@@ -3,7 +3,7 @@ import { userStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
-const baseURL = 'http://127.0.0.1:8080'
+const baseURL = '/api' //配合vite.config.js中的代理配置解决跨域问题
 
 const instance = axios.create({
   baseURL,

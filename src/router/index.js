@@ -8,10 +8,6 @@ const router = createRouter({
       component: () => import('@/views/LoginPage.vue')
     },
     {
-      path: '/register',
-      component: () => import('@/views/RegisterPage.vue')
-    },
-    {
       path: '/',
       component: () => import('@/views/layout/LayoutContainer.vue'),
       redirect: '/message',
