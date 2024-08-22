@@ -22,3 +22,11 @@ export const userLoginService = ({ username, password }) => {
     clientVersion: CLIENT_VERSION
   })
 }
+
+export const userInfoService = () => {
+  return request.post('/user/querySelf', {
+    clientType: CLIENT_TYPE,
+    clientName: CLIENT_NAME,
+    clientVersion: CLIENT_VERSION
+  })
+}

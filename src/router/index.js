@@ -25,8 +25,8 @@ const router = createRouter({
           component: () => import('@/views/meeting/MeetingLayout.vue')
         },
         {
-          path: '/user',
-          component: () => import('@/views/user/UserLayout.vue')
+          path: '/setting',
+          component: () => import('@/views/setting/SettingLayout.vue')
         }
       ]
     }
