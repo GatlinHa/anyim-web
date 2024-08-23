@@ -6,16 +6,35 @@ import {
   Setting,
   SwitchButton
 } from '@element-plus/icons-vue'
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore } from '@/stores'
 import router from '@/router'
+import MyCard from '@/components/navigate/MyCard.vue'
 
+const myCardDialog = ref()
+const myAvatar = ref()
 const userData = userStore()
 
 onMounted(() => {
   userData.getUser()
+  document.addEventListener('click', clickListener)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('click', clickListener)
+})
+
+const clickListener = (e) => {
+  // 鼠标点击不在头像或卡片范围内，则关闭卡片
+  if (!myCardDialog.value?.$el.contains(e.target) && !myAvatar.value?.$el.contains(e.target)) {
+    myCardDialog.value.close()
+  }
+}
+
+const openMyCardDialog = () => {
+  myCardDialog.value.open()
+}
 
 const onExit = async () => {
   await ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
@@ -33,7 +52,11 @@ const onExit = async () => {
   <el-container class="layout-container">
     <el-aside width="100px">
       <span class="avatar">
-        <el-avatar :src="userData.user.avatarThumb || avatar" />
+        <el-avatar
+          ref="myAvatar"
+          :src="userData.user.avatarThumb || avatar"
+          @click="openMyCardDialog"
+        />
       </span>
 
       <el-menu
@@ -72,6 +95,7 @@ const onExit = async () => {
     <el-main>
       <router-view></router-view>
     </el-main>
+    <my-card ref="myCardDialog"></my-card>
   </el-container>
 </template>
 
@@ -108,6 +132,7 @@ const onExit = async () => {
   justify-content: center;
   margin-top: 20px;
   margin-bottom: 30px;
+  cursor: pointer;
 }
 
 .el-menu-item {
