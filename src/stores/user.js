@@ -10,19 +10,19 @@ export const userStore = defineStore(
     const at = ref({
       token: '',
       secret: '',
-      expiretime: null
+      expiretime: 0
     })
     const rt = ref({
       token: '',
       secret: '',
-      expiretime: null
+      expiretime: 0
     })
     const setAt = (newAt) => {
       const now = new Date()
       at.value = {
         token: newAt.token,
         secret: newAt.secret,
-        expiretime: new Date(now.getTime() + newAt.expire * 1000)
+        expiretime: now.getTime() + newAt.expire * 1000
       }
     }
     const setRt = (newRt) => {
@@ -30,21 +30,21 @@ export const userStore = defineStore(
       rt.value = {
         token: newRt.token,
         secret: newRt.secret,
-        expiretime: new Date(now.getTime() + newRt.expire * 1000)
+        expiretime: now.getTime() + newRt.expire * 1000
       }
     }
     const clearAt = () => {
       at.value = {
         token: '',
         secret: '',
-        expiretime: null
+        expiretime: 0
       }
     }
     const clearRt = () => {
       rt.value = {
         token: '',
         secret: '',
-        expiretime: null
+        expiretime: 0
       }
     }
 

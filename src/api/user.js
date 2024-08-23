@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import { CLIENT_TYPE, CLIENT_NAME, CLIENT_VERSION, CLIENT_ID } from '@/const/userConst'
+import { refreshToken } from '@/api/common'
 
 export const userRegisterService = ({ username, password }) => {
   return request.post('/user/register', {
@@ -23,7 +24,8 @@ export const userLoginService = ({ username, password }) => {
   })
 }
 
-export const userInfoService = () => {
+export const userInfoService = async () => {
+  await refreshToken()
   return request.post('/user/querySelf', {
     clientType: CLIENT_TYPE,
     clientName: CLIENT_NAME,

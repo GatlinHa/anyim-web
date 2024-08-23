@@ -25,7 +25,15 @@ const generateSign = (key, content) => {
 instance.interceptors.request.use(
   (config) => {
     const userData = userStore()
-    if (userData.at) {
+    if (config.url === '/user/refreshToken' && userData.rt.token !== '') {
+      const traceId = uuidv4()
+      const timestamp = Math.floor(new Date().getTime() / 1000)
+      const sigh = generateSign(userData.rt.secret, `${traceId}${timestamp}`)
+      config.headers.traceId = traceId
+      config.headers.timestamp = timestamp
+      config.headers.sign = sigh
+      config.headers.refreshToken = userData.rt.token
+    } else if (userData.at.token !== '') {
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)
       const sigh = generateSign(userData.at.secret, `${traceId}${timestamp}`)
