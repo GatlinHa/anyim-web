@@ -53,11 +53,13 @@ instance.interceptors.response.use(
     // 401错误返回登录页
     if (err.response?.status === 401) {
       router.push('/login')
+      ElMessage.error('您还未登录，请先登录！')
+    } else {
+      ElMessage.error(err.response.message || '服务异常')
     }
 
     //TODO token过期处理，刷新tokne再发一次请求
 
-    ElMessage.error(err.response.message || '服务异常')
     return Promise.reject(err)
   }
 )
