@@ -58,6 +58,11 @@ export const userStore = defineStore(
         loginTime.value = now
       }
     }
+    const getUserForce = async () => {
+      const res = await userInfoService()
+      user.value = res.data.data
+      loginTime.value = new Date().getTime()
+    }
     const setUser = (obj) => {
       user.value = obj
     }
@@ -71,6 +76,7 @@ export const userStore = defineStore(
       clearRt,
       user,
       getUser,
+      getUserForce,
       setUser,
       loginTime
     }
