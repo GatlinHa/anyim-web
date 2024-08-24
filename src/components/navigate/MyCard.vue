@@ -1,13 +1,9 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
 import { userStore } from '@/stores'
 
 const userData = userStore()
-
-onMounted(() => {
-  userData.getUserForce()
-})
 
 const truncatedSignature = computed(() => {
   const signature = userData.user.signature || '您还没有个性签名。'
