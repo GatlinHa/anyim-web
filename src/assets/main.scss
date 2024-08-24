@@ -18,3 +18,9 @@ body {
   transform: translateX(30px);
   opacity: 0;
 }
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
