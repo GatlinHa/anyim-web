@@ -20,7 +20,7 @@ body {
 }
 
 .text-ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; //防止文本自动换行，确保在一行内显示，这样当文本超出宽度时才会触发省略号
+  overflow: hidden; //当文本超出元素范围时，隐藏超出的部分。
+  text-overflow: ellipsis; //在文本溢出并且overflow属性设置为hidden时，显示省略号。
 }

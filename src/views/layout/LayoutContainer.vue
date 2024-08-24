@@ -11,6 +11,7 @@ import avatar from '@/assets/default_avatar.png'
 import { userStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
+import NaviMenu from '@/components/navigate/NaviMenu.vue'
 
 const myCardDialog = ref()
 const myAvatar = ref()

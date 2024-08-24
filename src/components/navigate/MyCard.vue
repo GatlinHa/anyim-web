@@ -1,6 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
+import { userStore } from '@/stores'
+
+const userData = userStore()
+
+onMounted(() => {
+  userData.getUserForce()
+})
+
+const truncatedSignature = computed(() => {
+  const signature = userData.user.signature || '您还没有个性签名。'
+  const lengthLimit = 50
+  return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
+})
 
 const dialogVisible = ref(false)
 
@@ -21,27 +34,19 @@ defineExpose({
   <transition name="fade">
     <div class="card-dialog" v-show="dialogVisible">
       <el-icon class="close-button" @click="dialogVisible = false"><Close /></el-icon>
-      <div class="header">
-        <el-avatar
-          class="avatar"
-          src="http://127.0.0.1:9001/box-im/image/20240818/1723972279844.jpg"
-        />
+      <div class="main">
+        <el-avatar class="avatar" :src="userData.user.avatarThumb" />
 
         <div class="gender">
-          <el-icon v-if="true" color="#508afe"><Male /></el-icon>
-          <el-icon v-if="false" color="#ff5722"><Female /></el-icon>
+          <el-icon v-if="userData.user.sex === 0" color="#508afe"><Male /></el-icon>
+          <el-icon v-if="userData.user.sex === 1" color="#ff5722"><Female /></el-icon>
         </div>
 
-        <div class="nickname text-ellipsis">未设置昵称</div>
-      </div>
+        <div class="nickname text-ellipsis">{{ userData.user.nickName || 未设置昵称 }}</div>
 
-      <div class="signature">
-        <el-input
-          v-model="input"
-          style="width: 240px"
-          size="small"
-          placeholder="编辑个性签名，展示我的独特态度。"
-        />
+        <el-text class="signature" type="primary" size="large">
+          {{ truncatedSignature }}
+        </el-text>
       </div>
     </div>
   </transition>
@@ -88,9 +93,9 @@ defineExpose({
     }
   }
 
-  .header {
+  .main {
     width: 100%;
-    height: 60%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -99,6 +104,8 @@ defineExpose({
     .avatar {
       width: 100px;
       height: 100px;
+      position: absolute;
+      top: 40px;
     }
 
     .gender {
@@ -119,12 +126,17 @@ defineExpose({
       text-align: center;
       color: black;
     }
-  }
 
-  .signature {
-    margin-top: 50px;
-    display: flex;
-    justify-content: center;
+    .signature {
+      width: 90%;
+      position: absolute;
+      top: 200px;
+      height: 85px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      white-space: normal; //允许文本内容自动换行
+    }
   }
 }
 
