@@ -26,7 +26,18 @@ const router = createRouter({
         },
         {
           path: '/setting',
-          component: () => import('@/views/setting/SettingLayout.vue')
+          component: () => import('@/views/setting/SettingLayout.vue'),
+          redirect: '/setting/personal',
+          children: [
+            {
+              path: '/setting/personal',
+              component: () => import('@/views/setting/SettingPersonal.vue')
+            },
+            {
+              path: '/setting/security',
+              component: () => import('@/views/setting/SettingSecurity.vue')
+            }
+          ]
         }
       ]
     }

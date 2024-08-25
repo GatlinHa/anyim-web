@@ -94,7 +94,7 @@ const onExit = async () => {
         <el-icon :size="20"><SwitchButton /></el-icon>
       </div>
     </el-aside>
-    <el-main>
+    <el-main style="padding: 0">
       <router-view></router-view>
     </el-main>
     <my-card ref="myCardDialog"></my-card>
@@ -106,6 +106,15 @@ const onExit = async () => {
   height: 100vh;
   .el-aside {
     background-color: #409eff;
+
+    .avatar {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      cursor: pointer;
+    }
+
     .el-menu {
       border-right: none;
       display: flex;
@@ -127,17 +136,5 @@ const onExit = async () => {
       cursor: pointer;
     }
   }
-}
-
-.avatar {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 30px;
-  cursor: pointer;
-}
-
-.el-menu-item {
-  margin-top: 20px;
 }
 </style>

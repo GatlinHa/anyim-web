@@ -24,3 +24,20 @@ body {
   overflow: hidden; //当文本超出元素范围时，隐藏超出的部分。
   text-overflow: ellipsis; //在文本溢出并且overflow属性设置为hidden时，显示省略号。
 }
+
+// 全局边框
+.bdr-t {
+  border-top: 1px solid #e9e9eb;
+}
+
+.bdr-r {
+  border-right: 1px solid #e9e9eb;
+}
+
+.bdr-b {
+  border-bottom: 1px solid #e9e9eb;
+}
+
+.bdr-l {
+  border-left: 1px solid #e9e9eb;
+}
