@@ -66,7 +66,6 @@ const login = async () => {
   await form.value.validate() // 登录之前预校验
   const res = await userLoginService(formModel.value)
   ElMessage.success('登录成功')
-  console.log(res)
   userData.setAt(res.data.data.accessToken)
   userData.setRt(res.data.data.refreshToken)
   router.push('/')

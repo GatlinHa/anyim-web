@@ -4,7 +4,7 @@ defineProps(['funcName', 'index'])
 
 <template>
   <el-menu-item :index="index">
-    <el-icon :size="30">
+    <el-icon :size="30" style="margin: 0">
       <slot name="iconSlot"></slot>
     </el-icon>
     <span>{{ funcName }}</span>
@@ -21,10 +21,12 @@ defineProps(['funcName', 'index'])
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: #ecf5ff;
 }
 
 .el-menu-item.is-active {
-  background-color: #a0cfff;
+  background-color: #79bbff;
+  color: #fff;
 }
 
 .el-icon {
