@@ -54,4 +54,14 @@ import { User, Key } from '@element-plus/icons-vue'
     padding-top: 3px;
   }
 }
+
+.el-menu-item {
+  border-radius: 8px;
+}
+
+.el-menu-item.is-active {
+  background-color: #dedfe0;
+  color: #409eff;
+  border-radius: 8px;
+}
 </style>

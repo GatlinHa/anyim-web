@@ -64,7 +64,7 @@ const onExit = async () => {
       <el-menu
         active-text-color="#ecf5ff"
         background-color="#409eff"
-        :default-active="$route.path"
+        :default-active="$route.meta.active || $route.path"
         text-color="#fff"
         router
       >
