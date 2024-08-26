@@ -124,7 +124,7 @@ defineExpose({
     }
 
     .signature {
-      width: 90%;
+      width: 80%;
       position: absolute;
       top: 200px;
       height: 85px;

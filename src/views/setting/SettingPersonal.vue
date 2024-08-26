@@ -4,7 +4,7 @@ import { userStore } from '@/stores'
 import router from '@/router'
 import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEqual } from 'lodash'
 
 const userData = userStore()
 // 准备表单数据
@@ -16,6 +16,11 @@ onMounted(() => {
 })
 
 const onSave = () => {
+  if (isEqual(formModel.value, userData.user)) {
+    ElMessage.warning('您还没有修改任何信息哦！')
+    return
+  }
+
   isLoading.value = true
   const res = userModifySelfService(formModel.value)
   res.then(() => {
@@ -71,7 +76,7 @@ const onSave = () => {
           </el-form-item>
           <el-form-item label="我的昵称：" prop="nickname">
             <el-input
-              v-model="formModel.nickName"
+              v-model.trim="formModel.nickName"
               maxlength="10"
               show-word-limit
               style="width: 300px"
@@ -88,7 +93,7 @@ const onSave = () => {
           </el-form-item>
           <el-form-item label="个性签名：" prop="level">
             <el-input
-              v-model="formModel.signature"
+              v-model.trim="formModel.signature"
               maxlength="50"
               show-word-limit
               style="width: 300px"
