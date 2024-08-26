@@ -20,6 +20,9 @@ importers:
       element-plus:
         specifier: ^2.8.0
         version: 2.8.0(vue@3.4.38)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       pinia:
         specifier: ^2.1.7
         version: 2.2.2(vue@3.4.38)

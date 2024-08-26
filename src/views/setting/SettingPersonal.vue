@@ -4,35 +4,19 @@ import { userStore } from '@/stores'
 import router from '@/router'
 import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
+import { cloneDeep } from 'lodash'
 
 const userData = userStore()
-
 // 准备表单数据
-const formModel = ref({
-  phoneNum: '',
-  email: '',
-  nickName: '',
-  sex: '',
-  birthday: '',
-  level: '',
-  signature: ''
-})
-
+const formModel = ref({})
 const isLoading = ref(false)
 
 onMounted(() => {
-  formModel.value.phoneNum = userData.user.phoneNum
-  formModel.value.email = userData.user.email
-  formModel.value.nickName = userData.user.nickName
-  formModel.value.sex = userData.user.sex
-  formModel.value.birthday = userData.user.birthday
-  formModel.value.level = userData.user.level
-  formModel.value.signature = userData.user.signature
+  formModel.value = cloneDeep(userData.user)
 })
 
 const onSave = () => {
   isLoading.value = true
-  console.log(formModel.value)
   const res = userModifySelfService(formModel.value)
   res.then(() => {
     ElMessage.success('信息保存成功')
