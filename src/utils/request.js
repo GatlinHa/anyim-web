@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { userStore } from '@/stores'
-import { ElMessage } from 'element-plus'
 import router from '@/router'
 import CryptoJS from 'crypto-js'
 import { v4 as uuidv4 } from 'uuid'
@@ -63,7 +62,7 @@ instance.interceptors.response.use(
       router.push('/login')
       ElMessage.error('您还未登录，请先登录！')
     } else {
-      ElMessage.error(err.response.message || '服务异常')
+      ElMessage.error(err.response?.message || '服务异常')
     }
 
     //TODO token过期处理，刷新tokne再发一次请求
