@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { userStore } from '@/stores'
 
 defineProps(['modelValue'])
@@ -38,14 +38,6 @@ const rules = {
       trigger: 'blur'
     }
   ]
-  // verify_code: [
-  //   { required: true, message: '', trigger: 'blur' },
-  //   {
-  //     pattern: /^\d{4,6}$/,
-  //     message: '请输入正确的验证码',
-  //     trigger: 'blur'
-  //   }
-  // ]
 }
 
 const onComfirm = async () => {
@@ -64,19 +56,25 @@ const onCancle = () => {
   emit('update:modelValue', false)
 }
 
+const createTimer = () => {
+  timer.value = setInterval(() => {
+    remainSec.value = remainSec.value - 1
+    if (remainSec.value <= 0) {
+      clearInterval(timer.value)
+      timer.value = null
+      remainSec.value = totalSec
+    }
+  }, 1000)
+}
+
 const onSendCodde = async () => {
   await form.value.validate()
   if (!timer.value && remainSec.value === totalSec) {
-    console.log('启动定时器，假装发了验证码')
+    // TODO 发送短信验证码
     ElMessage.success('验证码已发送，注意查收')
-    timer.value = setInterval(() => {
-      remainSec.value = remainSec.value - 1
-      if (remainSec.value <= 0) {
-        clearInterval(timer.value)
-        timer.value = null
-        remainSec.value = totalSec
-      }
-    }, 1000)
+    // 将计时器到期时间保存到本地存储，防止刷新页面丢失
+    localStorage.setItem('email-timer-end-time', new Date().getTime() + totalSec * 1000)
+    createTimer()
   }
 }
 // 关闭时清除数据
@@ -87,6 +85,18 @@ const onReset = () => {
 // 在钩子函数中清除
 onBeforeUnmount(() => {
   clearInterval(timer)
+})
+
+// 在挂载钩子函数中恢复计时器
+onMounted(() => {
+  const timerEndTime = localStorage.getItem('email-timer-end-time')
+  const nowTime = new Date().getTime()
+  if (timerEndTime - nowTime > 0 && timerEndTime - nowTime < totalSec * 1000) {
+    remainSec.value = Math.floor((timerEndTime - nowTime) / 1000)
+    createTimer()
+  } else {
+    localStorage.removeItem('email-timer-end-time')
+  }
 })
 </script>
 
@@ -107,7 +117,7 @@ onBeforeUnmount(() => {
         <el-input v-model="formModel.new_email" autocomplete="off" />
       </el-form-item>
       <el-form-item
-        label="邮箱验证码"
+        label="短信验证码"
         label-width="100px"
         prop="verify_code"
         style="display: flex; justify-content: space-between"
