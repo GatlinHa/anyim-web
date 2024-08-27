@@ -17,7 +17,7 @@ import { User, Key } from '@element-plus/icons-vue'
         >
           <el-menu-item index="/setting/personal">
             <el-icon><User /></el-icon>
-            <span>个人中心</span>
+            <span>个人信息</span>
           </el-menu-item>
 
           <el-menu-item index="/setting/security">
