@@ -1,0 +1,138 @@
+<script setup>
+import { ref, onBeforeUnmount } from 'vue'
+import { userStore } from '@/stores'
+
+defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const userData = userStore()
+
+const form = ref()
+const formModel = ref({
+  password: '',
+  new_phone: '',
+  verify_code: ''
+})
+const totalSec = 60 // 验证码发送间隔
+const remainSec = ref(60) // 剩余发送的时间
+const timer = ref() // 计时器
+
+// 表单的校验规则
+const rules = {
+  password: [{ required: true, message: '', trigger: 'blur' }],
+  new_phone: [
+    { required: true, message: '', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '手机号格式不正确',
+      trigger: 'blur'
+    },
+    {
+      validator: (rule, value, callback) => {
+        if (value === userData.user.phoneNum) {
+          callback(new Error('请输入新的手机号'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+}
+
+const onComfirm = async () => {
+  await form.value.validate()
+  if (!formModel.value.verify_code) {
+    ElMessage.warning('验证码不能为空')
+    return
+  } else if (!/^\d{4,6}$/.test(formModel.value.verify_code)) {
+    ElMessage.warning('请输入正确的验证码')
+    return
+  }
+  emit('update:modelValue', false)
+}
+
+const onCancle = () => {
+  emit('update:modelValue', false)
+}
+
+const onSendCodde = async () => {
+  await form.value.validate()
+  if (!timer.value && remainSec.value === totalSec) {
+    console.log('启动定时器，假装发了验证码')
+    ElMessage.success('验证码已发送，注意查收')
+    timer.value = setInterval(() => {
+      remainSec.value = remainSec.value - 1
+      if (remainSec.value <= 0) {
+        clearInterval(timer.value)
+        timer.value = null
+        remainSec.value = totalSec
+      }
+    }, 1000)
+  }
+}
+// 关闭时清除数据
+const onReset = () => {
+  form.value.resetFields()
+}
+
+// 在钩子函数中清除
+onBeforeUnmount(() => {
+  clearInterval(timer)
+})
+</script>
+
+<template>
+  <el-dialog
+    class="edit-phone"
+    :modelValue="modelValue"
+    @update:modelValue="emit('update:modelValue', false)"
+    @close="onReset"
+    title="更换绑定手机"
+    width="500"
+  >
+    <el-form :model="formModel" :rules="rules" ref="form">
+      <el-form-item label="登录密码" label-width="100px" prop="password">
+        <el-input v-model="formModel.password" autocomplete="off" type="password" />
+      </el-form-item>
+      <el-form-item label="新手机号码" label-width="100px" prop="new_phone">
+        <el-input v-model="formModel.new_phone" autocomplete="off" />
+      </el-form-item>
+      <el-form-item
+        label="短信验证码"
+        label-width="100px"
+        prop="verify_code"
+        style="display: flex; justify-content: space-between"
+      >
+        <el-input
+          v-model="formModel.verify_code"
+          placeholder="填1111"
+          autocomplete="off"
+          style="width: 100px"
+        />
+        <el-button
+          type="info"
+          :disabled="remainSec !== totalSec"
+          @click="onSendCodde"
+          style="margin-left: 20px"
+        >
+          {{ remainSec === totalSec ? '获取验证码' : remainSec + '秒后重新发送' }}
+        </el-button>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="onCancle">取消</el-button>
+        <el-button type="primary" @click="onComfirm"> 确认 </el-button>
+      </div>
+    </template>
+  </el-dialog>
+</template>
+
+<style lang="scss" scoped>
+.edit-phone {
+  .el-form-item {
+    width: 430px;
+  }
+}
+</style>

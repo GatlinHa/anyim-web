@@ -68,26 +68,26 @@ const onExit = async () => {
         text-color="#fff"
         router
       >
-        <navi-menu funcName="消息" index="/message">
+        <NaviMenu funcName="消息" index="/message">
           <template #iconSlot>
             <ChatRound />
           </template>
-        </navi-menu>
-        <navi-menu funcName="通讯录" index="/contacts">
+        </NaviMenu>
+        <NaviMenu funcName="通讯录" index="/contacts">
           <template #iconSlot>
             <Notebook />
           </template>
-        </navi-menu>
-        <navi-menu funcName="会议" index="/meeting">
+        </NaviMenu>
+        <NaviMenu funcName="会议" index="/meeting">
           <template #iconSlot>
             <VideoCameraFilled />
           </template>
-        </navi-menu>
-        <navi-menu funcName="设置" index="/setting">
+        </NaviMenu>
+        <NaviMenu funcName="设置" index="/setting">
           <template #iconSlot>
             <Setting />
           </template>
-        </navi-menu>
+        </NaviMenu>
       </el-menu>
 
       <div class="exit-button" @click="onExit()" title="退出">

@@ -1,9 +1,15 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { userStore } from '@/stores'
 import { maskPhoneNum } from '@/utils/common'
+import EditEmail from '@/components/user/EditEmail.vue'
+import EditPassword from '@/components/user/EditPassword.vue'
+import EditPhone from '@/components/user/EditPhone.vue'
 
 const userData = userStore()
+const isShowEditPassword = ref(false)
+const isShowEditPhone = ref(false)
+const isShowEditEmail = ref(false)
 
 const phoneDesc = computed(() => {
   if (!userData.user.phoneNum) {
@@ -30,10 +36,10 @@ const emailDesc = computed(() => {
         <div class="item bdr-b">
           <div class="content">
             <div class="name">账户密码</div>
-            <div class="desc">当前密码强度 ：中</div>
+            <div class="desc">当前密码强度 ：低</div>
           </div>
           <div class="modify">
-            <el-button type="primary" text> 修改 </el-button>
+            <el-button type="primary" text @click="isShowEditPassword = true"> 修改 </el-button>
           </div>
         </div>
 
@@ -43,7 +49,7 @@ const emailDesc = computed(() => {
             <div class="desc">{{ phoneDesc }}</div>
           </div>
           <div class="modify">
-            <el-button type="primary" text>
+            <el-button type="primary" text @click="isShowEditPhone = true">
               {{ userData.user.phoneNum ? '修改' : '绑定' }}
             </el-button>
           </div>
@@ -55,12 +61,18 @@ const emailDesc = computed(() => {
             <div class="desc">{{ emailDesc }}</div>
           </div>
           <div class="modify">
-            <el-button type="primary" text> {{ userData.user.email ? '修改' : '绑定' }} </el-button>
+            <el-button type="primary" text @click="isShowEditEmail = true">
+              {{ userData.user.email ? '修改' : '绑定' }}
+            </el-button>
           </div>
         </div>
       </el-main>
     </el-container>
   </div>
+
+  <EditPassword v-model="isShowEditPassword"></EditPassword>
+  <EditPhone v-model="isShowEditPhone"></EditPhone>
+  <EditEmail v-model="isShowEditEmail"></EditEmail>
 </template>
 
 <style lang="scss" scoped>

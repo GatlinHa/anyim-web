@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { userStore } from '@/stores'
 import router from '@/router'
 import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
+import { maskPhoneNum } from '@/utils/common'
 
 const userData = userStore()
 // 准备表单数据
@@ -31,6 +32,14 @@ const onSave = () => {
     isLoading.value = false
   })
 }
+
+const displayPhone = computed(() => {
+  if (userData.user.phoneNum) {
+    return maskPhoneNum(userData.user.phoneNum)
+  } else {
+    return userData.user.phoneNum
+  }
+})
 </script>
 
 <template>
@@ -53,14 +62,14 @@ const onSave = () => {
             {{ userData.user.account }}
           </el-form-item>
           <el-form-item label="手机号码：" prop="phoneNum">
-            {{ formModel.phoneNum || '未绑定' }}
+            {{ displayPhone || '未绑定' }}
             <el-button
               type="primary"
               text
               @click="router.push('/setting/security')"
               style="margin-left: 15px"
             >
-              {{ formModel.phoneNum ? '修改' : '去绑定' }}
+              {{ displayPhone ? '修改' : '去绑定' }}
             </el-button>
           </el-form-item>
           <el-form-item label="电子邮箱：" prop="email">

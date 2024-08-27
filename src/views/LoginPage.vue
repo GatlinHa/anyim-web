@@ -37,13 +37,13 @@ const rules = {
     { required: true, message: '请再次输入密码', trigger: 'blur' },
     {
       pattern: /^\S{6,15}$/,
-      message: '密码必须是6-15的非空字符',
+      message: '密码必须是6-15位的非空字符',
       trigger: 'blur'
     },
     {
       validator: (rule, value, callback) => {
         if (value !== formModel.value.password) {
-          callback(new Error('两次输入密码不一致!'))
+          callback(new Error('两次输入密码不一致'))
         } else {
           callback()
         }
