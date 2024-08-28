@@ -6,11 +6,13 @@ import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
 import { maskPhoneNum } from '@/utils/common'
+import EditeAvatar from '@/components/user/EditeAvatar.vue'
 
 const userData = userStore()
 // 准备表单数据
 const formModel = ref({})
 const isLoading = ref(false)
+const isShowEditeAvatar = ref(false)
 
 onMounted(() => {
   formModel.value = cloneDeep(userData.user)
@@ -50,9 +52,14 @@ const displayPhone = computed(() => {
         <img
           :src="userData.user.avatar || defaultImg"
           alt="图片加载错误"
-          style="text-align: center"
+          @click="isShowEditeAvatar = true"
+          style="text-align: center; border-radius: 10px"
         />
-        <el-button type="info" round style="margin-top: 20px; cursor: pointer">
+        <el-button
+          type="info"
+          @click="isShowEditeAvatar = true"
+          style="margin-top: 20px; cursor: pointer"
+        >
           点击修改头像
         </el-button>
       </el-aside>
@@ -123,6 +130,8 @@ const displayPhone = computed(() => {
         </el-form>
       </el-main>
     </el-container>
+
+    <EditeAvatar v-model="isShowEditeAvatar"></EditeAvatar>
   </el-container>
 </template>
 

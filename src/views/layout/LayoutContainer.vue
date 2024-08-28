@@ -113,6 +113,10 @@ const onExit = async () => {
       margin-top: 20px;
       margin-bottom: 30px;
       cursor: pointer;
+      .el-avatar {
+        width: 40px;
+        height: 40px;
+      }
     }
 
     .el-menu {
