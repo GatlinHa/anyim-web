@@ -93,8 +93,8 @@ const displayPhone = computed(() => {
           </el-form-item>
           <el-form-item label="我的性别：" prop="sex">
             <el-radio-group v-model="formModel.sex">
-              <el-radio :value="0">男</el-radio>
-              <el-radio :value="1">女</el-radio>
+              <el-radio :value="1">男</el-radio>
+              <el-radio :value="2">女</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="我的生日：" prop="birthday">
