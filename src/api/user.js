@@ -38,3 +38,8 @@ export const userModifySelfService = async (obj) => {
   await refreshToken()
   return request.post('/user/modifySelf', getReqBody(obj))
 }
+
+export const userModifyPassword = async (obj) => {
+  await refreshToken()
+  return request.post('/user/modifyPwd', getReqBody(obj))
+}
