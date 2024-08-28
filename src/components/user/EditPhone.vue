@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { userStore } from '@/stores'
+import { userModifySelfService } from '@/api/user'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue'])
@@ -16,6 +17,7 @@ const formModel = ref({
 const totalSec = 60 // 验证码发送间隔
 const remainSec = ref(60) // 剩余发送的时间
 const timer = ref() // 计时器
+const isLoading = ref(false)
 
 // 表单的校验规则
 const rules = {
@@ -30,7 +32,7 @@ const rules = {
     {
       validator: (rule, value, callback) => {
         if (value === userData.user.phoneNum) {
-          callback(new Error('请输入新的手机号'))
+          callback(new Error('新手机号不能和旧手机号一样'))
         } else {
           callback()
         }
@@ -46,10 +48,21 @@ const onComfirm = async () => {
     ElMessage.warning('验证码不能为空')
     return
   } else if (!/^\d{4,6}$/.test(formModel.value.verify_code)) {
-    ElMessage.warning('请输入正确的验证码')
+    ElMessage.warning('验证码位数不正确')
     return
   }
-  emit('update:modelValue', false)
+
+  isLoading.value = true
+  const res = userModifySelfService({
+    phoneNum: formModel.value.new_phone
+  })
+  res.then(() => {
+    ElMessage.success('绑定手机修改成功')
+    emit('update:modelValue', false)
+  })
+  res.finally(() => {
+    isLoading.value = false
+  })
 }
 
 const onCancle = () => {
@@ -141,7 +154,7 @@ onMounted(() => {
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="onCancle">取消</el-button>
-        <el-button type="primary" @click="onComfirm"> 确认 </el-button>
+        <el-button type="primary" @click="onComfirm" :loading="isLoading"> 确认 </el-button>
       </div>
     </template>
   </el-dialog>
