@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { userStore } from '@/stores'
 import { Plus, Upload } from '@element-plus/icons-vue'
 import selectAvatar from '@/assets/select_avatar.jpg'
-import { userUpdateAvatarService } from '@/api/user'
+import { userUploadAvatarService, userModifySelfService } from '@/api/user'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue'])
@@ -12,15 +12,12 @@ const userData = userStore()
 const uploadRef = ref()
 const imgUrl = ref(userData.user.avatar)
 const isLoading = ref(false)
+let selectedFile
 
 const onSelected = (file) => {
   console.log('onSelected')
-  // 基于FileReader 读取图片做预览
-  const reader = new FileReader()
-  reader.readAsDataURL(file.raw)
-  reader.onload = () => {
-    imgUrl.value = reader.result
-  }
+  imgUrl.value = URL.createObjectURL(file.raw)
+  selectedFile = file.raw
 }
 
 const onSuccess = () => {
@@ -31,28 +28,46 @@ const beforeUpload = () => {
   console.log('beforeUpload')
 }
 
-const onUpload = () => {
+const onUpload = async () => {
   console.log('onUpload')
+  if (!selectedFile) {
+    ElMessage.warning('您还未选择新头像！')
+    return
+  }
+
   isLoading.value = true
-  const res = userUpdateAvatarService(imgUrl.value)
-  res.then(() => {
+  try {
+    const res = await userUploadAvatarService({ file: selectedFile })
+    const { originUrl, thumbUrl } = res.data.data
+    await userModifySelfService({ avatar: originUrl, avatarThumb: thumbUrl })
+    userData.getUserForce()
     ElMessage.success('头像上传成功')
     emit('update:modelValue', false)
-  })
-  res.finally(() => {
+    selectedFile = null
+  } catch (error) {
+    /* empty */
+  } finally {
     isLoading.value = false
-  })
+  }
 }
 
-// 关闭时清除数据
-const onReset = () => {}
+// 打开的时候触发
+const onOpen = () => {
+  imgUrl.value = userData.user.avatar
+}
+
+// 关闭的时候触发
+const onClose = () => {
+  isLoading.value = false
+}
 </script>
 
 <template>
   <el-dialog
     :modelValue="modelValue"
     @update:modelValue="emit('update:modelValue', false)"
-    @close="onReset"
+    @open="onOpen"
+    @close="onClose"
     title="更换头像"
     width="700"
   >

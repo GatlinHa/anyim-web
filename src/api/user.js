@@ -44,7 +44,7 @@ export const userModifyPassword = async (obj) => {
   return request.post('/user/modifyPwd', getReqBody(obj))
 }
 
-export const userUpdateAvatarService = async (avatar) => {
+export const userUploadAvatarService = async (obj) => {
   await refreshToken()
-  return request.post('/user/updateAvatar', getReqBody(avatar))
+  return request.postForm('/user/upload', getReqBody(obj))
 }
