@@ -60,7 +60,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  dragRef.value.removeEventListener('mousedown', onMouseDown)
   document.removeEventListener('mouseup', onMouseUp)
   document.removeEventListener('mousemove', onMouseMove)
 })
