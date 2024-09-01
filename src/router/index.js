@@ -52,9 +52,18 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // 如果没有token，且访问的是非登录页，拦截到登录，其他情况正常放行
+  // 如果没有token，且访问的是非登录页，拦截到登录
   const userData = userStore()
-  if (!userData.at.token && to.path !== '/login') return '/login'
+  if (!userData.at.token && to.path !== '/login') {
+    next('/login')
+    return
+  }
+
+  // 如果有token，且访问的是登录页，拦截到首页
+  if (userData.at.token && to.path === '/login') {
+    next('/')
+    return
+  }
 
   // 检查是否是其他请求（除了已定义的路由之外的请求）
   if (!router.getRoutes().some((route) => route.path === to.path)) {
