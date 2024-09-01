@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { userInfoService } from '@/api/user'
-import { USER_DATA_EXPIRE } from '@/const/userConst'
 
 // 用户模块
 export const userStore = defineStore(
@@ -49,22 +48,19 @@ export const userStore = defineStore(
     }
 
     const user = ref({})
-    const loginTime = ref(0)
+
     const getUser = async () => {
-      const now = new Date().getTime()
-      if (loginTime.value === 0 || now - loginTime.value > USER_DATA_EXPIRE * 1000) {
-        const res = await userInfoService()
-        user.value = res.data.data
-        loginTime.value = now
-      }
-    }
-    const getUserForce = async () => {
       const res = await userInfoService()
       user.value = res.data.data
-      loginTime.value = new Date().getTime()
     }
+
     const setUser = (obj) => {
       user.value = obj
+    }
+
+    const isLogin = () => {
+      const now = new Date().getTime()
+      return at.value.expiretime && now < at.value.expiretime
     }
 
     return {
@@ -76,9 +72,8 @@ export const userStore = defineStore(
       clearRt,
       user,
       getUser,
-      getUserForce,
       setUser,
-      loginTime
+      isLogin
     }
   },
   {

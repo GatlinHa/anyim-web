@@ -40,7 +40,7 @@ const onUpload = async () => {
     const res = await userUploadAvatarService({ file: selectedFile })
     const { originUrl, thumbUrl } = res.data.data
     await userModifySelfService({ avatar: originUrl, avatarThumb: thumbUrl })
-    userData.getUserForce()
+    userData.getUser()
     ElMessage.success('头像上传成功')
     emit('update:modelValue', false)
     selectedFile = null

@@ -34,7 +34,7 @@ const clickListener = (e) => {
 }
 
 const openMyCardDialog = () => {
-  userData.getUserForce() //打开头像信息之前，强制刷新一把数据
+  userData.getUser()
   myCardDialog.value.open()
 }
 
