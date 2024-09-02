@@ -29,6 +29,10 @@ export const userLoginService = ({ username, password }) => {
   )
 }
 
+export const userLogoutnService = ({ username }) => {
+  return request.post('/user/logout', getReqBody({ account: username }))
+}
+
 export const userInfoService = async () => {
   await refreshToken()
   return request.post('/user/querySelf', getReqBody({}))

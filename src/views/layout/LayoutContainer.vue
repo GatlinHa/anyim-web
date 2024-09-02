@@ -12,6 +12,7 @@ import { userStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
+import { userLogoutnService } from '@/api/user'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -44,6 +45,7 @@ const onExit = async () => {
     confirmButtonText: '确认',
     cancelButtonText: '取消'
   })
+  await userLogoutnService(userData.user.account)
   userData.clearAt()
   userData.clearRt()
   router.push('/login')
