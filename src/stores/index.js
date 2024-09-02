@@ -7,3 +7,4 @@ pinia.use(persist)
 export default pinia
 export * from './user'
 export * from './group'
+export * from './setting'
