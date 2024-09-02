@@ -63,6 +63,12 @@ export const userStore = defineStore(
       return at.value.expiretime && now < at.value.expiretime
     }
 
+    const isRemenberMe = ref(false)
+
+    const setIsRemenberMe = (flag) => {
+      isRemenberMe.value = flag
+    }
+
     return {
       at,
       rt,
@@ -73,7 +79,9 @@ export const userStore = defineStore(
       user,
       getUser,
       setUser,
-      isLogin
+      isLogin,
+      isRemenberMe,
+      setIsRemenberMe
     }
   },
   {

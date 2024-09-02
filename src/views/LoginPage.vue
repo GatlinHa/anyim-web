@@ -1,6 +1,6 @@
 <script setup>
 import { User, Lock } from '@element-plus/icons-vue'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import router from '@/router'
 import { userRegisterService, userLoginService } from '@/api/user.js'
 import { userStore } from '@/stores'
@@ -14,6 +14,7 @@ const formModel = ref({
 })
 // 表单对象
 const form = ref()
+const isRemenberMe = ref(false)
 
 // 表单的校验规则
 const rules = {
@@ -68,8 +69,16 @@ const login = async () => {
   ElMessage.success('登录成功')
   userData.setAt(res.data.data.accessToken)
   userData.setRt(res.data.data.refreshToken)
+  userData.setIsRemenberMe(isRemenberMe.value)
   router.push('/')
 }
+
+onMounted(() => {
+  isRemenberMe.value = userData.isRemenberMe
+  if (isRemenberMe.value) {
+    formModel.value.username = userData.user.account
+  }
+})
 
 watch(isRegister, () => {
   formModel.value = {
@@ -145,11 +154,12 @@ watch(isRegister, () => {
             :prefix-icon="Lock"
             type="password"
             placeholder="请输入密码"
+            @keyup.enter="login"
           ></el-input>
         </el-form-item>
         <el-form-item class="flex">
           <div class="flex">
-            <el-checkbox>记住我</el-checkbox>
+            <el-checkbox v-model="isRemenberMe">记住我</el-checkbox>
             <el-link type="primary" :underline="false">忘记密码？</el-link>
           </div>
         </el-form-item>
