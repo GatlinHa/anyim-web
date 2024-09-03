@@ -1,11 +1,15 @@
 <script setup>
 import { ref } from 'vue'
 import DragLine from '@/components/common/DragLine.vue'
-import { settingStore } from '@/stores'
+import SearchBox from '@/components/common/SearchBox.vue'
+import AddBotton from '@/components/common/AddBotton.vue'
+import SessionBox from '@/components/message/SessionBox.vue'
+import { userStore, settingStore } from '@/stores'
 
+const userData = userStore()
 const settingData = settingStore()
-const asideWidth = ref(settingData.sessionListDrag || 250)
-const widthMin = 150
+const asideWidth = ref(settingData.sessionListDrag || 200)
+const widthMin = 200
 const widthMax = 500
 
 const onDragUpdate = ({ width }) => {
@@ -17,9 +21,17 @@ const onDragUpdate = ({ width }) => {
 <template>
   <el-container class="msg-container-hole">
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
-      <div>
-        <div>搜索</div>
-        <div>会话列表</div>
+      <div class="msg-aside-main">
+        <div class="header bdr-b">
+          <SearchBox></SearchBox>
+          <AddBotton></AddBotton>
+        </div>
+        <div class="session-list">
+          <SessionBox :user="userData.user"></SessionBox>
+          <SessionBox
+            :user="{ account: '22asdsss', avatarThumb: '', nickName: '李寻欢欢欢欢欢欢欢欢欢' }"
+          ></SessionBox>
+        </div>
       </div>
 
       <DragLine
@@ -37,7 +49,7 @@ const onDragUpdate = ({ width }) => {
   </el-container>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .msg-container-hole {
   height: 100%;
   user-select: none;
@@ -45,6 +57,14 @@ const onDragUpdate = ({ width }) => {
   .msg-aside {
     height: 100%;
     position: relative;
+
+    .msg-aside-main {
+      .header {
+        display: flex;
+        margin-top: 5px;
+        padding-bottom: 5px;
+      }
+    }
   }
 }
 </style>
