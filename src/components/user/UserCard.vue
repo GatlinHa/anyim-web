@@ -5,7 +5,7 @@ import { Close, Male, Female } from '@element-plus/icons-vue'
 const props = defineProps(['isShow', 'user'])
 const emit = defineEmits(['update:isShow'])
 
-const isLoading = ref(false)
+// const isLoading = ref(false)
 const userCardRef = ref()
 
 const preventClose = (event) => {
@@ -18,6 +18,12 @@ const closeCardIfOutside = (event) => {
   }
 }
 
+const handleEscEvent = (event) => {
+  if (event.key === 'Escape') {
+    emit('update:isShow', false)
+  }
+}
+
 const truncatedSignature = computed(() => {
   const signature = props.user.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
@@ -26,17 +32,17 @@ const truncatedSignature = computed(() => {
 
 // 关闭的时候触发
 const onClose = () => {
-  console.log('onClose')
-  isLoading.value = false
   emit('update:isShow', false)
 }
 
 onMounted(() => {
   document.addEventListener('click', closeCardIfOutside)
+  document.addEventListener('keydown', handleEscEvent)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', closeCardIfOutside)
+  document.removeEventListener('keydown', handleEscEvent)
 })
 </script>
 
