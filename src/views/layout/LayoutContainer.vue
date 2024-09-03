@@ -106,6 +106,8 @@ const onExit = async () => {
 <style lang="scss" scoped>
 .layout-container {
   height: 100vh;
+  user-select: none;
+
   .el-aside {
     background-color: #409eff;
 
