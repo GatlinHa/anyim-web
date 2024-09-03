@@ -85,7 +85,8 @@ defineExpose({
     z-index: 1;
 
     &:hover {
-      color: red;
+      color: #fff;
+      background-color: red;
     }
   }
 
@@ -121,6 +122,7 @@ defineExpose({
       font-size: 16px;
       text-align: center;
       color: black;
+      font-weight: bold;
     }
 
     .signature {

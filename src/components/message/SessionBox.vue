@@ -2,16 +2,22 @@
 import { ref } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
+import UserCard from '../user/UserCard.vue'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 
 const props = defineProps(['user'])
 const isPinToTop = ref(false)
 const isMute = ref(false)
+const isShowUserCard = ref(false)
+
+const handleUserCard = (flag) => {
+  isShowUserCard.value = flag
+}
 </script>
 
 <template>
   <div class="session-box">
-    <AvatarIcon :user="props.user"></AvatarIcon>
+    <AvatarIcon :user="props.user" @click="isShowUserCard = true"></AvatarIcon>
     <div class="content-box">
       <div class="header">
         <div class="title">
@@ -49,6 +55,7 @@ const isMute = ref(false)
       </div>
     </div>
   </div>
+  <UserCard :isShow="isShowUserCard" @update:isShow="handleUserCard" :user="props.user"></UserCard>
 </template>
 
 <style lang="scss" scoped>
