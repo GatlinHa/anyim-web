@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -36,16 +36,40 @@ const inputBoxHeightMin = 150
 const inputBoxHeightMax = 400
 
 const curSessionId = ref('')
-const curChatObject = ref({})
+const curSessionType = ref('')
+const curObject = ref({})
 const sessionList = ref([])
 
 
 onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
-  curChatObject.value = messageData.lastChatObj
+  curSessionType.value = messageStore.lastSessionType
+  curObject.value = messageData.lastObject
 
   const res = await msgChatSessionListService()
   sessionList.value = sessionList.value.concat(res.data.data)
+})
+
+const showName = computed(() => {
+  switch (curSessionType.value) {
+    case 'chat':
+      return curObject.value.nickName
+    case 'groupchat':
+      return curObject.value.groupName
+    default:
+      return ''
+  }
+})
+
+const showId = computed(() => {
+  switch (curSessionType.value) {
+    case 'chat':
+      return curObject.value.account
+    case 'groupchat':
+      return curObject.value.groupId
+    default:
+      return ''
+  }
 })
 
 const onAsideDragUpdate = ({ width }) => {
@@ -60,9 +84,12 @@ const onInputBoxDragUpdate = ({ height }) => {
 
 const handleExportData = (data) => {
   curSessionId.value = data.sessionId
-  curChatObject.value = data.chatObj
+  curSessionType.value = data.sessionType
+  curObject.value = data.objectInfo
+
   messageData.setLastSessionId(data.sessionId)
-  messageData.setLastChatObj(data.chatObj)
+  messageData.setLastSessionType(data.sessionType)
+  messageData.setLastObject(data.objectInfo)
 }
 
 </script>
@@ -107,7 +134,11 @@ const handleExportData = (data) => {
 
       <el-container v-else class="container">
         <el-header class="header bdr-b">
-          <span class="show-nickname">{{ curChatObject.nickName }}</span>
+          <div class="show-name-id">
+            <span class="show-name">{{ showName }}</span>
+            <span v-if="curSessionType === 'chat'" class="show-id">{{ showId }}</span>
+          </div>
+
           <div class="action-set">
             <el-button class="action-button" :icon="Phone" circle />
             <el-button class="action-button" :icon="VideoCamera" circle />
@@ -225,9 +256,21 @@ const handleExportData = (data) => {
         align-items: center;
         justify-content: space-between;
 
-        .show-nickname {
-          font-size: 16px;
-          font-weight: bold;
+        .show-name-id {
+          display: flex;
+          align-items: center;
+          user-select: text;
+
+          .show-name {
+            font-size: 16px;
+            font-weight: bold;
+          }
+
+          .show-id {
+            margin-left: 10px;
+            font-size: 14px;
+            color: gray;
+          }
         }
 
         .action-set {

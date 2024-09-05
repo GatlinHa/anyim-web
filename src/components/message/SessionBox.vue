@@ -16,7 +16,8 @@ const isShowGroupCard = ref(false)
 const sessionInfo = computed(() => {
   return {
     sessionId: props.sessionId,
-    chatObj: props.objectInfo
+    sessionType: props.sessionType,
+    objectInfo: props.objectInfo
   }
 })
 
@@ -83,7 +84,10 @@ const showSomeoneCard = () => {
     <div class="content-box" @click="emit('exportData', sessionInfo)">
       <div class="header">
         <div class="title">
-          <span class="nickname">{{ showName || showId }}</span>
+          <span class="showName">{{ showName || showId }}</span>
+          <span v-if="props.objectInfo.account" class="showAccount">
+            {{ props.objectInfo.account }}
+          </span>
           <SessionTag :tagType="props.sessionType"></SessionTag>
           <SessionTag v-if="isPinToTop" tagType="pinToTop"></SessionTag>
           <SessionTag v-if="isMute" tagType="mute"></SessionTag>
@@ -164,12 +168,19 @@ const showSomeoneCard = () => {
         flex: 1 1;
         overflow: hidden;
 
-        .nickname {
+        .showName {
           font-size: 14px;
           margin-right: 5px;
           white-space: nowrap; /*不换行*/
           overflow: hidden; /*超出的文本隐藏*/
           text-overflow: ellipsis; /* 溢出用省略号*/
+        }
+
+        .showAccount {
+          font-size: 12px;
+          margin-left: 2px;
+          color: gray;
+          white-space: nowrap; /*不换行*/
         }
       }
 

@@ -6,21 +6,28 @@ export const messageStore = defineStore(
   'anyim-message',
   () => {
     const lastSessionId = ref('')
-    const lastChatObj = ref({})
+    const lastSessionType = ref('')
+    const lastObject = ref({})
 
     const setLastSessionId = (sessionId) => {
       lastSessionId.value = sessionId
     }
 
-    const setLastChatObj = (obj) => {
-      lastChatObj.value = obj
+    const setLastSessionType = (sessionType) => {
+      lastSessionType.value = sessionType
+    }
+
+    const setLastObject = (obj) => {
+      lastObject.value = obj
     }
 
     return {
       lastSessionId,
-      lastChatObj,
+      lastSessionType,
+      lastObject,
       setLastSessionId,
-      setLastChatObj
+      setLastSessionType,
+      setLastObject
     }
   },
   {
