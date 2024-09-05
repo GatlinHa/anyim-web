@@ -26,22 +26,5 @@ const options = {
 .ql-editor {
   padding: 8px;
   font-size: 14px;
-
-  &::-webkit-scrollbar {
-    width: 3px;
-    height: 3px;
-    background-color: unset;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 3px;
-    background-color: unset;
-  }
-
-  &:hover {
-    &::-webkit-scrollbar-thumb {
-      background-color: #409eff;
-    }
-  }
 }
 </style>
