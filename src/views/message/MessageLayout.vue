@@ -75,6 +75,7 @@ const handleExportData = (data) => {
           <SearchBox></SearchBox>
           <AddBotton></AddBotton>
         </div>
+
         <div class="session-list">
           <SessionBox
             v-for="item in sessionList"
@@ -186,7 +187,9 @@ const handleExportData = (data) => {
 
     .msg-aside-main {
       width: 100%;
-      height: 100vh;
+      height: 100%;
+      display: flex; // 需要flex布局，否则session-list的滚动条会有问题
+      flex-direction: column;
       overflow: hidden; // 禁用它的滚动条
 
       .header {
@@ -197,8 +200,7 @@ const handleExportData = (data) => {
 
       .session-list {
         width: 100%;
-        height: 100vh;
-        overflow-y: auto; // 用它的滚动条
+        overflow-y: scroll; // 用它的滚动条
       }
     }
   }
