@@ -52,12 +52,7 @@ onUnmounted(() => {
       <div v-if="isShow" class="overlay"></div>
     </transition>
     <transition name="fade">
-      <div
-        class="user-card"
-        v-if="isShow"
-        @update:isShow="emit('update:isShow', false)"
-        @click.self="preventClose($event)"
-      >
+      <div class="user-card" v-if="isShow" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
@@ -76,19 +71,23 @@ onUnmounted(() => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <space class="value">{{ props.user.phoneNum || '-' }}</space>
+            <span class="value">{{ props.user.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <space class="value">{{ props.user.email || '-' }}</space>
+            <span class="value">{{ props.user.email || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">驻地：</span>
-            <space class="value">{{ props.user.base || '-' }}</space>
+            <span class="value">{{ props.user.base || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <space class="value">{{ props.user.organize || '-' }}</space>
+            <span class="value">{{ props.user.organize || '-' }}</span>
+          </div>
+          <div class="info-item remark">
+            <span class="label">备注：</span>
+            <span class="value">{{ props.user.remark || 'TODO' }}</span>
           </div>
         </div>
       </div>
@@ -110,6 +109,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   margin: auto;
+  z-index: 1;
 
   .header {
     width: 100%;
@@ -177,6 +177,7 @@ onUnmounted(() => {
         text-align: center;
         color: black;
         font-weight: bold;
+        user-select: text;
       }
     }
   }
@@ -207,7 +208,7 @@ onUnmounted(() => {
       margin-top: 10px;
       width: 80%;
       display: flex;
-      font-size: 15px;
+      font-size: 14px;
 
       .label {
         color: #909399;
@@ -217,6 +218,7 @@ onUnmounted(() => {
       .value {
         margin-left: 10px;
         color: #409eff;
+        user-select: text;
       }
     }
   }
@@ -229,6 +231,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
 }
 
 .fade-enter-active,

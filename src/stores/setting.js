@@ -6,14 +6,21 @@ export const settingStore = defineStore(
   'anyim-setting',
   () => {
     const sessionListDrag = ref(0)
+    const inputBoxDrag = ref(0)
 
     const setSessionListDrag = (width) => {
       sessionListDrag.value = width
     }
 
+    const setInputBoxDrag = (height) => {
+      inputBoxDrag.value = height
+    }
+
     return {
       sessionListDrag,
-      setSessionListDrag
+      inputBoxDrag,
+      setSessionListDrag,
+      setInputBoxDrag
     }
   },
   {

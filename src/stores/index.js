@@ -8,3 +8,4 @@ export default pinia
 export * from './user'
 export * from './group'
 export * from './setting'
+export * from './message'

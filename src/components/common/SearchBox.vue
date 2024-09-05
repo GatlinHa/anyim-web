@@ -10,6 +10,7 @@ const searchValue = ref('')
 
 <style lang="scss" scoped>
 .el-input {
+  height: 30px;
   margin-left: 10px;
   margin-right: 10px;
 }

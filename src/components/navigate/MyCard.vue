@@ -123,6 +123,7 @@ defineExpose({
       text-align: center;
       color: black;
       font-weight: bold;
+      user-select: text;
     }
 
     .signature {
@@ -134,6 +135,7 @@ defineExpose({
       justify-content: flex-start;
       align-items: flex-start;
       white-space: normal; //允许文本内容自动换行
+      user-select: text;
     }
   }
 }

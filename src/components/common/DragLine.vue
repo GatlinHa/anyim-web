@@ -37,11 +37,11 @@ const onMouseMove = (e) => {
     case 'right':
       width = dragData.value.width + e.pageX - dragData.value.pageX
       break
-    case 'up':
-      height = dragData.value.height + dragRef.value.pageY - e.pageY
+    case 'top':
+      height = dragData.value.height + dragData.value.pageY - e.pageY
       break
-    case 'down':
-      height = dragData.value.height + e.pageY - dragRef.value.pageY
+    case 'botton':
+      height = dragData.value.height + e.pageY - dragData.value.pageY
       break
   }
 
@@ -83,7 +83,7 @@ onUnmounted(() => {
     background-color: #409eff;
   }
 
-  &.drag-line-up {
+  &.drag-line-top {
     top: 0;
     left: 0;
     height: 2px;
@@ -91,7 +91,7 @@ onUnmounted(() => {
     cursor: row-resize;
   }
 
-  &.drag-line-down {
+  &.drag-line-botton {
     bottom: 0;
     left: 0;
     height: 2px;

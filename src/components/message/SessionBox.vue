@@ -1,14 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import UserCard from '../user/UserCard.vue'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 
-const props = defineProps(['user'])
+const props = defineProps(['user', 'sessionId'])
+const emit = defineEmits(['exportData'])
 const isPinToTop = ref(false)
 const isMute = ref(false)
 const isShowUserCard = ref(false)
+
+const sessionInfo = computed(() => {
+  return {
+    sessionId: props.sessionId,
+    chatObj: props.user
+  }
+})
 
 const handleUserCard = (flag) => {
   isShowUserCard.value = flag
@@ -18,7 +26,7 @@ const handleUserCard = (flag) => {
 <template>
   <div class="session-box">
     <AvatarIcon :user="props.user" @click="isShowUserCard = true"></AvatarIcon>
-    <div class="content-box">
+    <div class="content-box" @click="emit('exportData', sessionInfo)">
       <div class="header">
         <div class="title">
           <span class="nickname">{{ props.user.nickName }}</span>
