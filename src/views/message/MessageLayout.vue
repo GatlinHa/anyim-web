@@ -37,7 +37,10 @@ const inputBoxHeightMax = 400
 
 const curSessionId = ref('')
 const curChatObject = ref({})
-const sessionArr = ref([])
+const sessions = ref({
+  chatSessions: [],
+  groupChatSessions: []
+})
 
 
 onMounted(async () => {
@@ -45,9 +48,7 @@ onMounted(async () => {
   curChatObject.value = messageData.lastChatObj
 
   const res = await msgChatSessionListService()
-  sessionArr.value = res.data.data
-  console.log(sessionArr);
-  
+  sessions.value.chatSessions = res.data.data
 })
 
 const onAsideDragUpdate = ({ width }) => {
@@ -79,7 +80,7 @@ const handleExportData = (data) => {
         </div>
         <div class="session-list">
           <SessionBox
-            v-for="item in sessionArr"
+            v-for="item in sessions.chatSessions"
             :key="item.session"
             :user="item.userInfo"
             :sessionId="item.session_id"

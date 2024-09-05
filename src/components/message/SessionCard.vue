@@ -7,7 +7,7 @@ const props = defineProps(['isShow', 'user'])
 const emit = defineEmits(['update:isShow'])
 
 // const isLoading = ref(false)
-const userCardRef = ref()
+const sessionCardRef = ref()
 
 const preventClose = (event) => {
   event.stopPropagation()
@@ -48,7 +48,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="userCardRef">
+  <div ref="sessionCardRef">
     <transition name="fade">
       <div v-if="isShow" class="overlay"></div>
     </transition>

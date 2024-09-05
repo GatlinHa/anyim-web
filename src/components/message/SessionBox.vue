@@ -2,14 +2,14 @@
 import { ref, computed } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
-import UserCard from '../user/UserCard.vue'
+import SessionCard from './SessionCard.vue'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 
 const props = defineProps(['user', 'sessionId'])
 const emit = defineEmits(['exportData'])
 const isPinToTop = ref(false)
 const isMute = ref(false)
-const isShowUserCard = ref(false)
+const isShowSessionCard = ref(false)
 
 const sessionInfo = computed(() => {
   return {
@@ -18,14 +18,14 @@ const sessionInfo = computed(() => {
   }
 })
 
-const handleUserCard = (flag) => {
-  isShowUserCard.value = flag
+const handleSessionCard = (flag) => {
+  isShowSessionCard.value = flag
 }
 </script>
 
 <template>
   <div class="session-box">
-    <AvatarIcon :user="props.user" @click="isShowUserCard = true"></AvatarIcon>
+    <AvatarIcon :user="props.user" @click="isShowSessionCard = true"></AvatarIcon>
     <div class="content-box" @click="emit('exportData', sessionInfo)">
       <div class="header">
         <div class="title">
@@ -63,7 +63,11 @@ const handleUserCard = (flag) => {
       </div>
     </div>
   </div>
-  <UserCard :isShow="isShowUserCard" @update:isShow="handleUserCard" :user="props.user"></UserCard>
+  <SessionCard
+    :isShow="isShowSessionCard"
+    @update:isShow="handleSessionCard"
+    :user="props.user"
+  ></SessionCard>
 </template>
 
 <style lang="scss" scoped>

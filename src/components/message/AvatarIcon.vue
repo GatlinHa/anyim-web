@@ -15,14 +15,14 @@ const firstChar = computed(() => {
 const randomColor = getRandomColor(props.user.account)
 const fontColor = getFontColor(randomColor)
 
-const openUserCardDialog = () => {
+const openSessionCardDialog = () => {
   // 打开用户头像卡片
 }
 </script>
 
 <template>
   <div class="avatar-box">
-    <el-avatar v-if="isShowImg" :src="props.user.avatarThumb" @click="openUserCardDialog" />
+    <el-avatar v-if="isShowImg" :src="props.user.avatarThumb" @click="openSessionCardDialog" />
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
     </span>
