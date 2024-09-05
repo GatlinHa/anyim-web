@@ -2,38 +2,89 @@
 import { ref, computed } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
-import SessionCard from './SessionCard.vue'
+import UserCard from '../user/UserCard.vue'
+import GroupCard from '../group/GroupCard.vue'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 
-const props = defineProps(['user', 'sessionId'])
+const props = defineProps(['sessionId', 'sessionType', 'objectInfo'])
 const emit = defineEmits(['exportData'])
 const isPinToTop = ref(false)
 const isMute = ref(false)
-const isShowSessionCard = ref(false)
+const isShowUserCard = ref(false)
+const isShowGroupCard = ref(false)
 
 const sessionInfo = computed(() => {
   return {
     sessionId: props.sessionId,
-    chatObj: props.user
+    chatObj: props.objectInfo
   }
 })
 
-const handleSessionCard = (flag) => {
-  isShowSessionCard.value = flag
+const showName = computed(() => {
+  switch (props.sessionType) {
+    case 'chat':
+      return props.objectInfo.nickName
+    case 'groupchat':
+      return props.objectInfo.groupName
+    default:
+      return ''
+  }
+})
+
+const showId = computed(() => {
+  switch (props.sessionType) {
+    case 'chat':
+      return props.objectInfo.account
+    case 'groupchat':
+      return props.objectInfo.groupId
+    default:
+      return ''
+  }
+})
+
+const showAvatarThumb = computed(() => {
+  switch (props.sessionType) {
+    case 'chat':
+    case 'groupchat':
+      return props.objectInfo.avatarThumb
+    default:
+      return ''
+  }
+})
+
+const handleUserCard = (flag) => {
+  isShowUserCard.value = flag
+}
+const handleGroupCard = (flag) => {
+  isShowGroupCard.value = flag
+}
+const showSomeoneCard = () => {
+  switch (props.sessionType) {
+    case 'chat':
+      isShowUserCard.value = true
+      break
+    case 'groupchat':
+      isShowGroupCard.value = true
+      break
+    default:
+      break
+  }
 }
 </script>
 
 <template>
   <div class="session-box">
-    <AvatarIcon :user="props.user" @click="isShowSessionCard = true"></AvatarIcon>
+    <AvatarIcon
+      :showName="showName"
+      :showId="showId"
+      :showAvatarThumb="showAvatarThumb"
+      @click="showSomeoneCard"
+    ></AvatarIcon>
     <div class="content-box" @click="emit('exportData', sessionInfo)">
       <div class="header">
         <div class="title">
-          <span class="nickname">{{ props.user.nickName || props.user.account }}</span>
-          <SessionTag tagType="group"></SessionTag>
-          <SessionTag tagType="team"></SessionTag>
-          <SessionTag tagType="organize"></SessionTag>
-          <SessionTag tagType="assistant"></SessionTag>
+          <span class="nickname">{{ showName || showId }}</span>
+          <SessionTag :tagType="props.sessionType"></SessionTag>
           <SessionTag v-if="isPinToTop" tagType="pinToTop"></SessionTag>
           <SessionTag v-if="isMute" tagType="mute"></SessionTag>
         </div>
@@ -63,11 +114,16 @@ const handleSessionCard = (flag) => {
       </div>
     </div>
   </div>
-  <SessionCard
-    :isShow="isShowSessionCard"
-    @update:isShow="handleSessionCard"
-    :user="props.user"
-  ></SessionCard>
+  <UserCard
+    :isShow="isShowUserCard"
+    @update:isShow="handleUserCard"
+    :user="props.objectInfo"
+  ></UserCard>
+  <GroupCard
+    :isShow="isShowGroupCard"
+    @update:isShow="handleGroupCard"
+    :group="props.objectInfo"
+  ></GroupCard>
 </template>
 
 <style lang="scss" scoped>

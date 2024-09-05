@@ -37,10 +37,7 @@ const inputBoxHeightMax = 400
 
 const curSessionId = ref('')
 const curChatObject = ref({})
-const sessions = ref({
-  chatSessions: [],
-  groupChatSessions: []
-})
+const sessionList = ref([])
 
 
 onMounted(async () => {
@@ -48,7 +45,7 @@ onMounted(async () => {
   curChatObject.value = messageData.lastChatObj
 
   const res = await msgChatSessionListService()
-  sessions.value.chatSessions = res.data.data
+  sessionList.value = sessionList.value.concat(res.data.data)
 })
 
 const onAsideDragUpdate = ({ width }) => {
@@ -80,10 +77,11 @@ const handleExportData = (data) => {
         </div>
         <div class="session-list">
           <SessionBox
-            v-for="item in sessions.chatSessions"
-            :key="item.session"
-            :user="item.userInfo"
-            :sessionId="item.session_id"
+            v-for="item in sessionList"
+            :key="item.sessionId"
+            :objectInfo="item.objectInfo"
+            :sessionId="item.sessionId"
+            :sessionType="item.sessionType"
             @exportData="handleExportData"
           ></SessionBox>
         </div>
@@ -106,7 +104,7 @@ const handleExportData = (data) => {
         fit="cover"
       ></el-image>
 
-      <el-container class="container">
+      <el-container v-else class="container">
         <el-header class="header bdr-b">
           <span class="show-nickname">{{ curChatObject.nickName }}</span>
           <div class="action-set">
@@ -199,7 +197,7 @@ const handleExportData = (data) => {
 
       .session-list {
         width: 100%;
-        height: 1000px;
+        height: 100vh;
         overflow-y: auto; // 用它的滚动条
       }
     }

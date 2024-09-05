@@ -2,27 +2,27 @@
 import { computed } from 'vue'
 import { getRandomColor, getFontColor } from '@/utils/common'
 
-const props = defineProps(['user'])
+const props = defineProps(['showName', 'showId', 'showAvatarThumb'])
 
 const isShowImg = computed(() => {
-  return props.user.avatarThumb ? true : false
+  return props.showAvatarThumb ? true : false
 })
 
 const firstChar = computed(() => {
-  return props.user.nickName ? props.user.nickName.charAt(0) : '未'
+  return props.showName ? props.showName.charAt(0) : '未'
 })
 
-const randomColor = getRandomColor(props.user.account)
+const randomColor = getRandomColor(props.showId)
 const fontColor = getFontColor(randomColor)
 
-const openSessionCardDialog = () => {
+const openUserCardDialog = () => {
   // 打开用户头像卡片
 }
 </script>
 
 <template>
   <div class="avatar-box">
-    <el-avatar v-if="isShowImg" :src="props.user.avatarThumb" @click="openSessionCardDialog" />
+    <el-avatar v-if="isShowImg" :src="props.showAvatarThumb" @click="openUserCardDialog" />
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
     </span>

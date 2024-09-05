@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 const items = {
-  group: { color: '#409EFF', label: '群' },
+  groupchat: { color: '#409EFF', label: '群' },
   team: { color: '#67C23A', label: '团' },
   organize: { color: '#E6A23C', label: '组' },
   assistant: { color: '#E734F5', label: '助' },
@@ -16,7 +16,7 @@ const selectedItem = computed(() => {
 </script>
 
 <template>
-  <el-tag :color="selectedItem.color" effect="dark" size="small">
+  <el-tag v-if="selectedItem" :color="selectedItem.color" effect="dark" size="small">
     {{ selectedItem.label }}
   </el-tag>
 </template>
