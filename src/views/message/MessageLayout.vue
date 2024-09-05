@@ -205,6 +205,7 @@ const handleExportData = (data) => {
 
   .msg-box {
     padding: 0;
+    overflow: hidden; // 禁用它的滚动条
 
     .backgroup-image {
       width: 100%;
