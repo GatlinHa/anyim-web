@@ -110,6 +110,8 @@ const onExit = async () => {
 
   .el-aside {
     background-color: #409eff;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 
     .avatar {
       display: flex;
@@ -143,6 +145,11 @@ const onExit = async () => {
       align-items: center;
       cursor: pointer;
     }
+  }
+
+  .el-main {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 }
 </style>
