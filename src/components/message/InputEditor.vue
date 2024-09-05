@@ -9,7 +9,7 @@ const options = {
   modules: {
     toolbar: false
   },
-  placeholder: 'Enter发送/Shift+Enter换行',
+  placeholder: 'Enter发送 / Shift+Enter换行',
   theme: 'snow'
 }
 </script>
@@ -24,7 +24,10 @@ const options = {
 
 <style lang="scss">
 .ql-editor {
-  padding: 8px;
+  padding: 16px;
+  padding-left: 16px;
   font-size: 14px;
+  background-color: #fff;
+  border-radius: 8px;
 }
 </style>

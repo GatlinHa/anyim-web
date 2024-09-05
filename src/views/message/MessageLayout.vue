@@ -229,9 +229,6 @@ const testItems = [
               <el-main class="input-box-main">
                 <InputEditor></InputEditor>
               </el-main>
-              <el-footer class="input-box-footer">
-                <el-button type="primary">发送</el-button>
-              </el-footer>
             </el-container>
           </div>
         </el-main>
@@ -310,8 +307,10 @@ const testItems = [
 
           .input-box-header {
             width: 100%;
-            height: 45px;
+            height: auto;
             padding: 0;
+            display: flex;
+            flex-direction: column;
 
             .tool-set {
               display: flex;
@@ -324,33 +323,12 @@ const testItems = [
               .right-tools {
                 margin-right: 10px;
               }
-
-              .tool-icon {
-                margin: 10px;
-
-                &:hover {
-                  background-color: red;
-                }
-              }
             }
           }
 
           .input-box-main {
             width: 100%;
             padding: 0;
-            // flex: 1;
-          }
-
-          .input-box-footer {
-            width: 100%;
-            height: 32px;
-            padding: 0px;
-            display: flex;
-            justify-content: flex-end;
-
-            .el-button {
-              margin-right: 0px;
-            }
           }
         }
       }
