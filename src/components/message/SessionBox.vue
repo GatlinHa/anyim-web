@@ -29,7 +29,7 @@ const handleUserCard = (flag) => {
     <div class="content-box" @click="emit('exportData', sessionInfo)">
       <div class="header">
         <div class="title">
-          <span class="nickname">{{ props.user.nickName }}</span>
+          <span class="nickname">{{ props.user.nickName || props.user.account }}</span>
           <SessionTag tagType="group"></SessionTag>
           <SessionTag tagType="team"></SessionTag>
           <SessionTag tagType="organize"></SessionTag>

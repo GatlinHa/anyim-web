@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
+import avatar from '@/assets/default_avatar.png'
 
 const props = defineProps(['isShow', 'user'])
 const emit = defineEmits(['update:isShow'])
@@ -56,12 +57,14 @@ onUnmounted(() => {
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="props.user.avatarThumb" />
+            <el-avatar class="avatar" :src="props.user.avatarThumb || avatar" />
             <div class="gender">
               <el-icon v-if="props.user.sex === 1" color="#508afe"><Male /></el-icon>
               <el-icon v-if="props.user.sex === 2" color="#ff5722"><Female /></el-icon>
             </div>
-            <div class="nickname text-ellipsis">{{ props.user.nickName || '未设置昵称' }}</div>
+            <div class="nickname text-ellipsis">
+              {{ props.user.nickName || '未设置昵称' }}({{ props.user.account }})
+            </div>
           </div>
         </div>
 
@@ -170,12 +173,12 @@ onUnmounted(() => {
 
       .nickname {
         position: absolute;
-        top: 160px;
+        top: 150px;
         width: 80%;
-        height: 24px;
+        height: 48px;
         font-size: 16px;
         text-align: center;
-        color: black;
+        color: #409eff;
         font-weight: bold;
         user-select: text;
       }

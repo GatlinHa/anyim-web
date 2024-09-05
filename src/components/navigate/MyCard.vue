@@ -38,7 +38,9 @@ defineExpose({
           <el-icon v-if="userData.user.sex === 2" color="#ff5722"><Female /></el-icon>
         </div>
 
-        <div class="nickname text-ellipsis">{{ userData.user.nickName || '未设置昵称' }}</div>
+        <div class="nickname text-ellipsis">
+          {{ userData.user.nickName || '未设置昵称' }}({{ userData.user.account }})
+        </div>
 
         <el-text class="signature" type="primary" size="large">
           {{ truncatedSignature }}
@@ -116,26 +118,27 @@ defineExpose({
 
     .nickname {
       position: absolute;
-      top: 160px;
+      top: 145px;
       width: 80%;
       height: 24px;
       font-size: 16px;
       text-align: center;
-      color: black;
+      color: #409eff;
       font-weight: bold;
       user-select: text;
     }
 
     .signature {
       width: 80%;
+      height: 85px;
       position: absolute;
       top: 200px;
-      height: 85px;
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
       white-space: normal; //允许文本内容自动换行
       user-select: text;
+      color: black;
     }
   }
 }

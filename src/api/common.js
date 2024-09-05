@@ -14,3 +14,12 @@ export const refreshToken = async () => {
     userData.setAt(res.data.data.accessToken)
   }
 }
+
+export const getReqBody = (obj) => {
+  return {
+    ...obj,
+    clientType: CLIENT_TYPE,
+    clientName: CLIENT_NAME,
+    clientVersion: CLIENT_VERSION
+  }
+}

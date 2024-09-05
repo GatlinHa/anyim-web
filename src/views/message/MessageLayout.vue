@@ -22,6 +22,7 @@ import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
 import { settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
+import { msgChatSessionListService } from '@/api/message'
 
 const settingData = settingStore()
 const messageData = messageStore()
@@ -36,12 +37,17 @@ const inputBoxHeightMax = 400
 
 const curSessionId = ref('')
 const curChatObject = ref({})
+const sessionArr = ref([])
 
 
-
-onMounted(() => {
+onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
   curChatObject.value = messageData.lastChatObj
+
+  const res = await msgChatSessionListService()
+  sessionArr.value = res.data.data
+  console.log(sessionArr);
+  
 })
 
 const onAsideDragUpdate = ({ width }) => {
@@ -61,73 +67,6 @@ const handleExportData = (data) => {
   messageData.setLastChatObj(data.chatObj)
 }
 
-const testItems = [
-  {
-    session_id: '00000001',
-    user: 
-    {
-      account: 'a123456',
-      avatar: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/fc0eff1f-ac2e-4a09-abd0-f834615137e7/微信图片_20240327170045.jpg',
-      avatarThumb: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/e1c5b5d3-17d5-4603-9a3e-6985142455e3/微信图片_20240327170045-thumb.jpg',
-      birthday: '2000-01-01',
-      email: '312777916@qq.com',
-      level: 1,
-      nickName: '我是Bob呀！',
-      phoneNum: '13511111111',
-      sex: 1,
-      signature: '真的要坚持，才会有希望啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-      organize: '消费者BG/2012实验室/海斯开发部/运营部/西安项目组/第五小组',
-      base: '西安'
-    }
-  },
-  {
-    session_id: '00000002',
-    user: 
-    {
-      account: 'Asdasdasd',
-      avatar: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/fc0eff1f-ac2e-4a09-abd0-f834615137e7/微信图片_20240327170045.jpg',
-      avatarThumb: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/e1c5b5d3-17d5-4603-9a3e-6985142455e3/微信图片_20240327170045-thumb.jpg',
-      birthday: '2000-01-01',
-      email: '312777916@qq.com',
-      level: 1,
-      nickName: '我是A',
-      phoneNum: '13511111111',
-      sex: 1,
-      signature: ''
-    }
-  },
-  {
-    session_id: '00000003',
-    user: 
-    {
-    account: 'Bsdasdasd',
-    avatar: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/fc0eff1f-ac2e-4a09-abd0-f834615137e7/微信图片_20240327170045.jpg',
-    avatarThumb: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/e1c5b5d3-17d5-4603-9a3e-6985142455e3/微信图片_20240327170045-thumb.jpg',
-    birthday: '2000-01-01',
-    email: '312777916@qq.com',
-    level: 1,
-    nickName: '我是B',
-    phoneNum: '13511111111',
-    sex: 1,
-    signature: 'AAAAAAAAAAAA'
-    }
-  },
-  {
-    session_id: '00000004',
-    user: 
-    {
-    account: 'Csdasdasd',
-    avatar: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/fc0eff1f-ac2e-4a09-abd0-f834615137e7/微信图片_20240327170045.jpg',
-    avatarThumb: 'http://127.0.0.1:9001/anyim/IMAGE/20240831/e1c5b5d3-17d5-4603-9a3e-6985142455e3/微信图片_20240327170045-thumb.jpg',
-    birthday: '2000-01-01',
-    email: '312777916@qq.com',
-    level: 1,
-    nickName: '我是C',
-    phoneNum: '13511111111',
-    sex: 1,
-    signature: 'AAAAAAAAAAAA'
-    }
-  }]
 </script>
 
 <template>
@@ -140,9 +79,9 @@ const testItems = [
         </div>
         <div class="session-list">
           <SessionBox
-            v-for="item in testItems"
-            :key="item.session_id"
-            :user="item.user"
+            v-for="item in sessionArr"
+            :key="item.session"
+            :user="item.userInfo"
             :sessionId="item.session_id"
             @exportData="handleExportData"
           ></SessionBox>
@@ -247,10 +186,20 @@ const testItems = [
     position: relative;
 
     .msg-aside-main {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden; // 禁用它的滚动条
+
       .header {
-        display: flex;
         margin-top: 10px;
         margin-bottom: 10px;
+        display: flex;
+      }
+
+      .session-list {
+        width: 100%;
+        height: 1000px;
+        overflow-y: auto; // 用它的滚动条
       }
     }
   }
