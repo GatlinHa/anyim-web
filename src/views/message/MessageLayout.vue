@@ -43,7 +43,7 @@ const sessionList = ref([])
 
 onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
-  curSessionType.value = messageStore.lastSessionType
+  curSessionType.value = messageData.lastSessionType
   curObject.value = messageData.lastObject
 
   const res = await msgChatSessionListService()
