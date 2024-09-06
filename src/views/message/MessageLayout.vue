@@ -20,18 +20,19 @@ import AddBotton from '@/components/common/AddBotton.vue'
 import SessionBox from '@/components/message/SessionBox.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
-import { settingStore, messageStore } from '@/stores'
+import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService } from '@/api/message'
 
+const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
 
-const asideWidth = ref(settingData.sessionListDrag || 200)
+const asideWidth = ref(0)
 const asideWidthMin = 200
 const asideWidthMax = 500
 
-const inputBoxHeight = ref(settingData.inputBoxDrag || 200)
+const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 150
 const inputBoxHeightMax = 400
 
@@ -45,6 +46,9 @@ onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
   curSessionType.value = messageData.lastSessionType
   curObject.value = messageData.lastObject
+
+  asideWidth.value = settingData.sessionListDrag[userData.user.account] || 200
+  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 200
 
   const res = await msgChatSessionListService()
   sessionList.value = sessionList.value.concat(res.data.data)
@@ -74,12 +78,18 @@ const showId = computed(() => {
 
 const onAsideDragUpdate = ({ width }) => {
   asideWidth.value = width
-  settingData.setSessionListDrag(width)
+  settingData.setSessionListDrag({
+    ...settingData.sessionListDrag,
+    [userData.user.account]: width
+  })
 }
 
 const onInputBoxDragUpdate = ({ height }) => {
   inputBoxHeight.value = height
-  settingData.setInputBoxDrag(height)
+  settingData.setInputBoxDrag({
+    ...settingData.inputBoxDrag,
+    [userData.user.account]: height
+  })
 }
 
 const handleExportData = (data) => {

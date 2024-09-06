@@ -19,7 +19,6 @@ const myAvatar = ref()
 const userData = userStore()
 
 onMounted(() => {
-  userData.getUser()
   document.addEventListener('click', clickListener)
 })
 

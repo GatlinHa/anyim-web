@@ -67,11 +67,12 @@ const login = async () => {
   await form.value.validate() // 登录之前预校验
   const response = userLoginService(formModel.value)
   response
-    .then((res) => {
+    .then(async (res) => {
       ElMessage.success('登录成功')
       userData.setAt(res.data.data.accessToken)
       userData.setRt(res.data.data.refreshToken)
       userData.setIsRemenberMe(isRemenberMe.value)
+      await userData.getUser() //这里要用await确保拿到结果了再跳转，否则其他页面依赖user的不能及时得到更新
       router.push('/')
     })
     .catch(() => {
