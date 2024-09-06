@@ -52,15 +52,16 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // 如果没有登录，且访问的是非登录页，拦截到登录
   const userData = userStore()
-  if (!userData.isLogin() && to.path !== '/login') {
+
+  // 如果没有access token，且访问的是非登录页，拦截到登录
+  if (!userData.at.token && to.path !== '/login') {
     next('/login')
     return
   }
 
-  // 如果登录，且访问的是登录页，拦截到首页
-  if (userData.isLogin() && to.path === '/login') {
+  // 如果有access token，且访问的是登录页，拦截到首页
+  if (userData.at.token && to.path === '/login') {
     next('/')
     return
   }

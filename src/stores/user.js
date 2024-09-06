@@ -58,9 +58,9 @@ export const userStore = defineStore(
       user.value = obj
     }
 
-    const isLogin = () => {
+    const isAtExpired = () => {
       const now = new Date().getTime()
-      return at.value.expiretime && now < at.value.expiretime
+      return at.value.expiretime && now > at.value.expiretime
     }
 
     const isRemenberMe = ref(false)
@@ -79,7 +79,7 @@ export const userStore = defineStore(
       user,
       getUser,
       setUser,
-      isLogin,
+      isAtExpired,
       isRemenberMe,
       setIsRemenberMe
     }
