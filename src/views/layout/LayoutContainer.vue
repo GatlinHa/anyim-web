@@ -44,10 +44,11 @@ const onExit = async () => {
     confirmButtonText: '确认',
     cancelButtonText: '取消'
   })
-  await userLogoutnService(userData.user.account)
-  userData.clearAt()
-  userData.clearRt()
-  router.push('/login')
+  userLogoutnService(userData.user.account).finally(() => {
+    userData.clearAt()
+    userData.clearRt()
+    router.push('/login')
+  })
 }
 </script>
 

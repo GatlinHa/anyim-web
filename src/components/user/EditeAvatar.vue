@@ -15,21 +15,15 @@ const isLoading = ref(false)
 let selectedFile
 
 const onSelected = (file) => {
-  console.log('onSelected')
   imgUrl.value = URL.createObjectURL(file.raw)
   selectedFile = file.raw
 }
 
-const onSuccess = () => {
-  console.log('onSuccess')
-}
+const onSuccess = () => {}
 
-const beforeUpload = () => {
-  console.log('beforeUpload')
-}
+const beforeUpload = () => {}
 
 const onUpload = async () => {
-  console.log('onUpload')
   if (!selectedFile) {
     ElMessage.warning('您还未选择新头像！')
     return
