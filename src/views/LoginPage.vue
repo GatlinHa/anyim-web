@@ -4,6 +4,8 @@ import { ref, watch, onMounted } from 'vue'
 import router from '@/router'
 import { userRegisterService, userLoginService } from '@/api/user.js'
 import { userStore } from '@/stores'
+import { generateClientId } from '@/utils/common'
+
 const isRegister = ref(false)
 
 // 提交的整个form表单的数据
@@ -84,6 +86,10 @@ onMounted(() => {
   isRemenberMe.value = userData.isRemenberMe
   if (isRemenberMe.value) {
     formModel.value.username = userData.user.account
+  }
+
+  if (!userData.clientId) {
+    userData.setClientId(generateClientId())
   }
 })
 

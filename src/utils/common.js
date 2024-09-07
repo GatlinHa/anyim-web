@@ -37,3 +37,12 @@ export const getFontColor = (backgroundColor) => {
   // 根据亮度确定对比明显的字体颜色
   return brightness > 128 ? '#000000' : '#FFFFFF'
 }
+
+export const generateClientId = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let clientId = ''
+  for (let i = 0; i < 8; i++) {
+    clientId += characters[Math.floor(Math.random() * characters.length)]
+  }
+  return clientId
+}

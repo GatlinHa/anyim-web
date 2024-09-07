@@ -1,6 +1,6 @@
 import request from '@/utils/request'
-import { CLIENT_ID } from '@/const/userConst'
 import { getReqBody } from '@/api/common'
+import { userStore } from '@/stores'
 
 export const userRegisterService = ({ username, password }) => {
   return request.post(
@@ -14,9 +14,10 @@ export const userRegisterService = ({ username, password }) => {
 }
 
 export const userLoginService = ({ username, password }) => {
+  const userData = userStore()
   return request.post(
     '/user/login',
-    getReqBody({ account: username, password: password, clientId: CLIENT_ID })
+    getReqBody({ account: username, password: password, clientId: userData.clientId })
   )
 }
 

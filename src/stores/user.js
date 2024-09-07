@@ -69,6 +69,12 @@ export const userStore = defineStore(
       isRemenberMe.value = flag
     }
 
+    const clientId = ref('')
+
+    const setClientId = (id) => {
+      clientId.value = id
+    }
+
     return {
       at,
       rt,
@@ -81,7 +87,9 @@ export const userStore = defineStore(
       setUser,
       isAtExpired,
       isRemenberMe,
-      setIsRemenberMe
+      setIsRemenberMe,
+      clientId,
+      setClientId
     }
   },
   {
