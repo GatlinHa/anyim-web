@@ -4,6 +4,7 @@ import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import UserCard from '../user/UserCard.vue'
 import GroupCard from '../group/GroupCard.vue'
+import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 
 const props = defineProps(['sessionId', 'sessionType', 'objectInfo'])
@@ -53,6 +54,12 @@ const showAvatarThumb = computed(() => {
   }
 })
 
+const showTime = computed(() => {
+  const now = new Date()
+  const oneDayAgo = new Date(now.getTime() - 0 * 24 * 60 * 60 * 1000)
+  return sessionShowTime(oneDayAgo)
+})
+
 const handleUserCard = (flag) => {
   isShowUserCard.value = flag
 }
@@ -93,7 +100,7 @@ const showSomeoneCard = () => {
           <SessionTag v-if="isMute" tagType="mute"></SessionTag>
         </div>
         <div class="datetime">
-          <span>15:10</span>
+          <span>{{ showTime }}</span>
         </div>
       </div>
       <div class="body">
@@ -185,11 +192,12 @@ const showSomeoneCard = () => {
       }
 
       .datetime {
-        display: block;
-        margin-left: 10px;
-        width: 40px;
+        width: 52px;
         font-size: 12px;
+        margin-right: 5px;
         color: gray;
+        display: flex;
+        justify-content: flex-end;
       }
     }
 

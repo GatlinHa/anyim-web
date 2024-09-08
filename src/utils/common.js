@@ -46,3 +46,84 @@ export const generateClientId = () => {
   }
   return clientId
 }
+
+export const sessionShowTime = (datetime) => {
+  const now = new Date()
+  const inputDate = new Date(datetime)
+
+  const isToday =
+    now.getDate() === inputDate.getDate() &&
+    now.getMonth() === inputDate.getMonth() &&
+    now.getFullYear() === inputDate.getFullYear()
+
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const isYesterday =
+    yesterday.getDate() === inputDate.getDate() &&
+    yesterday.getMonth() === inputDate.getMonth() &&
+    yesterday.getFullYear() === inputDate.getFullYear()
+
+  const dayBeforeYesterday = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+  const isDayBeforeYesterday =
+    dayBeforeYesterday.getDate() === inputDate.getDate() &&
+    dayBeforeYesterday.getMonth() === inputDate.getMonth() &&
+    dayBeforeYesterday.getFullYear() === inputDate.getFullYear()
+
+  if (isToday) {
+    const hours = inputDate.getHours().toString().padStart(2, '0')
+    const minutes = inputDate.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${minutes}`
+  } else if (isYesterday) {
+    return '昨天'
+  } else if (isDayBeforeYesterday) {
+    return '前天'
+  } else {
+    const year = inputDate.getFullYear() % 100
+    let month = inputDate.getMonth() + 1
+    let day = inputDate.getDate()
+    day = day < 10 ? day.toString() : day
+    return `${year}/${month}/${day}`
+  }
+}
+
+export const messageShowTime = (datetime) => {
+  const now = new Date()
+  const inputDate = new Date(datetime)
+
+  const isToday =
+    now.getDate() === inputDate.getDate() &&
+    now.getMonth() === inputDate.getMonth() &&
+    now.getFullYear() === inputDate.getFullYear()
+
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const isYesterday =
+    yesterday.getDate() === inputDate.getDate() &&
+    yesterday.getMonth() === inputDate.getMonth() &&
+    yesterday.getFullYear() === inputDate.getFullYear()
+
+  const dayBeforeYesterday = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+  const isDayBeforeYesterday =
+    dayBeforeYesterday.getDate() === inputDate.getDate() &&
+    dayBeforeYesterday.getMonth() === inputDate.getMonth() &&
+    dayBeforeYesterday.getFullYear() === inputDate.getFullYear()
+
+  if (isToday) {
+    const hours = inputDate.getHours().toString().padStart(2, '0')
+    const minutes = inputDate.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${minutes}`
+  } else if (isYesterday) {
+    const hours = inputDate.getHours().toString().padStart(2, '0')
+    const minutes = inputDate.getMinutes().toString().padStart(2, '0')
+    return `昨天 ${hours}:${minutes}`
+  } else if (isDayBeforeYesterday) {
+    const hours = inputDate.getHours().toString().padStart(2, '0')
+    const minutes = inputDate.getMinutes().toString().padStart(2, '0')
+    return `前天 ${hours}:${minutes}`
+  } else {
+    const year = inputDate.getFullYear()
+    const month = inputDate.getMonth() + 1
+    const day = inputDate.getDate()
+    const hours = inputDate.getHours().toString().padStart(2, '0')
+    const minutes = inputDate.getMinutes().toString().padStart(2, '0')
+    return `${year}年${month}月${day}日 ${hours}:${minutes}`
+  }
+}

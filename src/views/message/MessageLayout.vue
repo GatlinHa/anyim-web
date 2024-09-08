@@ -20,9 +20,11 @@ import AddBotton from '@/components/common/AddBotton.vue'
 import SessionBox from '@/components/message/SessionBox.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
+import MessageItem from '@/components/message/MessageItem.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService } from '@/api/message'
+import { msgType } from '@/const/msgConst'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -41,6 +43,12 @@ const curSessionType = ref('')
 const curObject = ref({})
 const sessionList = ref([])
 
+const isShowTopLoading = ref(false)
+const isTopLoading = ref(false)
+const loadMoreTips = ref('查看更多消息')
+const loadCursor = computed(() => {
+  return isTopLoading.value ? 'auto' : 'pointer'
+})
 
 onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
@@ -102,6 +110,11 @@ const handleExportData = (data) => {
   messageData.setLastObject(data.objectInfo)
 }
 
+const onLoadMore = () => {
+  isTopLoading.value = true
+  loadMoreTips.value = ''
+}
+
 </script>
 
 <template>
@@ -158,7 +171,24 @@ const handleExportData = (data) => {
           </div>
         </el-header>
         <el-main class="body">
-          <div class="show-box"></div>
+          <div class="show-box">
+            <div v-if="isShowTopLoading" class="top-loading">
+              <div
+                v-loading="isTopLoading"
+                :fullscreen="false"
+                class="loading-box"
+                @click="onLoadMore"
+                :style="{ cursor: loadCursor }"
+              >
+                {{ loadMoreTips }}
+              </div>
+            </div>
+            <div class="message-main">
+              <MessageItem :type="msgType.NO_MORE_MSG"></MessageItem>
+              <MessageItem :type="msgType.USER_MSG" :objectInfo="curObject"></MessageItem>
+              <MessageItem></MessageItem>
+            </div>
+          </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
             <el-container class="input-box-container">
               <el-header class="input-box-header">
@@ -302,6 +332,35 @@ const handleExportData = (data) => {
         .show-box {
           width: 100%;
           flex: 1;
+          position: relative;
+
+          .top-loading {
+            width: 100%;
+            height: 30px;
+            position: absolute;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .loading-box {
+              color: #409eff;
+              font-size: 14px;
+            }
+          }
+
+          :deep(.circular) {
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            top: 12px;
+            left: -12px;
+          }
+
+          .message-main {
+            width: 100%;
+            height: 100%;
+          }
         }
 
         .input-box {
