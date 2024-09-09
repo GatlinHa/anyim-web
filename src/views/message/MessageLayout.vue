@@ -86,10 +86,8 @@ const showId = computed(() => {
 
 const getLastMsgTime = (index) => {
     if (index > 0) {
-    console.log(testdata.value[index - 1].content);
     return testdata.value[index - 1].msgTime;
     } else {
-      console.log('null');
       return null;
     }
 }
