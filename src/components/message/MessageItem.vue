@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { msgType } from '@/const/msgConst'
 import { userStore } from '@/stores'
-import { messageShowTime } from '@/utils/common'
+import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
 const props = defineProps(['type', 'objectInfo', 'content'])
@@ -17,7 +17,11 @@ const isSelf = computed(() => {
 const showTime = computed(() => {
   const now = new Date()
   const oneDayAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000)
-  return messageShowTime(oneDayAgo)
+  return messageSysShowTime(oneDayAgo)
+})
+
+const msgTime = computed(() => {
+  return messageBoxShowTime(new Date())
 })
 
 const handleUserCard = (flag) => {
@@ -37,7 +41,17 @@ const onShowUserCard = () => {
     <span class="datetime">{{ showTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
-        <el-main class="el-main-right">Main</el-main>
+        <el-main class="el-main-right">
+          <el-container class="message-content-wrapper">
+            <el-header class="message-time">{{ msgTime }}</el-header>
+            <el-main class="message-content">
+              <div class="div-blank"></div>
+              <div class="div-content">
+                你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！
+              </div>
+            </el-main>
+          </el-container>
+        </el-main>
         <el-aside class="el-aside-right">
           <AvatarIcon
             :showId="props.objectInfo.account"
@@ -48,6 +62,7 @@ const onShowUserCard = () => {
           ></AvatarIcon>
         </el-aside>
       </el-container>
+
       <el-container class="el-container-left" v-else>
         <el-aside class="el-aside-left">
           <AvatarIcon
@@ -58,7 +73,17 @@ const onShowUserCard = () => {
             :size="30"
           ></AvatarIcon>
         </el-aside>
-        <el-main class="el-main-left">Main</el-main>
+        <el-main class="el-main-left">
+          <el-container class="message-content-wrapper">
+            <el-header class="message-time">{{ msgTime }}</el-header>
+            <el-main class="message-content">
+              <div class="div-content">
+                你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！
+              </div>
+              <div class="div-blank"></div>
+            </el-main>
+          </el-container>
+        </el-main>
       </el-container>
     </div>
   </div>
@@ -78,39 +103,78 @@ const onShowUserCard = () => {
   align-items: center;
   font-size: 14px;
   color: gray;
+  user-select: text;
 }
 
 .user-message {
   width: 100%;
+  margin-top: 15px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 
   .datetime {
-    // height: 30px;
     border-radius: 2px;
     padding-left: 5px;
     padding-right: 5px;
-    font-size: 14px;
+    font-size: 12px;
     background-color: #c8c9cc;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
+    user-select: text;
   }
 
   .message-container-wrapper {
     width: 100%;
+
     .el-container-right {
       width: 100%;
       display: flex;
+
       .el-aside-right {
         width: auto;
         margin-top: 5px;
         display: flex;
       }
       .el-main-right {
+        padding: 0;
+        display: flex;
+
+        .message-content-wrapper {
+          margin-right: 10px;
+
+          .message-time {
+            height: auto;
+            padding: 0;
+            font-size: 12px;
+            color: gray;
+            user-select: text;
+            text-align: end;
+          }
+
+          .message-content {
+            margin-top: 5px;
+            padding: 0;
+            display: flex;
+
+            .div-content {
+              max-width: 500px;
+              padding: 5px;
+              font-size: 14px;
+              background-color: #c6e2ff;
+              border-radius: 10px;
+              border-top-right-radius: 0;
+              user-select: text;
+            }
+
+            .div-blank {
+              flex: 1;
+            }
+          }
+        }
       }
     }
 
@@ -123,7 +187,41 @@ const onShowUserCard = () => {
         margin-top: 5px;
         display: flex;
       }
-      .el-main-right {
+      .el-main-left {
+        padding: 0;
+        display: flex;
+
+        .message-content-wrapper {
+          margin-left: 10px;
+
+          .message-time {
+            height: auto;
+            padding: 0;
+            font-size: 12px;
+            color: gray;
+            user-select: text;
+          }
+
+          .message-content {
+            margin-top: 5px;
+            padding: 0;
+            display: flex;
+
+            .div-content {
+              max-width: 500px;
+              padding: 5px;
+              font-size: 14px;
+              background-color: #c6e2ff;
+              border-radius: 10px;
+              border-top-left-radius: 0;
+              user-select: text;
+            }
+
+            .div-blank {
+              flex: 1;
+            }
+          }
+        }
       }
     }
   }

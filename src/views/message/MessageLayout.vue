@@ -186,6 +186,7 @@ const onLoadMore = () => {
             <div class="message-main">
               <MessageItem :type="msgType.NO_MORE_MSG"></MessageItem>
               <MessageItem :type="msgType.USER_MSG" :objectInfo="curObject"></MessageItem>
+              <MessageItem :type="msgType.USER_MSG" :objectInfo="userData.user"></MessageItem>
               <MessageItem></MessageItem>
             </div>
           </div>

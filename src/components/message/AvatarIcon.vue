@@ -24,7 +24,12 @@ const openUserCardDialog = () => {
 
 <template>
   <div class="avatar-box" :style="{ width: avatarSize + 'px', height: avatarSize + 'px' }">
-    <el-avatar v-if="isShowImg" :src="props.showAvatarThumb" @click="openUserCardDialog" />
+    <el-avatar
+      v-if="isShowImg"
+      :src="props.showAvatarThumb"
+      @click="openUserCardDialog"
+      :size="avatarSize"
+    />
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
     </span>
