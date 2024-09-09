@@ -331,6 +331,7 @@ const onLoadMore = () => {
 
         .show-box {
           width: 100%;
+          display: flex;
           flex: 1;
           position: relative;
 
@@ -360,6 +361,7 @@ const onLoadMore = () => {
           .message-main {
             width: 100%;
             height: 100%;
+            padding: 15px;
           }
         }
 

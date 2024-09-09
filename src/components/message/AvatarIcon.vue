@@ -2,7 +2,9 @@
 import { computed } from 'vue'
 import { getRandomColor, getFontColor } from '@/utils/common'
 
-const props = defineProps(['showName', 'showId', 'showAvatarThumb'])
+const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'size'])
+
+const avatarSize = props.size || 40
 
 const isShowImg = computed(() => {
   return props.showAvatarThumb ? true : false
@@ -21,7 +23,7 @@ const openUserCardDialog = () => {
 </script>
 
 <template>
-  <div class="avatar-box">
+  <div class="avatar-box" :style="{ width: avatarSize + 'px', height: avatarSize + 'px' }">
     <el-avatar v-if="isShowImg" :src="props.showAvatarThumb" @click="openUserCardDialog" />
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
@@ -31,8 +33,6 @@ const openUserCardDialog = () => {
 
 <style lang="scss" scoped>
 .avatar-box {
-  width: 40px;
-  height: 40px;
   flex-shrink: 0;
   cursor: pointer;
 
