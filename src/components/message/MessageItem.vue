@@ -5,7 +5,7 @@ import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
-const props = defineProps(['obj'])
+const props = defineProps(['obj', 'lastMsgTime'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
@@ -14,14 +14,27 @@ const isSelf = computed(() => {
   return userData.user.account === props.obj.user.account
 })
 
-const showTime = computed(() => {
-  const now = new Date()
-  const oneDayAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000)
-  return messageSysShowTime(oneDayAgo)
+const sysShowTime = computed(() => {
+  const testTime = new Date(props.obj.msgTime - 0 * 24 * 60 * 60 * 1000)
+  return messageSysShowTime(testTime)
+})
+
+// 判断是否是连续的会话，与上个会话时间差小于1分钟
+const isContinuousSession = computed(() => {
+  if (!props.lastMsgTime) {
+    return false
+  }
+
+  const diff = props.obj.msgTime.getTime() - props.lastMsgTime.getTime()
+  if (diff < 1 * 60 * 1000) {
+    return true
+  } else {
+    return false
+  }
 })
 
 const msgTime = computed(() => {
-  return messageBoxShowTime(props.obj.time)
+  return messageBoxShowTime(props.obj.msgTime)
 })
 
 const handleUserCard = (flag) => {
@@ -35,7 +48,7 @@ const onShowUserCard = () => {
 
 <template>
   <div v-if="props.obj.type === msgType.USER_MSG" class="user-message">
-    <span class="datetime">{{ showTime }}</span>
+    <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
         <el-main class="el-main-right">

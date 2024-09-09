@@ -84,6 +84,16 @@ const showId = computed(() => {
   }
 })
 
+const getLastMsgTime = (index) => {
+    if (index > 0) {
+    console.log(testdata.value[index - 1].content);
+    return testdata.value[index - 1].msgTime;
+    } else {
+      console.log('null');
+      return null;
+    }
+}
+
 const onAsideDragUpdate = ({ width }) => {
   asideWidth.value = width
   settingData.setSessionListDrag({
@@ -116,26 +126,26 @@ const onLoadMore = () => {
 }
 
 const testdata = ref([
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
-  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '2' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '3' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '4' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '5' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '6' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '7' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '8' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '9' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '10' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '11' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '12' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '13' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '14' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '15' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '16' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '17' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '18' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '19' },
+  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '20' },
 ])
 
 </script>
@@ -208,7 +218,12 @@ const testdata = ref([
             </div>
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
-              <MessageItem v-for="(item, index) in testdata" :key="index" :obj="item"></MessageItem>
+              <MessageItem
+                v-for="(item, index) in testdata"
+                :key="index"
+                :obj="item"
+                :lastMsgTime="getLastMsgTime(index)"
+              ></MessageItem>
             </div>
           </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
