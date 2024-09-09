@@ -5,13 +5,13 @@ import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
-const props = defineProps(['type', 'objectInfo', 'content'])
+const props = defineProps(['obj'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
 
 const isSelf = computed(() => {
-  return userData.user.account === props.objectInfo.account
+  return userData.user.account === props.obj.user.account
 })
 
 const showTime = computed(() => {
@@ -21,7 +21,7 @@ const showTime = computed(() => {
 })
 
 const msgTime = computed(() => {
-  return messageBoxShowTime(new Date())
+  return messageBoxShowTime(props.obj.time)
 })
 
 const handleUserCard = (flag) => {
@@ -34,10 +34,7 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div v-if="props.type === msgType.NO_MORE_MSG" class="no-more-message">
-    <span>当前无更多消息</span>
-  </div>
-  <div v-if="props.type === msgType.USER_MSG" class="user-message">
+  <div v-if="props.obj.type === msgType.USER_MSG" class="user-message">
     <span class="datetime">{{ showTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
@@ -46,17 +43,15 @@ const onShowUserCard = () => {
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
               <div class="div-blank"></div>
-              <div class="div-content">
-                你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！
-              </div>
+              <div class="div-content">{{ props.obj.content }}</div>
             </el-main>
           </el-container>
         </el-main>
         <el-aside class="el-aside-right">
           <AvatarIcon
-            :showId="props.objectInfo.account"
-            :showName="props.objectInfo.nickName"
-            :showAvatarThumb="props.objectInfo.avatarThumb"
+            :showId="props.obj.user.account"
+            :showName="props.obj.user.nickName"
+            :showAvatarThumb="props.obj.user.avatarThumb"
             @click="onShowUserCard"
             :size="30"
           ></AvatarIcon>
@@ -66,9 +61,9 @@ const onShowUserCard = () => {
       <el-container class="el-container-left" v-else>
         <el-aside class="el-aside-left">
           <AvatarIcon
-            :showId="props.objectInfo.account"
-            :showName="props.objectInfo.nickName"
-            :showAvatarThumb="props.objectInfo.avatarThumb"
+            :showId="props.obj.user.account"
+            :showName="props.obj.user.nickName"
+            :showAvatarThumb="props.obj.user.avatarThumb"
             @click="onShowUserCard"
             :size="30"
           ></AvatarIcon>
@@ -77,9 +72,7 @@ const onShowUserCard = () => {
           <el-container class="message-content-wrapper">
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
-              <div class="div-content">
-                你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！你好，很高兴认识你！
-              </div>
+              <div class="div-content">{{ props.obj.content }}</div>
               <div class="div-blank"></div>
             </el-main>
           </el-container>
@@ -90,22 +83,11 @@ const onShowUserCard = () => {
   <UserCard
     :isShow="isShowUserCard"
     @update:isShow="handleUserCard"
-    :user="props.objectInfo"
+    :user="props.obj.user"
   ></UserCard>
 </template>
 
 <style lang="scss" scoped>
-.no-more-message {
-  width: 100%;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px;
-  color: gray;
-  user-select: text;
-}
-
 .user-message {
   width: 100%;
   margin-top: 15px;

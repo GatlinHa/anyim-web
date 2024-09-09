@@ -115,6 +115,29 @@ const onLoadMore = () => {
   loadMoreTips.value = ''
 }
 
+const testdata = ref([
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你好呀' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我很好' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, time: new Date(), content: '你是谁啊？' },
+  {user: userData.user, type: msgType.USER_MSG, time: new Date(), content: '我是bob呀' },
+])
+
 </script>
 
 <template>
@@ -184,10 +207,8 @@ const onLoadMore = () => {
               </div>
             </div>
             <div class="message-main">
-              <MessageItem :type="msgType.NO_MORE_MSG"></MessageItem>
-              <MessageItem :type="msgType.USER_MSG" :objectInfo="curObject"></MessageItem>
-              <MessageItem :type="msgType.USER_MSG" :objectInfo="userData.user"></MessageItem>
-              <MessageItem></MessageItem>
+              <span class="no-more-message">当前无更多消息</span>
+              <MessageItem v-for="(item, index) in testdata" :key="index" :obj="item"></MessageItem>
             </div>
           </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
@@ -329,12 +350,14 @@ const onLoadMore = () => {
         padding: 0;
         display: flex;
         flex-direction: column;
+        overflow: hidden; // 禁用它的滚动条
 
         .show-box {
           width: 100%;
           display: flex;
           flex: 1;
           position: relative;
+          overflow-y: scroll; // 用它的滚动条
 
           .top-loading {
             width: 100%;
@@ -363,6 +386,17 @@ const onLoadMore = () => {
             width: 100%;
             height: 100%;
             padding: 15px;
+
+            .no-more-message {
+              width: 100%;
+              height: 40px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              font-size: 14px;
+              color: gray;
+              user-select: text;
+            }
           }
         }
 
