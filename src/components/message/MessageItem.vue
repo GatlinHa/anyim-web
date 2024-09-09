@@ -116,9 +116,6 @@ const onShowUserCard = () => {
     font-size: 12px;
     background-color: #c8c9cc;
     color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     user-select: text;
   }
 

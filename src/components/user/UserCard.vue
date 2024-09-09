@@ -1,13 +1,26 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
+import { userQueryService } from '@/api/user'
 
 const props = defineProps(['isShow', 'user'])
 const emit = defineEmits(['update:isShow'])
 
-// const isLoading = ref(false)
+const isLoading = ref(false)
 const userCardRef = ref()
+const showData = ref({
+  account: props.user.account,
+  nickName: '',
+  signature: '',
+  avatarThumb: '',
+  sex: '',
+  phoneNum: '',
+  email: '',
+  base: '',
+  organize: '',
+  remark: ''
+})
 
 const preventClose = (event) => {
   event.stopPropagation()
@@ -26,7 +39,7 @@ const handleEscEvent = (event) => {
 }
 
 const truncatedSignature = computed(() => {
-  const signature = props.user.signature || 'TA还没有个性签名。'
+  const signature = showData.value.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
   return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
 })
@@ -45,6 +58,24 @@ onUnmounted(() => {
   document.removeEventListener('click', closeCardIfOutside)
   document.removeEventListener('keydown', handleEscEvent)
 })
+
+onUpdated(async () => {
+  if (props.isShow) {
+    isLoading.value = true
+    userQueryService({ account: props.user.account })
+      .then((res) => {
+        showData.value.nickName = res.data.data.nickName
+        showData.value.signature = res.data.data.signature
+        showData.value.avatarThumb = res.data.data.avatarThumb
+        showData.value.sex = res.data.data.sex
+        showData.value.phoneNum = res.data.data.phoneNum
+        showData.value.email = res.data.data.email
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
+  }
+})
 </script>
 
 <template>
@@ -53,17 +84,20 @@ onUnmounted(() => {
       <div v-if="isShow" class="overlay"></div>
     </transition>
     <transition name="fade">
-      <div class="user-card" v-if="isShow" @click.self="preventClose($event)">
+      <div v-if="isLoading" class="loading-wrapper">加载中...</div>
+    </transition>
+    <transition name="fade">
+      <div class="user-card" v-if="isShow && !isLoading" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="props.user.avatarThumb || avatar" />
+            <el-avatar class="avatar" :src="showData.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="props.user.sex === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="props.user.sex === 2" color="#ff5722"><Female /></el-icon>
+              <el-icon v-if="showData.sex === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="showData.sex === 2" color="#ff5722"><Female /></el-icon>
             </div>
             <div class="nickname text-ellipsis">
-              {{ props.user.nickName || '未设置昵称' }}({{ props.user.account }})
+              {{ showData.nickName || '未设置昵称' }}({{ showData.account }})
             </div>
           </div>
         </div>
@@ -74,23 +108,23 @@ onUnmounted(() => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <span class="value">{{ props.user.phoneNum || '-' }}</span>
+            <span class="value">{{ showData.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <span class="value">{{ props.user.email || '-' }}</span>
+            <span class="value">{{ showData.email || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">驻地：</span>
-            <span class="value">{{ props.user.base || '-' }}</span>
+            <span class="value">{{ showData.base || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <span class="value">{{ props.user.organize || '-' }}</span>
+            <span class="value">{{ showData.organize || '-' }}</span>
           </div>
           <div class="info-item remark">
             <span class="label">备注：</span>
-            <span class="value">{{ props.user.remark || 'TODO' }}</span>
+            <span class="value">{{ showData.remark || 'TODO' }}</span>
           </div>
         </div>
       </div>
@@ -99,6 +133,27 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.loading-wrapper {
+  width: 300px;
+  height: 500px;
+  border-radius: 10px;
+  padding: 0px;
+  box-shadow: 2px 2px 20px gray;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 1;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #409eff;
+}
+
 .user-card {
   width: 300px;
   height: 500px;
