@@ -1,33 +1,50 @@
 <script setup>
-import { ref } from 'vue'
-import { QuillEditor } from '@vueup/vue-quill'
-import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import '@wangeditor/editor/dist/css/style.css'
+import { onBeforeUnmount, ref, shallowRef } from 'vue'
+import { Editor } from '@wangeditor/editor-for-vue'
 
-const content = ref('')
-const options = {
-  debug: false,
-  modules: {
-    toolbar: false
-  },
-  placeholder: 'Enter发送 / Shift+Enter换行',
-  theme: 'snow'
+const mode = 'simple'
+// 编辑器实例，必须用 shallowRef
+const editorRef = shallowRef()
+
+// 内容 HTML
+const valueHtml = ref('')
+
+const editorConfig = { placeholder: 'Enter发送 / Shift + Enter换行' }
+
+// 组件销毁时，也及时销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor == null) return
+  editor.destroy()
+})
+
+const handleCreated = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
 }
 </script>
 
 <template>
-  <QuillEditor
-    v-model:content="content"
-    :options="options"
-    style="height: 100%; border: none"
-  ></QuillEditor>
+  <div class="editor-wrapper">
+    <Editor
+      class="editor"
+      v-model="valueHtml"
+      :defaultConfig="editorConfig"
+      :mode="mode"
+      @onCreated="handleCreated"
+    />
+  </div>
 </template>
 
 <style lang="scss">
-.ql-editor {
-  padding: 16px;
-  padding-left: 16px;
-  font-size: 14px;
-  background-color: #fff;
-  border-radius: 8px;
+.editor-wrapper {
+  height: 100%;
+
+  .editor {
+    height: 100%;
+    overflow-y: hidden;
+    font-size: 14px;
+    border-radius: 8px;
+  }
 }
 </style>
