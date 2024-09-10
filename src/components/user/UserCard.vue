@@ -3,10 +3,12 @@ import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userQueryService } from '@/api/user'
+import { userStore } from '@/stores'
 
 const props = defineProps(['isShow', 'user'])
 const emit = defineEmits(['update:isShow'])
 
+const userData = userStore()
 const isLoading = ref(false)
 const userCardRef = ref()
 const showData = ref({
@@ -20,6 +22,10 @@ const showData = ref({
   base: '',
   organize: '',
   remark: ''
+})
+
+const isSelf = computed(() => {
+  return userData.user.account === props.user.account
 })
 
 const preventClose = (event) => {
@@ -122,7 +128,7 @@ onUpdated(async () => {
             <span class="label">部门：</span>
             <span class="value">{{ showData.organize || '-' }}</span>
           </div>
-          <div class="info-item remark">
+          <div v-if="!isSelf" class="info-item remark">
             <span class="label">备注：</span>
             <span class="value">{{ showData.remark || 'TODO' }}</span>
           </div>

@@ -95,8 +95,8 @@ const onShowUserCard = () => {
   </div>
   <UserCard
     :isShow="isShowUserCard"
-    @update:isShow="handleUserCard"
     :user="props.obj.user"
+    @update:isShow="handleUserCard"
   ></UserCard>
 </template>
 
