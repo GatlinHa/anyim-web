@@ -43,7 +43,7 @@ const curSessionType = ref('')
 const curObject = ref({})
 const sessionList = ref([])
 
-const isShowTopLoading = ref(false)
+const isShowTopLoading = ref(true)
 const isTopLoading = ref(false)
 const loadMoreTips = ref('查看更多消息')
 const loadCursor = computed(() => {
@@ -202,18 +202,18 @@ const testdata = ref([
           </div>
         </el-header>
         <el-main class="body">
-          <div class="show-box">
-            <div v-if="isShowTopLoading" class="top-loading">
-              <div
-                v-loading="isTopLoading"
-                :fullscreen="false"
-                class="loading-box"
-                @click="onLoadMore"
-                :style="{ cursor: loadCursor }"
-              >
-                {{ loadMoreTips }}
-              </div>
+          <div v-if="isShowTopLoading" class="top-loading">
+            <div
+              v-loading="isTopLoading"
+              :fullscreen="false"
+              class="loading-box"
+              @click="onLoadMore"
+              :style="{ cursor: loadCursor }"
+            >
+              {{ loadMoreTips }}
             </div>
+          </div>
+          <div class="show-box">
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
               <MessageItem
@@ -364,27 +364,20 @@ const testdata = ref([
         display: flex;
         flex-direction: column;
         overflow: hidden; // 禁用它的滚动条
+        position: relative;
 
-        .show-box {
+        .top-loading {
           width: 100%;
+          height: 30px;
+          position: absolute;
+          top: 0;
           display: flex;
-          flex: 1;
-          position: relative;
-          overflow-y: scroll; // 用它的滚动条
+          justify-content: center;
+          align-items: center;
 
-          .top-loading {
-            width: 100%;
-            height: 30px;
-            position: absolute;
-            top: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            .loading-box {
-              color: #409eff;
-              font-size: 14px;
-            }
+          .loading-box {
+            color: #409eff;
+            font-size: 14px;
           }
 
           :deep(.circular) {
@@ -394,11 +387,19 @@ const testdata = ref([
             top: 12px;
             left: -12px;
           }
+        }
+
+        .show-box {
+          width: 100%;
+          display: flex;
+          flex: 1;
+          overflow-y: scroll; // 用它的滚动条
 
           .message-main {
             width: 100%;
             height: 100%;
-            padding: 15px;
+            padding: 20px;
+            padding-right: 15px;
 
             .no-more-message {
               width: 100%;
