@@ -53,23 +53,28 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const userData = userStore()
+  console.log(111)
 
   // 如果没有access token，且访问的是非登录页，拦截到登录
   if (!userData.at.token && to.path !== '/login') {
+    console.log(222)
     next('/login')
     return
   }
 
   // 如果有access token，且访问的是登录页，拦截到首页
   if (userData.at.token && to.path === '/login') {
+    console.log(333)
     next('/')
     return
   }
 
   // 检查是否是其他请求（除了已定义的路由之外的请求）
   if (!router.getRoutes().some((route) => route.path === to.path)) {
+    console.log(444)
     next('/')
   } else {
+    console.log(555)
     next()
   }
 })

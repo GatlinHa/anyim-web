@@ -28,4 +28,4 @@ coverage
 *.sw?
 
 *.tsbuildinfo
-*.local
+note.md
