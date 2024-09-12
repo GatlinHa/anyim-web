@@ -83,7 +83,6 @@ class WsConnect {
     const hello = Msg.create({ header: header })
     const payload = Msg.encode(hello).finish()
     const data = this.encodePayload(payload)
-    console.log('encode data: ', data)
     this.connect.send(data)
   }
 
@@ -108,31 +107,6 @@ class WsConnect {
       lenEncode.push(byte)
     }
     return Uint8Array.of(...lenEncode, ...payload)
-  }
-
-  /**
-   * 接收消息后对payload进行解码，剥离掉长度
-   * @param {*} buf
-   * @returns
-   */
-  decodePayload(buf) {
-    const view = new DataView(buf)
-    let byteIndex = 0
-
-    let length = 0
-    let shift = 0
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const byte = view.getUint8(byteIndex)
-      length |= (byte & 0x7f) << shift
-      byteIndex++
-      if ((byte & 0x80) === 0) {
-        break
-      }
-      shift += 7
-    }
-
-    return new Uint8Array(buf, byteIndex, length)
   }
 
   /**
