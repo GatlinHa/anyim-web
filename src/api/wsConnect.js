@@ -18,8 +18,7 @@ class WsConnect {
   buffer
 
   constructor() {
-    const aar = [14, 10, 12, 8, 139, 150, 196, 240, 8, 16, 0, 24, 0]
-    this.buffer = new Uint8Array(aar)
+    this.buffer = new Uint8Array()
   }
 
   /**
