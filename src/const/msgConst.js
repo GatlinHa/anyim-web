@@ -3,4 +3,7 @@ export const msgType = {
   USER_MSG: 2
 }
 
-export const MAGIC = 0x8e110b0b
+export const PROTO = {
+  magic: 0x8e110b0b,
+  version: 0x01
+}

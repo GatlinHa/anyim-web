@@ -1,5 +1,5 @@
 import { Msg, Header, MsgType } from '@/proto/msg'
-import { MAGIC } from '@/const/msgConst'
+import { PROTO } from '@/const/msgConst'
 
 class WsConnect {
   /**
@@ -17,8 +17,47 @@ class WsConnect {
    */
   buffer
 
+  /**
+   * 心跳设置
+   */
+  heartBeat
+
   constructor() {
     this.buffer = new Uint8Array()
+    this.heartBeat = {
+      interval: 5000, // 间隔时间
+      timeoutTimes: 3, // 超时次数，超过该次数不再发心跳
+      healthPoint: 0, // 健康指数，心跳发出+1，收到心跳-1，最小不能小于0，超过timeoutTimes次数视为心跳中断
+      taskObj: null,
+      task: () => {
+        if (this.heartBeat.healthPoint >= this.heartBeat.timeoutTimes) {
+          this.heartBeat.stop()
+          console.log('心跳超时，关闭心跳')
+          // TODO 重连
+        }
+        const header = Header.create({
+          magic: PROTO.magic,
+          version: PROTO.version,
+          msgType: MsgType.HEART_BEAT,
+          isExtension: false
+        })
+        const heartBeat = Msg.create({ header: header })
+        const payload = Msg.encode(heartBeat).finish()
+        const data = this.encodePayload(payload)
+        this.connect.send(data)
+        this.heartBeat.healthPoint++
+        console.log('发送WebSocket心跳，心跳指数是：', this.heartBeat.healthPoint)
+      },
+      start: () => {
+        if (!this.heartBeat.taskObj) {
+          this.heartBeat.stop()
+        }
+        this.heartBeat.taskObj = setInterval(this.heartBeat.task, this.heartBeat.interval)
+      },
+      stop: () => {
+        this.heartBeat.taskObj && clearInterval(this.heartBeat.taskObj)
+      }
+    }
   }
 
   /**
@@ -57,26 +96,11 @@ class WsConnect {
     this.connect.onerror = this.onError.bind(this)
   }
 
-  async onMessage(evt) {
-    console.log('onMessage')
-    const arrayBuffer = await evt.data.arrayBuffer()
-    const frames = this.decode(new Uint8Array(arrayBuffer))
-
-    frames.forEach((frame) => {
-      const res = Msg.decode(frame)
-      console.log('Decoded res:', res)
-    })
-  }
-
-  onClose(evt) {
-    console.log('onClose', evt)
-  }
-
   onOpen() {
     console.log('onOpen')
     const header = Header.create({
-      magic: MAGIC,
-      version: 0,
+      magic: PROTO.magic,
+      version: PROTO.version,
       msgType: MsgType.HELLO,
       isExtension: false
     })
@@ -86,8 +110,47 @@ class WsConnect {
     this.connect.send(data)
   }
 
+  async onMessage(evt) {
+    const arrayBuffer = await evt.data.arrayBuffer()
+    const frames = this.decode(new Uint8Array(arrayBuffer))
+
+    frames.forEach((frame) => {
+      const msg = Msg.decode(frame)
+      console.log('onMessage, msg is: ', msg)
+      switch (msg.header.msgType) {
+        case MsgType.HELLO:
+          this.handleHello()
+          break
+        case MsgType.HEART_BEAT:
+          this.handleHeartBeat()
+          break
+        default:
+          console.log('不支持该message type: ', msg.header.msgType)
+
+          break
+      }
+      console.log()
+    })
+  }
+
+  onClose(evt) {
+    console.log('onClose', evt)
+    this.heartBeat.stop()
+  }
+
   onError(evt) {
     console.log('onError', evt)
+    this.heartBeat.stop()
+    // 先关闭心跳，再重连 TODO
+  }
+
+  handleHello() {
+    // 启动心跳
+    this.heartBeat.start()
+  }
+
+  handleHeartBeat() {
+    if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
   }
 
   /**
