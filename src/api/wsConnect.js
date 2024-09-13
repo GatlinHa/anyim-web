@@ -96,12 +96,13 @@ class WsConnect {
   /**
    * 创建ws连接，登录成功之后调用
    */
-  createWs() {
+  async createWs() {
     if (this.isConnect) {
       return
     }
     console.log('create websocket')
-    this.url = `${import.meta.env.VITE_WS_URL}?token=${this.userData.at.token}`
+    const token = await this.userData.getAccessToken()
+    this.url = `${import.meta.env.VITE_WS_URL}?token=${token}`
     this.connect = new WebSocket(this.url)
     this.connect.onmessage = this.onMessage.bind(this)
     this.connect.onclose = this.onClose.bind(this)
@@ -122,8 +123,8 @@ class WsConnect {
     this.isConnect = false
   }
 
-  onOpen() {
-    console.log('onOpen')
+  onOpen(evt) {
+    console.log('onOpen', evt)
     const header = Header.create({
       magic: proto.magic,
       version: proto.version,
@@ -157,7 +158,7 @@ class WsConnect {
     })
   }
 
-  onClose(evt) {
+  async onClose(evt) {
     console.log('onClose', evt)
     this.heartBeat.stop()
     this.connect && this.connect.close()

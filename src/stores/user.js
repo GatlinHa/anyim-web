@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { userInfoService } from '@/api/user'
+import { refreshToken } from '@/api/common'
 
 // 用户模块
 export const userStore = defineStore(
@@ -16,6 +17,18 @@ export const userStore = defineStore(
       secret: '',
       expiretime: 0
     })
+    const getAccessToken = async () => {
+      const now = new Date().getTime()
+      if (at.value.expiretime && now < at.value.expiretime) {
+        return at.value.token
+      } else {
+        await refreshToken()
+        return at.value.token
+      }
+    }
+    const getRefreshToken = () => {
+      return rt.value.token
+    }
     const setAt = (newAt) => {
       const now = new Date()
       at.value = {
@@ -58,11 +71,6 @@ export const userStore = defineStore(
       user.value = obj
     }
 
-    const isAtExpired = () => {
-      const now = new Date().getTime()
-      return at.value.expiretime && now > at.value.expiretime
-    }
-
     const isRemenberMe = ref(false)
 
     const setIsRemenberMe = (flag) => {
@@ -80,12 +88,13 @@ export const userStore = defineStore(
       rt,
       setAt,
       setRt,
+      getAccessToken,
+      getRefreshToken,
       clearAt,
       clearRt,
       user,
       getUser,
       setUser,
-      isAtExpired,
       isRemenberMe,
       setIsRemenberMe,
       clientId,
