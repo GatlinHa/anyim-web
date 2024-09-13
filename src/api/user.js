@@ -47,7 +47,6 @@ export const userQueryService = (obj) => {
 }
 
 export const refreshToken = async () => {
-  console.log('refreshToken')
   return request.post('/user/refreshToken', {
     clientType: CLIENT_TYPE,
     clientName: CLIENT_NAME,

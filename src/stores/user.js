@@ -19,8 +19,13 @@ export const userStore = defineStore(
     })
     // 注意这个是异步的，取到的token一定是有效期内的
     const getAccessToken = async () => {
+      if (!at.value.expiretime) {
+        // 没有值表示未登录
+        return ''
+      }
+
       const now = new Date().getTime()
-      if (at.value.expiretime && now < at.value.expiretime) {
+      if (now < at.value.expiretime) {
         return at.value.token
       } else {
         const res = await refreshToken()
