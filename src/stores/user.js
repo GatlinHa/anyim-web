@@ -17,6 +17,7 @@ export const userStore = defineStore(
       secret: '',
       expiretime: 0
     })
+    // 注意这个是异步的，取到的token一定是有效期内的
     const getAccessToken = async () => {
       const now = new Date().getTime()
       if (at.value.expiretime && now < at.value.expiretime) {
