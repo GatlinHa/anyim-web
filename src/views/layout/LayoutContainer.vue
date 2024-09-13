@@ -19,8 +19,10 @@ const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
 
-onMounted(() => {
-  wsConnect.createWs()
+onMounted(async () => {
+  setTimeout(() => {
+    wsConnect.createWs()
+  }, 3000) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
 })
 
