@@ -13,16 +13,20 @@ import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
 import { userLogoutnService } from '@/api/user'
+import wsConnect from '@/api/wsConnect'
 
 const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
 
 onMounted(() => {
+  console.log('LayoutContainer onMounted')
+  wsConnect.createWs()
   document.addEventListener('click', clickListener)
 })
 
 onUnmounted(() => {
+  console.log('LayoutContainer onUnmounted')
   document.removeEventListener('click', clickListener)
 })
 
@@ -47,6 +51,7 @@ const onExit = async () => {
   userLogoutnService(userData.user.account).finally(() => {
     userData.clearAt()
     userData.clearRt()
+    wsConnect.closeWs()
     router.push('/login')
   })
 }

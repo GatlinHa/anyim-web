@@ -5,7 +5,6 @@ import router from '@/router'
 import { userRegisterService, userLoginService } from '@/api/user.js'
 import { userStore } from '@/stores'
 import { generateClientId } from '@/utils/common'
-import wsConnect from '@/api/wsConnect'
 
 const isRegister = ref(false)
 
@@ -76,7 +75,6 @@ const login = async () => {
       userData.setRt(res.data.data.refreshToken)
       userData.setIsRemenberMe(isRemenberMe.value)
       await userData.getUser() //这里要用await确保拿到结果了再跳转，否则其他页面依赖user的不能及时得到更新
-      wsConnect.createWs(userData.user.account, userData.clientId, userData.at.token)
       router.push('/')
     })
     .catch(() => {
