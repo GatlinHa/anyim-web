@@ -21,7 +21,7 @@ export const userLoginService = ({ username, password }) => {
   )
 }
 
-export const userLogoutnService = ({ username }) => {
+export const userLogoutService = ({ username }) => {
   return request.post('/user/logout', getReqBody({ account: username }))
 }
 

@@ -18,6 +18,9 @@ class WsConnect {
     return WsConnect.instance
   }
 
+  /**
+   * 用户数据
+   */
   userData
 
   /**
@@ -35,6 +38,9 @@ class WsConnect {
    */
   buffer
 
+  /**
+   * ws地址
+   */
   url
 
   /**
@@ -59,6 +65,15 @@ class WsConnect {
     taskObj: null,
     start: null,
     stop: null
+  }
+
+  /**
+   * 重发设置
+   */
+  reSend = {
+    interval: 1000, // 间隔时间
+    timeoutTimes: 5, // 超时次数，超过该次数不再重发
+    curReSendTimes: 0 // 当前重发的次数
   }
 
   /**
@@ -102,7 +117,7 @@ class WsConnect {
     console.log('client close the websocket connect')
     this.heartBeat.stop()
     this.reconnect.stop()
-    this.connect && this.connect.close(1000)
+    this.connect && this.connect.close(1000) //1000表示正常退出
     this.connect = null
     this.isConnect = false
   }
@@ -149,7 +164,7 @@ class WsConnect {
     this.connect = null
     this.isConnect = false
     if (evt.code != 1000) {
-      this.reconnect.start() // 正常关闭要重连
+      this.reconnect.start() // 非正常关闭要重连
     }
   }
 
@@ -241,6 +256,28 @@ class WsConnect {
     newBuffer.set(buffer1)
     newBuffer.set(buffer2, buffer1.length)
     return newBuffer
+  }
+
+  /**
+   * 发送msg，封装了重发机制
+   * @param {*} msg
+   * @param {*} callback 失败回调
+   */
+  sendMsg(msg, callback) {
+    if (this.isConnect) {
+      this.connect.send(msg)
+    } else {
+      if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {
+        console.log('resend to0 many times')
+        this.reSend.curReSendTimes = 0
+        callback()
+      } else {
+        setTimeout(() => {
+          this.sendMsg(msg, callback)
+        }, this.reSend.interval)
+        this.reSend.curReSendTimes++
+      }
+    }
   }
 
   sendHeartBeat() {

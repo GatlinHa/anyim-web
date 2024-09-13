@@ -12,7 +12,7 @@ import { userStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
-import { userLogoutnService } from '@/api/user'
+import { userLogoutService } from '@/api/user'
 import wsConnect from '@/api/wsConnect'
 
 const myCardDialog = ref()
@@ -20,13 +20,11 @@ const myAvatar = ref()
 const userData = userStore()
 
 onMounted(() => {
-  console.log('LayoutContainer onMounted')
   wsConnect.createWs()
   document.addEventListener('click', clickListener)
 })
 
 onUnmounted(() => {
-  console.log('LayoutContainer onUnmounted')
   document.removeEventListener('click', clickListener)
 })
 
@@ -43,17 +41,22 @@ const openMyCardDialog = () => {
 }
 
 const onExit = async () => {
-  await ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
+  ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
     type: 'warning',
     confirmButtonText: '确认',
     cancelButtonText: '取消'
   })
-  userLogoutnService(userData.user.account).finally(() => {
-    userData.clearAt()
-    userData.clearRt()
-    wsConnect.closeWs()
-    router.push('/login')
-  })
+    .then(() => {
+      userLogoutService(userData.user.account).finally(() => {
+        userData.clearAt()
+        userData.clearRt()
+        wsConnect.closeWs()
+        router.push('/login')
+      })
+    })
+    .catch(() => {
+      // do nothing
+    })
 }
 </script>
 
