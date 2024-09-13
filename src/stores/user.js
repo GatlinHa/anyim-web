@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { userInfoService } from '@/api/user'
-import { refreshToken } from '@/api/common'
+import { refreshToken } from '@/api/user'
 
 // 用户模块
 export const userStore = defineStore(
@@ -22,7 +22,8 @@ export const userStore = defineStore(
       if (at.value.expiretime && now < at.value.expiretime) {
         return at.value.token
       } else {
-        await refreshToken()
+        const res = await refreshToken()
+        setAt(res.data.data.accessToken)
         return at.value.token
       }
     }

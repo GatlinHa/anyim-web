@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 import { getReqBody } from '@/api/common'
 import { userStore } from '@/stores'
+import { CLIENT_TYPE, CLIENT_NAME, CLIENT_VERSION } from '@/const/userConst'
 
 export const userRegisterService = ({ username, password }) => {
   return request.post(
@@ -43,4 +44,13 @@ export const userUploadAvatarService = (obj) => {
 
 export const userQueryService = (obj) => {
   return request.post('/user/query', getReqBody(obj))
+}
+
+export const refreshToken = async () => {
+  console.log('refreshToken')
+  return request.post('/user/refreshToken', {
+    clientType: CLIENT_TYPE,
+    clientName: CLIENT_NAME,
+    clientVersion: CLIENT_VERSION
+  })
 }
