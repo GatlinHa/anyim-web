@@ -157,7 +157,7 @@ const testdata = ref([
           <AddBotton></AddBotton>
         </div>
 
-        <div class="session-list">
+        <div class="session-list my-scrollbar">
           <SessionBox
             v-for="item in sessionList"
             :key="item.sessionId"
@@ -213,7 +213,7 @@ const testdata = ref([
               {{ loadMoreTips }}
             </div>
           </div>
-          <div class="show-box">
+          <div class="show-box my-scrollbar">
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
               <MessageItem

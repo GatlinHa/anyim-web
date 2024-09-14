@@ -1,17 +1,22 @@
 <script setup>
 import '@wangeditor/editor/dist/css/style.css'
-import { onBeforeUnmount, ref, shallowRef } from 'vue'
+import { onMounted, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { Editor } from '@wangeditor/editor-for-vue'
 
 const mode = 'simple'
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef()
+const editorStyleRef = ref()
 
 // 内容 HTML
 const valueHtml = ref('')
 
 const editorConfig = { placeholder: 'Enter发送 / Shift + Enter换行' }
 
+onMounted(() => {
+  // 给组件增加滚动条样式
+  editorStyleRef.value.$el.querySelector('.w-e-scroll').classList.add('my-scrollbar')
+})
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
   const editor = editorRef.value
@@ -27,6 +32,7 @@ const handleCreated = (editor) => {
 <template>
   <div class="editor-wrapper">
     <Editor
+      ref="editorStyleRef"
       class="editor"
       v-model="valueHtml"
       :defaultConfig="editorConfig"
@@ -44,7 +50,6 @@ const handleCreated = (editor) => {
     height: 100%;
     overflow-y: hidden;
     font-size: 14px;
-    border-radius: 8px;
   }
 }
 </style>

@@ -42,20 +42,22 @@ body {
   border-left: 1px solid #e9e9eb;
 }
 
-// 应用到全局
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-  background-color: unset;
-}
+// 滚动条样式
+.my-scrollbar {
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: unset;
+  }
 
-::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-  background-color: unset;
-}
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: unset;
+  }
 
-:hover {
-  ::-webkit-scrollbar-thumb {
-    background-color: #409eff;
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: #409eff;
+    }
   }
 }
