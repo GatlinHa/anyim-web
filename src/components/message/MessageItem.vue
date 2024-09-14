@@ -47,7 +47,7 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div v-if="props.obj.type === msgType.USER_MSG" class="user-message">
+  <div v-if="props.obj.type === msgType.USER_MSG" class="message-item">
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
@@ -101,9 +101,8 @@ const onShowUserCard = () => {
 </template>
 
 <style lang="scss" scoped>
-.user-message {
+.message-item {
   width: 100%;
-  margin-top: 15px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -121,6 +120,8 @@ const onShowUserCard = () => {
 
   .message-container-wrapper {
     width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
 
     .el-container-right {
       width: 100%;
