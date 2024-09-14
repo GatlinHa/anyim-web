@@ -10,8 +10,14 @@ const editorStyleRef = ref()
 
 // 内容 HTML
 const valueHtml = ref('')
-
-const editorConfig = { placeholder: 'Enter发送 / Shift + Enter换行' }
+const content = [
+  {
+    type: 'paragraph',
+    children: [{ text: '', fontSize: '14px' }],
+    lineHeight: 0.5
+  }
+]
+const editorConfig = { placeholder: '' }
 
 onMounted(() => {
   // 给组件增加滚动条样式
@@ -36,6 +42,7 @@ const handleCreated = (editor) => {
       class="editor"
       v-model="valueHtml"
       :defaultConfig="editorConfig"
+      :defaultContent="content"
       :mode="mode"
       @onCreated="handleCreated"
     />
