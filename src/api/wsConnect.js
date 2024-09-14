@@ -143,7 +143,7 @@ class WsConnect {
 
     frames.forEach((frame) => {
       const msg = Msg.decode(frame)
-      console.log('onMessage, msg is: ', msg)
+      // console.log('onMessage, msg is: ', msg)
       switch (msg.header.msgType) {
         case MsgType.HELLO:
           this.handleHello()
@@ -301,7 +301,7 @@ class WsConnect {
       const data = this.encodePayload(payload)
       this.connect.send(data)
       this.heartBeat.healthPoint++
-      console.log('send heart beat, the health point is: ', this.heartBeat.healthPoint)
+      // console.log('send heart beat, the health point is: ', this.heartBeat.healthPoint)
     }
   }
 

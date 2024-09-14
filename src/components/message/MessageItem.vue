@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { msgType } from '@/const/msgConst'
+import { MsgType } from '@/proto/msg'
 import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
@@ -47,7 +47,7 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div v-if="props.obj.type === msgType.USER_MSG" class="message-item">
+  <div v-if="props.obj.type === MsgType.CHAT" class="message-item">
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">

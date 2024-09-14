@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -24,7 +24,7 @@ import MessageItem from '@/components/message/MessageItem.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService } from '@/api/message'
-import { msgType } from '@/const/msgConst'
+import { MsgType } from '@/proto/msg' 
 
 const userData = userStore()
 const settingData = settingStore()
@@ -50,6 +50,8 @@ const loadCursor = computed(() => {
   return isTopLoading.value ? 'auto' : 'pointer'
 })
 
+const msgListRef = ref()
+
 onMounted(async () => {
   curSessionId.value = messageData.lastSessionId
   curSessionType.value = messageData.lastSessionType
@@ -60,6 +62,8 @@ onMounted(async () => {
 
   const res = await msgChatSessionListService()
   sessionList.value = sessionList.value.concat(res.data.data)
+
+  msgListRef.value.scrollTop = msgListRef.value.scrollHeight
 })
 
 const showName = computed(() => {
@@ -86,7 +90,7 @@ const showId = computed(() => {
 
 const getLastMsgTime = (index) => {
     if (index > 0) {
-    return testdata.value[index - 1].msgTime;
+    return msgList.value[index - 1].msgTime;
     } else {
       return null;
     }
@@ -118,33 +122,43 @@ const handleExportData = (data) => {
   messageData.setLastObject(data.objectInfo)
 }
 
+const handleExportContent = (content) => {
+  const msg = {
+    user: userData.user,
+    type: MsgType.CHAT,
+    msgTime: new Date(),
+    content: content
+  }
+  msgList.value.push(msg)
+}
+
 const onLoadMore = () => {
   isTopLoading.value = true
   loadMoreTips.value = ''
 }
 
-const testdata = ref([
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '2' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '3' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '4' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '5' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '6' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '7' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '8' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '9' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '10' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '11' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '12' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '13' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '14' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '15' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '16' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '17' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '18' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: msgType.USER_MSG, msgTime: new Date(), content: '19' },
-  {user: userData.user, type: msgType.USER_MSG, msgTime: new Date(), content: '20' },
+const msgList = ref([
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
+  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
+  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
 ])
+
+watch(msgList, () => {
+  nextTick(() => {
+    msgListRef.value.scrollTo({
+      top: msgListRef.value.scrollHeight,
+      behavior: 'smooth'
+    })
+  })
+}, {deep: true})
 
 </script>
 
@@ -213,11 +227,11 @@ const testdata = ref([
               {{ loadMoreTips }}
             </div>
           </div>
-          <div class="show-box my-scrollbar">
+          <div class="show-box my-scrollbar" ref="msgListRef">
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
               <MessageItem
-                v-for="(item, index) in testdata"
+                v-for="(item, index) in msgList"
                 :key="index"
                 :obj="item"
                 :lastMsgTime="getLastMsgTime(index)"
@@ -272,7 +286,7 @@ const testdata = ref([
                 </div>
               </el-header>
               <el-main class="input-box-main">
-                <InputEditor></InputEditor>
+                <InputEditor @exportContent="handleExportContent"></InputEditor>
               </el-main>
             </el-container>
           </div>

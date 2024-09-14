@@ -7,6 +7,7 @@ const mode = 'simple'
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef()
 const editorStyleRef = ref()
+const emit = defineEmits(['exportContent'])
 
 // 内容 HTML
 const valueHtml = ref('')
@@ -33,10 +34,22 @@ onBeforeUnmount(() => {
 const handleCreated = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
+
+const handleEnter = () => {
+  const editor = editorRef.value
+  const trimContent = editor.getText().trim()
+  if (!trimContent) {
+    ElMessage.warning('请勿发送空内容')
+    valueHtml.value = ''
+  } else {
+    emit('exportContent', trimContent)
+    valueHtml.value = ''
+  }
+}
 </script>
 
 <template>
-  <div class="editor-wrapper">
+  <div class="input-editor">
     <Editor
       ref="editorStyleRef"
       class="editor"
@@ -45,12 +58,13 @@ const handleCreated = (editor) => {
       :defaultContent="content"
       :mode="mode"
       @onCreated="handleCreated"
+      @keyup.enter="handleEnter"
     />
   </div>
 </template>
 
 <style lang="scss">
-.editor-wrapper {
+.input-editor {
   height: 100%;
 
   .editor {
