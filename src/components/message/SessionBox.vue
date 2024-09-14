@@ -128,7 +128,7 @@ const showSomeoneCard = () => {
   <UserCard
     :isShow="isShowUserCard"
     @update:isShow="handleUserCard"
-    :user="props.objectInfo"
+    :account="props.objectInfo.account"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"

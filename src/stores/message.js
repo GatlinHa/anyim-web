@@ -5,29 +5,51 @@ import { ref } from 'vue'
 export const messageStore = defineStore(
   'anyim-message',
   () => {
-    const lastSessionId = ref('')
-    const lastSessionType = ref('')
-    const lastObject = ref({})
+    const last = ref({
+      lastSessionId: '',
+      lastSessionType: '',
+      lastObject: {}
+    })
 
-    const setLastSessionId = (sessionId) => {
-      lastSessionId.value = sessionId
+    const msgRecords = ref({})
+
+    const setLast = ({ sessionId, sessionType, objectInfo }) => {
+      last.value = {
+        lastSessionId: sessionId ? sessionId : last.value.lastSessionId,
+        lastSessionType: sessionType ? sessionType : last.value.lastSessionType,
+        lastObject: objectInfo ? objectInfo : last.value.lastObject
+      }
     }
 
-    const setLastSessionType = (sessionType) => {
-      lastSessionType.value = sessionType
-    }
-
-    const setLastObject = (obj) => {
-      lastObject.value = obj
+    const addMsgRecord = (sessionId, { msgId, fromId, msgType, msgTime, content }) => {
+      if (!msgRecords.value[sessionId]) {
+        // 如果这个sessionId还没有数据，直接赋值成一个元素的数组
+        msgRecords.value[sessionId] = [
+          {
+            msgId: msgId,
+            fromId: fromId,
+            msgType: msgType,
+            msgTime: msgTime,
+            content: content
+          }
+        ]
+      } else {
+        // 如果这个sessionId有数据，在原有数组基础上追加
+        msgRecords.value[sessionId].push({
+          msgId: msgId,
+          fromId: fromId,
+          msgType: msgType,
+          msgTime: msgTime,
+          content: content
+        })
+      }
     }
 
     return {
-      lastSessionId,
-      lastSessionType,
-      lastObject,
-      setLastSessionId,
-      setLastSessionType,
-      setLastObject
+      last,
+      setLast,
+      msgRecords,
+      addMsgRecord
     }
   },
   {

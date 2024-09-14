@@ -1,8 +1,8 @@
-import { Msg, Header, MsgType } from '@/proto/msg'
+import { Msg, Header, MsgType, Body } from '@/proto/msg'
 import { proto } from '@/const/msgConst'
-import { userStore } from '@/stores'
+import { userStore, messageStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
-import { generateSign } from '@/utils/common'
+import { generateSign, combineId } from '@/utils/common'
 
 class WsConnect {
   /**
@@ -143,13 +143,29 @@ class WsConnect {
 
     frames.forEach((frame) => {
       const msg = Msg.decode(frame)
-      // console.log('onMessage, msg is: ', msg)
       switch (msg.header.msgType) {
         case MsgType.HELLO:
           this.handleHello()
           break
         case MsgType.HEART_BEAT:
           this.handleHeartBeat()
+          break
+        case MsgType.CHAT:
+          console.log('receive a CHAT message, it is: ', msg)
+          this.handleChat(msg)
+          break
+        case MsgType.GROUP_CHAT:
+          break
+        case MsgType.READ:
+          break
+        case MsgType.DELIVERED:
+          console.log('receive a DELIVERED message, it is: ', msg)
+          break
+        case MsgType.SENDER_SYNC:
+          break
+        case MsgType.CLOSE_BY_READ_IDLE:
+          break
+        case MsgType.CLOSE_BY_ERROR_MAGIC:
           break
         default:
           console.log('The message type is not supported: ', msg.header.msgType)
@@ -186,6 +202,24 @@ class WsConnect {
 
   handleHeartBeat() {
     if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
+  }
+
+  handleChat(msg) {
+    const msgId = msg.body.msgId
+    const fromId = msg.body.fromId
+    const toId = msg.body.toId
+    const msgType = MsgType.CHAT
+    const msgTime = new Date() // TODO 这个时间应该是要从消息里面解出来的，但是服务端没有定义这个字段
+    const content = msg.body.content
+
+    const msgData = messageStore()
+    msgData.addMsgRecord(combineId(fromId, toId), {
+      msgId: msgId,
+      fromId: fromId,
+      msgType: msgType,
+      msgTime: msgTime,
+      content: content
+    })
   }
 
   /**
@@ -260,13 +294,36 @@ class WsConnect {
   }
 
   /**
-   * 发送msg，封装了重发机制
-   * @param {*} msg
+   * 发送msg，封装了重发机制  TODO 这个函数要按照消息类型拆出来多个
+   * @param {*} toId
+   * @param {*} msgType
+   * @param {*} content
    * @param {*} callback 失败回调
    */
-  sendMsg(msg, callback) {
+  sendMsg(toId, msgType, content, callback) {
+    const header = Header.create({
+      magic: proto.magic,
+      version: proto.version,
+      msgType: msgType,
+      isExtension: false
+    })
+
+    const userData = userStore()
+    const body = Body.create({
+      fromId: userData.user.account,
+      fromClient: userData.clientId,
+      toId: toId,
+      seq: 1,
+      ack: 1,
+      content: content,
+      tempMsgId: 1
+    })
+    const chatMsg = Msg.create({ header: header, body: body })
+    const payload = Msg.encode(chatMsg).finish()
+    const data = this.encodePayload(payload)
+
     if (this.isConnect) {
-      this.connect.send(msg)
+      this.connect.send(data)
     } else {
       if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {
         console.log('resend to0 many times')
@@ -274,7 +331,7 @@ class WsConnect {
         callback()
       } else {
         setTimeout(() => {
-          this.sendMsg(msg, callback)
+          this.sendMsg(data, callback)
         }, this.reSend.interval)
         this.reSend.curReSendTimes++
       }

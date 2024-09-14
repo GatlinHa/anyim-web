@@ -24,7 +24,8 @@ import MessageItem from '@/components/message/MessageItem.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService } from '@/api/message'
-import { MsgType } from '@/proto/msg' 
+import { MsgType } from '@/proto/msg'
+import wsConnect from '@/api/wsConnect'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -42,6 +43,15 @@ const curSessionId = ref('')
 const curSessionType = ref('')
 const curObject = ref({})
 const sessionList = ref([])
+const sessionRecords = computed(() => {
+  const records = messageData.msgRecords[curSessionId.value]
+  if (records) {
+    return records.sort((a, b) => a.msgId - b.msgId)
+  }
+  else {
+    return []
+  }
+})
 
 const isShowTopLoading = ref(true)
 const isTopLoading = ref(false)
@@ -50,12 +60,12 @@ const loadCursor = computed(() => {
   return isTopLoading.value ? 'auto' : 'pointer'
 })
 
-const msgListRef = ref()
+const msgListDiv = ref()
 
 onMounted(async () => {
-  curSessionId.value = messageData.lastSessionId
-  curSessionType.value = messageData.lastSessionType
-  curObject.value = messageData.lastObject
+  curSessionId.value = messageData.last.lastSessionId
+  curSessionType.value = messageData.last.lastSessionType
+  curObject.value = messageData.last.lastObject
 
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 200
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 200
@@ -63,7 +73,7 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   sessionList.value = sessionList.value.concat(res.data.data)
 
-  msgListRef.value.scrollTop = msgListRef.value.scrollHeight
+  msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
 })
 
 const showName = computed(() => {
@@ -90,7 +100,7 @@ const showId = computed(() => {
 
 const getLastMsgTime = (index) => {
     if (index > 0) {
-    return msgList.value[index - 1].msgTime;
+    return sessionRecords.value[index - 1].msgTime;
     } else {
       return null;
     }
@@ -117,19 +127,22 @@ const handleExportData = (data) => {
   curSessionType.value = data.sessionType
   curObject.value = data.objectInfo
 
-  messageData.setLastSessionId(data.sessionId)
-  messageData.setLastSessionType(data.sessionType)
-  messageData.setLastObject(data.objectInfo)
+  messageData.setLast({
+    sessionId: data.sessionId,
+    sessionType: data.sessionType,
+    objectInfo: data.objectInfo
+  })
 }
-
+// 发送事件要做的事情
 const handleExportContent = (content) => {
-  const msg = {
-    user: userData.user,
-    type: MsgType.CHAT,
+  wsConnect.sendMsg(curObject.value.account, MsgType.CHAT, content, () => {})
+  messageData.addMsgRecord(curSessionId.value, {
+    msgId: 0,  // TODO 这个msgid在发出去的时候没有，收到“已发送”消息才有的，根据tempMsgId反填的
+    fromId: userData.user.account,
+    msgType: MsgType.CHAT, // TODO 这里应该是读取sessionType，但是sessionType没有按照MsgType写
     msgTime: new Date(),
     content: content
-  }
-  msgList.value.push(msg)
+  })
 }
 
 const onLoadMore = () => {
@@ -137,24 +150,12 @@ const onLoadMore = () => {
   loadMoreTips.value = ''
 }
 
-const msgList = ref([
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
-  {user: {account:'a00001', nickName: '甘道夫', avatarThumb: ''}, type: MsgType.CHAT, msgTime: new Date(), content: '1' },
-  {user: userData.user, type: MsgType.CHAT, msgTime: new Date(), content: '2' },
-])
 
-watch(msgList, () => {
+
+watch(() => messageData.msgRecords[curSessionId.value], () => {
   nextTick(() => {
-    msgListRef.value.scrollTo({
-      top: msgListRef.value.scrollHeight,
+    msgListDiv.value.scrollTo({
+      top: msgListDiv.value.scrollHeight,
       behavior: 'smooth'
     })
   })
@@ -227,13 +228,14 @@ watch(msgList, () => {
               {{ loadMoreTips }}
             </div>
           </div>
-          <div class="show-box my-scrollbar" ref="msgListRef">
+          <div class="show-box my-scrollbar" ref="msgListDiv">
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
               <MessageItem
-                v-for="(item, index) in msgList"
+                v-for="(item, index) in sessionRecords"
                 :key="index"
-                :obj="item"
+                :msg="item"
+                :obj="curObject"
                 :lastMsgTime="getLastMsgTime(index)"
               ></MessageItem>
             </div>

@@ -5,14 +5,14 @@ import avatar from '@/assets/default_avatar.png'
 import { userQueryService } from '@/api/user'
 import { userStore } from '@/stores'
 
-const props = defineProps(['isShow', 'user'])
+const props = defineProps(['isShow', 'account'])
 const emit = defineEmits(['update:isShow'])
 
 const userData = userStore()
 const isLoading = ref(false)
 const userCardRef = ref()
 const showData = ref({
-  account: props.user.account,
+  account: props.account,
   nickName: '',
   signature: '',
   avatarThumb: '',
@@ -25,7 +25,7 @@ const showData = ref({
 })
 
 const isSelf = computed(() => {
-  return userData.user.account === props.user.account
+  return userData.user.account === props.account
 })
 
 const preventClose = (event) => {
@@ -68,7 +68,7 @@ onUnmounted(() => {
 onUpdated(async () => {
   if (props.isShow) {
     isLoading.value = true
-    userQueryService({ account: props.user.account })
+    userQueryService({ account: props.account })
       .then((res) => {
         showData.value.nickName = res.data.data.nickName
         showData.value.signature = res.data.data.signature

@@ -5,18 +5,29 @@ import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
-const props = defineProps(['obj', 'lastMsgTime'])
+const props = defineProps(['msg', 'obj', 'lastMsgTime'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
 
 const isSelf = computed(() => {
-  return userData.user.account === props.obj.user.account
+  return userData.user.account === props.msg.fromId
+})
+
+const account = computed(() => {
+  return isSelf.value ? userData.user.account : props.obj.account
+})
+
+const nickName = computed(() => {
+  return isSelf.value ? userData.user.nickName : props.obj.nickName
+})
+
+const avatarThumb = computed(() => {
+  return isSelf.value ? userData.user.avatarThumb : props.obj.avatarThumb
 })
 
 const sysShowTime = computed(() => {
-  const testTime = new Date(props.obj.msgTime - 0 * 24 * 60 * 60 * 1000)
-  return messageSysShowTime(testTime)
+  return messageSysShowTime(new Date(props.msg.msgTime))
 })
 
 // 判断是否是连续的会话，与上个会话时间差小于1分钟
@@ -25,7 +36,7 @@ const isContinuousSession = computed(() => {
     return false
   }
 
-  const diff = props.obj.msgTime.getTime() - props.lastMsgTime.getTime()
+  const diff = new Date(props.msg.msgTime).getTime() - new Date(props.lastMsgTime).getTime()
   if (diff < 1 * 60 * 1000) {
     return true
   } else {
@@ -34,7 +45,7 @@ const isContinuousSession = computed(() => {
 })
 
 const msgTime = computed(() => {
-  return messageBoxShowTime(props.obj.msgTime)
+  return messageBoxShowTime(props.msg.msgTime)
 })
 
 const handleUserCard = (flag) => {
@@ -47,7 +58,7 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div v-if="props.obj.type === MsgType.CHAT" class="message-item">
+  <div v-if="props.msg.msgType === MsgType.CHAT" class="message-item">
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
@@ -56,15 +67,15 @@ const onShowUserCard = () => {
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
               <div class="div-blank"></div>
-              <div class="div-content">{{ props.obj.content }}</div>
+              <div class="div-content">{{ props.msg.content }}</div>
             </el-main>
           </el-container>
         </el-main>
         <el-aside class="el-aside-right">
           <AvatarIcon
-            :showId="props.obj.user.account"
-            :showName="props.obj.user.nickName"
-            :showAvatarThumb="props.obj.user.avatarThumb"
+            :showId="account"
+            :showName="nickName"
+            :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
             :size="30"
           ></AvatarIcon>
@@ -74,9 +85,9 @@ const onShowUserCard = () => {
       <el-container class="el-container-left" v-else>
         <el-aside class="el-aside-left">
           <AvatarIcon
-            :showId="props.obj.user.account"
-            :showName="props.obj.user.nickName"
-            :showAvatarThumb="props.obj.user.avatarThumb"
+            :showId="account"
+            :showName="nickName"
+            :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
             :size="30"
           ></AvatarIcon>
@@ -85,7 +96,7 @@ const onShowUserCard = () => {
           <el-container class="message-content-wrapper">
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
-              <div class="div-content">{{ props.obj.content }}</div>
+              <div class="div-content">{{ props.msg.content }}</div>
               <div class="div-blank"></div>
             </el-main>
           </el-container>
@@ -93,11 +104,7 @@ const onShowUserCard = () => {
       </el-container>
     </div>
   </div>
-  <UserCard
-    :isShow="isShowUserCard"
-    :user="props.obj.user"
-    @update:isShow="handleUserCard"
-  ></UserCard>
+  <UserCard :isShow="isShowUserCard" :account="account" @update:isShow="handleUserCard"></UserCard>
 </template>
 
 <style lang="scss" scoped>

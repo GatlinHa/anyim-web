@@ -149,3 +149,11 @@ export const generateSign = (key, content) => {
     return null
   }
 }
+
+export const combineId = (fromId, toId) => {
+  if (fromId < toId) {
+    return fromId + '@' + toId
+  } else {
+    return toId + '@' + fromId
+  }
+}
