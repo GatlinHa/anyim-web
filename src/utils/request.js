@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { userStore } from '@/stores'
 import router from '@/router'
-import CryptoJS from 'crypto-js'
+import { generateSign } from './common'
 import { v4 as uuidv4 } from 'uuid'
 
 const baseURL = '/api' //配合vite.config.js中的代理配置解决跨域问题
@@ -11,15 +11,6 @@ const instance = axios.create({
   timeout: 3000
 })
 
-const generateSign = (key, content) => {
-  try {
-    const hash = CryptoJS.HmacSHA256(content, key)
-    return CryptoJS.enc.Base64.stringify(hash)
-  } catch (e) {
-    return null
-  }
-}
-
 // 请求拦截器
 instance.interceptors.request.use(
   async (config) => {
@@ -27,19 +18,19 @@ instance.interceptors.request.use(
     if (config.url === '/user/refreshToken' && userData.rt.token !== '') {
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)
-      const sigh = generateSign(userData.rt.secret, `${traceId}${timestamp}`)
+      const sign = generateSign(userData.rt.secret, `${traceId}${timestamp}`)
       config.headers.traceId = traceId
       config.headers.timestamp = timestamp
-      config.headers.sign = sigh
+      config.headers.sign = sign
       config.headers.refreshToken = userData.rt.token
     } else if (userData.at.token !== '') {
       const token = await userData.getAccessToken()
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)
-      const sigh = generateSign(userData.at.secret, `${traceId}${timestamp}`)
+      const sign = generateSign(userData.at.secret, `${traceId}${timestamp}`)
       config.headers.traceId = traceId
       config.headers.timestamp = timestamp
-      config.headers.sign = sigh
+      config.headers.sign = sign
       config.headers.accessToken = token
     }
     return config

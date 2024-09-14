@@ -1,6 +1,8 @@
 import { Msg, Header, MsgType } from '@/proto/msg'
 import { proto } from '@/const/msgConst'
 import { userStore } from '@/stores'
+import { v4 as uuidv4 } from 'uuid'
+import { generateSign } from '@/utils/common'
 
 class WsConnect {
   /**
@@ -17,11 +19,6 @@ class WsConnect {
     }
     return WsConnect.instance
   }
-
-  /**
-   * 用户数据
-   */
-  userData
 
   /**
    * WebSockt连接对象
@@ -80,7 +77,6 @@ class WsConnect {
    * 构造函数
    */
   constructor() {
-    this.userData = userStore()
     this.buffer = new Uint8Array()
     this.isConnect = false
 
@@ -101,8 +97,12 @@ class WsConnect {
       return
     }
     console.log('create websocket')
-    const token = await this.userData.getAccessToken()
-    this.url = `${import.meta.env.VITE_WS_URL}?token=${token}`
+    const userData = userStore()
+    const token = await userData.getAccessToken()
+    const traceId = uuidv4()
+    const timestamp = Math.floor(new Date().getTime() / 1000)
+    const sign = generateSign(userData.at.secret, `${traceId}${timestamp}`)
+    this.url = `${import.meta.env.VITE_WS_URL}?traceId=${traceId}&timestamp=${timestamp}&sign=${sign}&token=${token}`
     this.connect = new WebSocket(this.url)
     this.connect.onmessage = this.onMessage.bind(this)
     this.connect.onclose = this.onClose.bind(this)
