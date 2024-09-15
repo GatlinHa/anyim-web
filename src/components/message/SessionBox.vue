@@ -6,6 +6,7 @@ import UserCard from '../user/UserCard.vue'
 import GroupCard from '../group/GroupCard.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
+import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['sessionId', 'sessionType', 'objectInfo'])
 const emit = defineEmits(['exportData'])
@@ -24,9 +25,9 @@ const sessionInfo = computed(() => {
 
 const showName = computed(() => {
   switch (props.sessionType) {
-    case 'chat':
+    case MsgType.CHAT:
       return props.objectInfo.nickName
-    case 'groupchat':
+    case MsgType.GROUP_CHAT:
       return props.objectInfo.groupName
     default:
       return ''
@@ -35,9 +36,9 @@ const showName = computed(() => {
 
 const showId = computed(() => {
   switch (props.sessionType) {
-    case 'chat':
+    case MsgType.CHAT:
       return props.objectInfo.account
-    case 'groupchat':
+    case MsgType.GROUP_CHAT:
       return props.objectInfo.groupId
     default:
       return ''
@@ -46,8 +47,8 @@ const showId = computed(() => {
 
 const showAvatarThumb = computed(() => {
   switch (props.sessionType) {
-    case 'chat':
-    case 'groupchat':
+    case MsgType.CHAT:
+    case MsgType.GROUP_CHAT:
       return props.objectInfo.avatarThumb
     default:
       return ''
@@ -68,10 +69,10 @@ const handleGroupCard = (flag) => {
 }
 const showSomeoneCard = () => {
   switch (props.sessionType) {
-    case 'chat':
+    case MsgType.CHAT:
       isShowUserCard.value = true
       break
-    case 'groupchat':
+    case MsgType.GROUP_CHAT:
       isShowGroupCard.value = true
       break
     default:

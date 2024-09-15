@@ -78,9 +78,9 @@ onMounted(async () => {
 
 const showName = computed(() => {
   switch (curSessionType.value) {
-    case 'chat':
+    case MsgType.CHAT:
       return curObject.value.nickName
-    case 'groupchat':
+    case MsgType.GROUP_CHAT:
       return curObject.value.groupName
     default:
       return ''
@@ -89,9 +89,9 @@ const showName = computed(() => {
 
 const showId = computed(() => {
   switch (curSessionType.value) {
-    case 'chat':
+    case MsgType.CHAT:
       return curObject.value.account
-    case 'groupchat':
+    case MsgType.GROUP_CHAT:
       return curObject.value.groupId
     default:
       return ''
@@ -135,6 +135,7 @@ const handleExportData = (data) => {
 }
 // 发送事件要做的事情
 const handleExportContent = (content) => {
+  // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(curObject.value.account, MsgType.CHAT, content, (deliveredMsg) => {
     messageData.addMsgRecord(curSessionId.value, {
       msgId: deliveredMsg.body.msgId,  
@@ -207,7 +208,7 @@ watch(() => messageData.msgRecords[curSessionId.value], () => {
         <el-header class="header bdr-b">
           <div class="show-name-id">
             <span class="show-name">{{ showName }}</span>
-            <span v-if="curSessionType === 'chat'" class="show-id">{{ showId }}</span>
+            <span v-if="curSessionType === MsgType.CHAT" class="show-id">{{ showId }}</span>
           </div>
 
           <div class="action-set">
