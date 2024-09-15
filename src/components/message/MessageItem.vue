@@ -211,7 +211,7 @@ const onShowUserCard = () => {
               max-width: 500px;
               padding: 5px;
               font-size: 14px;
-              background-color: #c6e2ff;
+              background-color: #dedfe0;
               border-radius: 10px;
               border-top-left-radius: 0;
               user-select: text;
