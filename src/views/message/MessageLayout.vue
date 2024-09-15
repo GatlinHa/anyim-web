@@ -135,14 +135,16 @@ const handleExportData = (data) => {
 }
 // 发送事件要做的事情
 const handleExportContent = (content) => {
-  wsConnect.sendMsg(curObject.value.account, MsgType.CHAT, content, () => {})
-  messageData.addMsgRecord(curSessionId.value, {
-    msgId: 0,  // TODO 这个msgid在发出去的时候没有，收到“已发送”消息才有的，根据tempMsgId反填的
-    fromId: userData.user.account,
-    msgType: MsgType.CHAT, // TODO 这里应该是读取sessionType，但是sessionType没有按照MsgType写
-    msgTime: new Date(),
-    content: content
+  wsConnect.sendMsg(curObject.value.account, MsgType.CHAT, content, (deliveredMsg) => {
+    messageData.addMsgRecord(curSessionId.value, {
+      msgId: deliveredMsg.body.msgId,  
+      fromId: userData.user.account,
+      msgType: MsgType.CHAT, // TODO 这里应该是读取sessionType，但是sessionType没有按照MsgType写
+      msgTime: new Date(),
+      content: content
+    })
   })
+
 }
 
 const onLoadMore = () => {

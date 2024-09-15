@@ -74,6 +74,13 @@ class WsConnect {
   }
 
   /**
+   * 绑定的业务事件
+   */
+  events = {
+    delivered: () => {}
+  }
+
+  /**
    * 构造函数
    */
   constructor() {
@@ -160,6 +167,7 @@ class WsConnect {
           break
         case MsgType.DELIVERED:
           console.log('receive a DELIVERED message, it is: ', msg)
+          this.handleDelivered(msg)
           break
         case MsgType.SENDER_SYNC:
           break
@@ -220,6 +228,10 @@ class WsConnect {
       msgTime: msgTime,
       content: content
     })
+  }
+
+  handleDelivered(msg) {
+    this.events.delivered(msg)
   }
 
   /**
@@ -294,11 +306,20 @@ class WsConnect {
   }
 
   /**
+   * 绑定事件
+   * @param {*} event
+   * @param {*} callback
+   */
+  bindEvent(event, callback) {
+    this.events[event] = callback
+  }
+
+  /**
    * 发送msg，封装了重发机制  TODO 这个函数要按照消息类型拆出来多个
    * @param {*} toId
    * @param {*} msgType
    * @param {*} content
-   * @param {*} callback 失败回调
+   * @param {*} callback
    */
   sendMsg(toId, msgType, content, callback) {
     const header = Header.create({
@@ -323,12 +344,13 @@ class WsConnect {
     const data = this.encodePayload(payload)
 
     if (this.isConnect) {
+      this.bindEvent('delivered', callback)
       this.connect.send(data)
     } else {
       if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {
-        console.log('resend to0 many times')
+        console.log('resend too many times')
         this.reSend.curReSendTimes = 0
-        callback()
+        // TODO 应该反馈到业务层给提示
       } else {
         setTimeout(() => {
           this.sendMsg(data, callback)
