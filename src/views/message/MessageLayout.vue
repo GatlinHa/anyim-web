@@ -116,6 +116,7 @@ const onAsideDragUpdate = ({ width }) => {
 
 const onInputBoxDragUpdate = ({ height }) => {
   inputBoxHeight.value = height
+  msgListReachBottom()
   settingData.setInputBoxDrag({
     ...settingData.inputBoxDrag,
     [userData.user.account]: height
@@ -153,16 +154,18 @@ const onLoadMore = () => {
   loadMoreTips.value = ''
 }
 
-
-
 watch(() => messageData.msgRecords[curSessionId.value], () => {
+  msgListReachBottom()
+}, {deep: true})
+
+const msgListReachBottom = () => {
   nextTick(() => {
     msgListDiv.value.scrollTo({
       top: msgListDiv.value.scrollHeight,
       behavior: 'smooth'
     })
   })
-}, {deep: true})
+}
 
 </script>
 
