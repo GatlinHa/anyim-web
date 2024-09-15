@@ -1,8 +1,8 @@
-import { Msg, Header, MsgType, Body } from '@/proto/msg'
-import { proto } from '@/const/msgConst'
+import { Msg, MsgType } from '@/proto/msg'
 import { userStore, messageStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 import { generateSign, combineId } from '@/utils/common'
+import { chatConstructor, heartBeatConstructor, helloConstructor } from './constructor'
 
 class WsConnect {
   /**
@@ -74,10 +74,19 @@ class WsConnect {
   }
 
   /**
-   * 绑定的业务事件
+   * 绑定事件
    */
   events = {
     delivered: () => {}
+  }
+
+  /**
+   * 业务处理器
+   */
+  dataConstructor = {
+    [MsgType.HELLO]: helloConstructor,
+    [MsgType.HEART_BEAT]: heartBeatConstructor,
+    [MsgType.CHAT]: chatConstructor
   }
 
   /**
@@ -132,16 +141,7 @@ class WsConnect {
 
   onOpen(evt) {
     console.log('onOpen', evt)
-    const header = Header.create({
-      magic: proto.magic,
-      version: proto.version,
-      msgType: MsgType.HELLO,
-      isExtension: false
-    })
-    const hello = Msg.create({ header: header })
-    const payload = Msg.encode(hello).finish()
-    const data = this.encodePayload(payload)
-    this.connect.send(data)
+    this.connect.send(helloConstructor())
   }
 
   async onMessage(evt) {
@@ -217,7 +217,7 @@ class WsConnect {
     const fromId = msg.body.fromId
     const toId = msg.body.toId
     const msgType = MsgType.CHAT
-    const msgTime = new Date() // TODO 这个时间应该是要从消息里面解出来的，但是服务端没有定义这个字段
+    const msgTime = new Date()
     const content = msg.body.content
 
     const msgData = messageStore()
@@ -232,25 +232,6 @@ class WsConnect {
 
   handleDelivered(msg) {
     this.events.delivered(msg)
-  }
-
-  /**
-   * 发送前对长度编码，配合服务端解决半包黏包问题
-   * @param {*} payload
-   * @returns
-   */
-  encodePayload(payload) {
-    let num = payload.length
-    let lenEncode = []
-    while (num > 0) {
-      let byte = num & 0x7f
-      num >>= 7
-      if (num > 0) {
-        byte |= 0x80
-      }
-      lenEncode.push(byte)
-    }
-    return Uint8Array.of(...lenEncode, ...payload)
   }
 
   /**
@@ -315,34 +296,21 @@ class WsConnect {
   }
 
   /**
-   * 发送msg，封装了重发机制  TODO 这个函数要按照消息类型拆出来多个
-   * @param {*} toId
+   * 发送msg，封装了重发机制
+   * @param {*} remoteId 对方id或者群id
    * @param {*} msgType
    * @param {*} content
    * @param {*} callback
    */
-  sendMsg(toId, msgType, content, callback) {
-    const header = Header.create({
-      magic: proto.magic,
-      version: proto.version,
-      msgType: msgType,
-      isExtension: false
-    })
+  sendMsg(remoteId, msgType, content, callback) {
+    const data = this.dataConstructor[msgType](remoteId, content)
+    this.sendAgent(data, callback)
+  }
 
-    const userData = userStore()
-    const body = Body.create({
-      fromId: userData.user.account,
-      fromClient: userData.clientId,
-      toId: toId,
-      seq: 1,
-      ack: 1,
-      content: content,
-      tempMsgId: 1
-    })
-    const chatMsg = Msg.create({ header: header, body: body })
-    const payload = Msg.encode(chatMsg).finish()
-    const data = this.encodePayload(payload)
-
+  /**
+   * 发送代理，封装了重发机制
+   */
+  sendAgent(data, callback) {
     if (this.isConnect) {
       this.bindEvent('delivered', callback)
       this.connect.send(data)
@@ -353,7 +321,7 @@ class WsConnect {
         // TODO 应该反馈到业务层给提示
       } else {
         setTimeout(() => {
-          this.sendMsg(data, callback)
+          this.sendAgent(data, callback)
         }, this.reSend.interval)
         this.reSend.curReSendTimes++
       }
@@ -369,18 +337,8 @@ class WsConnect {
       this.isConnect = false
       this.reconnect.start()
     } else {
-      const header = Header.create({
-        magic: proto.magic,
-        version: proto.version,
-        msgType: MsgType.HEART_BEAT,
-        isExtension: false
-      })
-      const heartBeat = Msg.create({ header: header })
-      const payload = Msg.encode(heartBeat).finish()
-      const data = this.encodePayload(payload)
-      this.connect.send(data)
+      this.connect.send(heartBeatConstructor())
       this.heartBeat.healthPoint++
-      // console.log('send heart beat, the health point is: ', this.heartBeat.healthPoint)
     }
   }
 

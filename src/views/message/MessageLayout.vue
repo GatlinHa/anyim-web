@@ -25,7 +25,7 @@ import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
-import wsConnect from '@/api/wsConnect'
+import wsConnect from '@/js/websocket/wsConnect'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -136,11 +136,11 @@ const handleExportData = (data) => {
 // 发送事件要做的事情
 const handleExportContent = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
-  wsConnect.sendMsg(curObject.value.account, MsgType.CHAT, content, (deliveredMsg) => {
+  wsConnect.sendMsg(showId.value, curSessionType.value, content, (deliveredMsg) => {
     messageData.addMsgRecord(curSessionId.value, {
       msgId: deliveredMsg.body.msgId,  
       fromId: userData.user.account,
-      msgType: MsgType.CHAT, // TODO 这里应该是读取sessionType，但是sessionType没有按照MsgType写
+      msgType: curSessionType.value,
       msgTime: new Date(),
       content: content
     })

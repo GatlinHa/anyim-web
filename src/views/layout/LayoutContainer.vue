@@ -13,7 +13,7 @@ import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
 import { userLogoutService } from '@/api/user'
-import wsConnect from '@/api/wsConnect'
+import wsConnect from '@/js/websocket/wsConnect'
 
 const myCardDialog = ref()
 const myAvatar = ref()
