@@ -8,57 +8,61 @@ import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 
-const props = defineProps(['sessionId', 'sessionType', 'objectInfo'])
-const emit = defineEmits(['exportData'])
-const isPinToTop = ref(false)
-const isMute = ref(false)
+const props = defineProps(['sesionInfo', 'choosedSessionId'])
+const emit = defineEmits(['beChoosed', 'switchTag'])
+const top = ref(props.sesionInfo.top)
+const muted = ref(props.sesionInfo.muted)
 const isShowUserCard = ref(false)
 const isShowGroupCard = ref(false)
 
-const sessionInfo = computed(() => {
-  return {
-    sessionId: props.sessionId,
-    sessionType: props.sessionType,
-    objectInfo: props.objectInfo
-  }
-})
+const exportSession = {
+  sessionId: props.sesionInfo.sessionId,
+  sessionType: props.sesionInfo.sessionType,
+  objectInfo: props.sesionInfo.objectInfo
+}
 
 const showName = computed(() => {
-  switch (props.sessionType) {
+  switch (props.sesionInfo.sessionType) {
     case MsgType.CHAT:
-      return props.objectInfo.nickName
+      return props.sesionInfo.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return props.objectInfo.groupName
+      return props.sesionInfo.objectInfo.groupName
     default:
       return ''
   }
 })
 
 const showId = computed(() => {
-  switch (props.sessionType) {
+  switch (props.sesionInfo.sessionType) {
     case MsgType.CHAT:
-      return props.objectInfo.account
+      return props.sesionInfo.objectInfo.account
     case MsgType.GROUP_CHAT:
-      return props.objectInfo.groupId
+      return props.sesionInfo.objectInfo.groupId
     default:
       return ''
   }
 })
 
 const showAvatarThumb = computed(() => {
-  switch (props.sessionType) {
+  switch (props.sesionInfo.sessionType) {
     case MsgType.CHAT:
     case MsgType.GROUP_CHAT:
-      return props.objectInfo.avatarThumb
+      return props.sesionInfo.objectInfo.avatarThumb
     default:
       return ''
   }
 })
 
 const showTime = computed(() => {
-  const now = new Date()
-  const oneDayAgo = new Date(now.getTime() - 0 * 24 * 60 * 60 * 1000)
-  return sessionShowTime(oneDayAgo)
+  return sessionShowTime(props.sesionInfo.lastMsgTime)
+})
+
+const isShowDraft = computed(() => {
+  return props.sesionInfo.sessionId !== props.choosedSessionId && props.sesionInfo.draft
+})
+
+const isShowUnreadCount = computed(() => {
+  return props.sesionInfo.sessionId !== props.choosedSessionId && props.sesionInfo.unreadCount > 0
 })
 
 const handleUserCard = (flag) => {
@@ -68,7 +72,7 @@ const handleGroupCard = (flag) => {
   isShowGroupCard.value = flag
 }
 const showSomeoneCard = () => {
-  switch (props.sessionType) {
+  switch (props.sesionInfo.sessionType) {
     case MsgType.CHAT:
       isShowUserCard.value = true
       break
@@ -78,6 +82,19 @@ const showSomeoneCard = () => {
     default:
       break
   }
+}
+
+let timer
+const switchTag = (func) => {
+  func()
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    emit('switchTag', {
+      sessionId: props.sesionInfo.sessionId,
+      top: top.value,
+      muted: muted.value
+    })
+  }, 1000)
 }
 </script>
 
@@ -89,16 +106,17 @@ const showSomeoneCard = () => {
       :showAvatarThumb="showAvatarThumb"
       @click="showSomeoneCard"
     ></AvatarIcon>
-    <div class="content-box" @click="emit('exportData', sessionInfo)">
+    <div v-if="isShowUnreadCount" class="unread-tips"></div>
+    <div class="content-box" @click="emit('beChoosed', exportSession)">
       <div class="header">
         <div class="title">
           <span class="showName">{{ showName || showId }}</span>
-          <span v-if="props.objectInfo.account" class="showAccount">
-            {{ props.objectInfo.account }}
+          <span v-if="props.sesionInfo.objectInfo.account" class="showAccount">
+            {{ props.sesionInfo.objectInfo.account }}
           </span>
-          <SessionTag :tagType="props.sessionType"></SessionTag>
-          <SessionTag v-if="isPinToTop" tagType="pinToTop"></SessionTag>
-          <SessionTag v-if="isMute" tagType="mute"></SessionTag>
+          <SessionTag :tagType="props.sesionInfo.sessionType"></SessionTag>
+          <SessionTag v-if="top" tagType="top"></SessionTag>
+          <SessionTag v-if="muted" tagType="mute"></SessionTag>
         </div>
         <div class="datetime">
           <span>{{ showTime }}</span>
@@ -106,20 +124,33 @@ const showSomeoneCard = () => {
       </div>
       <div class="body">
         <div class="content">
-          <span class="draft">[草稿]</span>
-          <span class="detail">你吃饭了吗？</span>
+          <span v-if="isShowUnreadCount" class="unread-count"
+            >[{{ props.sesionInfo.unreadCount }}条]</span
+          >
+          <span v-if="isShowDraft" class="draft">[草稿]</span>
+          <span class="detail">{{
+            props.sesionInfo.draft ? props.sesionInfo.draft : props.sesionInfo.lastMsgContent
+          }}</span>
         </div>
         <div class="action">
           <el-button
-            class="action-button pin-to-top"
-            :icon="isPinToTop ? Bottom : Top"
-            @click="isPinToTop = !isPinToTop"
+            class="action-button"
+            :icon="top ? Bottom : Top"
+            @click="
+              switchTag(() => {
+                top = !top
+              })
+            "
             circle
           />
           <el-button
-            class="action-button no-not-disturb"
-            :icon="isMute ? Bell : MuteNotification"
-            @click="isMute = !isMute"
+            class="action-button"
+            :icon="muted ? Bell : MuteNotification"
+            @click="
+              switchTag(() => {
+                muted = !muted
+              })
+            "
             circle
           />
         </div>
@@ -129,12 +160,12 @@ const showSomeoneCard = () => {
   <UserCard
     :isShow="isShowUserCard"
     @update:isShow="handleUserCard"
-    :account="props.objectInfo.account"
+    :account="props.sesionInfo.objectInfo.account"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
     @update:isShow="handleGroupCard"
-    :group="props.objectInfo"
+    :group="props.sesionInfo.objectInfo"
   ></GroupCard>
 </template>
 
@@ -147,11 +178,21 @@ const showSomeoneCard = () => {
   display: flex;
   align-items: center;
   user-select: none;
-  // cursor: pointer;
+  position: relative;
 
   &:hover {
     background-color: #c6e2ff;
     border-radius: 6px;
+  }
+
+  .unread-tips {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
+    position: absolute;
+    top: 5px;
+    left: 40px;
   }
 
   .content-box {
@@ -182,6 +223,7 @@ const showSomeoneCard = () => {
           white-space: nowrap; /*不换行*/
           overflow: hidden; /*超出的文本隐藏*/
           text-overflow: ellipsis; /* 溢出用省略号*/
+          flex-shrink: 0;
         }
 
         .showAccount {
@@ -205,13 +247,18 @@ const showSomeoneCard = () => {
     .body {
       height: 20px;
       display: flex;
-      align-items: center;
+      justify-content: space-between;
 
       .content {
         font-size: 12px;
         display: flex;
         flex: 1 1;
         overflow: hidden;
+
+        .unread-count {
+          color: gray;
+          flex-shrink: 0;
+        }
 
         .draft {
           color: red;
@@ -227,6 +274,8 @@ const showSomeoneCard = () => {
       }
 
       .action {
+        display: flex;
+
         .action-button {
           width: 20px;
           height: 20px;

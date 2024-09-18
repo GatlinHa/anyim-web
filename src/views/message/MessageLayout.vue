@@ -23,7 +23,7 @@ import InputEditor from '@/components/message/InputEditor.vue'
 import MessageItem from '@/components/message/MessageItem.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import { msgChatSessionListService } from '@/api/message'
+import { msgChatSessionListService, msgUpdateSessionService, msgChatPullMsgService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 
@@ -39,19 +39,10 @@ const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 150
 const inputBoxHeightMax = 400
 
-const curSessionId = ref('')
-const curSessionType = ref('')
-const curObject = ref({})
-const sessionList = ref([])
-const sessionRecords = computed(() => {
-  const records = messageData.msgRecords[curSessionId.value]
-  if (records) {
-    return records.sort((a, b) => a.msgId - b.msgId)
-  }
-  else {
-    return []
-  }
-})
+const sessionList = ref({})
+const choosedSessionId = ref()
+const choosedSession = ref({})
+const msgRecords = ref([])
 
 const isShowTopLoading = ref(true)
 const isTopLoading = ref(false)
@@ -63,36 +54,48 @@ const loadCursor = computed(() => {
 const msgListDiv = ref()
 
 onMounted(async () => {
-  curSessionId.value = messageData.last.lastSessionId
-  curSessionType.value = messageData.last.lastSessionType
-  curObject.value = messageData.last.lastObject
-
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 200
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 200
 
   const res = await msgChatSessionListService()
-  sessionList.value = sessionList.value.concat(res.data.data)
+  messageData.setSessionList(res.data.data) //入缓存
+  sessionList.value = messageData.sessionList
+  choosedSessionId.value = messageData.lastSessionId
 
-  msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
+  if (msgListDiv.value) {
+    // 首次进到消息页面，不会有有值
+    msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
+  }
+})
+
+// 把sessionList转成数组，并按照lastMsgTime排序
+const sessionListSorted = computed(() => {
+  if (!sessionList.value) {
+    return []
+  }
+  else {
+    let sessionArr = Object.values(sessionList.value)
+    return sessionArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime)
+  }
 })
 
 const showName = computed(() => {
-  switch (curSessionType.value) {
+  switch (choosedSession.value.sessionType) {
     case MsgType.CHAT:
-      return curObject.value.nickName
+      return choosedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return curObject.value.groupName
+      return choosedSession.value.objectInfo.groupName
     default:
       return ''
   }
 })
 
 const showId = computed(() => {
-  switch (curSessionType.value) {
+  switch (choosedSession.value.sessionType) {
     case MsgType.CHAT:
-      return curObject.value.account
+      return choosedSession.value.objectInfo.account
     case MsgType.GROUP_CHAT:
-      return curObject.value.groupId
+      return choosedSession.value.objectInfo.groupId
     default:
       return ''
   }
@@ -100,7 +103,7 @@ const showId = computed(() => {
 
 const getLastMsgTime = (index) => {
     if (index > 0) {
-    return sessionRecords.value[index - 1].msgTime;
+    return msgRecords.value[index - 1].msgTime;
     } else {
       return null;
     }
@@ -123,30 +126,26 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
-const handleExportData = (data) => {
-  curSessionId.value = data.sessionId
-  curSessionType.value = data.sessionType
-  curObject.value = data.objectInfo
-
-  messageData.setLast({
-    sessionId: data.sessionId,
-    sessionType: data.sessionType,
-    objectInfo: data.objectInfo
-  })
+const handleBeChoosed = (session) => {
+  choosedSessionId.value = session.sessionId // sessionId变化会引发watch
 }
+
+const handleSwitchTag = (obj) => {
+  msgUpdateSessionService(obj)
+}
+
 // 发送事件要做的事情
 const handleExportContent = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
-  wsConnect.sendMsg(showId.value, curSessionType.value, content, (deliveredMsg) => {
-    messageData.addMsgRecord(curSessionId.value, {
+  wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
+    messageData.addRecord(choosedSessionId.value, {
       msgId: deliveredMsg.body.msgId,  
       fromId: userData.user.account,
-      msgType: curSessionType.value,
+      msgType: choosedSession.value.sessionType,
       msgTime: new Date(),
       content: content
     })
   })
-
 }
 
 const onLoadMore = () => {
@@ -154,8 +153,50 @@ const onLoadMore = () => {
   loadMoreTips.value = ''
 }
 
-watch(() => messageData.msgRecords[curSessionId.value], () => {
+// watch到哪个，表示哪个会话被选中
+watch(choosedSessionId, (newValue, oldValue) => {
+  console.log('====>111: ', newValue, oldValue)
+  messageData.setLastSessionId(newValue)
+  choosedSession.value = sessionList.value[newValue]
+
+  msgChatPullMsgService({
+    sessionId: choosedSessionId.value,
+    lastMsgId: sessionList.value[choosedSessionId.value].readMsgId,
+    lastPullTime: sessionList.value[choosedSessionId.value].readTime,
+    pageSize: 20
+  })
+  .then((res) => {
+    msgRecords.value = res.data.data.msgList
+    
+    if (res.data.data.lastMsgId > choosedSession.value.readMsgId) {
+      const now = new Date()
+      choosedSession.value.readMsgId = res.data.data.lastMsgId
+      choosedSession.value.readTime = now
+      choosedSession.value.unreadCount = 0;
+
+      msgUpdateSessionService({ 
+        sessionId: choosedSessionId.value, 
+        readMsgId: res.data.data.lastMsgId, 
+        readTime: now })
+    }
+  })
+})
+
+watch(msgRecords, () => {
+  if (msgRecords.value) {
+    msgRecords.value =  msgRecords.value.sort((a, b) => a.msgId - b.msgId)
+  }
   msgListReachBottom()
+}, {deep: true})
+
+
+watch(() => messageData.sessionRecordsSize, async () => {
+  // TODO 这里还要检查messageData中的sessionId是否都在sessionList中
+  // 如果有不在的，要直接刷新sessionList
+  // if (xxx)
+  // const res = await msgChatSessionListService()
+  // sessionList.value = sessionList.value.concat(res.data.data)
+  
 }, {deep: true})
 
 const msgListReachBottom = () => {
@@ -180,12 +221,12 @@ const msgListReachBottom = () => {
 
         <div class="session-list my-scrollbar">
           <SessionBox
-            v-for="item in sessionList"
+            v-for="item in sessionListSorted"
             :key="item.sessionId"
-            :objectInfo="item.objectInfo"
-            :sessionId="item.sessionId"
-            :sessionType="item.sessionType"
-            @exportData="handleExportData"
+            :sesionInfo="item"
+            :choosedSessionId="choosedSessionId"
+            @beChoosed="handleBeChoosed"
+            @switchTag="handleSwitchTag"
           ></SessionBox>
         </div>
       </div>
@@ -202,7 +243,7 @@ const msgListReachBottom = () => {
     <el-main class="msg-box">
       <el-image
         class="backgroup-image"
-        v-if="!curSessionId"
+        v-if="!choosedSessionId"
         :src="backgroupImage"
         fit="cover"
       ></el-image>
@@ -211,7 +252,9 @@ const msgListReachBottom = () => {
         <el-header class="header bdr-b">
           <div class="show-name-id">
             <span class="show-name">{{ showName }}</span>
-            <span v-if="curSessionType === MsgType.CHAT" class="show-id">{{ showId }}</span>
+            <span v-if="choosedSession.sessionType === MsgType.CHAT" class="show-id">{{
+              showId
+            }}</span>
           </div>
 
           <div class="action-set">
@@ -238,10 +281,10 @@ const msgListReachBottom = () => {
             <div class="message-main">
               <span class="no-more-message">当前无更多消息</span>
               <MessageItem
-                v-for="(item, index) in sessionRecords"
+                v-for="(item, index) in msgRecords"
                 :key="index"
                 :msg="item"
-                :obj="curObject"
+                :obj="choosedSession.objectInfo"
                 :lastMsgTime="getLastMsgTime(index)"
               ></MessageItem>
             </div>
@@ -294,7 +337,10 @@ const msgListReachBottom = () => {
                 </div>
               </el-header>
               <el-main class="input-box-main">
-                <InputEditor @exportContent="handleExportContent"></InputEditor>
+                <InputEditor
+                  :sessionInfo="choosedSession"
+                  @exportContent="handleExportContent"
+                ></InputEditor>
               </el-main>
             </el-container>
           </div>

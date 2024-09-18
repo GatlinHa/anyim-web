@@ -1,20 +1,24 @@
 <script setup>
 import '@wangeditor/editor/dist/css/style.css'
-import { onMounted, onBeforeUnmount, ref, shallowRef } from 'vue'
+import { onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { Editor } from '@wangeditor/editor-for-vue'
+import { messageStore } from '@/stores'
+import { msgUpdateSessionService } from '@/api/message'
 
 const mode = 'simple'
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef()
 const editorStyleRef = ref()
+const props = defineProps(['sessionInfo'])
 const emit = defineEmits(['exportContent'])
+const messageData = messageStore()
 
 // 内容 HTML
 const valueHtml = ref('')
 const content = [
   {
     type: 'paragraph',
-    children: [{ text: '', fontSize: '14px' }],
+    children: [{ text: props.sessionInfo.draft || '', fontSize: '14px' }],
     lineHeight: 0.5
   }
 ]
@@ -46,6 +50,21 @@ const handleEnter = () => {
     valueHtml.value = ''
   }
 }
+
+// 监控session发生了切换
+watch(
+  () => props.sessionInfo,
+  (newValue, oldValue) => {
+    valueHtml.value = newValue.draft || ''
+    // 草稿若没发生变动，则不触发存储
+    if (editorRef.value.getText().trim() !== oldValue.draft) {
+      oldValue.draft = editorRef.value.getText().trim()
+      messageData.updateSession(oldValue)
+      msgUpdateSessionService({ sessionId: oldValue.sessionId, draft: oldValue.draft })
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <template>
