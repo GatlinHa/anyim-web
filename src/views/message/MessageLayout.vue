@@ -132,7 +132,7 @@ const handleIsChoosed = (session) => {
 
 const handleSwitchTag = (obj) => {
   messageData.updateSession({
-    ...choosedSession,
+    ...choosedSession.value,
     ...obj
   })
 }
@@ -141,17 +141,29 @@ const handleExportContent = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
 
-    // 更新到messageStore中的sessionList：已读，已读时间
-    // 更新到数据库session表中（发送端）
-    // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
+    const now = new Date()
 
-    messageData.addRecord(choosedSessionId.value, {
-      msgId: deliveredMsg.body.msgId,  
-      fromId: userData.user.account,
-      msgType: choosedSession.value.sessionType,
-      msgTime: new Date(),
-      content: content
+    messageData.updateSession({
+      ...choosedSession.value,
+      readMsgId: deliveredMsg.body.msgId,
+      readTime: now,
+      lastMsgId: deliveredMsg.body.msgId,
+      lastMsgContent: content,
+      lastMsgTime: now
     })
+
+    // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
+    if (choosedSessionId.value === deliveredMsg.body.sessionId) {
+      
+      msgRecords.value.push({
+        sessionId: choosedSessionId.value,
+        msgId: deliveredMsg.body.msgId,  
+        fromId: userData.user.account,
+        msgType: choosedSession.value.sessionType,
+        content: content,
+        msgTime: now
+      })
+    }
   })
 }
 
@@ -176,12 +188,14 @@ watch(choosedSessionId, (newValue) => {
     
     if (res.data.data.lastMsgId > choosedSession.value.readMsgId) {
       const now = new Date()
+
+      //TODO 看看这三行能不能省
       choosedSession.value.readMsgId = res.data.data.lastMsgId
       choosedSession.value.readTime = now
       choosedSession.value.unreadCount = 0;
 
       messageData.updateSession({
-        ...choosedSession,
+        ...choosedSession.value,
         sessionId: choosedSessionId.value, 
         readMsgId: res.data.data.lastMsgId, 
         readTime: now })
@@ -194,16 +208,6 @@ watch(msgRecords, () => {
     msgRecords.value =  msgRecords.value.sort((a, b) => a.msgId - b.msgId)
   }
   msgListReachBottom()
-}, {deep: true})
-
-
-watch(() => messageData.sessionRecordsSize, async () => {
-  // TODO 这里还要检查messageData中的sessionId是否都在sessionList中
-  // 如果有不在的，要直接刷新sessionList
-  // if (xxx)
-  // const res = await msgChatSessionListService()
-  // sessionList.value = sessionList.value.concat(res.data.data)
-  
 }, {deep: true})
 
 const msgListReachBottom = () => {
