@@ -9,7 +9,7 @@ import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['sesionInfo', 'choosedSessionId'])
-const emit = defineEmits(['beChoosed', 'switchTag'])
+const emit = defineEmits(['isChoosed', 'switchTag'])
 const top = ref(props.sesionInfo.top)
 const muted = ref(props.sesionInfo.muted)
 const isShowUserCard = ref(false)
@@ -20,6 +20,10 @@ const exportSession = {
   sessionType: props.sesionInfo.sessionType,
   objectInfo: props.sesionInfo.objectInfo
 }
+
+const hasBeenChoosed = computed(() => {
+  return props.sesionInfo.sessionId === props.choosedSessionId
+})
 
 const showName = computed(() => {
   switch (props.sesionInfo.sessionType) {
@@ -58,11 +62,11 @@ const showTime = computed(() => {
 })
 
 const isShowDraft = computed(() => {
-  return props.sesionInfo.sessionId !== props.choosedSessionId && props.sesionInfo.draft
+  return !hasBeenChoosed.value && props.sesionInfo.draft
 })
 
 const isShowUnreadCount = computed(() => {
-  return props.sesionInfo.sessionId !== props.choosedSessionId && props.sesionInfo.unreadCount > 0
+  return !hasBeenChoosed.value && props.sesionInfo.unreadCount > 0
 })
 
 const handleUserCard = (flag) => {
@@ -99,7 +103,7 @@ const switchTag = (func) => {
 </script>
 
 <template>
-  <div class="session-box">
+  <div class="session-box" :class="{ 'session-box-active': hasBeenChoosed }">
     <AvatarIcon
       :showName="showName"
       :showId="showId"
@@ -107,7 +111,7 @@ const switchTag = (func) => {
       @click="showSomeoneCard"
     ></AvatarIcon>
     <div v-if="isShowUnreadCount" class="unread-tips"></div>
-    <div class="content-box" @click="emit('beChoosed', exportSession)">
+    <div class="content-box" @click="emit('isChoosed', exportSession)">
       <div class="header">
         <div class="title">
           <span class="showName">{{ showName || showId }}</span>
@@ -170,10 +174,15 @@ const switchTag = (func) => {
 </template>
 
 <style lang="scss" scoped>
+.session-box-active {
+  background-color: #c6e2ff;
+}
+
 .session-box {
-  height: 50px;
+  height: 60px;
   margin: 5px;
   padding: 4px;
+  border-radius: 6px;
   padding-right: 0;
   display: flex;
   align-items: center;
@@ -182,7 +191,6 @@ const switchTag = (func) => {
 
   &:hover {
     background-color: #c6e2ff;
-    border-radius: 6px;
   }
 
   .unread-tips {
@@ -200,6 +208,7 @@ const switchTag = (func) => {
     height: 100%;
     margin-left: 10px;
     display: flex;
+    justify-content: center;
     flex: 1 1;
     flex-direction: column;
     overflow: hidden;
@@ -207,6 +216,7 @@ const switchTag = (func) => {
     .header {
       width: 100%;
       height: 24px;
+      margin-bottom: 2px;
       display: flex;
       align-items: center;
 

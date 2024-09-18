@@ -126,7 +126,7 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
-const handleBeChoosed = (session) => {
+const handleIsChoosed = (session) => {
   choosedSessionId.value = session.sessionId // sessionId变化会引发watch
 }
 
@@ -225,7 +225,7 @@ const msgListReachBottom = () => {
             :key="item.sessionId"
             :sesionInfo="item"
             :choosedSessionId="choosedSessionId"
-            @beChoosed="handleBeChoosed"
+            @isChoosed="handleIsChoosed"
             @switchTag="handleSwitchTag"
           ></SessionBox>
         </div>
