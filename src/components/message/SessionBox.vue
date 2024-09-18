@@ -133,7 +133,7 @@ const switchTag = (func) => {
           >
           <span v-if="isShowDraft" class="draft">[草稿]</span>
           <span class="detail">{{
-            props.sesionInfo.draft ? props.sesionInfo.draft : props.sesionInfo.lastMsgContent
+            isShowDraft ? props.sesionInfo.draft : props.sesionInfo.lastMsgContent
           }}</span>
         </div>
         <div class="action">
