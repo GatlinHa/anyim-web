@@ -23,7 +23,7 @@ import InputEditor from '@/components/message/InputEditor.vue'
 import MessageItem from '@/components/message/MessageItem.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import { msgChatSessionListService, msgUpdateSessionService, msgChatPullMsgService } from '@/api/message'
+import { msgChatSessionListService, msgChatPullMsgService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 
@@ -36,8 +36,8 @@ const asideWidthMin = 200
 const asideWidthMax = 500
 
 const inputBoxHeight = ref(0)
-const inputBoxHeightMin = 150
-const inputBoxHeightMax = 400
+const inputBoxHeightMin = 350
+const inputBoxHeightMax = 500
 
 const sessionList = ref({})
 const choosedSessionId = ref()
@@ -55,7 +55,7 @@ const msgListDiv = ref()
 
 onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 200
-  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 200
+  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 350
 
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
@@ -131,13 +131,20 @@ const handleIsChoosed = (session) => {
 }
 
 const handleSwitchTag = (obj) => {
-  msgUpdateSessionService(obj)
+  messageData.updateSession({
+    ...choosedSession,
+    ...obj
+  })
 }
 
-// 发送事件要做的事情
 const handleExportContent = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
+
+    // 更新到messageStore中的sessionList：已读，已读时间
+    // 更新到数据库session表中（发送端）
+    // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
+
     messageData.addRecord(choosedSessionId.value, {
       msgId: deliveredMsg.body.msgId,  
       fromId: userData.user.account,
@@ -154,8 +161,7 @@ const onLoadMore = () => {
 }
 
 // watch到哪个，表示哪个会话被选中
-watch(choosedSessionId, (newValue, oldValue) => {
-  console.log('====>111: ', newValue, oldValue)
+watch(choosedSessionId, (newValue) => {
   messageData.setLastSessionId(newValue)
   choosedSession.value = sessionList.value[newValue]
 
@@ -174,7 +180,8 @@ watch(choosedSessionId, (newValue, oldValue) => {
       choosedSession.value.readTime = now
       choosedSession.value.unreadCount = 0;
 
-      msgUpdateSessionService({ 
+      messageData.updateSession({
+        ...choosedSession,
         sessionId: choosedSessionId.value, 
         readMsgId: res.data.data.lastMsgId, 
         readTime: now })

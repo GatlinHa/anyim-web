@@ -3,7 +3,6 @@ import '@wangeditor/editor/dist/css/style.css'
 import { onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { Editor } from '@wangeditor/editor-for-vue'
 import { messageStore } from '@/stores'
-import { msgUpdateSessionService } from '@/api/message'
 
 const mode = 'simple'
 // 编辑器实例，必须用 shallowRef
@@ -58,9 +57,10 @@ watch(
     valueHtml.value = newValue.draft || ''
     // 草稿若没发生变动，则不触发存储
     if (editorRef.value.getText().trim() !== oldValue.draft) {
-      oldValue.draft = editorRef.value.getText().trim()
-      messageData.updateSession(oldValue)
-      msgUpdateSessionService({ sessionId: oldValue.sessionId, draft: oldValue.draft })
+      messageData.updateSession({
+        ...oldValue,
+        draft: editorRef.value.getText().trim()
+      })
     }
   },
   { deep: true }

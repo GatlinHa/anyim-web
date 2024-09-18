@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { msgUpdateSessionService } from '@/api/message'
 
 // 消息功能相关需要缓存的数据
 export const messageStore = defineStore(
@@ -26,6 +27,15 @@ export const messageStore = defineStore(
           [session.sessionId]: session
         }
       }
+
+      msgUpdateSessionService({
+        sessionId: session.sessionId,
+        readMsgId: session.readMsgId,
+        readTime: session.readTime,
+        top: session.top,
+        muted: session.muted,
+        draft: session.draft
+      })
     }
 
     return {
