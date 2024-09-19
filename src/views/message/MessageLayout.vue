@@ -149,7 +149,8 @@ const handleExportContent = (content) => {
       readTime: now,
       lastMsgId: deliveredMsg.body.msgId,
       lastMsgContent: content,
-      lastMsgTime: now
+      lastMsgTime: now,
+      draft: ''
     })
 
     // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
@@ -189,7 +190,7 @@ watch(choosedSessionId, (newValue) => {
     if (res.data.data.lastMsgId > choosedSession.value.readMsgId) {
       const now = new Date()
 
-      //TODO 看看这三行能不能省
+      //这三行能不能省，下面的只是改了Store的值，本地的choosedSession没有改
       choosedSession.value.readMsgId = res.data.data.lastMsgId
       choosedSession.value.readTime = now
       choosedSession.value.unreadCount = 0;
@@ -198,7 +199,9 @@ watch(choosedSessionId, (newValue) => {
         ...choosedSession.value,
         sessionId: choosedSessionId.value, 
         readMsgId: res.data.data.lastMsgId, 
-        readTime: now })
+        readTime: now,
+        unreadCount: 0
+      })
     }
   })
 })
