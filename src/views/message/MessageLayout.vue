@@ -60,7 +60,7 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
   sessionList.value = messageData.sessionList
-  choosedSessionId.value = messageData.lastSessionId
+  choosedSessionId.value = userData.lastSessionId
 
   if (msgListDiv.value) {
     // 首次进到消息页面，不会有有值
@@ -175,7 +175,7 @@ const onLoadMore = () => {
 
 // watch到哪个，表示哪个会话被选中
 watch(choosedSessionId, (newValue) => {
-  messageData.setLastSessionId(newValue)
+  userData.setLastSessionId(newValue)
   choosedSession.value = sessionList.value[newValue]
 
   msgChatPullMsgService({
