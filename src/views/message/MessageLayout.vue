@@ -238,7 +238,6 @@ const msgListReachBottom = () => {
             v-for="item in sessionListSorted"
             :key="item.sessionId"
             :sesionInfo="item"
-            :choosedSessionId="choosedSessionId"
             @isChoosed="handleIsChoosed"
             @switchTag="handleSwitchTag"
           ></SessionBox>
