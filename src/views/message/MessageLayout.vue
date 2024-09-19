@@ -36,13 +36,8 @@ const asideWidthMin = 200
 const asideWidthMax = 500
 
 const inputBoxHeight = ref(0)
-const inputBoxHeightMin = 350
+const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
-
-const sessionList = ref({})
-const choosedSessionId = ref()
-const choosedSession = ref({})
-const msgRecords = ref([])
 
 const isShowTopLoading = ref(true)
 const isTopLoading = ref(false)
@@ -51,16 +46,26 @@ const loadCursor = computed(() => {
   return isTopLoading.value ? 'auto' : 'pointer'
 })
 
+const choosedSession = computed(() => {
+  if (userData.lastSessionId)
+    return messageData.sessionList[userData.lastSessionId]
+  else
+    return {}
+})
+const msgRecords = ref([])
+
 const msgListDiv = ref()
 
 onMounted(async () => {
-  asideWidth.value = settingData.sessionListDrag[userData.user.account] || 200
-  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 350
+  asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
+  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
 
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
-  sessionList.value = messageData.sessionList
-  choosedSessionId.value = userData.lastSessionId
+  
+  if (userData.lastSessionId) {
+    pullMsg()
+  }
 
   if (msgListDiv.value) {
     // 首次进到消息页面，不会有有值
@@ -70,17 +75,17 @@ onMounted(async () => {
 
 // 把sessionList转成数组，并按照lastMsgTime排序
 const sessionListSorted = computed(() => {
-  if (!sessionList.value) {
+  if (!messageData.sessionList) {
     return []
   }
   else {
-    let sessionArr = Object.values(sessionList.value)
+    let sessionArr = Object.values(messageData.sessionList)
     return sessionArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime)
   }
 })
 
 const showName = computed(() => {
-  switch (choosedSession.value.sessionType) {
+  switch (choosedSession.value?.sessionType) {
     case MsgType.CHAT:
       return choosedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
@@ -91,7 +96,7 @@ const showName = computed(() => {
 })
 
 const showId = computed(() => {
-  switch (choosedSession.value.sessionType) {
+  switch (choosedSession.value?.sessionType) {
     case MsgType.CHAT:
       return choosedSession.value.objectInfo.account
     case MsgType.GROUP_CHAT:
@@ -126,15 +131,35 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
-const handleIsChoosed = (session) => {
-  choosedSessionId.value = session.sessionId // sessionId变化会引发watch
+const pullMsg = () => {
+    msgChatPullMsgService({
+    sessionId: userData.lastSessionId,
+    readMsgId: choosedSession.value.readMsgId,
+    readTime: choosedSession.value.readTime,
+    pageSize: 20
+  })
+  .then((res) => {
+    msgRecords.value = res.data.data.msgList
+    messageData.updateSession({
+      sessionId: userData.lastSessionId, 
+      readMsgId: res.data.data.lastMsgId, 
+      readTime: new Date(),
+      lastMsgId: res.data.data.lastMsgId,
+      lastMsgContent: res.data.data.msgList.content, 
+      lastMsgTime: res.data.data.msgList.msgTime, 
+      unreadCount: 0
+    })
+  })
+}
+
+// 表示有个session被选中了
+const handleIsChoosed = (exportSession) => {
+  userData.setLastSessionId(exportSession.sessionId)
+  pullMsg()
 }
 
 const handleSwitchTag = (obj) => {
-  messageData.updateSession({
-    ...choosedSession.value,
-    ...obj
-  })
+  messageData.updateSession(obj)
 }
 
 const handleExportContent = (content) => {
@@ -142,22 +167,21 @@ const handleExportContent = (content) => {
   wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
 
     const now = new Date()
-
     messageData.updateSession({
-      ...choosedSession.value,
-      readMsgId: deliveredMsg.body.msgId,
+      sessionId: userData.lastSessionId,
+      readMsgId: deliveredMsg.body.msgId,  // 发消息视为已经读到最后一条消息（自己发的）
       readTime: now,
-      lastMsgId: deliveredMsg.body.msgId,
+      lastMsgId: deliveredMsg.body.msgId,  // lastMsgId = 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
-      draft: ''
+      unreadCount: 0,  // readMsgId = lastMsgId = 最后一条消息（自己发的），因此未读是0
+      draft: ''  //草稿意味着要清空
     })
 
     // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
-    if (choosedSessionId.value === deliveredMsg.body.sessionId) {
-      
+    if (userData.lastSessionId === deliveredMsg.body.sessionId) {
       msgRecords.value.push({
-        sessionId: choosedSessionId.value,
+        sessionId: userData.lastSessionId,
         msgId: deliveredMsg.body.msgId,  
         fromId: userData.user.account,
         msgType: choosedSession.value.sessionType,
@@ -172,39 +196,6 @@ const onLoadMore = () => {
   isTopLoading.value = true
   loadMoreTips.value = ''
 }
-
-// watch到哪个，表示哪个会话被选中
-watch(choosedSessionId, (newValue) => {
-  userData.setLastSessionId(newValue)
-  choosedSession.value = sessionList.value[newValue]
-
-  msgChatPullMsgService({
-    sessionId: choosedSessionId.value,
-    lastMsgId: sessionList.value[choosedSessionId.value].readMsgId,
-    lastPullTime: sessionList.value[choosedSessionId.value].readTime,
-    pageSize: 20
-  })
-  .then((res) => {
-    msgRecords.value = res.data.data.msgList
-    
-    if (res.data.data.lastMsgId > choosedSession.value.readMsgId) {
-      const now = new Date()
-
-      //这三行能不能省，下面的只是改了Store的值，本地的choosedSession没有改
-      choosedSession.value.readMsgId = res.data.data.lastMsgId
-      choosedSession.value.readTime = now
-      choosedSession.value.unreadCount = 0;
-
-      messageData.updateSession({
-        ...choosedSession.value,
-        sessionId: choosedSessionId.value, 
-        readMsgId: res.data.data.lastMsgId, 
-        readTime: now,
-        unreadCount: 0
-      })
-    }
-  })
-})
 
 watch(msgRecords, () => {
   if (msgRecords.value) {
@@ -256,7 +247,7 @@ const msgListReachBottom = () => {
     <el-main class="msg-box">
       <el-image
         class="backgroup-image"
-        v-if="!choosedSessionId"
+        v-if="!userData.lastSessionId"
         :src="backgroupImage"
         fit="cover"
       ></el-image>
@@ -265,7 +256,7 @@ const msgListReachBottom = () => {
         <el-header class="header bdr-b">
           <div class="show-name-id">
             <span class="show-name">{{ showName }}</span>
-            <span v-if="choosedSession.sessionType === MsgType.CHAT" class="show-id">{{
+            <span v-if="choosedSession?.sessionType === MsgType.CHAT" class="show-id">{{
               showId
             }}</span>
           </div>
@@ -297,7 +288,7 @@ const msgListReachBottom = () => {
                 v-for="(item, index) in msgRecords"
                 :key="index"
                 :msg="item"
-                :obj="choosedSession.objectInfo"
+                :obj="choosedSession?.objectInfo"
                 :lastMsgTime="getLastMsgTime(index)"
               ></MessageItem>
             </div>
@@ -351,7 +342,7 @@ const msgListReachBottom = () => {
               </el-header>
               <el-main class="input-box-main">
                 <InputEditor
-                  :sessionInfo="choosedSession"
+                  :draft="choosedSession?.draft"
                   @exportContent="handleExportContent"
                 ></InputEditor>
               </el-main>

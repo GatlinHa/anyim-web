@@ -1,84 +1,83 @@
 <script setup>
-import '@wangeditor/editor/dist/css/style.css'
-import { onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
-import { Editor } from '@wangeditor/editor-for-vue'
-import { messageStore } from '@/stores'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import { onMounted, ref, watch, onUpdated } from 'vue'
+import { userStore, messageStore } from '@/stores'
 
-const mode = 'simple'
-// 编辑器实例，必须用 shallowRef
-const editorRef = shallowRef()
-const editorStyleRef = ref()
-const props = defineProps(['sessionInfo'])
+const props = defineProps(['draft'])
 const emit = defineEmits(['exportContent'])
 const messageData = messageStore()
+const userData = userStore()
 
-// 内容 HTML
-const valueHtml = ref('')
-const content = [
-  {
-    type: 'paragraph',
-    children: [{ text: props.sessionInfo.draft || '', fontSize: '14px' }],
-    lineHeight: 0.5
-  }
-]
-const editorConfig = { placeholder: '' }
+const editorRef = ref()
 
-onMounted(() => {
-  // 给组件增加滚动条样式
-  editorStyleRef.value.$el.querySelector('.w-e-scroll').classList.add('my-scrollbar')
-})
-// 组件销毁时，也及时销毁编辑器
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
-
-const handleCreated = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
+const getQuill = () => {
+  return editorRef.value?.getQuill()
 }
 
 const handleEnter = () => {
-  const editor = editorRef.value
-  const trimContent = editor.getText().trim()
-  if (!trimContent) {
+  const content = getQuill().getText().trim()
+  if (!content) {
     ElMessage.warning('请勿发送空内容')
-    valueHtml.value = ''
+    getQuill().setText('')
   } else {
-    emit('exportContent', trimContent)
-    valueHtml.value = ''
+    emit('exportContent', content)
+    getQuill().setText('')
   }
 }
 
+onMounted(() => {
+  // 给组件增加滚动条样式
+  document.querySelector('.ql-editor').classList.add('my-scrollbar')
+})
+
+onUpdated(() => {
+  getQuill().setText(props.draft)
+})
+
 // 监控session发生了切换
 watch(
-  () => props.sessionInfo,
+  () => userData.lastSessionId,
   (newValue, oldValue) => {
-    valueHtml.value = newValue.draft || ''
+    let content = getQuill().getText().trim()
     // 草稿若没发生变动，则不触发存储
-    if (editorRef.value.getText().trim() !== oldValue.draft) {
+    if (oldValue && content !== messageData.sessionList[oldValue].draft) {
       messageData.updateSession({
-        ...oldValue,
-        draft: editorRef.value.getText().trim()
+        sessionId: oldValue,
+        draft: content
       })
     }
+    getQuill().setText(messageData.sessionList[newValue].draft || '')
   },
   { deep: true }
 )
+
+const options = {
+  debug: false,
+  modules: {
+    toolbar: false,
+    keyboard: {
+      bindings: {
+        enter: {
+          key: 13,
+          handler: handleEnter
+        }
+      }
+    }
+  },
+  placeholder: 'Enter发送 / Shift+Enter换行',
+  theme: 'snow'
+}
 </script>
 
 <template>
   <div class="input-editor">
-    <Editor
-      ref="editorStyleRef"
+    <QuillEditor
       class="editor"
-      v-model="valueHtml"
-      :defaultConfig="editorConfig"
-      :defaultContent="content"
-      :mode="mode"
-      @onCreated="handleCreated"
-      @keyup.enter="handleEnter"
-    />
+      ref="editorRef"
+      :options="options"
+      content-type="text"
+    ></QuillEditor>
   </div>
 </template>
 
@@ -88,8 +87,14 @@ watch(
 
   .editor {
     height: 100%;
-    overflow-y: hidden;
-    font-size: 14px;
+    border: none;
+
+    .ql-editor {
+      padding: 16px;
+      padding-left: 16px;
+      font-size: 14px;
+      background-color: #fff;
+    }
   }
 }
 </style>
