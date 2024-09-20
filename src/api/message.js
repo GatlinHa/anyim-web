@@ -12,3 +12,7 @@ export const msgUpdateSessionService = (obj) => {
 export const msgChatPullMsgService = (obj) => {
   return request.post('/chat/pullMsg', getReqBody(obj))
 }
+
+export const msgChatCreateSessionService = (obj) => {
+  return request.post('/chat/createSession', getReqBody(obj))
+}

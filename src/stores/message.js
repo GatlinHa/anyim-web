@@ -46,11 +46,16 @@ export const messageStore = defineStore('anyim-message', () => {
    */
   const msgRecordsList = ref({})
 
+  /**
+   * 对话列表中加入新的消息
+   * @param {*} sessionId 会话id
+   * @param {*} msgRecords 新的消息数组
+   */
   const addMsgRecords = (sessionId, msgRecords) => {
     if (!msgRecordsList.value[sessionId]) {
       msgRecordsList.value[sessionId] = msgRecords.sort((a, b) => a.msgId - b.msgId)
     } else {
-      msgRecordsList.value[sessionId] = [...msgRecordsList.value[sessionId], msgRecords].sort(
+      msgRecordsList.value[sessionId] = [...msgRecordsList.value[sessionId], ...msgRecords].sort(
         (a, b) => a.msgId - b.msgId
       )
     }

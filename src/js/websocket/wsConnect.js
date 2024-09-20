@@ -3,6 +3,7 @@ import { userStore, messageStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 import { generateSign, combineId } from '@/utils/common'
 import { chatConstructor, heartBeatConstructor, helloConstructor } from './constructor'
+import { msgChatCreateSessionService } from '@/api/message'
 
 class WsConnect {
   /**
@@ -84,21 +85,45 @@ class WsConnect {
 
     [MsgType.DELIVERED]: () => {}, //需要发送时定义事件处理逻辑
 
-    [MsgType.CHAT]: (msg) => {
-      const msgId = msg.body.msgId
-      const fromId = msg.body.fromId
-      const toId = msg.body.toId
-      const msgType = MsgType.CHAT
-      const msgTime = new Date()
-      const content = msg.body.content
-      const msgData = messageStore()
-      msgData.addMsgRecord(combineId(fromId, toId), {
-        msgId: msgId,
-        fromId: fromId,
-        msgType: msgType,
-        msgTime: msgTime,
-        content: content
+    [MsgType.CHAT]: async (msg) => {
+      const messageData = messageStore()
+      const userData = userStore()
+      const sessionId = combineId(msg.body.fromId, msg.body.toId)
+      const now = new Date()
+
+      // 如果sessionList中没有,需要先创建session
+      if (!messageData.sessionList[sessionId]) {
+        const res = await msgChatCreateSessionService({
+          sessionId: sessionId,
+          account: msg.body.toId,
+          remoteId: msg.body.fromId,
+          sessionType: MsgType.CHAT
+        })
+        messageData.addSession(res.data.data)
+      }
+
+      messageData.updateSession({
+        sessionId: sessionId,
+        lastMsgId: msg.body.msgId,
+        lastMsgContent: msg.body.content,
+        lastMsgTime: now,
+        unreadCount: messageData.sessionList[sessionId].unreadCount + 1
       })
+
+      // 当前会话需要把它添加到对话数组中,其他不需要
+      // 因为其他会话如果也添加的话,切到这个session还会再pull一把,这样就重复了
+      if (userData.curSessionId === sessionId) {
+        messageData.addMsgRecords(sessionId, [
+          {
+            sessionId: sessionId,
+            msgId: msg.body.msgId,
+            fromId: msg.body.fromId,
+            msgType: MsgType.CHAT,
+            content: msg.body.content,
+            msgTime: now
+          }
+        ])
+      }
     },
 
     [MsgType.HEART_BEAT]: () => {

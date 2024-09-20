@@ -138,8 +138,8 @@ const onInputBoxDragUpdate = ({ height }) => {
 }
 
 const pullMsg = () => {
-  // 1.如果session中存在未读信息，需要从服务器拉去，否则就使用本地缓存的消息，避免频繁查询服务器
-  // 2.如果这个会话没有缓存过消息,需要从服务器拉去一定数量的历史消息
+  // 1.如果session中存在未读信息，需要从服务器拉取，否则就使用本地缓存的消息，避免频繁查询服务器
+  // 2.如果这个会话没有缓存过消息,需要从服务器拉取一定数量的历史消息
   if (!msgRecords.value || messageData.sessionList[userData.curSessionId].unreadCount > 0) {
     msgChatPullMsgService({
     sessionId: userData.curSessionId,
@@ -149,7 +149,6 @@ const pullMsg = () => {
     })
     .then((res) => {      
       messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
-
       messageData.updateSession({
         sessionId: userData.curSessionId, 
         readMsgId: res.data.data.lastMsgId, 
@@ -193,14 +192,14 @@ const handleExportContent = (content) => {
 
     // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
     if (userData.curSessionId === deliveredMsg.body.sessionId) {
-      messageData.addMsgRecords(userData.curSessionId, {
+      messageData.addMsgRecords(userData.curSessionId, [{
         sessionId: userData.curSessionId,
         msgId: deliveredMsg.body.msgId,  
         fromId: userData.user.account,
         msgType: choosedSession.value.sessionType,
         content: content,
         msgTime: now
-      })
+      }])
     }
   })
 }
