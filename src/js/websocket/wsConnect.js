@@ -74,10 +74,36 @@ class WsConnect {
   }
 
   /**
-   * 绑定事件
+   * 绑定事件，() => {}留白的需要业务自己定义处理逻辑
    */
   events = {
-    delivered: () => {}
+    [MsgType.HELLO]: () => {
+      this.heartBeat.start()
+      this.isConnect = true
+    },
+
+    [MsgType.DELIVERED]: () => {},
+
+    [MsgType.CHAT]: (msg) => {
+      const msgId = msg.body.msgId
+      const fromId = msg.body.fromId
+      const toId = msg.body.toId
+      const msgType = MsgType.CHAT
+      const msgTime = new Date()
+      const content = msg.body.content
+      const msgData = messageStore()
+      msgData.addMsgRecord(combineId(fromId, toId), {
+        msgId: msgId,
+        fromId: fromId,
+        msgType: msgType,
+        msgTime: msgTime,
+        content: content
+      })
+    },
+
+    [MsgType.HEART_BEAT]: () => {
+      if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
+    }
   }
 
   /**
@@ -150,35 +176,8 @@ class WsConnect {
 
     frames.forEach((frame) => {
       const msg = Msg.decode(frame)
-      switch (msg.header.msgType) {
-        case MsgType.HELLO:
-          this.handleHello()
-          break
-        case MsgType.HEART_BEAT:
-          this.handleHeartBeat()
-          break
-        case MsgType.CHAT:
-          console.log('receive a CHAT message, it is: ', msg)
-          this.handleChat(msg)
-          break
-        case MsgType.GROUP_CHAT:
-          break
-        case MsgType.READ:
-          break
-        case MsgType.DELIVERED:
-          console.log('receive a DELIVERED message, it is: ', msg)
-          this.handleDelivered(msg)
-          break
-        case MsgType.SENDER_SYNC:
-          break
-        case MsgType.CLOSE_BY_READ_IDLE:
-          break
-        case MsgType.CLOSE_BY_ERROR_MAGIC:
-          break
-        default:
-          console.log('The message type is not supported: ', msg.header.msgType)
-          break
-      }
+      console.log(`receive a ${MsgType[msg.header.msgType]} msg: `, msg)
+      if (this.events[msg.header.msgType]) this.events[msg.header.msgType](msg)
     })
   }
 
@@ -200,38 +199,6 @@ class WsConnect {
     this.connect = null
     this.isConnect = false
     this.reconnect.start()
-  }
-
-  handleHello() {
-    // 启动心跳
-    this.heartBeat.start()
-    this.isConnect = true
-  }
-
-  handleHeartBeat() {
-    if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
-  }
-
-  handleChat(msg) {
-    const msgId = msg.body.msgId
-    const fromId = msg.body.fromId
-    const toId = msg.body.toId
-    const msgType = MsgType.CHAT
-    const msgTime = new Date()
-    const content = msg.body.content
-
-    const msgData = messageStore()
-    msgData.addMsgRecord(combineId(fromId, toId), {
-      msgId: msgId,
-      fromId: fromId,
-      msgType: msgType,
-      msgTime: msgTime,
-      content: content
-    })
-  }
-
-  handleDelivered(msg) {
-    this.events.delivered(msg)
   }
 
   /**
@@ -312,7 +279,7 @@ class WsConnect {
    */
   sendAgent(data, callback) {
     if (this.isConnect) {
-      this.bindEvent('delivered', callback)
+      this.bindEvent(MsgType.DELIVERED, callback)
       this.connect.send(data)
     } else {
       if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {

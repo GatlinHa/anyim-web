@@ -67,10 +67,9 @@ onMounted(async () => {
     pullMsg()
   }
 
-  if (msgListDiv.value) {
-    // 首次进到消息页面，不会有有值
-    msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
-  }
+  if (msgListDiv.value) msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
+
+  bindMsgEvents()
 })
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -192,6 +191,10 @@ const handleExportContent = (content) => {
       })
     }
   })
+}
+
+const bindMsgEvents = () => {
+  wsConnect.bindEvent()
 }
 
 const onLoadMore = () => {
