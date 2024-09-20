@@ -20,22 +20,22 @@ export const messageStore = defineStore('anyim-message', () => {
 
   const updateSession = (obj) => {
     const mySession = sessionList.value[obj.sessionId]
-    if (obj.readMsgId) mySession.readMsgId = obj.readMsgId
-    if (obj.readTime) mySession.readTime = obj.readTime
-    if (obj.lastMsgId) mySession.lastMsgId = obj.lastMsgId
-    if (obj.lastMsgContent) mySession.lastMsgContent = obj.lastMsgContent
-    if (obj.lastMsgTime) mySession.lastMsgTime = obj.lastMsgTime
-    if (obj.unreadCount) mySession.unreadCount = obj.unreadCount
-    if (obj.top) mySession.top = obj.top
-    if (obj.muted) mySession.muted = obj.muted
+    if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
+    if ('readTime' in obj) mySession.readTime = obj.readTime
+    if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
+    if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
+    if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
+    if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
+    if ('top' in obj) mySession.top = obj.top
+    if ('muted' in obj) mySession.muted = obj.muted
     if ('draft' in obj) mySession.draft = obj.draft
 
     let params = { sessionId: obj.sessionId }
-    if (obj.top) params.top = obj.top
-    if (obj.muted) params.muted = obj.muted
+    if ('top' in obj) params.top = obj.top
+    if ('muted' in obj) params.muted = obj.muted
     if ('draft' in obj) params.draft = obj.draft
 
-    if (obj.top || obj.muted || 'draft' in obj) {
+    if ('top' in obj || 'muted' in obj || 'draft' in obj) {
       msgUpdateSessionService(params)
     }
   }

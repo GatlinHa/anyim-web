@@ -140,7 +140,7 @@ const onInputBoxDragUpdate = ({ height }) => {
 const pullMsg = () => {
   // 1.如果session中存在未读信息，需要从服务器拉取，否则就使用本地缓存的消息，避免频繁查询服务器
   // 2.如果这个会话没有缓存过消息,需要从服务器拉取一定数量的历史消息
-  if (!msgRecords.value || messageData.sessionList[userData.curSessionId].unreadCount > 0) {
+  if (!msgRecords.value || choosedSession.value.unreadCount > 0) {
     msgChatPullMsgService({
     sessionId: userData.curSessionId,
     readMsgId: choosedSession.value.readMsgId,
@@ -149,13 +149,14 @@ const pullMsg = () => {
     })
     .then((res) => {      
       messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
+      const msgCount = res.data.data.msgList.length
       messageData.updateSession({
         sessionId: userData.curSessionId, 
         readMsgId: res.data.data.lastMsgId, 
         readTime: new Date(),
         lastMsgId: res.data.data.lastMsgId,
-        lastMsgContent: res.data.data.msgList.content, 
-        lastMsgTime: res.data.data.msgList.msgTime, 
+        lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
+        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime, 
         unreadCount: 0
       })
     })
@@ -166,8 +167,19 @@ const pullMsg = () => {
 const handleIsChoosed = (exportSession) => {
   if (userData.curSessionId !== exportSession.sessionId) {
     userData.setCurSessionId(exportSession.sessionId)
-    pullMsg()
   }
+  else {
+
+    // TODO 这个是为了临时消除接收端当前session下出现的未读图标,后面要通过""已读消息"来消除的
+    messageData.updateSession({
+        sessionId: userData.curSessionId, 
+        readMsgId: choosedSession.value.lastMsgId, 
+        readTime: new Date(),
+        unreadCount: 0
+      })
+  }
+
+  pullMsg()
 }
 
 const handleSwitchTag = (obj) => {
@@ -237,7 +249,7 @@ const msgListReachBottom = () => {
           <SessionBox
             v-for="item in sessionListSorted"
             :key="item.sessionId"
-            :sesionInfo="item"
+            :sessionId="item.sessionId"
             @isChoosed="handleIsChoosed"
             @switchTag="handleSwitchTag"
           ></SessionBox>

@@ -7,69 +7,73 @@ import GroupCard from '../group/GroupCard.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
-import { userStore } from '@/stores'
+import { userStore, messageStore } from '@/stores'
 
-const props = defineProps(['sesionInfo'])
+const props = defineProps(['sessionId'])
 const emit = defineEmits(['isChoosed', 'switchTag'])
 const userData = userStore()
+const messageData = messageStore()
+const sessionInfo = computed(() => {
+  return messageData.sessionList[props.sessionId]
+})
 
-const top = ref(props.sesionInfo.top)
-const muted = ref(props.sesionInfo.muted)
+const top = ref(sessionInfo.value.top)
+const muted = ref(sessionInfo.value.muted)
 const isShowUserCard = ref(false)
 const isShowGroupCard = ref(false)
 
 const exportSession = {
-  sessionId: props.sesionInfo.sessionId,
-  sessionType: props.sesionInfo.sessionType,
-  objectInfo: props.sesionInfo.objectInfo
+  sessionId: props.sessionId,
+  sessionType: sessionInfo.value.sessionType,
+  objectInfo: sessionInfo.value.objectInfo
 }
 
 const hasBeenChoosed = computed(() => {
-  return props.sesionInfo.sessionId === userData.curSessionId
+  return props.sessionId === userData.curSessionId
 })
 
 const showName = computed(() => {
-  switch (props.sesionInfo.sessionType) {
+  switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
-      return props.sesionInfo.objectInfo.nickName
+      return sessionInfo.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return props.sesionInfo.objectInfo.groupName
+      return sessionInfo.value.objectInfo.groupName
     default:
       return ''
   }
 })
 
 const showId = computed(() => {
-  switch (props.sesionInfo.sessionType) {
+  switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
-      return props.sesionInfo.objectInfo.account
+      return sessionInfo.value.objectInfo.account
     case MsgType.GROUP_CHAT:
-      return props.sesionInfo.objectInfo.groupId
+      return sessionInfo.value.objectInfo.groupId
     default:
       return ''
   }
 })
 
 const showAvatarThumb = computed(() => {
-  switch (props.sesionInfo.sessionType) {
+  switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
     case MsgType.GROUP_CHAT:
-      return props.sesionInfo.objectInfo.avatarThumb
+      return sessionInfo.value.objectInfo.avatarThumb
     default:
       return ''
   }
 })
 
 const showTime = computed(() => {
-  return sessionShowTime(props.sesionInfo.lastMsgTime)
+  return sessionShowTime(sessionInfo.value.lastMsgTime)
 })
 
 const isShowDraft = computed(() => {
-  return !hasBeenChoosed.value && props.sesionInfo.draft
+  return !hasBeenChoosed.value && sessionInfo.value.draft
 })
 
 const isShowUnreadCount = computed(() => {
-  return !hasBeenChoosed.value && props.sesionInfo.unreadCount > 0
+  return sessionInfo.value.unreadCount > 0
 })
 
 const handleUserCard = (flag) => {
@@ -79,7 +83,7 @@ const handleGroupCard = (flag) => {
   isShowGroupCard.value = flag
 }
 const showSomeoneCard = () => {
-  switch (props.sesionInfo.sessionType) {
+  switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
       isShowUserCard.value = true
       break
@@ -97,7 +101,7 @@ const switchTag = (func) => {
   clearTimeout(timer)
   timer = setTimeout(() => {
     emit('switchTag', {
-      sessionId: props.sesionInfo.sessionId,
+      sessionId: props.sessionId,
       top: top.value,
       muted: muted.value
     })
@@ -118,10 +122,10 @@ const switchTag = (func) => {
       <div class="header">
         <div class="title">
           <span class="showName">{{ showName || showId }}</span>
-          <span v-if="props.sesionInfo.objectInfo.account" class="showAccount">
-            {{ props.sesionInfo.objectInfo.account }}
+          <span v-if="sessionInfo.objectInfo.account" class="showAccount">
+            {{ sessionInfo.objectInfo.account }}
           </span>
-          <SessionTag :tagType="props.sesionInfo.sessionType"></SessionTag>
+          <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>
           <SessionTag v-if="top" tagType="top"></SessionTag>
           <SessionTag v-if="muted" tagType="mute"></SessionTag>
         </div>
@@ -132,11 +136,11 @@ const switchTag = (func) => {
       <div class="body">
         <div class="content">
           <span v-if="isShowUnreadCount" class="unread-count"
-            >[{{ props.sesionInfo.unreadCount }}条]</span
+            >[{{ sessionInfo.unreadCount }}条]</span
           >
           <span v-if="isShowDraft" class="draft">[草稿]</span>
           <span class="detail">{{
-            isShowDraft ? props.sesionInfo.draft : props.sesionInfo.lastMsgContent
+            isShowDraft ? sessionInfo.draft : sessionInfo.lastMsgContent
           }}</span>
         </div>
         <div class="action">
@@ -167,12 +171,12 @@ const switchTag = (func) => {
   <UserCard
     :isShow="isShowUserCard"
     @update:isShow="handleUserCard"
-    :account="props.sesionInfo.objectInfo.account"
+    :account="sessionInfo.objectInfo.account"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
     @update:isShow="handleGroupCard"
-    :group="props.sesionInfo.objectInfo"
+    :group="sessionInfo.objectInfo"
   ></GroupCard>
 </template>
 
