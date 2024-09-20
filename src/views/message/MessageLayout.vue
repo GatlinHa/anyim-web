@@ -154,8 +154,10 @@ const pullMsg = () => {
 
 // 表示有个session被选中了
 const handleIsChoosed = (exportSession) => {
-  userData.setLastSessionId(exportSession.sessionId)
-  pullMsg()
+  if (userData.lastSessionId !== exportSession.sessionId) {
+    userData.setLastSessionId(exportSession.sessionId)
+    pullMsg()
+  }
 }
 
 const handleSwitchTag = (obj) => {

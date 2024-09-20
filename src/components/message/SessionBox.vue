@@ -241,7 +241,7 @@ const switchTag = (func) => {
 
         .showAccount {
           font-size: 12px;
-          margin-left: 2px;
+          margin-right: 5px;
           color: gray;
           white-space: nowrap; /*不换行*/
         }
@@ -250,7 +250,7 @@ const switchTag = (func) => {
       .datetime {
         width: 52px;
         font-size: 12px;
-        margin-right: 5px;
+        margin-right: 10px;
         color: gray;
         display: flex;
         justify-content: flex-end;
@@ -297,6 +297,8 @@ const switchTag = (func) => {
 
           &:hover {
             opacity: 1;
+            background-color: #409eff;
+            color: #fff;
           }
         }
       }
