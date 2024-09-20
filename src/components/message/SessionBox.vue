@@ -25,7 +25,7 @@ const exportSession = {
 }
 
 const hasBeenChoosed = computed(() => {
-  return props.sesionInfo.sessionId === userData.lastSessionId
+  return props.sesionInfo.sessionId === userData.curSessionId
 })
 
 const showName = computed(() => {

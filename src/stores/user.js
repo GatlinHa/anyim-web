@@ -90,10 +90,10 @@ export const userStore = defineStore(
       clientId.value = id
     }
 
-    const lastSessionId = ref()
+    const curSessionId = ref()
 
-    const setLastSessionId = (sessionId) => {
-      lastSessionId.value = sessionId
+    const setCurSessionId = (sessionId) => {
+      curSessionId.value = sessionId
     }
 
     return {
@@ -112,8 +112,8 @@ export const userStore = defineStore(
       setIsRemenberMe,
       clientId,
       setClientId,
-      lastSessionId,
-      setLastSessionId
+      curSessionId,
+      setCurSessionId
     }
   },
   {

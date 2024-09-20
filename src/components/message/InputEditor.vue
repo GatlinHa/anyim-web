@@ -37,7 +37,7 @@ onUpdated(() => {
 
 // 监控session发生了切换
 watch(
-  () => userData.lastSessionId,
+  () => userData.curSessionId,
   (newValue, oldValue) => {
     let content = getQuill().getText().trim()
     // 草稿若没发生变动，则不触发存储

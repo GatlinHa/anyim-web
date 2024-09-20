@@ -74,7 +74,7 @@ class WsConnect {
   }
 
   /**
-   * 绑定事件，() => {}留白的需要业务自己定义处理逻辑
+   * 绑定事件
    */
   events = {
     [MsgType.HELLO]: () => {
@@ -82,7 +82,7 @@ class WsConnect {
       this.isConnect = true
     },
 
-    [MsgType.DELIVERED]: () => {},
+    [MsgType.DELIVERED]: () => {}, //需要发送时定义事件处理逻辑
 
     [MsgType.CHAT]: (msg) => {
       const msgId = msg.body.msgId

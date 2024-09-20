@@ -42,15 +42,22 @@ export const messageStore = defineStore('anyim-message', () => {
 
   /**
    * 格式：{sessionId_1: msgRecord_1, sessionId_2: msgRecord_2, ...}
+   * 其中msgRecord_x是数组
    */
-  const msgRecordList = ref({})
+  const msgRecordsList = ref({})
 
-  const setMsgRecordList = (msgRecords) => {
-    msgRecordList.value = msgRecords
+  const addMsgRecords = (sessionId, msgRecords) => {
+    if (!msgRecordsList.value[sessionId]) {
+      msgRecordsList.value[sessionId] = msgRecords.sort((a, b) => a.msgId - b.msgId)
+    } else {
+      msgRecordsList.value[sessionId] = [...msgRecordsList.value[sessionId], msgRecords].sort(
+        (a, b) => a.msgId - b.msgId
+      )
+    }
   }
 
-  const addMsgRecord = (msgRecord) => {
-    msgRecordList.value[msgRecord.sessionId] = msgRecord
+  const getMsgRecords = (sessionId) => {
+    return msgRecordsList.value[sessionId] ? msgRecordsList.value[sessionId] : []
   }
 
   return {
@@ -59,8 +66,8 @@ export const messageStore = defineStore('anyim-message', () => {
     addSession,
     updateSession,
 
-    msgRecordList,
-    setMsgRecordList,
-    addMsgRecord
+    msgRecordsList,
+    addMsgRecords,
+    getMsgRecords
   }
 })

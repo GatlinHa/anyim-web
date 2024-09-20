@@ -47,12 +47,20 @@ const loadCursor = computed(() => {
 })
 
 const choosedSession = computed(() => {
-  if (userData.lastSessionId)
-    return messageData.sessionList[userData.lastSessionId]
+  if (userData.curSessionId)
+    return messageData.sessionList[userData.curSessionId]
   else
     return {}
 })
-const msgRecords = ref([])
+
+const msgRecords = computed(() => {
+  if (userData.curSessionId) {
+    return messageData.msgRecordsList[userData.curSessionId]
+  }
+  else {
+    return []
+  }
+})
 
 const msgListDiv = ref()
 
@@ -63,13 +71,12 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
   
-  if (userData.lastSessionId) {
+  if (userData.curSessionId) {
     pullMsg()
   }
 
   if (msgListDiv.value) msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
 
-  bindMsgEvents()
 })
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -131,30 +138,35 @@ const onInputBoxDragUpdate = ({ height }) => {
 }
 
 const pullMsg = () => {
+  // 1.如果session中存在未读信息，需要从服务器拉去，否则就使用本地缓存的消息，避免频繁查询服务器
+  // 2.如果这个会话没有缓存过消息,需要从服务器拉去一定数量的历史消息
+  if (!msgRecords.value || messageData.sessionList[userData.curSessionId].unreadCount > 0) {
     msgChatPullMsgService({
-    sessionId: userData.lastSessionId,
+    sessionId: userData.curSessionId,
     readMsgId: choosedSession.value.readMsgId,
     readTime: choosedSession.value.readTime,
     pageSize: 20
-  })
-  .then((res) => {
-    msgRecords.value = res.data.data.msgList
-    messageData.updateSession({
-      sessionId: userData.lastSessionId, 
-      readMsgId: res.data.data.lastMsgId, 
-      readTime: new Date(),
-      lastMsgId: res.data.data.lastMsgId,
-      lastMsgContent: res.data.data.msgList.content, 
-      lastMsgTime: res.data.data.msgList.msgTime, 
-      unreadCount: 0
     })
-  })
+    .then((res) => {      
+      messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
+
+      messageData.updateSession({
+        sessionId: userData.curSessionId, 
+        readMsgId: res.data.data.lastMsgId, 
+        readTime: new Date(),
+        lastMsgId: res.data.data.lastMsgId,
+        lastMsgContent: res.data.data.msgList.content, 
+        lastMsgTime: res.data.data.msgList.msgTime, 
+        unreadCount: 0
+      })
+    })
+  }
 }
 
 // 表示有个session被选中了
 const handleIsChoosed = (exportSession) => {
-  if (userData.lastSessionId !== exportSession.sessionId) {
-    userData.setLastSessionId(exportSession.sessionId)
+  if (userData.curSessionId !== exportSession.sessionId) {
+    userData.setCurSessionId(exportSession.sessionId)
     pullMsg()
   }
 }
@@ -169,7 +181,7 @@ const handleExportContent = (content) => {
 
     const now = new Date()
     messageData.updateSession({
-      sessionId: userData.lastSessionId,
+      sessionId: userData.curSessionId,
       readMsgId: deliveredMsg.body.msgId,  // 发消息视为已经读到最后一条消息（自己发的）
       readTime: now,
       lastMsgId: deliveredMsg.body.msgId,  // lastMsgId = 最后一条消息（自己发的）
@@ -180,9 +192,9 @@ const handleExportContent = (content) => {
     })
 
     // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
-    if (userData.lastSessionId === deliveredMsg.body.sessionId) {
-      msgRecords.value.push({
-        sessionId: userData.lastSessionId,
+    if (userData.curSessionId === deliveredMsg.body.sessionId) {
+      messageData.addMsgRecords(userData.curSessionId, {
+        sessionId: userData.curSessionId,
         msgId: deliveredMsg.body.msgId,  
         fromId: userData.user.account,
         msgType: choosedSession.value.sessionType,
@@ -193,19 +205,12 @@ const handleExportContent = (content) => {
   })
 }
 
-const bindMsgEvents = () => {
-  wsConnect.bindEvent()
-}
-
 const onLoadMore = () => {
   isTopLoading.value = true
   loadMoreTips.value = ''
 }
 
 watch(msgRecords, () => {
-  if (msgRecords.value) {
-    msgRecords.value =  msgRecords.value.sort((a, b) => a.msgId - b.msgId)
-  }
   msgListReachBottom()
 }, {deep: true})
 
@@ -252,7 +257,7 @@ const msgListReachBottom = () => {
     <el-main class="msg-box">
       <el-image
         class="backgroup-image"
-        v-if="!userData.lastSessionId"
+        v-if="!userData.curSessionId"
         :src="backgroupImage"
         fit="cover"
       ></el-image>
