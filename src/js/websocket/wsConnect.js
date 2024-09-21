@@ -87,7 +87,6 @@ class WsConnect {
 
     [MsgType.CHAT]: async (msg) => {
       const messageData = messageStore()
-      const userData = userStore()
       const sessionId = combineId(msg.body.fromId, msg.body.toId)
       const now = new Date()
 
@@ -110,9 +109,8 @@ class WsConnect {
         unreadCount: messageData.sessionList[sessionId].unreadCount + 1
       })
 
-      // 当前会话需要把它添加到对话数组中,其他不需要
-      // 因为其他会话如果也添加的话,切到这个session还会再pull一把,这样就重复了
-      if (userData.curSessionId === sessionId) {
+      // 如果为真,说明这个session被pull过(一个session只会被pull一次,剩下就要在这里填入消息)
+      if (messageData.msgRecordsList[sessionId]) {
         messageData.addMsgRecords(sessionId, [
           {
             sessionId: sessionId,

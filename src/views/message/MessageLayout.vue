@@ -137,14 +137,12 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
+// 一个session只pull一次,之后通过ws通道更新消息
 const pullMsg = () => {
-  // 1.如果session中存在未读信息，需要从服务器拉取，否则就使用本地缓存的消息，避免频繁查询服务器
-  // 2.如果这个会话没有缓存过消息,需要从服务器拉取一定数量的历史消息
-  if (!msgRecords.value || choosedSession.value.unreadCount > 0) {
+  // 如果这个会话没有缓存过消息,则从服务端PullMsg,否则不拉取
+  if (!msgRecords.value) {
     msgChatPullMsgService({
     sessionId: userData.curSessionId,
-    readMsgId: choosedSession.value.readMsgId,
-    readTime: choosedSession.value.readTime,
     pageSize: 20
     })
     .then((res) => {      
@@ -152,8 +150,6 @@ const pullMsg = () => {
       const msgCount = res.data.data.msgList.length
       messageData.updateSession({
         sessionId: userData.curSessionId, 
-        readMsgId: res.data.data.lastMsgId, 
-        readTime: new Date(),
         lastMsgId: res.data.data.lastMsgId,
         lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
         lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime, 
@@ -169,16 +165,12 @@ const handleIsChoosed = (exportSession) => {
     userData.setCurSessionId(exportSession.sessionId)
   }
   else {
-
     // TODO 这个是为了临时消除接收端当前session下出现的未读图标,后面要通过""已读消息"来消除的
     messageData.updateSession({
         sessionId: userData.curSessionId, 
-        readMsgId: choosedSession.value.lastMsgId, 
-        readTime: new Date(),
         unreadCount: 0
       })
   }
-
   pullMsg()
 }
 
@@ -193,26 +185,21 @@ const handleExportContent = (content) => {
     const now = new Date()
     messageData.updateSession({
       sessionId: userData.curSessionId,
-      readMsgId: deliveredMsg.body.msgId,  // 发消息视为已经读到最后一条消息（自己发的）
-      readTime: now,
-      lastMsgId: deliveredMsg.body.msgId,  // lastMsgId = 最后一条消息（自己发的）
+      lastMsgId: deliveredMsg.body.msgId,  // 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
-      unreadCount: 0,  // readMsgId = lastMsgId = 最后一条消息（自己发的），因此未读是0
+      unreadCount: 0,  // 最后一条消息（自己发的），因此未读是0
       draft: ''  //草稿意味着要清空
     })
 
-    // 如果当前sessionid和这个“已发送”消息的sessionId，更新到msgRecords中
-    if (userData.curSessionId === deliveredMsg.body.sessionId) {
-      messageData.addMsgRecords(userData.curSessionId, [{
-        sessionId: userData.curSessionId,
-        msgId: deliveredMsg.body.msgId,  
-        fromId: userData.user.account,
-        msgType: choosedSession.value.sessionType,
-        content: content,
-        msgTime: now
-      }])
-    }
+    messageData.addMsgRecords(userData.curSessionId, [{
+      sessionId: userData.curSessionId,
+      msgId: deliveredMsg.body.msgId,  
+      fromId: userData.user.account,
+      msgType: choosedSession.value.sessionType,
+      content: content,
+      msgTime: now
+    }])
   })
 }
 

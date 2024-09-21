@@ -20,8 +20,6 @@ export const messageStore = defineStore('anyim-message', () => {
 
   const updateSession = (obj) => {
     const mySession = sessionList.value[obj.sessionId]
-    if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
-    if ('readTime' in obj) mySession.readTime = obj.readTime
     if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
     if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
     if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
