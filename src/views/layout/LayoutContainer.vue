@@ -22,7 +22,7 @@ const userData = userStore()
 onMounted(async () => {
   setTimeout(() => {
     wsConnect.createWs()
-  }, 3000) // 延迟启动，防止token刷新碰撞
+  }, 1500) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
 })
 

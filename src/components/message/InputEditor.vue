@@ -5,7 +5,7 @@ import { onMounted, ref, watch, onUpdated } from 'vue'
 import { userStore, messageStore } from '@/stores'
 
 const props = defineProps(['draft'])
-const emit = defineEmits(['exportContent'])
+const emit = defineEmits(['sendMessage'])
 const messageData = messageStore()
 const userData = userStore()
 
@@ -21,7 +21,7 @@ const handleEnter = () => {
     ElMessage.warning('请勿发送空内容')
     getQuill().setText('')
   } else {
-    emit('exportContent', content)
+    emit('sendMessage', content)
     getQuill().setText('')
   }
 }

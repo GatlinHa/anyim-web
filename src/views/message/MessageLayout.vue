@@ -39,15 +39,18 @@ const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
 
+const msgListDiv = ref()
+
 const hasNoMsg = ref(false)
-const isShowTopLoading = ref(true)
+const isShowTopLoading = ref(false)
 const isTopLoading = ref(false)
 const loadMoreTips = ref('查看更多消息')
 const loadCursor = computed(() => {
   return isTopLoading.value ? 'auto' : 'pointer'
 })
 
-const capacity = ref(15)
+const capacity = ref(15) //TODO 现在是调试值
+const step = 8 //TODO 现在是调试值
 const startIndex = computed(() => {
   if (userData.curSessionId) {
     const len = messageData.msgRecordsList[userData.curSessionId]?.length
@@ -58,23 +61,22 @@ const startIndex = computed(() => {
   }
 })
 
+const reset = () => {
+  capacity.value = 15
+  msgListReachBottom(false) //复位时msgList要触底
+  hasNoMsg.value = false
+  isShowTopLoading.value = false
+  isTopLoading.value = false
+  loadMoreTips.value = '查看更多消息'
+}
+
 const msgRecords = computed(() => {
-  if (userData.curSessionId) {
-    return messageData.msgRecordsList[userData.curSessionId]?.slice(startIndex.value)
-  }
-  else {
-    return []
-  }
+  return userData.curSessionId ? messageData.msgRecordsList[userData.curSessionId]?.slice(startIndex.value) : []
 })
 
 const choosedSession = computed(() => {
-  if (userData.curSessionId)
-    return messageData.sessionList[userData.curSessionId]
-  else
-    return {}
+  return userData.curSessionId ? messageData.sessionList[userData.curSessionId] : {}
 })
-
-const msgListDiv = ref()
 
 onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
@@ -83,13 +85,33 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
   
-  if (userData.curSessionId) {
-    pullMsg()  //页面加载进来,如果默认有要加载的对话,则首次pull时model=0
-  }
-
-  if (msgListDiv.value) msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
-
+  if (userData.curSessionId) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
 })
+
+const handleMsgListScroll = () => {
+  if (msgListDiv.value.scrollTop === 0) {
+    isShowTopLoading.value = true
+    const len = messageData.msgRecordsList[userData.curSessionId]?.length
+    if (len > capacity.value) {
+      if (len - capacity.value > step) {
+        capacity.value += step
+      }
+      else {
+        capacity.value = len
+      }
+      isShowTopLoading.value = false
+    }
+    else {
+      pullMsg(1, msgRecords.value[0].msgId)
+    }
+
+    // 保持页面对话的锚定位置
+    const scrollHeight = msgListDiv.value.scrollHeight
+    nextTick(() => {
+      msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
+    });
+  }
+}
 
 // 把sessionList转成数组，并按照lastMsgTime排序
 const sessionListSorted = computed(() => {
@@ -150,6 +172,11 @@ const onInputBoxDragUpdate = ({ height }) => {
 }
 
 const pullMsg = (mode = 0, ref = -1) => {
+  if (hasNoMsg.value) {
+    return
+  }
+
+  isTopLoading.value = true
   const params = {
       sessionId: userData.curSessionId, 
       pageSize: 30, 
@@ -159,7 +186,7 @@ const pullMsg = (mode = 0, ref = -1) => {
 
   msgChatPullMsgService(params)
   .then((res) => {
-    const msgCount = res.data.data.msgList.length
+    const msgCount = res.data.data.count
     if (msgCount > 0) {
       messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
       messageData.updateSession({
@@ -168,10 +195,17 @@ const pullMsg = (mode = 0, ref = -1) => {
         lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
         lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
       })
+      if (mode === 0) msgListReachBottom()
     }
     else {
-      if (mode === 1) hasNoMsg.value = true
+      if (mode === 1) {
+        hasNoMsg.value = true
+      }
     }
+  })
+  .finally(() => {
+    isShowTopLoading.value = false
+    isTopLoading.value = false
   })
 }
 
@@ -179,6 +213,7 @@ const pullMsg = (mode = 0, ref = -1) => {
 const handleIsChoosed = (exportSession) => {
   if (userData.curSessionId !== exportSession.sessionId) {
     userData.setCurSessionId(exportSession.sessionId)
+    reset()
   }
   else {
     // TODO 这个是为了临时消除接收端当前session下出现的未读图标,后面要通过""已读消息"来消除的
@@ -188,7 +223,7 @@ const handleIsChoosed = (exportSession) => {
       })
   }
 
-  // 如果切换的session之前的消息没有被pull过,则需要pull一次(mode=0)
+  // 如果切换到的session,在之前都没有pull过消息,则需要pull一次(mode=0方式),且lastMsgId有值才pull
   if (!msgRecords.value && choosedSession.value.lastMsgId) {
     pullMsg()
   }
@@ -198,7 +233,7 @@ const handleSwitchTag = (obj) => {
   messageData.updateSession(obj)
 }
 
-const handleExportContent = (content) => {
+const handleSendMessage = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
 
@@ -220,23 +255,31 @@ const handleExportContent = (content) => {
       content: content,
       msgTime: now
     }])
+
+    msgListReachBottom(false) // 发送消息之后,msgList要触底
   })
 }
 
 const onLoadMore = () => {
   isTopLoading.value = true
   loadMoreTips.value = ''
+  pullMsg(1, msgRecords.value[0].msgId)
 }
 
-watch(msgRecords, () => {
-  msgListReachBottom()
+watch(msgRecords, () => { 
+  // nextTick(() => {
+  //   console.log('======>2.scrollTopBefore: ', scrollTopBefore);
+  //   // msgListDiv.value.scrollTop = scrollTopBefore
+  //   console.log('======>3.scrollTop: ', msgListDiv.value.scrollTop);
+  // })
 }, {deep: true})
 
-const msgListReachBottom = () => {
+const msgListReachBottom = (isSmooth = true) => {
+  const behavior = isSmooth ? 'smooth' : 'instant'
   nextTick(() => {
     msgListDiv.value.scrollTo({
       top: msgListDiv.value.scrollHeight,
-      behavior: 'smooth'
+      behavior: behavior  // 还有一种是instant,没有动画过渡效果
     })
   })
 }
@@ -309,7 +352,7 @@ const msgListReachBottom = () => {
               {{ loadMoreTips }}
             </div>
           </div>
-          <div class="show-box my-scrollbar" ref="msgListDiv">
+          <div class="show-box my-scrollbar" ref="msgListDiv" @scroll="handleMsgListScroll">
             <div class="message-main">
               <span v-if="hasNoMsg" class="no-more-message">当前无更多消息</span>
               <MessageItem
@@ -371,7 +414,7 @@ const msgListReachBottom = () => {
               <el-main class="input-box-main">
                 <InputEditor
                   :draft="choosedSession?.draft"
-                  @exportContent="handleExportContent"
+                  @sendMessage="handleSendMessage"
                 ></InputEditor>
               </el-main>
             </el-container>
