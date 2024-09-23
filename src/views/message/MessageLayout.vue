@@ -39,6 +39,7 @@ const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
 
+const hasNoMsg = ref(false)
 const isShowTopLoading = ref(true)
 const isTopLoading = ref(false)
 const loadMoreTips = ref('查看更多消息')
@@ -46,20 +47,31 @@ const loadCursor = computed(() => {
   return isTopLoading.value ? 'auto' : 'pointer'
 })
 
+const capacity = ref(15)
+const startIndex = computed(() => {
+  if (userData.curSessionId) {
+    const len = messageData.msgRecordsList[userData.curSessionId]?.length
+    return len > capacity.value ? len - capacity.value : 0
+  }
+  else {
+     return 0
+  }
+})
+
+const msgRecords = computed(() => {
+  if (userData.curSessionId) {
+    return messageData.msgRecordsList[userData.curSessionId]?.slice(startIndex.value)
+  }
+  else {
+    return []
+  }
+})
+
 const choosedSession = computed(() => {
   if (userData.curSessionId)
     return messageData.sessionList[userData.curSessionId]
   else
     return {}
-})
-
-const msgRecords = computed(() => {
-  if (userData.curSessionId) {
-    return messageData.msgRecordsList[userData.curSessionId]
-  }
-  else {
-    return []
-  }
 })
 
 const msgListDiv = ref()
@@ -72,7 +84,7 @@ onMounted(async () => {
   messageData.setSessionList(res.data.data) //入缓存
   
   if (userData.curSessionId) {
-    pullMsg()
+    pullMsg()  //页面加载进来,如果默认有要加载的对话,则首次pull时model=0
   }
 
   if (msgListDiv.value) msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight
@@ -137,26 +149,30 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
-// 一个session只pull一次,之后通过ws通道更新消息
-const pullMsg = () => {
-  // 如果这个会话没有缓存过消息,则从服务端PullMsg,否则不拉取
-  if (!msgRecords.value) {
-    msgChatPullMsgService({
-    sessionId: userData.curSessionId,
-    pageSize: 20
-    })
-    .then((res) => {      
+const pullMsg = (mode = 0, ref = -1) => {
+  const params = {
+      sessionId: userData.curSessionId, 
+      pageSize: 30, 
+      mode: mode, 
+      refMsgId: ref
+    }
+
+  msgChatPullMsgService(params)
+  .then((res) => {
+    const msgCount = res.data.data.msgList.length
+    if (msgCount > 0) {
       messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
-      const msgCount = res.data.data.msgList.length
       messageData.updateSession({
         sessionId: userData.curSessionId, 
         lastMsgId: res.data.data.lastMsgId,
         lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
-        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime, 
-        unreadCount: 0
+        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
       })
-    })
-  }
+    }
+    else {
+      if (mode === 1) hasNoMsg.value = true
+    }
+  })
 }
 
 // 表示有个session被选中了
@@ -171,7 +187,11 @@ const handleIsChoosed = (exportSession) => {
         unreadCount: 0
       })
   }
-  pullMsg()
+
+  // 如果切换的session之前的消息没有被pull过,则需要pull一次(mode=0)
+  if (!msgRecords.value && choosedSession.value.lastMsgId) {
+    pullMsg()
+  }
 }
 
 const handleSwitchTag = (obj) => {
@@ -291,7 +311,7 @@ const msgListReachBottom = () => {
           </div>
           <div class="show-box my-scrollbar" ref="msgListDiv">
             <div class="message-main">
-              <span class="no-more-message">当前无更多消息</span>
+              <span v-if="hasNoMsg" class="no-more-message">当前无更多消息</span>
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"

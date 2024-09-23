@@ -194,6 +194,7 @@ class WsConnect {
   }
 
   async onMessage(evt) {
+    console.log('onMessage', evt)
     const arrayBuffer = await evt.data.arrayBuffer()
     const frames = this.decode(new Uint8Array(arrayBuffer))
 

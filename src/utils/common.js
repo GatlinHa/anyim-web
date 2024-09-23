@@ -50,6 +50,10 @@ export const generateClientId = () => {
 }
 
 export const sessionShowTime = (datetime) => {
+  if (!datetime) {
+    return ''
+  }
+
   const now = new Date()
   const inputDate = new Date(datetime)
 
