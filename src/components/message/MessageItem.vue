@@ -5,10 +5,29 @@ import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
-const props = defineProps(['msg', 'obj', 'lastMsgTime'])
+const props = defineProps(['msg', 'obj', 'lastMsgTime', 'firstMsgId', 'hasNoMoreMsg'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
+const loadMoreTips = ref('查看更多消息')
+const isLoadMoreLoading = ref(false)
+const isShowLoadMore = computed(() => {
+  if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
+    return true
+  } else {
+    return false
+  }
+})
+const isShowNoMoreMsg = computed(() => {
+  if (props.msg.msgId === props.firstMsgId && props.hasNoMoreMsg) {
+    return true
+  } else {
+    return false
+  }
+})
+const loadMoreCursor = computed(() => {
+  return isLoadMoreLoading.value ? 'auto' : 'pointer'
+})
 
 const isSelf = computed(() => {
   return userData.user.account === props.msg.fromId
@@ -52,6 +71,11 @@ const handleUserCard = (flag) => {
   isShowUserCard.value = flag
 }
 
+const onLoadMore = () => {
+  isLoadMoreLoading.value = true
+  loadMoreTips.value = ''
+}
+
 const onShowUserCard = () => {
   isShowUserCard.value = true
 }
@@ -59,6 +83,18 @@ const onShowUserCard = () => {
 
 <template>
   <div v-if="props.msg.msgType === MsgType.CHAT" class="message-item">
+    <span v-if="isShowNoMoreMsg" class="no-more-message">当前无更多消息</span>
+    <div v-if="isShowLoadMore" class="load-more-wrapper">
+      <div
+        class="load-more"
+        v-loading="isLoadMoreLoading"
+        @click="onLoadMore"
+        :style="{ cursor: loadMoreCursor }"
+      >
+        {{ loadMoreTips }}
+      </div>
+    </div>
+
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
@@ -114,6 +150,41 @@ const onShowUserCard = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  .no-more-message {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: gray;
+    user-select: text;
+  }
+
+  .load-more-wrapper {
+    width: 100%;
+    height: 30px;
+    margin-bottom: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .load-more {
+      color: #409eff;
+      font-size: 14px;
+    }
+
+    :deep(.circular) {
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      top: 12px;
+      left: -12px;
+    }
+  }
 
   .datetime {
     border-radius: 2px;

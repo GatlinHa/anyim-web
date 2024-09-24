@@ -41,16 +41,10 @@ const inputBoxHeightMax = 500
 
 const msgListDiv = ref()
 
-const hasNoMsg = ref(false)
-const isShowTopLoading = ref(false)
-const isTopLoading = ref(false)
-const loadMoreTips = ref('查看更多消息')
-const loadCursor = computed(() => {
-  return isTopLoading.value ? 'auto' : 'pointer'
-})
+const hasNoMoreMsg = ref(false)
 
 const capacity = ref(15) //TODO 现在是调试值
-const step = 8 //TODO 现在是调试值
+const step = 15 //TODO 现在是调试值
 const startIndex = computed(() => {
   if (userData.curSessionId) {
     const len = messageData.msgRecordsList[userData.curSessionId]?.length
@@ -64,10 +58,7 @@ const startIndex = computed(() => {
 const reset = () => {
   capacity.value = 15
   msgListReachBottom(false) //复位时msgList要触底
-  hasNoMsg.value = false
-  isShowTopLoading.value = false
-  isTopLoading.value = false
-  loadMoreTips.value = '查看更多消息'
+  hasNoMoreMsg.value = false
 }
 
 const msgRecords = computed(() => {
@@ -88,9 +79,12 @@ onMounted(async () => {
   if (userData.curSessionId) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
 })
 
-const handleMsgListScroll = () => {
+const handleMsgListScroll = async () => {
   if (msgListDiv.value.scrollTop === 0) {
-    isShowTopLoading.value = true
+    if (messageData.msgRecordsList[userData.curSessionId]?.length === capacity.value) {
+      await pullMsg(1, msgRecords.value[0].msgId)
+    }
+
     const len = messageData.msgRecordsList[userData.curSessionId]?.length
     if (len > capacity.value) {
       if (len - capacity.value > step) {
@@ -99,10 +93,6 @@ const handleMsgListScroll = () => {
       else {
         capacity.value = len
       }
-      isShowTopLoading.value = false
-    }
-    else {
-      pullMsg(1, msgRecords.value[0].msgId)
     }
 
     // 保持页面对话的锚定位置
@@ -146,12 +136,16 @@ const showId = computed(() => {
   }
 })
 
+const firstMsgId = computed(() => {
+  return messageData.msgRecordsList[userData.curSessionId][0].msgId
+})
+
 const getLastMsgTime = (index) => {
-    if (index > 0) {
+  if (index > 0) {
     return msgRecords.value[index - 1].msgTime;
-    } else {
-      return null;
-    }
+  } else {
+    return null;
+  }
 }
 
 const onAsideDragUpdate = ({ width }) => {
@@ -171,12 +165,11 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
-const pullMsg = (mode = 0, ref = -1) => {
-  if (hasNoMsg.value) {
+const pullMsg = async (mode = 0, ref = -1) => {
+  if (hasNoMoreMsg.value) {
     return
   }
 
-  isTopLoading.value = true
   const params = {
       sessionId: userData.curSessionId, 
       pageSize: 30, 
@@ -184,29 +177,23 @@ const pullMsg = (mode = 0, ref = -1) => {
       refMsgId: ref
     }
 
-  msgChatPullMsgService(params)
-  .then((res) => {
-    const msgCount = res.data.data.count
-    if (msgCount > 0) {
-      messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
-      messageData.updateSession({
-        sessionId: userData.curSessionId, 
-        lastMsgId: res.data.data.lastMsgId,
-        lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
-        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
-      })
-      if (mode === 0) msgListReachBottom()
+  const res = await msgChatPullMsgService(params)
+  const msgCount = res.data.data.count
+  if (msgCount > 0) {
+    messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
+    messageData.updateSession({
+      sessionId: userData.curSessionId, 
+      lastMsgId: res.data.data.lastMsgId,
+      lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
+      lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
+    })
+    if (mode === 0) msgListReachBottom()
+  }
+  else {
+    if (mode === 1) {
+      hasNoMoreMsg.value = true
     }
-    else {
-      if (mode === 1) {
-        hasNoMsg.value = true
-      }
-    }
-  })
-  .finally(() => {
-    isShowTopLoading.value = false
-    isTopLoading.value = false
-  })
+  }
 }
 
 // 表示有个session被选中了
@@ -260,11 +247,9 @@ const handleSendMessage = (content) => {
   })
 }
 
-const onLoadMore = () => {
-  isTopLoading.value = true
-  loadMoreTips.value = ''
-  pullMsg(1, msgRecords.value[0].msgId)
-}
+// const onLoadMore = () => {
+//   pullMsg(1, msgRecords.value[0].msgId)
+// }
 
 watch(msgRecords, () => { 
   // nextTick(() => {
@@ -341,26 +326,16 @@ const msgListReachBottom = (isSmooth = true) => {
           </div>
         </el-header>
         <el-main class="body">
-          <div v-if="isShowTopLoading" class="top-loading">
-            <div
-              v-loading="isTopLoading"
-              :fullscreen="false"
-              class="loading-box"
-              @click="onLoadMore"
-              :style="{ cursor: loadCursor }"
-            >
-              {{ loadMoreTips }}
-            </div>
-          </div>
           <div class="show-box my-scrollbar" ref="msgListDiv" @scroll="handleMsgListScroll">
             <div class="message-main">
-              <span v-if="hasNoMsg" class="no-more-message">当前无更多消息</span>
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
                 :msg="item"
                 :obj="choosedSession?.objectInfo"
                 :lastMsgTime="getLastMsgTime(index)"
+                :firstMsgId="firstMsgId"
+                :hasNoMoreMsg="hasNoMoreMsg"
               ></MessageItem>
             </div>
           </div>
@@ -509,29 +484,6 @@ const msgListReachBottom = (isSmooth = true) => {
         overflow: hidden; // 禁用它的滚动条
         position: relative;
 
-        .top-loading {
-          width: 100%;
-          height: 30px;
-          position: absolute;
-          top: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          .loading-box {
-            color: #409eff;
-            font-size: 14px;
-          }
-
-          :deep(.circular) {
-            width: 24px;
-            height: 24px;
-            position: absolute;
-            top: 12px;
-            left: -12px;
-          }
-        }
-
         .show-box {
           width: 100%;
           display: flex;
@@ -543,17 +495,6 @@ const msgListReachBottom = (isSmooth = true) => {
             height: 100%;
             padding: 20px;
             padding-right: 15px;
-
-            .no-more-message {
-              width: 100%;
-              height: 40px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              font-size: 14px;
-              color: gray;
-              user-select: text;
-            }
           }
         }
 
