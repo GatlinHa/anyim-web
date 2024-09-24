@@ -81,7 +81,10 @@ onMounted(async () => {
 
 const handleMsgListScroll = async () => {
   if (msgListDiv.value.scrollTop === 0) {
+    let loadMoreHeight = 0
     if (messageData.msgRecordsList[userData.curSessionId]?.length === capacity.value) {
+      // 拉取消息之后,"加载更多"的提示会消失,它的高度也会消失,因此需要修正一下高度
+      loadMoreHeight = document.querySelector('.load-more-wrapper').clientHeight
       await pullMsg(1, msgRecords.value[0].msgId)
     }
 
@@ -96,7 +99,7 @@ const handleMsgListScroll = async () => {
     }
 
     // 保持页面对话的锚定位置
-    const scrollHeight = msgListDiv.value.scrollHeight
+    const scrollHeight = msgListDiv.value.scrollHeight + loadMoreHeight
     nextTick(() => {
       msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
     });
