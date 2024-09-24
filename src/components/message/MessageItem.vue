@@ -5,12 +5,19 @@ import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
-const props = defineProps(['msg', 'obj', 'lastMsgTime', 'firstMsgId', 'hasNoMoreMsg'])
+const props = defineProps([
+  'msg',
+  'obj',
+  'lastMsgTime',
+  'firstMsgId',
+  'hasNoMoreMsg',
+  'isLoadMoreLoading'
+])
+const emit = defineEmits(['loadMore'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
 const loadMoreTips = ref('查看更多消息')
-const isLoadMoreLoading = ref(false)
 const isShowLoadMore = computed(() => {
   if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
     return true
@@ -26,7 +33,7 @@ const isShowNoMoreMsg = computed(() => {
   }
 })
 const loadMoreCursor = computed(() => {
-  return isLoadMoreLoading.value ? 'auto' : 'pointer'
+  return props.isLoadMoreLoading ? 'auto' : 'pointer'
 })
 
 const isSelf = computed(() => {
@@ -72,8 +79,8 @@ const handleUserCard = (flag) => {
 }
 
 const onLoadMore = () => {
-  isLoadMoreLoading.value = true
   loadMoreTips.value = ''
+  emit('loadMore')
 }
 
 const onShowUserCard = () => {
@@ -87,7 +94,7 @@ const onShowUserCard = () => {
     <div v-if="isShowLoadMore" class="load-more-wrapper">
       <div
         class="load-more"
-        v-loading="isLoadMoreLoading"
+        v-loading="props.isLoadMoreLoading"
         @click="onLoadMore"
         :style="{ cursor: loadMoreCursor }"
       >
@@ -153,8 +160,8 @@ const onShowUserCard = () => {
 
   .no-more-message {
     width: 100%;
-    height: 40px;
-    margin-bottom: 10px;
+    height: 30px;
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;

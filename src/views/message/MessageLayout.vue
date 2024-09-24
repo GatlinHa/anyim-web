@@ -42,6 +42,7 @@ const inputBoxHeightMax = 500
 const msgListDiv = ref()
 
 const hasNoMoreMsg = ref(false)
+const isLoadMoreLoading = ref(true)
 
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
@@ -81,10 +82,8 @@ onMounted(async () => {
 
 const handleMsgListScroll = async () => {
   if (msgListDiv.value.scrollTop === 0) {
-    let loadMoreHeight = 0
+    const scrollHeight = msgListDiv.value.scrollHeight
     if (messageData.msgRecordsList[userData.curSessionId]?.length === capacity.value) {
-      // 拉取消息之后,"加载更多"的提示会消失,它的高度也会消失,因此需要修正一下高度
-      loadMoreHeight = document.querySelector('.load-more-wrapper').clientHeight
       await pullMsg(1, msgRecords.value[0].msgId)
     }
 
@@ -99,7 +98,6 @@ const handleMsgListScroll = async () => {
     }
 
     // 保持页面对话的锚定位置
-    const scrollHeight = msgListDiv.value.scrollHeight + loadMoreHeight
     nextTick(() => {
       msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
     });
@@ -174,12 +172,13 @@ const pullMsg = async (mode = 0, ref = -1) => {
   }
 
   const params = {
-      sessionId: userData.curSessionId, 
-      pageSize: 30, 
-      mode: mode, 
-      refMsgId: ref
-    }
+    sessionId: userData.curSessionId, 
+    pageSize: 30, 
+    mode: mode, 
+    refMsgId: ref
+  }
 
+  if (mode === 1) isLoadMoreLoading.value = true // mode=1才需要显示"加载更多中..."
   const res = await msgChatPullMsgService(params)
   const msgCount = res.data.data.count
   if (msgCount > 0) {
@@ -197,6 +196,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
       hasNoMoreMsg.value = true
     }
   }
+  if (mode === 1) isLoadMoreLoading.value = false
 }
 
 // 表示有个session被选中了
@@ -250,9 +250,25 @@ const handleSendMessage = (content) => {
   })
 }
 
-// const onLoadMore = () => {
-//   pullMsg(1, msgRecords.value[0].msgId)
-// }
+const onLoadMore = async () => {
+  const scrollHeight = msgListDiv.value.scrollHeight
+  const scrollTop = msgListDiv.value.scrollTop
+  await pullMsg(1, msgRecords.value[0].msgId)
+  const len = messageData.msgRecordsList[userData.curSessionId]?.length
+  if (len > capacity.value) {
+    if (len - capacity.value > step) {
+      capacity.value += step
+    }
+    else {
+      capacity.value = len
+    }
+  }
+
+  // 保持页面对话的锚定位置
+  nextTick(() => {
+    msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight + scrollTop
+  });
+}
 
 watch(msgRecords, () => { 
   // nextTick(() => {
@@ -339,6 +355,8 @@ const msgListReachBottom = (isSmooth = true) => {
                 :lastMsgTime="getLastMsgTime(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
+                :isLoadMoreLoading="isLoadMoreLoading"
+                @loadMore="onLoadMore"
               ></MessageItem>
             </div>
           </div>
