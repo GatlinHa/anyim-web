@@ -39,6 +39,7 @@ const hideTooltip = () => {
     top: 36px;
     font-size: 12px;
     z-index: 1;
+    white-space: nowrap;
   }
 }
 </style>

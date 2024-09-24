@@ -12,7 +12,8 @@ import {
   Picture,
   FolderAdd,
   CreditCard,
-  PictureRounded
+  PictureRounded,
+  ArrowDownBold
 } from '@element-plus/icons-vue'
 import DragLine from '@/components/common/DragLine.vue'
 import SearchBox from '@/components/common/SearchBox.vue'
@@ -44,6 +45,7 @@ const msgListDiv = ref()
 const hasNoMoreMsg = ref(false)
 const isLoadMoreLoading = ref(false)
 const isLoading = ref(false)
+const isShowReturnBottom = ref(false)
 
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
@@ -61,6 +63,9 @@ const reset = () => {
   capacity.value = 15
   msgListReachBottom(false) //复位时msgList要触底
   hasNoMoreMsg.value = false
+  isLoadMoreLoading.value = false
+  isLoading.value = false
+  isShowReturnBottom.value = false
 }
 
 const msgRecords = computed(() => {
@@ -107,6 +112,9 @@ const handleMsgListScroll = async () => {
       msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
     });
   }
+
+  const clientHeight = document.querySelector('.show-box').clientHeight
+  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 150 //控制是否显示"回到底部"的按钮
 }
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -295,6 +303,11 @@ const msgListReachBottom = (isSmooth = true) => {
   })
 }
 
+const onReturnBottom = () => {
+  msgListReachBottom()
+  isShowReturnBottom.value = false
+}
+
 </script>
 
 <template>
@@ -352,9 +365,14 @@ const msgListReachBottom = (isSmooth = true) => {
           </div>
         </el-header>
         <el-main class="body">
-          <div class="show-box my-scrollbar" ref="msgListDiv" @scroll="handleMsgListScroll">
+          <div class="show-box">
             <div v-if="isLoading" class="show-loading">数据加载中……</div>
-            <div v-else class="message-main">
+            <div
+              v-else
+              class="message-main my-scrollbar"
+              ref="msgListDiv"
+              @scroll="handleMsgListScroll"
+            >
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
@@ -367,6 +385,14 @@ const msgListReachBottom = (isSmooth = true) => {
                 @loadMore="onLoadMore"
               ></MessageItem>
             </div>
+            <el-button
+              type="primary"
+              class="return-bottom"
+              :class="{ showIt: isShowReturnBottom }"
+              @click="onReturnBottom"
+            >
+              返回底部<el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
+            </el-button>
           </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
             <el-container class="input-box-container">
@@ -528,13 +554,26 @@ const msgListReachBottom = (isSmooth = true) => {
           width: 100%;
           display: flex;
           flex: 1;
-          overflow-y: scroll; // 用它的滚动条
+          overflow: hidden;
+          position: relative;
 
           .message-main {
             width: 100%;
             height: 100%;
             padding: 20px;
             padding-right: 15px;
+            overflow-y: scroll; // 用它的滚动条
+          }
+
+          .return-bottom {
+            position: absolute;
+            left: 0px;
+            bottom: -40px;
+            transition: bottom 1s ease-in-out;
+
+            &.showIt {
+              bottom: -2px;
+            }
           }
         }
 
