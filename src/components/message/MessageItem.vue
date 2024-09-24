@@ -17,7 +17,9 @@ const emit = defineEmits(['loadMore'])
 
 const userData = userStore()
 const isShowUserCard = ref(false)
-const loadMoreTips = ref('查看更多消息')
+const loadMoreTips = computed(() => {
+  return props.isLoadMoreLoading ? '' : '查看更多消息'
+})
 const isShowLoadMore = computed(() => {
   if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
     return true
