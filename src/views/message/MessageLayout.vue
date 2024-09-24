@@ -42,7 +42,8 @@ const inputBoxHeightMax = 500
 const msgListDiv = ref()
 
 const hasNoMoreMsg = ref(false)
-const isLoadMoreLoading = ref(true)
+const isLoadMoreLoading = ref(false)
+const isLoading = ref(false)
 
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
@@ -182,6 +183,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
     refMsgId: ref
   }
 
+  if (mode === 0) isLoading.value = true // mode=0才需要显示"数据加载中..."
   if (mode === 1) isLoadMoreLoading.value = true // mode=1才需要显示"加载更多中..."
   const res = await msgChatPullMsgService(params)
   const msgCount = res.data.data.count
@@ -200,6 +202,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
       hasNoMoreMsg.value = true
     }
   }
+  if (mode === 0) isLoading.value = false
   if (mode === 1) isLoadMoreLoading.value = false
 }
 
@@ -350,7 +353,8 @@ const msgListReachBottom = (isSmooth = true) => {
         </el-header>
         <el-main class="body">
           <div class="show-box my-scrollbar" ref="msgListDiv" @scroll="handleMsgListScroll">
-            <div class="message-main">
+            <div v-if="isLoading" class="show-loading">数据加载中……</div>
+            <div v-else class="message-main">
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
@@ -508,6 +512,17 @@ const msgListReachBottom = (isSmooth = true) => {
         flex-direction: column;
         overflow: hidden; // 禁用它的滚动条
         position: relative;
+
+        .show-loading {
+          width: 100%;
+          height: 30px;
+          padding: 10px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: #409eff;
+          font-size: 14px;
+        }
 
         .show-box {
           width: 100%;
