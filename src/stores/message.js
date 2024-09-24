@@ -59,6 +59,11 @@ export const messageStore = defineStore('anyim-message', () => {
     }
   }
 
+  const clear = () => {
+    sessionList.value = {}
+    msgRecordsList.value = {}
+  }
+
   return {
     sessionList,
     setSessionList,
@@ -66,6 +71,8 @@ export const messageStore = defineStore('anyim-message', () => {
     updateSession,
 
     msgRecordsList,
-    addMsgRecords
+    addMsgRecords,
+
+    clear
   }
 })

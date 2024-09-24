@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -78,6 +78,10 @@ onMounted(async () => {
   messageData.setSessionList(res.data.data) //入缓存
   
   if (userData.curSessionId) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
+})
+
+onUnmounted(() => {
+  messageData.clear()
 })
 
 const handleMsgListScroll = async () => {
