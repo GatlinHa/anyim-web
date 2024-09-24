@@ -114,7 +114,7 @@ const handleMsgListScroll = async () => {
   }
 
   const clientHeight = document.querySelector('.show-box').clientHeight
-  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 150 //控制是否显示"回到底部"的按钮
+  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 300 //控制是否显示"回到底部"的按钮
 }
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -559,7 +559,6 @@ const onReturnBottom = () => {
 
           .message-main {
             width: 100%;
-            height: 100%;
             padding: 20px;
             padding-right: 15px;
             overflow-y: scroll; // 用它的滚动条
