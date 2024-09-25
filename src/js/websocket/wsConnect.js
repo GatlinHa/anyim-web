@@ -2,7 +2,12 @@ import { Msg, MsgType } from '@/proto/msg'
 import { userStore, messageStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 import { generateSign, combineId } from '@/utils/common'
-import { chatConstructor, heartBeatConstructor, helloConstructor } from './constructor'
+import {
+  chatConstructor,
+  heartBeatConstructor,
+  helloConstructor,
+  chatReadConstructor
+} from './constructor'
 import { msgChatCreateSessionService } from '@/api/message'
 
 class WsConnect {
@@ -132,7 +137,8 @@ class WsConnect {
   dataConstructor = {
     [MsgType.HELLO]: helloConstructor,
     [MsgType.HEART_BEAT]: heartBeatConstructor,
-    [MsgType.CHAT]: chatConstructor
+    [MsgType.CHAT]: chatConstructor,
+    [MsgType.CHAT_READ]: chatReadConstructor
   }
 
   /**

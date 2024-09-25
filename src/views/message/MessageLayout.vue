@@ -180,6 +180,11 @@ const onInputBoxDragUpdate = ({ height }) => {
   })
 }
 
+/**
+ * 通过REST接口主动拉取消息
+ * @param mode 0:拉取最近N条;1:按refMsgId向上拉取N条(上滑加载更多消息)
+ * @param ref mode=1时要携带,标记更新的msgId位置
+ */
 const pullMsg = async (mode = 0, ref = -1) => {
   if (hasNoMoreMsg.value) {
     return
@@ -204,7 +209,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
       lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
       lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
     })
-    if (mode === 0) msgListReachBottom()
+    if (mode === 0) msgListReachBottom(false)
   }
   else {
     if (mode === 1) {
@@ -221,17 +226,21 @@ const handleIsChoosed = (exportSession) => {
     sessionId.value = exportSession.sessionId
     reset()
   }
-  else {
-    // TODO 这个是为了临时消除接收端当前session下出现的未读图标,后面要通过""已读消息"来消除的
-    messageData.updateSession({
-        sessionId: sessionId.value, 
-        unreadCount: 0
-      })
-  }
-
-  // 如果切换到的session,在之前都没有pull过消息,则需要pull一次(mode=0方式),且lastMsgId有值才pull
+  // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
   if (!msgRecords.value && choosedSession.value.lastMsgId) {
     pullMsg()
+  }
+  // 给这个session的对方回已读消息
+  if (choosedSession.value.readMsgId < choosedSession.value.lastMsgId) {
+    const content = choosedSession.value.lastMsgId.toString()
+    wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
+    // 更新本地缓存的已读位置
+    messageData.updateSession({
+      sessionId: sessionId.value, 
+      readMsgId: content,
+      readTime: new Date(),
+      unreadCount: 0
+    })
   }
 }
 

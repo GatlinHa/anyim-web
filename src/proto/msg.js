@@ -286,9 +286,10 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} HEART_BEAT=1 HEART_BEAT value
  * @property {number} CHAT=2 CHAT value
  * @property {number} GROUP_CHAT=3 GROUP_CHAT value
- * @property {number} READ=4 READ value
- * @property {number} DELIVERED=5 DELIVERED value
- * @property {number} SENDER_SYNC=6 SENDER_SYNC value
+ * @property {number} CHAT_READ=4 CHAT_READ value
+ * @property {number} GROUP_CHAT_READ=5 GROUP_CHAT_READ value
+ * @property {number} DELIVERED=6 DELIVERED value
+ * @property {number} SENDER_SYNC=7 SENDER_SYNC value
  * @property {number} CLOSE_BY_READ_IDLE=10 CLOSE_BY_READ_IDLE value
  * @property {number} CLOSE_BY_ERROR_MAGIC=11 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
@@ -300,9 +301,10 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[1] = 'HEART_BEAT')] = 1
   values[(valuesById[2] = 'CHAT')] = 2
   values[(valuesById[3] = 'GROUP_CHAT')] = 3
-  values[(valuesById[4] = 'READ')] = 4
-  values[(valuesById[5] = 'DELIVERED')] = 5
-  values[(valuesById[6] = 'SENDER_SYNC')] = 6
+  values[(valuesById[4] = 'CHAT_READ')] = 4
+  values[(valuesById[5] = 'GROUP_CHAT_READ')] = 5
+  values[(valuesById[6] = 'DELIVERED')] = 6
+  values[(valuesById[7] = 'SENDER_SYNC')] = 7
   values[(valuesById[10] = 'CLOSE_BY_READ_IDLE')] = 10
   values[(valuesById[11] = 'CLOSE_BY_ERROR_MAGIC')] = 11
   values[(valuesById[99] = 'DEFAULT')] = 99
@@ -495,6 +497,7 @@ export const Header = ($root.Header = (() => {
         case 4:
         case 5:
         case 6:
+        case 7:
         case 10:
         case 11:
         case 99:
@@ -541,17 +544,21 @@ export const Header = ($root.Header = (() => {
       case 3:
         message.msgType = 3
         break
-      case 'READ':
+      case 'CHAT_READ':
       case 4:
         message.msgType = 4
         break
-      case 'DELIVERED':
+      case 'GROUP_CHAT_READ':
       case 5:
         message.msgType = 5
         break
-      case 'SENDER_SYNC':
+      case 'DELIVERED':
       case 6:
         message.msgType = 6
+        break
+      case 'SENDER_SYNC':
+      case 7:
+        message.msgType = 7
         break
       case 'CLOSE_BY_READ_IDLE':
       case 10:

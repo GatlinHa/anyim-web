@@ -48,6 +48,8 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('top' in obj) mySession.top = obj.top
     if ('muted' in obj) mySession.muted = obj.muted
     if ('draft' in obj) mySession.draft = obj.draft
+    if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
+    if ('readTime' in obj) mySession.readTime = obj.readTime
   }
 
   /**
