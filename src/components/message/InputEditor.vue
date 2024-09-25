@@ -1,13 +1,12 @@
 <script setup>
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import { onMounted, ref, watch, onUpdated } from 'vue'
-import { userStore, messageStore } from '@/stores'
+import { onMounted, ref, watch } from 'vue'
+import { messageStore } from '@/stores'
 
-const props = defineProps(['draft'])
+const props = defineProps(['sessionId', 'draft'])
 const emit = defineEmits(['sendMessage'])
 const messageData = messageStore()
-const userData = userStore()
 
 const editorRef = ref()
 
@@ -29,15 +28,12 @@ const handleEnter = () => {
 onMounted(() => {
   // 给组件增加滚动条样式
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
-})
-
-onUpdated(() => {
   getQuill().setText(props.draft)
 })
 
 // 监控session发生了切换
 watch(
-  () => userData.curSessionId,
+  () => props.sessionId,
   (newValue, oldValue) => {
     let content = getQuill().getText().trim()
     // 草稿若没发生变动，则不触发存储

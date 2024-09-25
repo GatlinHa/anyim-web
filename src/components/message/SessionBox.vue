@@ -7,11 +7,10 @@ import GroupCard from '../group/GroupCard.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
-import { userStore, messageStore } from '@/stores'
+import { messageStore } from '@/stores'
 
-const props = defineProps(['sessionId'])
+const props = defineProps(['sessionId', 'choosedSessionId'])
 const emit = defineEmits(['isChoosed', 'switchTag'])
-const userData = userStore()
 const messageData = messageStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
@@ -29,7 +28,7 @@ const exportSession = {
 }
 
 const hasBeenChoosed = computed(() => {
-  return props.sessionId === userData.curSessionId
+  return props.sessionId === props.choosedSessionId
 })
 
 const showName = computed(() => {

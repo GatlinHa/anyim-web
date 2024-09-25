@@ -31,6 +31,7 @@ import wsConnect from '@/js/websocket/wsConnect'
 const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
+const sessionId = ref('')
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -50,8 +51,8 @@ const isShowReturnBottom = ref(false)
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
 const startIndex = computed(() => {
-  if (userData.curSessionId) {
-    const len = messageData.msgRecordsList[userData.curSessionId]?.length
+  if (sessionId.value) {
+    const len = messageData.msgRecordsList[sessionId.value]?.length
     return len > capacity.value ? len - capacity.value : 0
   }
   else {
@@ -69,11 +70,11 @@ const reset = () => {
 }
 
 const msgRecords = computed(() => {
-  return userData.curSessionId ? messageData.msgRecordsList[userData.curSessionId]?.slice(startIndex.value) : []
+  return messageData.msgRecordsList[sessionId.value]?.slice(startIndex.value)
 })
 
 const choosedSession = computed(() => {
-  return userData.curSessionId ? messageData.sessionList[userData.curSessionId] : {}
+  return messageData.sessionList[sessionId.value]
 })
 
 onMounted(async () => {
@@ -83,7 +84,7 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
   
-  if (userData.curSessionId) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
+  if (sessionId.value) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
 })
 
 onUnmounted(() => {
@@ -93,11 +94,11 @@ onUnmounted(() => {
 const handleMsgListScroll = async () => {
   if (msgListDiv.value.scrollTop === 0) {
     const scrollHeight = msgListDiv.value.scrollHeight
-    if (messageData.msgRecordsList[userData.curSessionId]?.length <= capacity.value) {
+    if (messageData.msgRecordsList[sessionId.value]?.length <= capacity.value) {
       await pullMsg(1, msgRecords.value[0].msgId)
     }
 
-    const len = messageData.msgRecordsList[userData.curSessionId]?.length
+    const len = messageData.msgRecordsList[sessionId.value]?.length
     if (len > capacity.value) {
       if (len - capacity.value > step) {
         capacity.value += step
@@ -129,7 +130,7 @@ const sessionListSorted = computed(() => {
 })
 
 const showName = computed(() => {
-  switch (choosedSession.value?.sessionType) {
+  switch (choosedSession.value.sessionType) {
     case MsgType.CHAT:
       return choosedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
@@ -140,7 +141,7 @@ const showName = computed(() => {
 })
 
 const showId = computed(() => {
-  switch (choosedSession.value?.sessionType) {
+  switch (choosedSession.value.sessionType) {
     case MsgType.CHAT:
       return choosedSession.value.objectInfo.account
     case MsgType.GROUP_CHAT:
@@ -151,7 +152,7 @@ const showId = computed(() => {
 })
 
 const firstMsgId = computed(() => {
-  return messageData.msgRecordsList[userData.curSessionId][0].msgId
+  return messageData.msgRecordsList[sessionId.value][0].msgId
 })
 
 const getLastMsgTime = (index) => {
@@ -185,7 +186,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
   }
 
   const params = {
-    sessionId: userData.curSessionId, 
+    sessionId: sessionId.value, 
     pageSize: 30, 
     mode: mode, 
     refMsgId: ref
@@ -196,9 +197,9 @@ const pullMsg = async (mode = 0, ref = -1) => {
   const res = await msgChatPullMsgService(params)
   const msgCount = res.data.data.count
   if (msgCount > 0) {
-    messageData.addMsgRecords(userData.curSessionId, res.data.data.msgList)
+    messageData.addMsgRecords(sessionId.value, res.data.data.msgList)
     messageData.updateSession({
-      sessionId: userData.curSessionId, 
+      sessionId: sessionId.value, 
       lastMsgId: res.data.data.lastMsgId,
       lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
       lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
@@ -216,14 +217,14 @@ const pullMsg = async (mode = 0, ref = -1) => {
 
 // 表示有个session被选中了
 const handleIsChoosed = (exportSession) => {
-  if (userData.curSessionId !== exportSession.sessionId) {
-    userData.setCurSessionId(exportSession.sessionId)
+  if (sessionId.value !== exportSession.sessionId) {
+    sessionId.value = exportSession.sessionId
     reset()
   }
   else {
     // TODO 这个是为了临时消除接收端当前session下出现的未读图标,后面要通过""已读消息"来消除的
     messageData.updateSession({
-        sessionId: userData.curSessionId, 
+        sessionId: sessionId.value, 
         unreadCount: 0
       })
   }
@@ -244,7 +245,7 @@ const handleSendMessage = (content) => {
 
     const now = new Date()
     messageData.updateSession({
-      sessionId: userData.curSessionId,
+      sessionId: sessionId.value,
       lastMsgId: deliveredMsg.body.msgId,  // 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
@@ -252,8 +253,8 @@ const handleSendMessage = (content) => {
       draft: ''  //草稿意味着要清空
     })
 
-    messageData.addMsgRecords(userData.curSessionId, [{
-      sessionId: userData.curSessionId,
+    messageData.addMsgRecords(sessionId.value, [{
+      sessionId: sessionId.value,
       msgId: deliveredMsg.body.msgId,  
       fromId: userData.user.account,
       msgType: choosedSession.value.sessionType,
@@ -269,7 +270,7 @@ const onLoadMore = async () => {
   const scrollHeight = msgListDiv.value.scrollHeight
   const scrollTop = msgListDiv.value.scrollTop
   await pullMsg(1, msgRecords.value[0].msgId)
-  const len = messageData.msgRecordsList[userData.curSessionId]?.length
+  const len = messageData.msgRecordsList[sessionId.value]?.length
   if (len > capacity.value) {
     if (len - capacity.value > step) {
       capacity.value += step
@@ -296,7 +297,7 @@ watch(msgRecords, () => {
 const msgListReachBottom = (isSmooth = true) => {
   const behavior = isSmooth ? 'smooth' : 'instant'
   nextTick(() => {
-    msgListDiv.value.scrollTo({
+    msgListDiv.value?.scrollTo({
       top: msgListDiv.value.scrollHeight,
       behavior: behavior  // 还有一种是instant,没有动画过渡效果
     })
@@ -324,6 +325,7 @@ const onReturnBottom = () => {
             v-for="item in sessionListSorted"
             :key="item.sessionId"
             :sessionId="item.sessionId"
+            :choosedSessionId="sessionId"
             @isChoosed="handleIsChoosed"
             @switchTag="handleSwitchTag"
           ></SessionBox>
@@ -342,7 +344,7 @@ const onReturnBottom = () => {
     <el-main class="msg-box">
       <el-image
         class="backgroup-image"
-        v-if="!userData.curSessionId"
+        v-if="!sessionId"
         :src="backgroupImage"
         fit="cover"
       ></el-image>
@@ -377,7 +379,7 @@ const onReturnBottom = () => {
                 v-for="(item, index) in msgRecords"
                 :key="index"
                 :msg="item"
-                :obj="choosedSession?.objectInfo"
+                :obj="choosedSession.objectInfo"
                 :lastMsgTime="getLastMsgTime(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
@@ -443,7 +445,8 @@ const onReturnBottom = () => {
               </el-header>
               <el-main class="input-box-main">
                 <InputEditor
-                  :draft="choosedSession?.draft || ''"
+                  :sessionId="sessionId"
+                  :draft="choosedSession.draft || ''"
                   @sendMessage="handleSendMessage"
                 ></InputEditor>
               </el-main>

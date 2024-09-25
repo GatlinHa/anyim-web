@@ -19,15 +19,6 @@ export const messageStore = defineStore('anyim-message', () => {
   }
 
   const updateSession = (obj) => {
-    const mySession = sessionList.value[obj.sessionId]
-    if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
-    if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
-    if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
-    if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
-    if ('top' in obj) mySession.top = obj.top
-    if ('muted' in obj) mySession.muted = obj.muted
-    if ('draft' in obj) mySession.draft = obj.draft
-
     let params = { sessionId: obj.sessionId }
     let flag = false
     if ('top' in obj) {
@@ -39,6 +30,7 @@ export const messageStore = defineStore('anyim-message', () => {
       params.muted = obj.muted
       flag = true
     }
+    // 注意,这里draft允许为""空串,有实际意义
     if ('draft' in obj && sessionList.value[obj.sessionId].draft !== obj.draft) {
       params.draft = obj.draft
       flag = true
@@ -47,6 +39,15 @@ export const messageStore = defineStore('anyim-message', () => {
     if (flag) {
       msgUpdateSessionService(params)
     }
+
+    const mySession = sessionList.value[obj.sessionId]
+    if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
+    if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
+    if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
+    if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
+    if ('top' in obj) mySession.top = obj.top
+    if ('muted' in obj) mySession.muted = obj.muted
+    if ('draft' in obj) mySession.draft = obj.draft
   }
 
   /**
