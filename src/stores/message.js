@@ -29,11 +29,22 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('draft' in obj) mySession.draft = obj.draft
 
     let params = { sessionId: obj.sessionId }
-    if ('top' in obj) params.top = obj.top
-    if ('muted' in obj) params.muted = obj.muted
-    if ('draft' in obj) params.draft = obj.draft
+    let flag = false
+    if ('top' in obj) {
+      params.top = obj.top
+      flag = true
+    }
 
-    if ('top' in obj || 'muted' in obj || 'draft' in obj) {
+    if ('muted' in obj) {
+      params.muted = obj.muted
+      flag = true
+    }
+    if ('draft' in obj && sessionList.value[obj.sessionId].draft !== obj.draft) {
+      params.draft = obj.draft
+      flag = true
+    }
+
+    if (flag) {
       msgUpdateSessionService(params)
     }
   }

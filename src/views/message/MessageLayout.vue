@@ -93,7 +93,7 @@ onUnmounted(() => {
 const handleMsgListScroll = async () => {
   if (msgListDiv.value.scrollTop === 0) {
     const scrollHeight = msgListDiv.value.scrollHeight
-    if (messageData.msgRecordsList[userData.curSessionId]?.length === capacity.value) {
+    if (messageData.msgRecordsList[userData.curSessionId]?.length <= capacity.value) {
       await pullMsg(1, msgRecords.value[0].msgId)
     }
 
@@ -443,7 +443,7 @@ const onReturnBottom = () => {
               </el-header>
               <el-main class="input-box-main">
                 <InputEditor
-                  :draft="choosedSession?.draft"
+                  :draft="choosedSession?.draft || ''"
                   @sendMessage="handleSendMessage"
                 ></InputEditor>
               </el-main>
