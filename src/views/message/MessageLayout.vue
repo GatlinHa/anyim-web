@@ -62,7 +62,7 @@ const startIndex = computed(() => {
 
 const reset = () => {
   capacity.value = 15
-  msgListReachBottom(false) //复位时msgList要触底
+  msgListReachBottom(false)
   hasNoMoreMsg.value = false
   isLoadMoreLoading.value = false
   isLoading.value = false
@@ -83,8 +83,6 @@ onMounted(async () => {
 
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
-  
-  if (sessionId.value) pullMsg()  //页面加载进来,如果缓存了sessionId,则要加载对话
 })
 
 onUnmounted(() => {
@@ -114,8 +112,9 @@ const handleMsgListScroll = async () => {
     });
   }
 
+  //控制是否显示"回到底部"的按钮
   const clientHeight = document.querySelector('.show-box').clientHeight
-  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 300 //控制是否显示"回到底部"的按钮
+  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 300
 }
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -209,7 +208,6 @@ const pullMsg = async (mode = 0, ref = -1) => {
       lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
       lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
     })
-    if (mode === 0) msgListReachBottom(false)
   }
   else {
     if (mode === 1) {
@@ -221,16 +219,18 @@ const pullMsg = async (mode = 0, ref = -1) => {
 }
 
 // 表示有个session被选中了
-const handleIsChoosed = (exportSession) => {
+const handleIsChoosed = async (exportSession) => {
   if (sessionId.value !== exportSession.sessionId) {
     sessionId.value = exportSession.sessionId
     reset()
+    
+    // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
+    if (!msgRecords.value && choosedSession.value.lastMsgId) {
+      await pullMsg()
+      msgListReachBottom()
+    }
+    handleRead()
   }
-  // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
-  if (!msgRecords.value && choosedSession.value.lastMsgId) {
-    pullMsg()
-  }
-  handleRead()
 }
 
 const handleRead = () => {
@@ -311,7 +311,7 @@ const msgListReachBottom = (isSmooth = true) => {
   nextTick(() => {
     msgListDiv.value?.scrollTo({
       top: msgListDiv.value.scrollHeight,
-      behavior: behavior  // 还有一种是instant,没有动画过渡效果
+      behavior: behavior
     })
   })
 }
@@ -389,7 +389,7 @@ const onMouseMove = () => {
               v-else
               class="message-main my-scrollbar"
               ref="msgListDiv"
-              @scroll="handleMsgListScroll"
+              @wheel="handleMsgListScroll"
             >
               <MessageItem
                 v-for="(item, index) in msgRecords"
