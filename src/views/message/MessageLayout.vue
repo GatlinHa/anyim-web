@@ -205,12 +205,14 @@ const pullMsg = async (mode = 0, ref = -1) => {
   const msgCount = res.data.data.count
   if (msgCount > 0) {
     messageData.addMsgRecords(sessionId.value, res.data.data.msgList)
-    messageData.updateSession({
-      sessionId: sessionId.value, 
-      lastMsgId: res.data.data.lastMsgId,
-      lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
-      lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
-    })
+    if (mode === 0) {
+      messageData.updateSession({
+        sessionId: sessionId.value, 
+        lastMsgId: res.data.data.lastMsgId,
+        lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
+        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
+      })
+    }
   }
 
   if (msgCount < pageSize) {
