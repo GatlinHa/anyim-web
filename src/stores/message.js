@@ -72,6 +72,7 @@ export const messageStore = defineStore('anyim-message', () => {
           el.innerText = el.innerText === title ? newTitle : title
         }, 1000)
       } else {
+        clearInterval(task)
         el.innerText = title
       }
     }
