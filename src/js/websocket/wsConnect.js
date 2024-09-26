@@ -1,14 +1,13 @@
 import { Msg, MsgType } from '@/proto/msg'
-import { userStore, messageStore } from '@/stores'
+import { userStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
-import { generateSign, combineId } from '@/utils/common'
+import { generateSign } from '@/utils/common'
 import {
   chatConstructor,
   heartBeatConstructor,
   helloConstructor,
   chatReadConstructor
 } from './constructor'
-import { msgChatCreateSessionService } from '@/api/message'
 
 class WsConnect {
   /**
@@ -87,45 +86,8 @@ class WsConnect {
       this.heartBeat.start()
       this.isConnect = true
     },
-
     [MsgType.DELIVERED]: () => {}, //需要发送时定义事件处理逻辑
-
-    [MsgType.CHAT]: async (msg) => {
-      const messageData = messageStore()
-      const sessionId = combineId(msg.body.fromId, msg.body.toId)
-      const now = new Date()
-
-      // 如果sessionList中没有,需要先创建session
-      if (!messageData.sessionList[sessionId]) {
-        const res = await msgChatCreateSessionService({
-          sessionId: sessionId,
-          account: msg.body.toId,
-          remoteId: msg.body.fromId,
-          sessionType: MsgType.CHAT
-        })
-        messageData.addSession(res.data.data)
-      }
-
-      messageData.updateSession({
-        sessionId: sessionId,
-        lastMsgId: msg.body.msgId,
-        lastMsgContent: msg.body.content,
-        lastMsgTime: now,
-        unreadCount: messageData.sessionList[sessionId].unreadCount + 1
-      })
-
-      messageData.addMsgRecords(sessionId, [
-        {
-          sessionId: sessionId,
-          msgId: msg.body.msgId,
-          fromId: msg.body.fromId,
-          msgType: MsgType.CHAT,
-          content: msg.body.content,
-          msgTime: now
-        }
-      ])
-    },
-
+    [MsgType.CHAT]: () => {},
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
     }

@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -27,6 +27,7 @@ import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService, msgChatPullMsgService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
+import { onReceiveChatMsg } from '@/js/event'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -83,6 +84,7 @@ onMounted(async () => {
 
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
+  wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
 })
 
 onUnmounted(() => {
@@ -298,14 +300,6 @@ const onLoadMore = async () => {
     msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight + scrollTop
   });
 }
-
-watch(msgRecords, () => { 
-  // nextTick(() => {
-  //   console.log('======>2.scrollTopBefore: ', scrollTopBefore);
-  //   // msgListDiv.value.scrollTop = scrollTopBefore
-  //   console.log('======>3.scrollTop: ', msgListDiv.value.scrollTop);
-  // })
-}, {deep: true})
 
 const msgListReachBottom = (isSmooth = true) => {
   const behavior = isSmooth ? 'smooth' : 'instant'
