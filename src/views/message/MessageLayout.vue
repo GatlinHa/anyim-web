@@ -230,8 +230,11 @@ const handleIsChoosed = (exportSession) => {
   if (!msgRecords.value && choosedSession.value.lastMsgId) {
     pullMsg()
   }
-  // 给这个session的对方回已读消息
-  if (choosedSession.value.readMsgId < choosedSession.value.lastMsgId) {
+  handleRead()
+}
+
+const handleRead = () => {
+  if (sessionId.value && choosedSession.value.readMsgId < choosedSession.value.lastMsgId) {
     const content = choosedSession.value.lastMsgId.toString()
     wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
     // 更新本地缓存的已读位置
@@ -318,10 +321,14 @@ const onReturnBottom = () => {
   isShowReturnBottom.value = false
 }
 
+const onMouseMove = () => {
+  handleRead()
+}
+
 </script>
 
 <template>
-  <el-container class="msg-container-hole">
+  <el-container class="msg-container-hole" @mousemove="onMouseMove">
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
       <div class="msg-aside-main">
         <div class="header">
