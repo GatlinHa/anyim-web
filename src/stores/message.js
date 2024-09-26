@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { msgUpdateSessionService } from '@/api/message'
 
 // 消息功能相关需要缓存的数据，不持久化存储
@@ -51,6 +51,31 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
     if ('readTime' in obj) mySession.readTime = obj.readTime
   }
+
+  const totalUnReadCount = computed(() => {
+    return Object.values(sessionList.value).reduce(
+      (sum, item) => (item?.unreadCount ? sum + item.unreadCount : sum),
+      0
+    )
+  })
+
+  const el = document.getElementsByTagName('title')[0]
+  const title = import.meta.env.VITE_TITLE
+  let task = null
+  watch(
+    () => totalUnReadCount.value,
+    (newValue) => {
+      if (totalUnReadCount.value > 0) {
+        const newTitle = `您有(${newValue})条未读消息!`
+        clearInterval(task)
+        task = setInterval(() => {
+          el.innerText = el.innerText === title ? newTitle : title
+        }, 1000)
+      } else {
+        el.innerText = title
+      }
+    }
+  )
 
   /**
    * 格式：{sessionId_1: msgRecord_1, sessionId_2: msgRecord_2, ...}
