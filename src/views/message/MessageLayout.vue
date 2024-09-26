@@ -90,7 +90,7 @@ onUnmounted(() => {
 })
 
 const handleMsgListScroll = async () => {
-  if (msgListDiv.value.scrollTop === 0) {
+  if (msgListDiv.value.scrollTop === 0 && !isLoadMoreLoading.value && !hasNoMoreMsg.value) {
     const scrollHeight = msgListDiv.value.scrollHeight
     if (messageData.msgRecordsList[sessionId.value]?.length <= capacity.value) {
       await pullMsg(1, msgRecords.value[0].msgId)
@@ -189,9 +189,10 @@ const pullMsg = async (mode = 0, ref = -1) => {
     return
   }
 
+  const pageSize = 30;
   const params = {
     sessionId: sessionId.value, 
-    pageSize: 30, 
+    pageSize: pageSize, 
     mode: mode, 
     refMsgId: ref
   }
@@ -209,11 +210,11 @@ const pullMsg = async (mode = 0, ref = -1) => {
       lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
     })
   }
-  else {
-    if (mode === 1) {
-      hasNoMoreMsg.value = true
-    }
+
+  if (msgCount < pageSize) {
+    hasNoMoreMsg.value = true
   }
+
   if (mode === 0) isLoading.value = false
   if (mode === 1) isLoadMoreLoading.value = false
 }
