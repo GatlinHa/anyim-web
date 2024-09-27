@@ -8,8 +8,10 @@ import AvatarIcon from './AvatarIcon.vue'
 const props = defineProps([
   'msg',
   'obj',
+  'readMsgId',
   'lastMsgTime',
   'firstMsgId',
+  'isFirstNew',
   'hasNoMoreMsg',
   'isLoadMoreLoading'
 ])
@@ -19,6 +21,10 @@ const userData = userStore()
 const isShowUserCard = ref(false)
 const loadMoreTips = computed(() => {
   return props.isLoadMoreLoading ? '' : '查看更多消息'
+})
+
+const isUnreadMsg = computed(() => {
+  return props.readMsgId < props.msg.msgId
 })
 const isShowLoadMore = computed(() => {
   if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
@@ -91,7 +97,11 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div v-if="props.msg.msgType === MsgType.CHAT" class="message-item">
+  <div
+    v-if="props.msg.msgType === MsgType.CHAT"
+    class="message-item"
+    :class="{ unreadMsg: isUnreadMsg }"
+  >
     <span v-if="isShowNoMoreMsg" class="no-more-message">当前无更多消息</span>
     <div v-if="isShowLoadMore" class="load-more-wrapper">
       <div
@@ -103,7 +113,9 @@ const onShowUserCard = () => {
         {{ loadMoreTips }}
       </div>
     </div>
-
+    <el-divider v-if="isFirstNew" class="new-messages-tips" content-position="center"
+      >以下是最新消息</el-divider
+    >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
@@ -192,6 +204,17 @@ const onShowUserCard = () => {
       position: absolute;
       top: 12px;
       left: -12px;
+    }
+  }
+
+  .new-messages-tips {
+    width: 40%;
+    :deep(.el-divider__text) {
+      background-color: #f5f5f5;
+      font-size: 14px;
+      font-weight: normal;
+      color: gray;
+      white-space: nowrap;
     }
   }
 

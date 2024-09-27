@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -13,7 +13,8 @@ import {
   FolderAdd,
   CreditCard,
   PictureRounded,
-  ArrowDownBold
+  ArrowDownBold,
+  ArrowUp
 } from '@element-plus/icons-vue'
 import DragLine from '@/components/common/DragLine.vue'
 import SearchBox from '@/components/common/SearchBox.vue'
@@ -43,7 +44,14 @@ const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
 
 const msgListDiv = ref()
+const newMsgTips = ref({
+  isShowTopTips: false,
+  isShowBottomTips: false,
+  unreadCount: 0,
+  firstElement: null
+})
 
+const lastReadMsgId = ref()
 const hasNoMoreMsg = ref(false)
 const isLoadMoreLoading = ref(false)
 const isLoading = ref(false)
@@ -91,7 +99,7 @@ onUnmounted(() => {
   messageData.clear()
 })
 
-const handleMsgListScroll = async () => {
+const handleMsgListWheel = async () => {
   if (msgListDiv.value.scrollTop === 0 && !isLoadMoreLoading.value && !hasNoMoreMsg.value) {
     const scrollHeight = msgListDiv.value.scrollHeight
     if (messageData.msgRecordsList[sessionId.value]?.length <= capacity.value) {
@@ -115,8 +123,14 @@ const handleMsgListScroll = async () => {
   }
 
   //控制是否显示"回到底部"的按钮
-  const clientHeight = document.querySelector('.show-box').clientHeight
-  isShowReturnBottom.value = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight > 300
+  const clientHeight = document.querySelector('.message-main').clientHeight
+  const diffToBottom = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight
+  newMsgTips.value.isShowBottomTips = diffToBottom < 50 ? false : newMsgTips.value.isShowBottomTips
+  // isShowReturnBottom.value = diffToBottom > 300  // 暂时取消这个提示功能
+
+  if (newMsgTips.value.firstElement?.getBoundingClientRect().top > 0) {
+    newMsgTips.value.isShowTopTips = false
+  }
 }
 
 // 把sessionList转成数组，并按照lastMsgTime排序
@@ -162,6 +176,18 @@ const getLastMsgTime = (index) => {
   } else {
     return null;
   }
+}
+
+/**
+ * 判断是否是打开session时的第一条未读消息
+ * @param index 
+ */
+const isFirstNew = (index) => {
+if (index > 0 
+    && msgRecords.value[index - 1].msgId == lastReadMsgId.value) {
+    return true
+  }
+  return false;
 }
 
 const onAsideDragUpdate = ({ width }) => {
@@ -234,6 +260,7 @@ const handleIsChoosed = async (exportSession) => {
       await pullMsg()
       msgListReachBottom()
     }
+    lastReadMsgId.value = choosedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
     handleRead()
   }
 }
@@ -311,21 +338,56 @@ const msgListReachBottom = (isSmooth = true) => {
       behavior: behavior
     })
   })
+  newMsgTips.value.isShowBottomTips = false
 }
 
 const onReturnBottom = () => {
   msgListReachBottom()
-  isShowReturnBottom.value = false
 }
 
-const onMouseMove = () => {
+const onReachFirtUnReadMsg = () => {
+  const msgListRect = msgListDiv.value.getBoundingClientRect();
+  const firstElRect = newMsgTips.value.firstElement.getBoundingClientRect()
+  nextTick(() => {
+    msgListDiv.value.scrollTop = msgListDiv.value.scrollTop - (msgListRect.top - firstElRect.top)
+  });
+  newMsgTips.value.isShowTopTips = false
+}
+
+const onClickMsgContainer = () => {
   handleRead()
 }
+
+/**
+ * 监视msgRecords的数据变化,给出新消息的tips提示
+ */
+watch(() => msgRecords.value, (oldValue) => {
+  if (!oldValue || choosedSession.value.unreadCount === 0) return
+  nextTick(() => {
+    const unreadMsgEls = document.querySelectorAll('.unreadMsg');
+    if (unreadMsgEls.length === 0) return
+    const msgListRect = msgListDiv.value.getBoundingClientRect();
+    Array.from(unreadMsgEls).some((el) => {
+      const rect = el.getBoundingClientRect()
+      if (rect.bottom < msgListRect.top) {
+        newMsgTips.value.isShowTopTips = true
+        newMsgTips.value.unreadCount = choosedSession.value.unreadCount
+        newMsgTips.value.firstElement = el
+        return true
+      }
+      else if (rect.top > msgListRect.bottom) {
+        newMsgTips.value.isShowBottomTips = true
+        newMsgTips.value.unreadCount = choosedSession.value.unreadCount
+        return true
+      }
+    })
+  })
+})
 
 </script>
 
 <template>
-  <el-container class="msg-container-hole" @mousemove="onMouseMove">
+  <el-container class="msg-container-hole" @click="onClickMsgContainer">
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
       <div class="msg-aside-main">
         <div class="header">
@@ -386,14 +448,16 @@ const onMouseMove = () => {
               v-else
               class="message-main my-scrollbar"
               ref="msgListDiv"
-              @wheel="handleMsgListScroll"
+              @wheel="handleMsgListWheel"
             >
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
                 :msg="item"
                 :obj="choosedSession.objectInfo"
+                :readMsgId="choosedSession.readMsgId"
                 :lastMsgTime="getLastMsgTime(index)"
+                :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
                 :isLoadMoreLoading="isLoadMoreLoading"
@@ -407,6 +471,26 @@ const onMouseMove = () => {
               @click="onReturnBottom"
             >
               返回底部<el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
+            </el-button>
+            <el-button
+              type="primary"
+              class="bottom-tips"
+              :class="{ showIt: newMsgTips.isShowBottomTips }"
+              @click="onReturnBottom"
+            >
+              {{ newMsgTips.unreadCount }}条未读消息<el-icon class="el-icon--right"
+                ><ArrowDownBold
+              /></el-icon>
+            </el-button>
+            <el-button
+              type="primary"
+              class="top-tips"
+              :class="{ showIt: newMsgTips.isShowTopTips }"
+              @click="onReachFirtUnReadMsg"
+            >
+              {{ newMsgTips.unreadCount }}条未读消息<el-icon class="el-icon--right"
+                ><ArrowUp
+              /></el-icon>
             </el-button>
           </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
@@ -588,6 +672,28 @@ const onMouseMove = () => {
 
             &.showIt {
               bottom: -2px;
+            }
+          }
+
+          .bottom-tips {
+            position: absolute;
+            right: 60px;
+            bottom: -40px;
+            transition: bottom 1s ease-in-out;
+
+            &.showIt {
+              bottom: -2px;
+            }
+          }
+
+          .top-tips {
+            position: absolute;
+            right: 60px;
+            top: -40px;
+            transition: top 1s ease-in-out;
+
+            &.showIt {
+              top: -2px;
             }
           }
         }
