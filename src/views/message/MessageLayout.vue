@@ -179,11 +179,11 @@ const getLastMsgTime = (index) => {
 }
 
 /**
- * 判断是否是打开session时的第一条未读消息
+ * 判断是否是打开session后的第一条未读消息
  * @param index 
  */
 const isFirstNew = (index) => {
-if (index > 0 
+  if (index > 0 
     && msgRecords.value[index - 1].msgId == lastReadMsgId.value) {
     return true
   }

@@ -24,7 +24,7 @@ const loadMoreTips = computed(() => {
 })
 
 const isUnreadMsg = computed(() => {
-  return props.readMsgId < props.msg.msgId
+  return props.readMsgId < props.msg.msgId && !isSelf.value
 })
 const isShowLoadMore = computed(() => {
   if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
@@ -114,7 +114,7 @@ const onShowUserCard = () => {
       </div>
     </div>
     <el-divider v-if="isFirstNew" class="new-messages-tips" content-position="center"
-      >以下是最新消息</el-divider
+      >以下是新消息</el-divider
     >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
     <div class="message-container-wrapper">
