@@ -9,6 +9,7 @@ const props = defineProps([
   'msg',
   'obj',
   'readMsgId',
+  'remoteRead',
   'lastMsgTime',
   'firstMsgId',
   'isFirstNew',
@@ -26,6 +27,11 @@ const loadMoreTips = computed(() => {
 const isUnreadMsg = computed(() => {
   return props.readMsgId < props.msg.msgId && !isSelf.value
 })
+
+const myMsgIsRead = computed(() => {
+  return isSelf.value && props.msg.msgId <= props.remoteRead
+})
+
 const isShowLoadMore = computed(() => {
   if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
     return true
@@ -123,7 +129,7 @@ const onShowUserCard = () => {
           <el-container class="message-content-wrapper">
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
-              <div class="div-blank"></div>
+              <div :class="{ remote_read: myMsgIsRead, remote_unread: !myMsgIsRead }"></div>
               <div class="div-content">{{ props.msg.content }}</div>
             </el-main>
           </el-container>
@@ -154,7 +160,6 @@ const onShowUserCard = () => {
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
               <div class="div-content">{{ props.msg.content }}</div>
-              <div class="div-blank"></div>
             </el-main>
           </el-container>
         </el-main>
@@ -262,10 +267,11 @@ const onShowUserCard = () => {
             margin-top: 5px;
             padding: 0;
             display: flex;
+            justify-content: right;
 
             .div-content {
               max-width: 500px;
-              padding: 5px;
+              padding: 8px;
               font-size: 14px;
               background-color: #c6e2ff;
               border-radius: 10px;
@@ -273,8 +279,28 @@ const onShowUserCard = () => {
               user-select: text;
             }
 
-            .div-blank {
-              flex: 1;
+            .remote_read {
+              margin-right: 5px;
+              display: flex;
+              align-items: end;
+
+              &::before {
+                content: '●';
+                font-size: 10px;
+                color: #95d475;
+              }
+            }
+
+            .remote_unread {
+              margin-right: 5px;
+              display: flex;
+              align-items: end;
+
+              &::before {
+                content: '●';
+                font-size: 10px;
+                color: #eebe77;
+              }
             }
           }
         }
@@ -309,19 +335,16 @@ const onShowUserCard = () => {
             margin-top: 5px;
             padding: 0;
             display: flex;
+            justify-content: left;
 
             .div-content {
               max-width: 500px;
-              padding: 5px;
+              padding: 8px;
               font-size: 14px;
               background-color: #dedfe0;
               border-radius: 10px;
               border-top-left-radius: 0;
               user-select: text;
-            }
-
-            .div-blank {
-              flex: 1;
             }
           }
         }

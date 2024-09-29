@@ -45,6 +45,7 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
     if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
     if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
+    if ('remoteRead' in obj) mySession.remoteRead = obj.remoteRead
     if ('top' in obj) mySession.top = obj.top
     if ('muted' in obj) mySession.muted = obj.muted
     if ('draft' in obj) mySession.draft = obj.draft

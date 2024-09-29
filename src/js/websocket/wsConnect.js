@@ -159,13 +159,13 @@ class WsConnect {
   }
 
   async onMessage(evt) {
-    console.log('onMessage', evt)
+    // console.log('onMessage', evt)
     const arrayBuffer = await evt.data.arrayBuffer()
     const frames = this.decode(new Uint8Array(arrayBuffer))
 
     frames.forEach((frame) => {
       const msg = Msg.decode(frame)
-      console.log(`receive a ${MsgType[msg.header.msgType]} msg: `, msg)
+      // console.log(`receive a ${MsgType[msg.header.msgType]} msg: `, msg)
       if (this.events[msg.header.msgType]) this.events[msg.header.msgType](msg)
     })
   }

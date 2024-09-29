@@ -28,7 +28,7 @@ import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatSessionListService, msgChatPullMsgService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
-import { onReceiveChatMsg } from '@/js/event'
+import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -93,6 +93,7 @@ onMounted(async () => {
   const res = await msgChatSessionListService()
   messageData.setSessionList(res.data.data) //入缓存
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
+  wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
 })
 
 onUnmounted(() => {
@@ -455,7 +456,7 @@ watch(() => msgRecords.value, (oldValue) => {
                 :key="index"
                 :msg="item"
                 :obj="choosedSession.objectInfo"
-                :readMsgId="choosedSession.readMsgId"
+                :remoteRead="choosedSession.remoteRead"
                 :lastMsgTime="getLastMsgTime(index)"
                 :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
