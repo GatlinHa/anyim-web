@@ -4,7 +4,7 @@ import { getRandomColor, getFontColor } from '@/utils/common'
 
 const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'size'])
 
-const avatarSize = props.size || 40
+const avatarSize = props.size || 30
 
 const isShowImg = computed(() => {
   return props.showAvatarThumb ? true : false
@@ -31,6 +31,7 @@ const fontColor = getFontColor(randomColor)
 .avatar-box {
   flex-shrink: 0;
   cursor: pointer;
+  overflow: hidden;
 
   .first-char-box {
     font-size: 18px;
