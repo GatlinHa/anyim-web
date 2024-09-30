@@ -19,6 +19,8 @@ const handleEnter = () => {
   if (!content) {
     ElMessage.warning('请勿发送空内容')
     getQuill().setText('')
+  } else if (content.length > 3000) {
+    ElMessage.warning('发送内容请不要超过3000个字')
   } else {
     emit('sendMessage', content)
     getQuill().setText('')
