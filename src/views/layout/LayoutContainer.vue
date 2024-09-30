@@ -52,6 +52,7 @@ const onExit = async () => {
       userLogoutService(userData.user.account).finally(() => {
         userData.clearAt()
         userData.clearRt()
+        userData.setUser({ account: userData.user.account })
         wsConnect.closeWs()
         router.push('/login')
       })
