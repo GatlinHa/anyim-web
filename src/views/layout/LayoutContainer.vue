@@ -14,6 +14,8 @@ import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
 import { userLogoutService } from '@/api/user'
 import wsConnect from '@/js/websocket/wsConnect'
+import { ElLoading } from 'element-plus'
+import { el_loading_options } from '@/const/commonConst'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -38,8 +40,17 @@ const clickListener = (e) => {
 }
 
 const openMyCardDialog = () => {
-  userData.getUser()
-  myCardDialog.value.open()
+  if (!myCardDialog.value.isOpen()) {
+    const loadingInstance = ElLoading.service(el_loading_options)
+    userData
+      .getUser()
+      .then(() => {
+        myCardDialog.value.open()
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  }
 }
 
 const onExit = async () => {

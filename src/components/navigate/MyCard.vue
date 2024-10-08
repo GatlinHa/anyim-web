@@ -20,9 +20,13 @@ const open = () => {
 const close = () => {
   dialogVisible.value = false
 }
+const isOpen = () => {
+  return dialogVisible.value
+}
 defineExpose({
   open,
-  close
+  close,
+  isOpen
 })
 </script>
 
