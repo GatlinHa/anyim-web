@@ -81,7 +81,7 @@ const handleUserCard = (flag) => {
 const handleGroupCard = (flag) => {
   isShowGroupCard.value = flag
 }
-const showSomeoneCard = () => {
+const onShowUserCard = () => {
   switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
       isShowUserCard.value = true
@@ -114,7 +114,7 @@ const switchTag = (func) => {
       :showName="showName"
       :showId="showId"
       :showAvatarThumb="showAvatarThumb"
-      @click="showSomeoneCard"
+      @click="onShowUserCard"
     ></AvatarIcon>
     <div v-if="isShowUnreadCount" class="unread-tips"></div>
     <div class="content-box" @click="emit('isChoosed', exportSession)">
@@ -169,8 +169,9 @@ const switchTag = (func) => {
   </div>
   <UserCard
     :isShow="isShowUserCard"
-    @update:isShow="handleUserCard"
+    :sessionId="props.sessionId"
     :account="sessionInfo.objectInfo.account"
+    @update:isShow="handleUserCard"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"

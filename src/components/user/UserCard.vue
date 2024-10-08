@@ -1,27 +1,22 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
+import { ElLoading } from 'element-plus'
 import avatar from '@/assets/default_avatar.png'
+import { el_loading_options } from '@/const/commonConst'
 import { userQueryService } from '@/api/user'
-import { userStore } from '@/stores'
+import { userStore, messageStore } from '@/stores'
 
-const props = defineProps(['isShow', 'account'])
+const props = defineProps(['isShow', 'sessionId', 'account'])
 const emit = defineEmits(['update:isShow'])
 
-const userData = userStore()
-const isLoading = ref(false)
 const userCardRef = ref()
-const showData = ref({
-  account: props.account,
-  nickName: '',
-  signature: '',
-  avatarThumb: '',
-  sex: '',
-  phoneNum: '',
-  email: '',
-  base: '',
-  organize: '',
-  remark: ''
+const userData = userStore()
+const messageData = messageStore()
+const isLoading = ref(false)
+
+const sessionInfo = computed(() => {
+  return messageData.sessionList[props.sessionId]
 })
 
 const isSelf = computed(() => {
@@ -45,7 +40,7 @@ const handleEscEvent = (event) => {
 }
 
 const truncatedSignature = computed(() => {
-  const signature = showData.value.signature || 'TA还没有个性签名。'
+  const signature = sessionInfo.value.objectInfo.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
   return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
 })
@@ -68,16 +63,24 @@ onUnmounted(() => {
 onUpdated(async () => {
   if (props.isShow) {
     isLoading.value = true
+    const loadingInstance = ElLoading.service(el_loading_options)
     userQueryService({ account: props.account })
       .then((res) => {
-        showData.value.nickName = res.data.data.nickName
-        showData.value.signature = res.data.data.signature
-        showData.value.avatarThumb = res.data.data.avatarThumb
-        showData.value.sex = res.data.data.sex
-        showData.value.phoneNum = res.data.data.phoneNum
-        showData.value.email = res.data.data.email
+        messageData.updateSession({
+          sessionId: props.sessionId,
+          objectInfo: {
+            ...sessionInfo.value.objectInfo,
+            nickName: res.data.data.nickName,
+            signature: res.data.data.signature,
+            avatarThumb: res.data.data.avatarThumb,
+            sex: res.data.data.sex,
+            phoneNum: res.data.data.phoneNum,
+            email: res.data.data.email
+          }
+        })
       })
       .finally(() => {
+        loadingInstance.close()
         isLoading.value = false
       })
   }
@@ -87,23 +90,17 @@ onUpdated(async () => {
 <template>
   <div ref="userCardRef">
     <transition name="fade">
-      <div v-if="isShow" class="overlay"></div>
-    </transition>
-    <transition name="fade">
-      <div v-if="isLoading" class="loading-wrapper">加载中...</div>
-    </transition>
-    <transition name="fade">
-      <div class="user-card" v-if="isShow && !isLoading" @click.self="preventClose($event)">
+      <div class="user-card" v-if="props.isShow && !isLoading" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="showData.avatarThumb || avatar" />
+            <el-avatar class="avatar" :src="sessionInfo.objectInfo.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="showData.sex === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="showData.sex === 2" color="#ff5722"><Female /></el-icon>
+              <el-icon v-if="sessionInfo.objectInfo.sex === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="sessionInfo.objectInfo.sex === 2" color="#ff5722"><Female /></el-icon>
             </div>
             <div class="nickname text-ellipsis">
-              {{ showData.nickName || '未设置昵称' }}({{ showData.account }})
+              {{ sessionInfo.objectInfo.nickName || '未设置昵称' }}({{ props.account }})
             </div>
           </div>
         </div>
@@ -114,23 +111,23 @@ onUpdated(async () => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <span class="value">{{ showData.phoneNum || '-' }}</span>
+            <span class="value">{{ sessionInfo.objectInfo.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <span class="value">{{ showData.email || '-' }}</span>
+            <span class="value">{{ sessionInfo.objectInfo.email || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">驻地：</span>
-            <span class="value">{{ showData.base || '-' }}</span>
+            <span class="value">{{ sessionInfo.objectInfo.base || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <span class="value">{{ showData.organize || '-' }}</span>
+            <span class="value">{{ sessionInfo.objectInfo.organize || '-' }}</span>
           </div>
           <div v-if="!isSelf" class="info-item remark">
             <span class="label">备注：</span>
-            <span class="value">{{ showData.remark || 'TODO' }}</span>
+            <span class="value">{{ sessionInfo.objectInfo.remark || 'TODO' }}</span>
           </div>
         </div>
       </div>
@@ -139,27 +136,6 @@ onUpdated(async () => {
 </template>
 
 <style lang="scss" scoped>
-.loading-wrapper {
-  width: 300px;
-  height: 500px;
-  border-radius: 10px;
-  padding: 0px;
-  box-shadow: 2px 2px 20px gray;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  z-index: 1;
-  background-color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  color: #409eff;
-}
-
 .user-card {
   width: 300px;
   height: 500px;
@@ -286,16 +262,6 @@ onUpdated(async () => {
       }
     }
   }
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1;
 }
 
 .fade-enter-active,

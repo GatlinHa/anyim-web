@@ -454,6 +454,7 @@ watch(() => msgRecords.value, (oldValue) => {
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
+                :sessionId="sessionId"
                 :msg="item"
                 :obj="choosedSession.objectInfo"
                 :remoteRead="choosedSession.remoteRead"

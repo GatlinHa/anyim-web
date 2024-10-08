@@ -20,7 +20,7 @@ export const messageStore = defineStore('anyim-message', () => {
 
   const updateSession = (obj) => {
     let params = { sessionId: obj.sessionId }
-    let flag = false
+    let flag = false // 是否需要更新云端的数据
     if ('top' in obj) {
       params.top = obj.top
       flag = true
@@ -51,6 +51,7 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('draft' in obj) mySession.draft = obj.draft
     if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
     if ('readTime' in obj) mySession.readTime = obj.readTime
+    if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
   }
 
   const totalUnReadCount = computed(() => {

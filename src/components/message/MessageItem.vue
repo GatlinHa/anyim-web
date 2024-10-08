@@ -6,6 +6,7 @@ import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
 import AvatarIcon from './AvatarIcon.vue'
 
 const props = defineProps([
+  'sessionId',
   'msg',
   'obj',
   'readMsgId',
@@ -166,7 +167,12 @@ const onShowUserCard = () => {
       </el-container>
     </div>
   </div>
-  <UserCard :isShow="isShowUserCard" :account="account" @update:isShow="handleUserCard"></UserCard>
+  <UserCard
+    :isShow="isShowUserCard"
+    :sessionId="sessionId"
+    :account="account"
+    @update:isShow="handleUserCard"
+  ></UserCard>
 </template>
 
 <style lang="scss" scoped>
