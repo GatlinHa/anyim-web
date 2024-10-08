@@ -5,6 +5,7 @@ import { generateSign } from './common'
 import { v4 as uuidv4 } from 'uuid'
 
 const baseURL = '/api' //配合vite.config.js中的代理配置解决跨域问题
+const noTokenReqList = ['/user/login', '/user/register', '/user/validateAccount']
 
 const instance = axios.create({
   baseURL,
@@ -23,7 +24,7 @@ instance.interceptors.request.use(
       config.headers.timestamp = timestamp
       config.headers.sign = sign
       config.headers.refreshToken = userData.rt.token
-    } else if (userData.at.token !== '') {
+    } else if (!noTokenReqList.includes(config.url) && userData.at.token !== '') {
       const token = await userData.getAccessToken()
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)

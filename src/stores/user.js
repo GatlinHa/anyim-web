@@ -17,6 +17,27 @@ export const userStore = defineStore(
       secret: '',
       expiretime: 0
     })
+
+    // 判断是否登录
+    const isLogin = async () => {
+      if (!at.value.token) {
+        return false
+      } else {
+        const now = new Date().getTime()
+        if (at.value.expiretime && now < at.value.expiretime) {
+          return true
+        } else {
+          if (rt.value.token && rt.value.expiretime && now < rt.value.expiretime) {
+            const res = await refreshToken()
+            setAt(res.data.data.accessToken)
+            return true
+          } else {
+            return false
+          }
+        }
+      }
+    }
+
     // 注意这个是异步的，取到的token一定是有效期内的
     const getAccessToken = async () => {
       if (!at.value.expiretime) {
@@ -25,14 +46,19 @@ export const userStore = defineStore(
       }
 
       const now = new Date().getTime()
-      if (now < at.value.expiretime) {
+      if (at.value.token && now < at.value.expiretime) {
         return at.value.token
-      } else {
+      } else if (rt.value.token && rt.value.expiretime && now < rt.value.expiretime) {
         const res = await refreshToken()
         setAt(res.data.data.accessToken)
         return at.value.token
+      } else {
+        clearAt()
+        clearRt()
+        return ''
       }
     }
+
     const getRefreshToken = () => {
       return rt.value.token
     }
@@ -95,6 +121,7 @@ export const userStore = defineStore(
       rt,
       setAt,
       setRt,
+      isLogin,
       getAccessToken,
       getRefreshToken,
       clearAt,
