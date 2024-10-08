@@ -110,7 +110,7 @@ const onExit = async () => {
     <el-main style="padding: 0">
       <router-view></router-view>
     </el-main>
-    <my-card ref="myCardDialog"></my-card>
+    <MyCard ref="myCardDialog"></MyCard>
   </el-container>
 </template>
 

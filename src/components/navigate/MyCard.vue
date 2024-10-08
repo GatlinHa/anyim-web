@@ -130,7 +130,6 @@ defineExpose({
 
     .signature {
       width: 80%;
-      height: 85px;
       position: absolute;
       top: 200px;
       display: flex;
@@ -138,7 +137,7 @@ defineExpose({
       align-items: flex-start;
       white-space: normal; //允许文本内容自动换行
       user-select: text;
-      color: black;
+      color: gray;
     }
   }
 }
