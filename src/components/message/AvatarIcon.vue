@@ -4,7 +4,7 @@ import { getRandomColor, getFontColor } from '@/utils/common'
 
 const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'size'])
 
-const avatarSize = props.size || 30
+const avatarSize = props.size || 40
 
 const isShowImg = computed(() => {
   return props.showAvatarThumb ? true : false

@@ -141,7 +141,6 @@ const onShowUserCard = () => {
             :showName="nickName"
             :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
-            :size="30"
           ></AvatarIcon>
         </el-aside>
       </el-container>
@@ -153,7 +152,6 @@ const onShowUserCard = () => {
             :showName="nickName"
             :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
-            :size="30"
           ></AvatarIcon>
         </el-aside>
         <el-main class="el-main-left">
