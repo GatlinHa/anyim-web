@@ -3,10 +3,10 @@ import { ref } from 'vue'
 import { userStore } from '@/stores'
 import { Plus, Upload } from '@element-plus/icons-vue'
 import selectAvatar from '@/assets/select_avatar.jpg'
-import { userUploadAvatarService, userModifySelfService } from '@/api/user'
+import { userUploadAvatarService } from '@/api/user'
 
 defineProps(['modelValue'])
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:newAvatar'])
 const userData = userStore()
 
 const uploadRef = ref()
@@ -32,12 +32,10 @@ const onUpload = async () => {
   isLoading.value = true
   try {
     const res = await userUploadAvatarService({ file: selectedFile })
-    const { originUrl, thumbUrl } = res.data.data
-    await userModifySelfService({ avatar: originUrl, avatarThumb: thumbUrl })
-    userData.getUser()
-    ElMessage.success('头像上传成功')
+    emit('update:newAvatar', res.data.data)
     emit('update:modelValue', false)
     selectedFile = null
+    ElMessage.success('头像上传成功')
   } catch (error) {
     /* empty */
   } finally {

@@ -6,7 +6,6 @@ import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
 import { maskPhoneNum } from '@/utils/common'
-import EditeAvatar from '@/components/user/EditeAvatar.vue'
 
 const userData = userStore()
 // 准备表单数据
@@ -17,6 +16,13 @@ const isShowEditeAvatar = ref(false)
 onMounted(() => {
   formModel.value = cloneDeep(userData.user)
 })
+
+const onNewAvatar = (newAvatar) => {
+  formModel.value.avatar = newAvatar.originUrl
+  formModel.value.avatarThumb = newAvatar.thumbUrl
+  console.log(newAvatar)
+  console.log(formModel.value.avatar)
+}
 
 const onSave = () => {
   if (isEqual(formModel.value, userData.user)) {
@@ -36,10 +42,10 @@ const onSave = () => {
 }
 
 const displayPhone = computed(() => {
-  if (userData.user.phoneNum) {
-    return maskPhoneNum(userData.user.phoneNum)
+  if (formModel.value.phoneNum) {
+    return maskPhoneNum(formModel.value.phoneNum)
   } else {
-    return userData.user.phoneNum
+    return ''
   }
 })
 </script>
@@ -50,7 +56,7 @@ const displayPhone = computed(() => {
     <el-container class="el-container__body">
       <el-aside width="240px">
         <img
-          :src="userData.user.avatar || defaultImg"
+          :src="formModel.avatar || defaultImg"
           alt="图片加载错误"
           @click="isShowEditeAvatar = true"
           style="text-align: center; border-radius: 10px"
@@ -66,7 +72,7 @@ const displayPhone = computed(() => {
       <el-main>
         <el-form :model="formModel" ref="formRef">
           <el-form-item label="登录账号：" prop="account">
-            {{ userData.user.account }}
+            {{ formModel.account }}
           </el-form-item>
           <el-form-item label="手机号码：" prop="phoneNum">
             {{ displayPhone || '未绑定' }}
@@ -131,7 +137,7 @@ const displayPhone = computed(() => {
       </el-main>
     </el-container>
 
-    <EditeAvatar v-model="isShowEditeAvatar"></EditeAvatar>
+    <EditeAvatar v-model="isShowEditeAvatar" @update:newAvatar="onNewAvatar"></EditeAvatar>
   </el-container>
 </template>
 
