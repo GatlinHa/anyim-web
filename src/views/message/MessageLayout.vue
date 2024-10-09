@@ -286,21 +286,22 @@ const handleSwitchTag = (obj) => {
 
 const handleSendMessage = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
-  wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (deliveredMsg) => {
-
+  wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (msgId) => {
     const now = new Date()
     messageData.updateSession({
       sessionId: sessionId.value,
-      lastMsgId: deliveredMsg.body.msgId,  // 最后一条消息（自己发的）
+      lastMsgId: msgId,  // 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
-      unreadCount: 0,  // 最后一条消息（自己发的），因此未读是0
+      readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到最大（刚发的这条消息的msgId）
+      readTime: now,
+      unreadCount: 0,  // 最后一条消息是自己发的，因此未读是0
       draft: ''  //草稿意味着要清空
     })
-
+    
     messageData.addMsgRecords(sessionId.value, [{
       sessionId: sessionId.value,
-      msgId: deliveredMsg.body.msgId,  
+      msgId: msgId,  
       fromId: userData.user.account,
       msgType: choosedSession.value.sessionType,
       content: content,

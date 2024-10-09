@@ -3,7 +3,7 @@ import { proto } from '@/const/msgConst'
 import { userStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 
-export const chatConstructor = (toId, content) => {
+export const chatConstructor = (toId, content, tempMsgId) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -17,7 +17,7 @@ export const chatConstructor = (toId, content) => {
     fromClient: userData.clientId,
     toId: toId,
     content: content,
-    tempMsgId: uuidv4()
+    tempMsgId: tempMsgId
   })
   const chatMsg = Msg.create({ header: header, body: body })
   const payload = Msg.encode(chatMsg).finish()

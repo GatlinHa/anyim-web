@@ -79,6 +79,11 @@ class WsConnect {
   }
 
   /**
+   * 消息发送时携带的是tempMsgId，服务端回复DELIVERED消息时返回了msgId，此时要回填msgId
+   */
+  msgIdRefillCallback = {}
+
+  /**
    * 绑定事件
    */
   events = {
@@ -86,7 +91,10 @@ class WsConnect {
       this.heartBeat.start()
       this.isConnect = true
     },
-    [MsgType.DELIVERED]: () => {}, //需要发送时定义事件处理逻辑
+    [MsgType.DELIVERED]: (deliveredMsg) => {
+      this.msgIdRefillCallback[deliveredMsg.body.tempMsgId](deliveredMsg.body.msgId)
+      delete this.msgIdRefillCallback[deliveredMsg.body.tempMsgId]
+    },
     [MsgType.CHAT]: () => {},
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
@@ -259,16 +267,17 @@ class WsConnect {
    * @param {*} callback
    */
   sendMsg(remoteId, msgType, content, callback) {
-    const data = this.dataConstructor[msgType](remoteId, content)
-    this.sendAgent(data, callback)
+    const tempMsgId = uuidv4()
+    const data = this.dataConstructor[msgType](remoteId, content, tempMsgId)
+    this.msgIdRefillCallback[tempMsgId] = callback
+    this.sendAgent(data)
   }
 
   /**
    * 发送代理，封装了重发机制
    */
-  sendAgent(data, callback) {
+  sendAgent(data) {
     if (this.isConnect) {
-      this.bindEvent(MsgType.DELIVERED, callback)
       this.connect.send(data)
     } else {
       if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {
@@ -277,7 +286,7 @@ class WsConnect {
         // TODO 应该反馈到业务层给提示
       } else {
         setTimeout(() => {
-          this.sendAgent(data, callback)
+          this.sendAgent(data)
         }, this.reSend.interval)
         this.reSend.curReSendTimes++
       }
