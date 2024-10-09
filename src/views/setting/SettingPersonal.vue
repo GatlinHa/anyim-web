@@ -104,8 +104,8 @@ const displayPhone = computed(() => {
               style="width: 300px"
             ></el-input>
           </el-form-item>
-          <el-form-item label="我的性别：" prop="sex">
-            <el-radio-group v-model="formModel.sex">
+          <el-form-item label="我的性别：" prop="gender">
+            <el-radio-group v-model="formModel.gender">
               <el-radio :value="1">男</el-radio>
               <el-radio :value="2">女</el-radio>
             </el-radio-group>

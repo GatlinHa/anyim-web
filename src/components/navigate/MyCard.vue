@@ -38,8 +38,8 @@ defineExpose({
         <el-avatar class="avatar" :src="userData.user.avatarThumb" />
 
         <div class="gender">
-          <el-icon v-if="userData.user.sex === 1" color="#508afe"><Male /></el-icon>
-          <el-icon v-if="userData.user.sex === 2" color="#ff5722"><Female /></el-icon>
+          <el-icon v-if="userData.user.gender === 1" color="#508afe"><Male /></el-icon>
+          <el-icon v-if="userData.user.gender === 2" color="#ff5722"><Female /></el-icon>
         </div>
 
         <div class="nickname text-ellipsis">

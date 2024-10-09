@@ -73,7 +73,7 @@ onUpdated(async () => {
             nickName: res.data.data.nickName,
             signature: res.data.data.signature,
             avatarThumb: res.data.data.avatarThumb,
-            sex: res.data.data.sex,
+            gender: res.data.data.gender,
             phoneNum: res.data.data.phoneNum,
             email: res.data.data.email
           }
@@ -96,8 +96,10 @@ onUpdated(async () => {
           <div class="main">
             <el-avatar class="avatar" :src="sessionInfo.objectInfo.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="sessionInfo.objectInfo.sex === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="sessionInfo.objectInfo.sex === 2" color="#ff5722"><Female /></el-icon>
+              <el-icon v-if="sessionInfo.objectInfo.gender === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="sessionInfo.objectInfo.gender === 2" color="#ff5722"
+                ><Female
+              /></el-icon>
             </div>
             <div class="nickname text-ellipsis">
               {{ sessionInfo.objectInfo.nickName || '未设置昵称' }}({{ props.account }})
