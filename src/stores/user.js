@@ -95,7 +95,7 @@ export const userStore = defineStore(
 
     const user = ref({})
 
-    const getUser = async () => {
+    const updateUser = async () => {
       const res = await userInfoService()
       user.value = res.data.data
     }
@@ -127,7 +127,7 @@ export const userStore = defineStore(
       clearAt,
       clearRt,
       user,
-      getUser,
+      updateUser,
       setUser,
       isRemenberMe,
       setIsRemenberMe,

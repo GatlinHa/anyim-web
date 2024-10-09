@@ -34,7 +34,7 @@ const onSave = () => {
   const res = userModifySelfService(formModel.value)
   res.then(() => {
     ElMessage.success('信息保存成功')
-    userData.getUser()
+    userData.updateUser()
   })
   res.finally(() => {
     isLoading.value = false

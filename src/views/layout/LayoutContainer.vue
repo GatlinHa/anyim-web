@@ -43,7 +43,7 @@ const openMyCardDialog = () => {
   if (!myCardDialog.value.isOpen()) {
     const loadingInstance = ElLoading.service(el_loading_options)
     userData
-      .getUser()
+      .updateUser()
       .then(() => {
         myCardDialog.value.open()
       })

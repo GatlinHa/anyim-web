@@ -15,8 +15,12 @@ const userData = userStore()
 const messageData = messageStore()
 const isLoading = ref(false)
 
-const sessionInfo = computed(() => {
-  return messageData.sessionList[props.sessionId]
+const userInfo = computed(() => {
+  if (isSelf.value) {
+    return userData.user
+  } else {
+    return messageData.sessionList[props.sessionId].objectInfo
+  }
 })
 
 const isSelf = computed(() => {
@@ -40,7 +44,7 @@ const handleEscEvent = (event) => {
 }
 
 const truncatedSignature = computed(() => {
-  const signature = sessionInfo.value.objectInfo.signature || 'TA还没有个性签名。'
+  const signature = userInfo.value.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
   return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
 })
@@ -62,27 +66,31 @@ onUnmounted(() => {
 
 onUpdated(async () => {
   if (props.isShow) {
-    isLoading.value = true
-    const loadingInstance = ElLoading.service(el_loading_options)
-    userQueryService({ account: props.account })
-      .then((res) => {
-        messageData.updateSession({
-          sessionId: props.sessionId,
-          objectInfo: {
-            ...sessionInfo.value.objectInfo,
-            nickName: res.data.data.nickName,
-            signature: res.data.data.signature,
-            avatarThumb: res.data.data.avatarThumb,
-            gender: res.data.data.gender,
-            phoneNum: res.data.data.phoneNum,
-            email: res.data.data.email
-          }
+    if (isSelf.value) {
+      await userData.updateUser()
+    } else {
+      isLoading.value = true
+      const loadingInstance = ElLoading.service(el_loading_options)
+      userQueryService({ account: props.account })
+        .then((res) => {
+          messageData.updateSession({
+            sessionId: props.sessionId,
+            objectInfo: {
+              ...userInfo.value,
+              nickName: res.data.data.nickName,
+              signature: res.data.data.signature,
+              avatarThumb: res.data.data.avatarThumb,
+              gender: res.data.data.gender,
+              phoneNum: res.data.data.phoneNum,
+              email: res.data.data.email
+            }
+          })
         })
-      })
-      .finally(() => {
-        loadingInstance.close()
-        isLoading.value = false
-      })
+        .finally(() => {
+          loadingInstance.close()
+          isLoading.value = false
+        })
+    }
   }
 })
 </script>
@@ -94,15 +102,13 @@ onUpdated(async () => {
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="sessionInfo.objectInfo.avatarThumb || avatar" />
+            <el-avatar class="avatar" :src="userInfo.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="sessionInfo.objectInfo.gender === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="sessionInfo.objectInfo.gender === 2" color="#ff5722"
-                ><Female
-              /></el-icon>
+              <el-icon v-if="userInfo.gender === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="userInfo.gender === 2" color="#ff5722"><Female /></el-icon>
             </div>
             <div class="nickname text-ellipsis">
-              {{ sessionInfo.objectInfo.nickName || '未设置昵称' }}({{ props.account }})
+              {{ userInfo.nickName || '未设置昵称' }}({{ props.account }})
             </div>
           </div>
         </div>
@@ -113,23 +119,23 @@ onUpdated(async () => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <span class="value">{{ sessionInfo.objectInfo.phoneNum || '-' }}</span>
+            <span class="value">{{ userInfo.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <span class="value">{{ sessionInfo.objectInfo.email || '-' }}</span>
+            <span class="value">{{ userInfo.email || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">驻地：</span>
-            <span class="value">{{ sessionInfo.objectInfo.base || '-' }}</span>
+            <span class="value">{{ userInfo.base || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <span class="value">{{ sessionInfo.objectInfo.organize || '-' }}</span>
+            <span class="value">{{ userInfo.organize || '-' }}</span>
           </div>
           <div v-if="!isSelf" class="info-item remark">
             <span class="label">备注：</span>
-            <span class="value">{{ sessionInfo.objectInfo.remark || 'TODO' }}</span>
+            <span class="value">{{ userInfo.remark || 'TODO' }}</span>
           </div>
         </div>
       </div>
