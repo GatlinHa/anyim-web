@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { userModifyPassword } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue'])

@@ -16,6 +16,7 @@ import { userLogoutService } from '@/api/user'
 import wsConnect from '@/js/websocket/wsConnect'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
+import { ElMessageBox } from 'element-plus'
 
 const myCardDialog = ref()
 const myAvatar = ref()

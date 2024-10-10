@@ -4,6 +4,7 @@ import { userStore } from '@/stores'
 import { Plus, Upload } from '@element-plus/icons-vue'
 import selectAvatar from '@/assets/select_avatar.jpg'
 import { userUploadAvatarService } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue', 'update:newAvatar'])

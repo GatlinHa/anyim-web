@@ -2,6 +2,7 @@
 import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { userStore } from '@/stores'
 import { userModifySelfService } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue'])

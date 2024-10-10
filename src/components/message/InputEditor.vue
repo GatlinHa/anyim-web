@@ -3,6 +3,7 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { onMounted, ref, watch } from 'vue'
 import { messageStore } from '@/stores'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps(['sessionId', 'draft'])
 const emit = defineEmits(['sendMessage'])

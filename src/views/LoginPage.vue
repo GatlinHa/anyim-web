@@ -5,6 +5,7 @@ import router from '@/router'
 import { userRegisterService, userLoginService } from '@/api/user.js'
 import { userStore } from '@/stores'
 import { generateClientId } from '@/utils/common'
+import { ElMessage } from 'element-plus'
 
 const isRegister = ref(false)
 

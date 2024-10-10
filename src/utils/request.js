@@ -3,6 +3,7 @@ import { userStore } from '@/stores'
 import router from '@/router'
 import { generateSign } from './common'
 import { v4 as uuidv4 } from 'uuid'
+import { ElMessage } from 'element-plus'
 
 const baseURL = '/api' //配合vite.config.js中的代理配置解决跨域问题
 const noTokenReqList = ['/user/login', '/user/register', '/user/validateAccount']
