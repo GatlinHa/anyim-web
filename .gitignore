@@ -30,3 +30,4 @@ coverage
 *.tsbuildinfo
 note.md
 *.bak
+*.xlsx

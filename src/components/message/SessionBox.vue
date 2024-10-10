@@ -84,6 +84,7 @@ const onShowCard = () => {
   }
 }
 
+// 这里有防抖动效果
 let timer
 const switchTag = (func) => {
   func()
@@ -98,7 +99,7 @@ const switchTag = (func) => {
       top: top.value,
       muted: muted.value
     })
-  }, 1000)
+  }, 100) // 这个时间太长会影响置顶按钮的响应时长
 }
 </script>
 

@@ -129,7 +129,7 @@ const handleMsgListWheel = async () => {
   const clientHeight = document.querySelector('.message-main').clientHeight
   const diffToBottom = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight
   newMsgTips.value.isShowBottomTips = diffToBottom < 50 ? false : newMsgTips.value.isShowBottomTips
-  // isShowReturnBottom.value = diffToBottom > 300  // 暂时取消这个提示功能
+  // isShowReturnBottom.value = diffToBottom > 300  // 暂时取消这个提示功能，与消息提示的按钮显得有点重复
 
   if (newMsgTips.value.firstElement?.getBoundingClientRect().top > 0) {
     newMsgTips.value.isShowTopTips = false
@@ -143,7 +143,26 @@ const sessionListSorted = computed(() => {
   }
   else {
     let sessionArr = Object.values(messageData.sessionList)
-    return sessionArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime)
+    return sessionArr.sort((a, b) => {
+      if (a.top && !b.top) { // 排序第一优先级：是否置顶
+        return -1
+      }
+      else if (!a.top && b.top) {
+        return 1
+      }
+      else {
+        if (a.draft && !b.draft) { // 排序第二优先级：是否有草稿
+          return -1
+        }
+        else if (!a.draft && b.draft) {
+          return 1
+        }
+        else {
+          // 排序第三优先级：最后一条消息的时间
+          return new Date(b.lastMsgTime).getTime() - new Date(a.lastMsgTime).getTime()
+        }
+      }
+    })
   }
 })
 
