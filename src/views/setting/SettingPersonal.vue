@@ -113,7 +113,12 @@ const displayPhone = computed(() => {
             </el-radio-group>
           </el-form-item>
           <el-form-item label="我的生日：" prop="birthday">
-            <el-date-picker v-model="formModel.birthday" type="date" placeholder="请选择日期" />
+            <el-date-picker
+              v-model="formModel.birthday"
+              type="date"
+              placeholder="请选择日期"
+              value-format="YYYY-MM-DD"
+            />
           </el-form-item>
           <el-form-item label="个性签名：" prop="level">
             <el-input
