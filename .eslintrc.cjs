@@ -28,9 +28,5 @@ module.exports = {
         ignores: ['index'] // vue组件名称多单词组成（忽略index.vue）
       }
     ]
-  },
-  globals: {
-    ElMessage: 'readonly',
-    ElMessageBox: 'readonly'
   }
 }
