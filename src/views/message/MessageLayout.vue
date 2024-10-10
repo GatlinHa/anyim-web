@@ -360,6 +360,28 @@ const onClickMsgContainer = () => {
   handleRead()
 }
 
+const isShowUserCard = ref(false)
+const showUserCardSessionId = ref('')
+const showUserCardAccount = ref('')
+
+const isShowGroupCard = ref(false)
+const showUserGroupSessionId = ref('')
+const showUserCardGroupId = ref('')
+
+const onShowUserCard = ({ sessionId, account }) => {
+  showUserCardSessionId.value = sessionId
+  showUserCardAccount.value = account
+  isShowGroupCard.value = false
+  isShowUserCard.value = true
+}
+
+const onShowGroupCard = ({ sessionId, groupId }) => {
+  showUserGroupSessionId.value = sessionId
+  showUserCardGroupId.value = groupId
+  isShowUserCard.value = false
+  isShowGroupCard.value = true
+}
+
 /**
  * 监视msgRecords的数据变化,给出新消息的tips提示
  */
@@ -405,6 +427,8 @@ watch(() => msgRecords.value, (oldValue) => {
             :choosedSessionId="sessionId"
             @isChoosed="handleIsChoosed"
             @switchTag="handleSwitchTag"
+            @showUserCard="onShowUserCard"
+            @showGroupCard="onShowGroupCard"
           ></SessionBox>
         </div>
       </div>
@@ -465,6 +489,7 @@ watch(() => msgRecords.value, (oldValue) => {
                 :hasNoMoreMsg="hasNoMoreMsg"
                 :isLoadMoreLoading="isLoadMoreLoading"
                 @loadMore="onLoadMore"
+                @showUserCard="onShowUserCard"
               ></MessageItem>
             </div>
             <el-button
@@ -556,6 +581,18 @@ watch(() => msgRecords.value, (oldValue) => {
       </el-container>
     </el-main>
   </el-container>
+  <UserCard
+    :isShow="isShowUserCard"
+    :sessionId="showUserCardSessionId"
+    :account="showUserCardAccount"
+    @close="isShowUserCard = false"
+  ></UserCard>
+  <GroupCard
+    :isShow="isShowGroupCard"
+    :sessionId="showUserGroupSessionId"
+    :groupId="showUserCardGroupId"
+    @close="isShowGroupCard = false"
+  ></GroupCard>
 </template>
 
 <style lang="scss" scoped>

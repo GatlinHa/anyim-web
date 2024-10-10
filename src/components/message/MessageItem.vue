@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/utils/common'
@@ -17,10 +17,9 @@ const props = defineProps([
   'hasNoMoreMsg',
   'isLoadMoreLoading'
 ])
-const emit = defineEmits(['loadMore'])
+const emit = defineEmits(['loadMore', 'showUserCard'])
 
 const userData = userStore()
-const isShowUserCard = ref(false)
 const loadMoreTips = computed(() => {
   return props.isLoadMoreLoading ? '' : '查看更多消息'
 })
@@ -89,17 +88,13 @@ const msgTime = computed(() => {
   return messageBoxShowTime(props.msg.msgTime)
 })
 
-const handleUserCard = (flag) => {
-  isShowUserCard.value = flag
-}
-
 const onLoadMore = () => {
   loadMoreTips.value = ''
   emit('loadMore')
 }
 
 const onShowUserCard = () => {
-  isShowUserCard.value = true
+  emit('showUserCard', { sessionId: props.sessionId, account: account.value })
 }
 </script>
 
@@ -165,12 +160,6 @@ const onShowUserCard = () => {
       </el-container>
     </div>
   </div>
-  <UserCard
-    :isShow="isShowUserCard"
-    :sessionId="sessionId"
-    :account="account"
-    @update:isShow="handleUserCard"
-  ></UserCard>
 </template>
 
 <style lang="scss" scoped>

@@ -2,15 +2,13 @@
 import { ref, computed } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
-import UserCard from '../user/UserCard.vue'
-import GroupCard from '../group/GroupCard.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore } from '@/stores'
 
 const props = defineProps(['sessionId', 'choosedSessionId'])
-const emit = defineEmits(['isChoosed', 'switchTag'])
+const emit = defineEmits(['isChoosed', 'switchTag', 'showUserCard', 'showGroupCard'])
 const messageData = messageStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
@@ -18,8 +16,6 @@ const sessionInfo = computed(() => {
 
 const top = ref(sessionInfo.value.top)
 const muted = ref(sessionInfo.value.muted)
-const isShowUserCard = ref(false)
-const isShowGroupCard = ref(false)
 
 const exportSession = {
   sessionId: props.sessionId,
@@ -75,19 +71,13 @@ const isShowUnreadCount = computed(() => {
   return sessionInfo.value.unreadCount > 0
 })
 
-const handleUserCard = (flag) => {
-  isShowUserCard.value = flag
-}
-const handleGroupCard = (flag) => {
-  isShowGroupCard.value = flag
-}
-const onShowUserCard = () => {
+const onShowCard = () => {
   switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
-      isShowUserCard.value = true
+      emit('showUserCard', { sessionId: props.sessionId, account: showId.value })
       break
     case MsgType.GROUP_CHAT:
-      isShowGroupCard.value = true
+      emit('showGroupCard', { sessionId: props.sessionId, groupId: showId.value })
       break
     default:
       break
@@ -114,7 +104,7 @@ const switchTag = (func) => {
       :showName="showName"
       :showId="showId"
       :showAvatarThumb="showAvatarThumb"
-      @click="onShowUserCard"
+      @click="onShowCard"
     ></AvatarIcon>
     <div v-if="isShowUnreadCount" class="unread-tips"></div>
     <div class="content-box" @click="emit('isChoosed', exportSession)">
@@ -167,17 +157,6 @@ const switchTag = (func) => {
       </div>
     </div>
   </div>
-  <UserCard
-    :isShow="isShowUserCard"
-    :sessionId="props.sessionId"
-    :account="sessionInfo.objectInfo.account"
-    @update:isShow="handleUserCard"
-  ></UserCard>
-  <GroupCard
-    :isShow="isShowGroupCard"
-    @update:isShow="handleGroupCard"
-    :group="sessionInfo.objectInfo"
-  ></GroupCard>
 </template>
 
 <style lang="scss" scoped>

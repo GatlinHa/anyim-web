@@ -8,7 +8,7 @@ import { userQueryService } from '@/api/user'
 import { userStore, messageStore } from '@/stores'
 
 const props = defineProps(['isShow', 'sessionId', 'account'])
-const emit = defineEmits(['update:isShow'])
+const emit = defineEmits(['close'])
 
 const userCardRef = ref()
 const userData = userStore()
@@ -33,13 +33,13 @@ const preventClose = (event) => {
 
 const closeCardIfOutside = (event) => {
   if (!event.target.closest('.user-card') && !event.target.closest('.avatar-box') && props.isShow) {
-    emit('update:isShow', false)
+    onClose()
   }
 }
 
 const handleEscEvent = (event) => {
   if (event.key === 'Escape') {
-    emit('update:isShow', false)
+    onClose()
   }
 }
 
@@ -51,7 +51,7 @@ const truncatedSignature = computed(() => {
 
 // 关闭的时候触发
 const onClose = () => {
-  emit('update:isShow', false)
+  emit('close')
 }
 
 onMounted(() => {
@@ -66,31 +66,27 @@ onUnmounted(() => {
 
 onUpdated(async () => {
   if (props.isShow) {
+    isLoading.value = true
+    const loadingInstance = ElLoading.service(el_loading_options)
     if (isSelf.value) {
       await userData.updateUser()
     } else {
-      isLoading.value = true
-      const loadingInstance = ElLoading.service(el_loading_options)
-      userQueryService({ account: props.account })
-        .then((res) => {
-          messageData.updateSession({
-            sessionId: props.sessionId,
-            objectInfo: {
-              ...userInfo.value,
-              nickName: res.data.data.nickName,
-              signature: res.data.data.signature,
-              avatarThumb: res.data.data.avatarThumb,
-              gender: res.data.data.gender,
-              phoneNum: res.data.data.phoneNum,
-              email: res.data.data.email
-            }
-          })
-        })
-        .finally(() => {
-          loadingInstance.close()
-          isLoading.value = false
-        })
+      const res = await userQueryService({ account: props.account })
+      messageData.updateSession({
+        sessionId: props.sessionId,
+        objectInfo: {
+          ...userInfo.value,
+          nickName: res.data.data.nickName,
+          signature: res.data.data.signature,
+          avatarThumb: res.data.data.avatarThumb,
+          gender: res.data.data.gender,
+          phoneNum: res.data.data.phoneNum,
+          email: res.data.data.email
+        }
+      })
     }
+    loadingInstance.close()
+    isLoading.value = false
   }
 })
 </script>
