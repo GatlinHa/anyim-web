@@ -7,7 +7,6 @@ import {
   SwitchButton
 } from '@element-plus/icons-vue'
 import { onMounted, onUnmounted, ref } from 'vue'
-import avatar from '@/assets/default_avatar.png'
 import { userStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
@@ -17,6 +16,7 @@ import wsConnect from '@/js/websocket/wsConnect'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
+import AvatarIcon from '@/components/message/AvatarIcon.vue'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -79,11 +79,14 @@ const onExit = async () => {
   <el-container class="layout-container">
     <el-aside width="100px">
       <span class="avatar">
-        <el-avatar
+        <AvatarIcon
           ref="myAvatar"
-          :src="userData.user.avatarThumb || avatar"
+          :showName="userData.user.nickName"
+          :showId="userData.user.account"
+          :showAvatarThumb="userData.user.avatarThumb"
           @click="openMyCardDialog"
-        />
+        >
+        </AvatarIcon>
       </span>
 
       <el-menu

@@ -11,7 +11,7 @@ const isShowImg = computed(() => {
 })
 
 const firstChar = computed(() => {
-  return props.showName ? props.showName.charAt(0) : '未'
+  return props.showName ? props.showName.charAt(0) : '*'
 })
 
 const randomColor = getRandomColor(props.showName || props.showId)

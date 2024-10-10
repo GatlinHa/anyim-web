@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
 import { userStore } from '@/stores'
+import avatar from '@/assets/default_avatar.png'
 
 const userData = userStore()
 
@@ -35,7 +36,7 @@ defineExpose({
     <div class="card-dialog" v-show="dialogVisible">
       <el-icon class="close-button" @click="dialogVisible = false"><Close /></el-icon>
       <div class="main">
-        <el-avatar class="avatar" :src="userData.user.avatarThumb" />
+        <el-avatar class="avatar" :src="userData.user.avatarThumb || avatar" />
 
         <div class="gender">
           <el-icon v-if="userData.user.gender === 1" color="#508afe"><Male /></el-icon>
