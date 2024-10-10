@@ -89,6 +89,10 @@ const switchTag = (func) => {
   func()
   clearTimeout(timer)
   timer = setTimeout(() => {
+    if (top.value === sessionInfo.value.top && muted.value === sessionInfo.value.muted) {
+      return
+    }
+
     emit('switchTag', {
       sessionId: props.sessionId,
       top: top.value,
