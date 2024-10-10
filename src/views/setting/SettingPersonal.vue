@@ -6,6 +6,7 @@ import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
 import { maskPhoneNum } from '@/utils/common'
+import EditeAvatar from '@/components/user/EditeAvatar.vue'
 
 const userData = userStore()
 // 准备表单数据
