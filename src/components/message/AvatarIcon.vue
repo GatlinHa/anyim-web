@@ -14,7 +14,7 @@ const firstChar = computed(() => {
   return props.showName ? props.showName.charAt(0) : '未'
 })
 
-const randomColor = getRandomColor(props.showId)
+const randomColor = getRandomColor(props.showName || props.showId)
 const fontColor = getFontColor(randomColor)
 </script>
 

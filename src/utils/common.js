@@ -10,11 +10,11 @@ export const maskPhoneNum = (str) => {
   return start + middle + end
 }
 
-// 使用简单的哈希算法，根据账号生成颜色
-export const getRandomColor = (account) => {
+// 使用简单的哈希算法，根据字符串生成颜色
+export const getRandomColor = (str) => {
   let hash = 0
-  for (let i = 0; i < account.length; i++) {
-    hash = account.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
   let color = '#'
   for (let i = 0; i < 3; i++) {
