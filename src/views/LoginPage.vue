@@ -96,7 +96,7 @@ onMounted(() => {
 
 watch(isRegister, () => {
   formModel.value = {
-    username: '',
+    username: !isRegister.value && isRemenberMe.value ? userData.user.account : '',
     password: '',
     repassword: ''
   }
