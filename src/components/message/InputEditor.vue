@@ -32,6 +32,7 @@ onMounted(() => {
   // 给组件增加滚动条样式
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
   getQuill().setText(props.draft)
+  getQuill().setSelection(getQuill().getLength(), 0, 'user')
 })
 
 // 监控session发生了切换
@@ -47,6 +48,7 @@ watch(
       })
     }
     getQuill().setText(messageData.sessionList[newValue].draft || '')
+    getQuill().setSelection(getQuill().getLength(), 0, 'user')
   },
   { deep: true }
 )
