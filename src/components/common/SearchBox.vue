@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 
 const inputRef = ref()
@@ -29,6 +29,12 @@ const onOpen = () => {
     inputRef.value?.focus()
   })
 }
+
+watch(searchTabAcitve, () => {
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+})
 </script>
 
 <template>
@@ -46,7 +52,7 @@ const onOpen = () => {
       @open="onOpen"
     >
       <template #header>
-        <el-input ref="inputRef" v-model="searchValue">
+        <el-input ref="inputRef" v-model="searchValue" :clearable="true">
           <template #prefix>
             <el-icon><search /></el-icon>
             <span v-if="tabTipsContent" class="tab-tips">{{ tabTipsContent }}</span>
