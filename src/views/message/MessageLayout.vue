@@ -581,7 +581,7 @@ watch(() => msgRecords.value, (oldValue) => {
                     </InputTool>
                   </div>
                   <div class="right-tools">
-                    <InputTool tips="历史记录">
+                    <InputTool tips="聊天记录">
                       <template #iconSlot>
                         <Clock />
                       </template>
@@ -636,6 +636,7 @@ watch(() => msgRecords.value, (oldValue) => {
         margin-top: 10px;
         margin-bottom: 10px;
         display: flex;
+        align-items: center;
       }
 
       .session-list {
