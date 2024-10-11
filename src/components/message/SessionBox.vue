@@ -106,6 +106,7 @@ const switchTag = (func) => {
 <template>
   <div class="session-box" :class="{ 'session-box-active': hasBeenChoosed }">
     <AvatarIcon
+      class="avatar-session-box"
       :showName="showName"
       :showId="showId"
       :showAvatarThumb="showAvatarThumb"

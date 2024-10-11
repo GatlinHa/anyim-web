@@ -32,7 +32,12 @@ const preventClose = (event) => {
 }
 
 const closeCardIfOutside = (event) => {
-  if (!event.target.closest('.user-card') && !event.target.closest('.avatar-box') && props.isShow) {
+  if (!props.isShow) return
+  if (
+    !event.target.closest('.user-card') &&
+    !event.target.closest('.avatar-session-box') &&
+    !event.target.closest('.avatar-message-item')
+  ) {
     onClose()
   }
 }

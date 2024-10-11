@@ -132,6 +132,7 @@ const onShowUserCard = () => {
         </el-main>
         <el-aside class="el-aside-right">
           <AvatarIcon
+            class="avatar-message-item"
             :showId="account"
             :showName="nickName"
             :showAvatarThumb="avatarThumb"
@@ -143,6 +144,7 @@ const onShowUserCard = () => {
       <el-container class="el-container-left" v-else>
         <el-aside class="el-aside-left">
           <AvatarIcon
+            class="avatar-message-item"
             :showId="account"
             :showName="nickName"
             :showAvatarThumb="avatarThumb"

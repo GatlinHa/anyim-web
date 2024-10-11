@@ -34,6 +34,8 @@ onUnmounted(() => {
 })
 
 const clickListener = (e) => {
+  if (!myCardDialog.value.isOpen()) return
+
   // 鼠标点击不在头像或卡片范围内，则关闭卡片
   if (!myCardDialog.value?.$el.contains(e.target) && !myAvatar.value?.$el.contains(e.target)) {
     myCardDialog.value.close()
