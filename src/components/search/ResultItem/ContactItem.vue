@@ -15,7 +15,7 @@ const onOpenSession = () => {
 </script>
 
 <template>
-  <div class="contact-item" @click="onOpenSession">
+  <div class="contact-item">
     <AvatarIcon
       class="avatar-contact-item"
       :showName="props.contactInfo.nickName"
@@ -23,7 +23,7 @@ const onOpenSession = () => {
       :showAvatarThumb="props.contactInfo.avatarThumb"
       @click="onShowCard"
     ></AvatarIcon>
-    <div class="body">
+    <div class="body" @click="onOpenSession">
       <div class="title">
         <span class="name">{{ props.contactInfo.nickName }}</span>
         <span class="account">{{ props.contactInfo.account }}</span>
@@ -53,6 +53,9 @@ const onOpenSession = () => {
 
   .body {
     margin-left: 10px;
+    flex: 1;
+    overflow: hidden;
+
     .title {
       height: 20px;
       display: flex;
