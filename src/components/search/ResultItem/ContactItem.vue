@@ -1,30 +1,30 @@
 <script setup>
 import AvatarIcon from '@/components/message/AvatarIcon.vue'
 
-const props = defineProps(['user'])
-const emit = defineEmits(['showUserCard'])
+const props = defineProps(['contactInfo'])
+const emit = defineEmits(['showContactCard'])
 
 const onShowCard = () => {
-  emit('showUserCard', { sessionId: props.sessionId, account: props.user.account })
+  emit('showContactCard', props.contactInfo)
 }
 </script>
 
 <template>
   <div class="contact-item">
     <AvatarIcon
-      class="avatar"
-      :showName="props.user.nickName"
-      :showId="props.user.account"
-      :showAvatarThumb="props.user.avatarThumb"
+      class="avatar-contact-item"
+      :showName="props.contactInfo.nickName"
+      :showId="props.contactInfo.account"
+      :showAvatarThumb="props.contactInfo.avatarThumb"
       @click="onShowCard"
     ></AvatarIcon>
     <div class="body">
       <div class="title">
-        <span class="name">{{ props.user.nickName }}</span>
-        <span class="account">{{ props.user.account }}</span>
+        <span class="name">{{ props.contactInfo.nickName }}</span>
+        <span class="account">{{ props.contactInfo.account }}</span>
       </div>
       <div class="info">
-        <span class="organization">部门: {{ props.user.organization || '-' }}</span>
+        <span class="organization">部门: {{ props.contactInfo.organization || '-' }}</span>
       </div>
     </div>
   </div>

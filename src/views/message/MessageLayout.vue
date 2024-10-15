@@ -417,6 +417,12 @@ const onShowUserCard = async ({ sessionId, account }) => {
   isShowUserCard.value = true
 }
 
+const onShowContactCard = (contactInfo) => {
+  userInfo.value = contactInfo
+  isShowGroupCard.value = false
+  isShowUserCard.value = true
+}
+
 // TODO
 const onShowGroupCard = () => {
   isShowUserCard.value = false
@@ -457,7 +463,7 @@ watch(() => msgRecords.value, (oldValue) => {
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
       <div class="msg-aside-main">
         <div class="header">
-          <SearchBox></SearchBox>
+          <SearchBox @showContactCard="onShowContactCard"></SearchBox>
           <AddBotton></AddBotton>
         </div>
 

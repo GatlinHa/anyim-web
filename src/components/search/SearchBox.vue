@@ -5,6 +5,8 @@ import ContactItem from './ResultItem/ContactItem.vue'
 import { userQueryService, userQueryByNickService } from '@/api/user'
 import { searchStore } from '@/stores'
 
+const emit = defineEmits(['showContactCard'])
+
 const searchData = searchStore()
 const inputRef = ref()
 const keyWords = ref('')
@@ -37,6 +39,10 @@ const onOpen = () => {
   })
 }
 
+const onShowContactCard = (contactInfo) => {
+  emit('showContactCard', contactInfo)
+}
+
 // 1.失去焦点或按Enter时触发查询
 // 2.延时+防抖查询
 // TODO 如果缓存有值，且keywords没有改变就不重新查了
@@ -53,7 +59,6 @@ const onQuery = () => {
         console.log('all 待完成，搜索关键字：', keyWordsTrim.value)
         break
       case 'contact':
-        console.log('contact 待完成，搜索关键字：', keyWordsTrim.value)
         response = await userQueryByNickService({ nickNameKeyWords: keyWordsTrim.value })
         response.data.data?.forEach((element) => {
           result[element.account] = element
@@ -132,7 +137,8 @@ watch(searchTab, () => {
         <ContactItem
           v-for="account in Object.keys(searchData.getContactResult)"
           :key="account"
-          :user="searchData.getContactResult[account]"
+          :contactInfo="searchData.getContactResult[account]"
+          @showContactCard="onShowContactCard"
         ></ContactItem>
       </div>
     </el-dialog>

@@ -23,7 +23,8 @@ const closeCardIfOutside = (event) => {
   if (
     !event.target.closest('.user-card') &&
     !event.target.closest('.avatar-session-box') &&
-    !event.target.closest('.avatar-message-item')
+    !event.target.closest('.avatar-message-item') &&
+    !event.target.closest('.avatar-contact-item')
   ) {
     onClose()
   }
