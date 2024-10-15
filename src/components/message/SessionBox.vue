@@ -270,6 +270,7 @@ const switchTag = (func) => {
       }
 
       .action {
+        margin-right: 10px;
         display: flex;
 
         .action-button {
