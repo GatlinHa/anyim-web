@@ -5,7 +5,7 @@ import ContactItem from './ResultItem/ContactItem.vue'
 import { userQueryService, userQueryByNickService } from '@/api/user'
 import { searchStore } from '@/stores'
 
-const emit = defineEmits(['showContactCard'])
+const emit = defineEmits(['showContactCard', 'openSession'])
 
 const searchData = searchStore()
 const inputRef = ref()
@@ -41,6 +41,11 @@ const onOpen = () => {
 
 const onShowContactCard = (contactInfo) => {
   emit('showContactCard', contactInfo)
+}
+
+const onOpenSession = (obj) => {
+  isShowSearchDialog.value = false
+  emit('openSession', obj)
 }
 
 // 1.失去焦点或按Enter时触发查询
@@ -85,6 +90,7 @@ const onQuery = () => {
   }, 300)
 }
 
+// 切换tab时保持输入框仍有焦点
 watch(searchTab, () => {
   nextTick(() => {
     inputRef.value?.focus()
@@ -98,7 +104,7 @@ watch(searchTab, () => {
     <el-input
       placeholder="搜索：联系人/群组/组织/聊天记录..."
       :prefix-icon="Search"
-      @focus="onShowComponents"
+      @click="onShowComponents"
     />
     <el-dialog
       class="search-dialog"
@@ -139,6 +145,7 @@ watch(searchTab, () => {
           :key="account"
           :contactInfo="searchData.getContactResult[account]"
           @showContactCard="onShowContactCard"
+          @openSession="onOpenSession"
         ></ContactItem>
       </div>
     </el-dialog>

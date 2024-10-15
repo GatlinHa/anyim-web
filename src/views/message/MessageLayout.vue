@@ -27,13 +27,14 @@ import UserCard from '@/components/user/UserCard.vue'
 import GroupCard from '@/components/group/GroupCard.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import { msgChatSessionListService, msgChatPullMsgService } from '@/api/message'
+import { msgChatSessionListService, msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
+import { combineId } from '@/utils/common'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -162,7 +163,15 @@ const sessionListSorted = computed(() => {
         }
         else {
           // 排序第三优先级：最后一条消息的时间
-          return new Date(b.lastMsgTime).getTime() - new Date(a.lastMsgTime).getTime()
+          const bTime = new Date(b.lastMsgTime).getTime()
+          const aTIme = new Date(a.lastMsgTime).getTime()
+          if (bTime !== aTIme) {
+            return new Date(b.lastMsgTime).getTime() - new Date(a.lastMsgTime).getTime()
+          }
+          else {
+            // 排序第四优先级：昵称字典序
+            return a.objectInfo.nickName > b.objectInfo.nickName ? 1 : -1
+          }
         }
       }
     })
@@ -275,9 +284,9 @@ const pullMsg = async (mode = 0, ref = -1) => {
 }
 
 // 表示有个session被选中了
-const handleIsChoosed = async (exportSession) => {
-  if (sessionId.value !== exportSession.sessionId) {
-    sessionId.value = exportSession.sessionId
+const handleChooseSession = async (choosedSessionId) => {
+  if (sessionId.value !== choosedSessionId) {
+    sessionId.value = choosedSessionId
     reset()
     
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
@@ -417,17 +426,38 @@ const onShowUserCard = async ({ sessionId, account }) => {
   isShowUserCard.value = true
 }
 
+// TODO
+const onShowGroupCard = () => {
+  isShowUserCard.value = false
+  isShowGroupCard.value = true
+  groupInfo.value = {} 
+}
+
 const onShowContactCard = (contactInfo) => {
   userInfo.value = contactInfo
   isShowGroupCard.value = false
   isShowUserCard.value = true
 }
 
-// TODO
-const onShowGroupCard = () => {
-  isShowUserCard.value = false
-  isShowGroupCard.value = true
-  groupInfo.value = {} 
+const onOpenSession = async ({ msgType, objectInfo }) => {
+  if (userData.user.account === objectInfo.account) {
+    console.log('暂不支持自己给自己发消息'); //TODO
+    return
+  }
+  const sessionId = combineId(userData.user.account, objectInfo.account)
+  if (messageData.sessionList[sessionId]) {
+    handleChooseSession(sessionId)
+  }
+  else {
+    const res = await msgChatCreateSessionService({
+        sessionId: sessionId,
+        account: userData.user.account,
+        remoteId: objectInfo.account,
+        sessionType: msgType
+      })
+    messageData.addSession(res.data.data)
+    handleChooseSession(sessionId)
+  }
 }
 
 /**
@@ -463,7 +493,7 @@ watch(() => msgRecords.value, (oldValue) => {
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
       <div class="msg-aside-main">
         <div class="header">
-          <SearchBox @showContactCard="onShowContactCard"></SearchBox>
+          <SearchBox @showContactCard="onShowContactCard" @openSession="onOpenSession"></SearchBox>
           <AddBotton></AddBotton>
         </div>
 
@@ -473,7 +503,7 @@ watch(() => msgRecords.value, (oldValue) => {
             :key="item.sessionId"
             :sessionId="item.sessionId"
             :choosedSessionId="sessionId"
-            @isChoosed="handleIsChoosed"
+            @isChoosed="handleChooseSession"
             @switchTag="handleSwitchTag"
             @showUserCard="onShowUserCard"
             @showGroupCard="onShowGroupCard"

@@ -1,16 +1,21 @@
 <script setup>
 import AvatarIcon from '@/components/message/AvatarIcon.vue'
+import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['contactInfo'])
-const emit = defineEmits(['showContactCard'])
+const emit = defineEmits(['showContactCard', 'openSession'])
 
 const onShowCard = () => {
   emit('showContactCard', props.contactInfo)
 }
+
+const onOpenSession = () => {
+  emit('openSession', { msgType: MsgType.CHAT, objectInfo: props.contactInfo })
+}
 </script>
 
 <template>
-  <div class="contact-item">
+  <div class="contact-item" @click="onOpenSession">
     <AvatarIcon
       class="avatar-contact-item"
       :showName="props.contactInfo.nickName"

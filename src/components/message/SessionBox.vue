@@ -17,12 +17,6 @@ const sessionInfo = computed(() => {
 const top = ref(sessionInfo.value.top)
 const muted = ref(sessionInfo.value.muted)
 
-const exportSession = {
-  sessionId: props.sessionId,
-  sessionType: sessionInfo.value.sessionType,
-  objectInfo: sessionInfo.value.objectInfo
-}
-
 const hasBeenChoosed = computed(() => {
   return props.sessionId === props.choosedSessionId
 })
@@ -113,7 +107,7 @@ const switchTag = (func) => {
       @click="onShowCard"
     ></AvatarIcon>
     <div v-if="isShowUnreadCount" class="unread-tips"></div>
-    <div class="content-box" @click="emit('isChoosed', exportSession)">
+    <div class="content-box" @click="emit('isChoosed', props.sessionId)">
       <div class="header">
         <div class="title">
           <span class="showName">{{ showName || showId }}</span>
