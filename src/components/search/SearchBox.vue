@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, nextTick, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import ContactItem from './ResultItem/ContactItem.vue'
 import { userQueryService, userQueryByNickService } from '@/api/user'
 import { searchStore } from '@/stores'
+import ResultBox from './ResultBox.vue'
 
 const emit = defineEmits(['showContactCard', 'openSession'])
 
@@ -14,10 +14,9 @@ const keyWordsTrim = computed(() => {
   return keyWords.value.trim()
 })
 const isShowSearchDialog = ref(false)
-const searchTab = ref('all')
+const searchTab = ref('contact')
 
 const staticTabData = {
-  all: '全部',
   contact: '联系人',
   group: '群组',
   organization: '组织',
@@ -26,7 +25,7 @@ const staticTabData = {
 }
 
 const tabTipsContent = computed(() => {
-  return searchTab.value === 'all' ? '' : staticTabData[searchTab.value]
+  return staticTabData[searchTab.value]
 })
 
 const onShowComponents = () => {
@@ -60,9 +59,6 @@ const onQuery = () => {
     let response
     let result = {}
     switch (searchTab.value) {
-      case 'all':
-        console.log('all 待完成，搜索关键字：', keyWordsTrim.value)
-        break
       case 'contact':
         response = await userQueryByNickService({ nickNameKeyWords: keyWordsTrim.value })
         response.data.data?.forEach((element) => {
@@ -139,15 +135,12 @@ watch(searchTab, () => {
           {{ staticTabData[item] }}
         </div>
       </div>
-      <div class="result-box my-scrollbar">
-        <ContactItem
-          v-for="account in Object.keys(searchData.getContactResult)"
-          :key="account"
-          :contactInfo="searchData.getContactResult[account]"
-          @showContactCard="onShowContactCard"
-          @openSession="onOpenSession"
-        ></ContactItem>
-      </div>
+      <ResultBox
+        :searchTab="searchTab"
+        @showContactCard="onShowContactCard"
+        @openSession="onOpenSession"
+      >
+      </ResultBox>
     </el-dialog>
   </div>
 </template>
@@ -175,7 +168,7 @@ watch(searchTab, () => {
   }
 
   :deep(.el-dialog) {
-    width: 360px;
+    width: 300px;
     height: 400px;
     margin: 0;
     padding: 0;
@@ -226,18 +219,6 @@ watch(searchTab, () => {
         .isSearchTabAcitve {
           background-color: #c6e2ff;
           color: #409eff;
-        }
-      }
-
-      .result-box {
-        margin: 10px;
-        overflow-y: auto;
-      }
-
-      // 全局样式是hover才能看到滑块，这里需要一直显示滑块
-      .my-scrollbar {
-        &::-webkit-scrollbar-thumb {
-          background-color: #409eff;
         }
       }
     }
