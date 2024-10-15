@@ -46,6 +46,10 @@ export const userQueryService = (obj) => {
   return request.post('/user/query', getReqBody(obj))
 }
 
+export const userQueryByNickService = (obj) => {
+  return request.post('/user/findByNick', getReqBody(obj))
+}
+
 export const refreshToken = async () => {
   return request.post('/user/refreshToken', {
     clientType: CLIENT_TYPE,

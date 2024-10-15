@@ -17,7 +17,7 @@ import {
   ArrowUp
 } from '@element-plus/icons-vue'
 import DragLine from '@/components/common/DragLine.vue'
-import SearchBox from '@/components/common/SearchBox.vue'
+import SearchBox from '@/components/search/SearchBox.vue'
 import AddBotton from '@/components/common/AddBotton.vue'
 import SessionBox from '@/components/message/SessionBox.vue'
 import InputTool from '@/components/message/InputTool.vue'
