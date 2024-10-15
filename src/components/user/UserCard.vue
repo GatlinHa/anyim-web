@@ -70,7 +70,7 @@ onUnmounted(() => {
               <el-icon v-if="props.userInfo.gender === 1" color="#508afe"><Male /></el-icon>
               <el-icon v-if="props.userInfo.gender === 2" color="#ff5722"><Female /></el-icon>
             </div>
-            <div class="nickname text-ellipsis">
+            <div class="nickname">
               {{ props.userInfo.nickName || '未设置昵称' }}({{ props.userInfo.account }})
             </div>
           </div>
@@ -113,6 +113,8 @@ onUnmounted(() => {
   border-radius: 10px;
   padding: 0px;
   box-shadow: 2px 2px 20px gray;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: fixed;
   top: 0;
@@ -167,7 +169,7 @@ onUnmounted(() => {
         width: 100px;
         height: 100px;
         position: absolute;
-        top: 40px;
+        top: 35px;
       }
 
       .gender {
@@ -175,27 +177,31 @@ onUnmounted(() => {
         height: 20px;
         position: absolute;
         left: 190px;
-        top: 125px;
+        top: 120px;
         border-radius: 50%;
       }
 
       .nickname {
         position: absolute;
-        top: 150px;
+        top: 145px;
         width: 80%;
         height: 48px;
         font-size: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         text-align: center;
         color: #409eff;
         font-weight: bold;
         user-select: text;
+        word-break: break-all;
       }
     }
   }
 
   .body {
     width: 100%;
-    height: 300px;
+    flex: 1;
     background-color: #fff;
     display: flex;
     flex-direction: column;
