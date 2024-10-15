@@ -34,12 +34,13 @@ import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { combineId } from '@/utils/common'
+import { combineId, sessionIdConvert } from '@/utils/common'
 
 const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
 const sessionId = ref('')
+const sessionListRef = ref()
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -82,6 +83,20 @@ const reset = () => {
   isLoadMoreLoading.value = false
   isLoading.value = false
   isShowReturnBottom.value = false
+}
+
+const locateSession = (sessionId) => {
+  nextTick(() => {
+    const choosedElement = document.querySelector(`#session-box-${sessionIdConvert(sessionId)}`)
+    // 如果被选中元素的上边在scrollTop之的上面，或这在下边在scrollTop+clientHeight的下面（显示不全或者完全没有显示），则需要重新定位
+    // 由于offsetTop和offsetHeight不包含外边距，因此定位存在细小误差，暂不处理
+    if (choosedElement.offsetTop - choosedElement.offsetHeight < sessionListRef.value.scrollTop) {
+      sessionListRef.value.scrollTop = choosedElement.offsetTop - choosedElement.offsetHeight
+    }
+    else if (choosedElement.offsetTop > sessionListRef.value.scrollTop + sessionListRef.value.clientHeight) {
+      sessionListRef.value.scrollTop = choosedElement.offsetTop - sessionListRef.value.clientHeight
+    }
+  })
 }
 
 const msgRecords = computed(() => {
@@ -288,6 +303,7 @@ const handleChooseSession = async (choosedSessionId) => {
   if (sessionId.value !== choosedSessionId) {
     sessionId.value = choosedSessionId
     reset()
+    locateSession(choosedSessionId)
     
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
     if (!msgRecords.value && choosedSession.value.lastMsgId) {
@@ -497,8 +513,9 @@ watch(() => msgRecords.value, (oldValue) => {
           <AddBotton></AddBotton>
         </div>
 
-        <div class="session-list my-scrollbar">
+        <div class="session-list my-scrollbar" ref="sessionListRef">
           <SessionBox
+            :id="`session-box-${sessionIdConvert(item.sessionId)}`"
             v-for="item in sessionListSorted"
             :key="item.sessionId"
             :sessionId="item.sessionId"

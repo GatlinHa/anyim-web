@@ -161,3 +161,7 @@ export const combineId = (fromId, toId) => {
     return toId + '@' + fromId
   }
 }
+
+export const sessionIdConvert = (sessionId) => {
+  return sessionId.replace(/[@]/g, '-')
+}

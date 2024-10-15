@@ -22,8 +22,6 @@ onMounted(() => {
 const onNewAvatar = (newAvatar) => {
   formModel.value.avatar = newAvatar.originUrl
   formModel.value.avatarThumb = newAvatar.thumbUrl
-  console.log(newAvatar)
-  console.log(formModel.value.avatar)
 }
 
 const onSave = () => {
