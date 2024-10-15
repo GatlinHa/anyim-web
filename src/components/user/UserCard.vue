@@ -1,30 +1,17 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
-import { ElLoading } from 'element-plus'
 import avatar from '@/assets/default_avatar.png'
-import { el_loading_options } from '@/const/commonConst'
-import { userQueryService } from '@/api/user'
-import { userStore, messageStore } from '@/stores'
+import { userStore } from '@/stores'
 
-const props = defineProps(['isShow', 'sessionId', 'account'])
+const props = defineProps(['isShow', 'userInfo'])
 const emit = defineEmits(['close'])
 
 const userCardRef = ref()
 const userData = userStore()
-const messageData = messageStore()
-const isLoading = ref(false)
-
-const userInfo = computed(() => {
-  if (isSelf.value) {
-    return userData.user
-  } else {
-    return messageData.sessionList[props.sessionId].objectInfo
-  }
-})
 
 const isSelf = computed(() => {
-  return userData.user.account === props.account
+  return userData.user.account === props.userInfo.account
 })
 
 const preventClose = (event) => {
@@ -49,7 +36,7 @@ const handleEscEvent = (event) => {
 }
 
 const truncatedSignature = computed(() => {
-  const signature = userInfo.value.signature || 'TA还没有个性签名。'
+  const signature = props.userInfo.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
   return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
 })
@@ -68,48 +55,22 @@ onUnmounted(() => {
   document.removeEventListener('click', closeCardIfOutside)
   document.removeEventListener('keydown', handleEscEvent)
 })
-
-onUpdated(async () => {
-  if (props.isShow) {
-    isLoading.value = true
-    const loadingInstance = ElLoading.service(el_loading_options)
-    if (isSelf.value) {
-      await userData.updateUser()
-    } else {
-      const res = await userQueryService({ account: props.account })
-      messageData.updateSession({
-        sessionId: props.sessionId,
-        objectInfo: {
-          ...userInfo.value,
-          nickName: res.data.data.nickName,
-          signature: res.data.data.signature,
-          avatarThumb: res.data.data.avatarThumb,
-          gender: res.data.data.gender,
-          phoneNum: res.data.data.phoneNum,
-          email: res.data.data.email
-        }
-      })
-    }
-    loadingInstance.close()
-    isLoading.value = false
-  }
-})
 </script>
 
 <template>
   <div ref="userCardRef">
     <transition name="fade">
-      <div class="user-card" v-if="props.isShow && !isLoading" @click.self="preventClose($event)">
+      <div class="user-card" v-if="props.isShow" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="userInfo.avatarThumb || avatar" />
+            <el-avatar class="avatar" :src="props.userInfo.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="userInfo.gender === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="userInfo.gender === 2" color="#ff5722"><Female /></el-icon>
+              <el-icon v-if="props.userInfo.gender === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="props.userInfo.gender === 2" color="#ff5722"><Female /></el-icon>
             </div>
             <div class="nickname text-ellipsis">
-              {{ userInfo.nickName || '未设置昵称' }}({{ props.account }})
+              {{ props.userInfo.nickName || '未设置昵称' }}({{ props.userInfo.account }})
             </div>
           </div>
         </div>
@@ -120,23 +81,23 @@ onUpdated(async () => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <span class="value">{{ userInfo.phoneNum || '-' }}</span>
+            <span class="value">{{ props.userInfo.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <span class="value">{{ userInfo.email || '-' }}</span>
+            <span class="value">{{ props.userInfo.email || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">驻地：</span>
-            <span class="value">{{ userInfo.base || '-' }}</span>
+            <span class="value">{{ props.userInfo.base || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <span class="value">{{ userInfo.organize || '-' }}</span>
+            <span class="value">{{ props.userInfo.organize || '-' }}</span>
           </div>
           <div v-if="!isSelf" class="info-item remark">
             <span class="label">备注：</span>
-            <span class="value">{{ userInfo.remark || 'TODO' }}</span>
+            <span class="value">{{ props.userInfo.remark || 'TODO' }}</span>
           </div>
         </div>
       </div>

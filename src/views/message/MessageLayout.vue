@@ -31,6 +31,9 @@ import { msgChatSessionListService, msgChatPullMsgService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
+import { userQueryService } from '@/api/user'
+import { ElLoading } from 'element-plus'
+import { el_loading_options } from '@/const/commonConst'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -382,25 +385,43 @@ const onClickMsgContainer = () => {
 }
 
 const isShowUserCard = ref(false)
-const showUserCardSessionId = ref('')
-const showUserCardAccount = ref('')
+const userInfo = ref()
 
 const isShowGroupCard = ref(false)
-const showUserGroupSessionId = ref('')
-const showUserCardGroupId = ref('')
+const groupInfo = ref()
 
-const onShowUserCard = ({ sessionId, account }) => {
-  showUserCardSessionId.value = sessionId
-  showUserCardAccount.value = account
+const onShowUserCard = async ({ sessionId, account }) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  if (userData.user.account === account) {
+    await userData.updateUser()
+    userInfo.value = userData.user
+  }
+  else {
+    const res = await userQueryService({ account: account })
+    messageData.updateSession({
+      sessionId: sessionId,
+      objectInfo: {
+        ...messageData.sessionList[sessionId].objectInfo,
+        nickName: res.data.data.nickName,
+        signature: res.data.data.signature,
+        avatarThumb: res.data.data.avatarThumb,
+        gender: res.data.data.gender,
+        phoneNum: res.data.data.phoneNum,
+        email: res.data.data.email
+      }
+    })
+    userInfo.value = messageData.sessionList[sessionId].objectInfo
+  }
+  loadingInstance.close()
   isShowGroupCard.value = false
   isShowUserCard.value = true
 }
 
-const onShowGroupCard = ({ sessionId, groupId }) => {
-  showUserGroupSessionId.value = sessionId
-  showUserCardGroupId.value = groupId
+// TODO
+const onShowGroupCard = () => {
   isShowUserCard.value = false
   isShowGroupCard.value = true
+  groupInfo.value = {} 
 }
 
 /**
@@ -604,14 +625,12 @@ watch(() => msgRecords.value, (oldValue) => {
   </el-container>
   <UserCard
     :isShow="isShowUserCard"
-    :sessionId="showUserCardSessionId"
-    :account="showUserCardAccount"
+    :userInfo="userInfo"
     @close="isShowUserCard = false"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
-    :sessionId="showUserGroupSessionId"
-    :groupId="showUserCardGroupId"
+    :groupInfo="groupInfo"
     @close="isShowGroupCard = false"
   ></GroupCard>
 </template>
