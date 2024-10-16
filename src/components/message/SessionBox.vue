@@ -7,8 +7,8 @@ import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore } from '@/stores'
 
-const props = defineProps(['sessionId', 'choosedSessionId'])
-const emit = defineEmits(['isChoosed', 'switchTag', 'showUserCard', 'showGroupCard'])
+const props = defineProps(['sessionId', 'selectedSessionId'])
+const emit = defineEmits(['isSelected', 'switchTag', 'showUserCard', 'showGroupCard'])
 const messageData = messageStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
@@ -17,8 +17,8 @@ const sessionInfo = computed(() => {
 const top = ref(sessionInfo.value.top)
 const muted = ref(sessionInfo.value.muted)
 
-const hasBeenChoosed = computed(() => {
-  return props.sessionId === props.choosedSessionId
+const hasBeenSelected = computed(() => {
+  return props.sessionId === props.selectedSessionId
 })
 
 const showName = computed(() => {
@@ -58,7 +58,7 @@ const showTime = computed(() => {
 })
 
 const isShowDraft = computed(() => {
-  return !hasBeenChoosed.value && sessionInfo.value.draft
+  return !hasBeenSelected.value && sessionInfo.value.draft
 })
 
 const isShowUnreadCount = computed(() => {
@@ -98,7 +98,7 @@ const switchTag = (func) => {
 </script>
 
 <template>
-  <div class="session-box" :class="{ 'session-box-active': hasBeenChoosed }">
+  <div class="session-box" :class="{ 'session-box-active': hasBeenSelected }">
     <AvatarIcon
       class="avatar-session-box"
       :showName="showName"
@@ -107,7 +107,7 @@ const switchTag = (func) => {
       @click="onShowCard"
     ></AvatarIcon>
     <div v-if="isShowUnreadCount" class="unread-tips"></div>
-    <div class="content-box" @click="emit('isChoosed', props.sessionId)">
+    <div class="content-box" @click="emit('isSelected', props.sessionId)">
       <div class="header">
         <div class="title">
           <span class="showName">{{ showName || showId }}</span>

@@ -87,14 +87,14 @@ const reset = () => {
 
 const locateSession = (sessionId) => {
   nextTick(() => {
-    const choosedElement = document.querySelector(`#session-box-${sessionIdConvert(sessionId)}`)
+    const selectedElement = document.querySelector(`#session-box-${sessionIdConvert(sessionId)}`)
     // 如果被选中元素的上边在scrollTop之的上面，或这在下边在scrollTop+clientHeight的下面（显示不全或者完全没有显示），则需要重新定位
     // 由于offsetTop和offsetHeight不包含外边距，因此定位存在细小误差，暂不处理
-    if (choosedElement.offsetTop - choosedElement.offsetHeight < sessionListRef.value.scrollTop) {
-      sessionListRef.value.scrollTop = choosedElement.offsetTop - choosedElement.offsetHeight
+    if (selectedElement.offsetTop - selectedElement.offsetHeight < sessionListRef.value.scrollTop) {
+      sessionListRef.value.scrollTop = selectedElement.offsetTop - selectedElement.offsetHeight
     }
-    else if (choosedElement.offsetTop > sessionListRef.value.scrollTop + sessionListRef.value.clientHeight) {
-      sessionListRef.value.scrollTop = choosedElement.offsetTop - sessionListRef.value.clientHeight
+    else if (selectedElement.offsetTop > sessionListRef.value.scrollTop + sessionListRef.value.clientHeight) {
+      sessionListRef.value.scrollTop = selectedElement.offsetTop - sessionListRef.value.clientHeight
     }
   })
 }
@@ -103,7 +103,7 @@ const msgRecords = computed(() => {
   return messageData.msgRecordsList[sessionId.value]?.slice(startIndex.value)
 })
 
-const choosedSession = computed(() => {
+const selectedSession = computed(() => {
   return messageData.sessionList[sessionId.value]
 })
 
@@ -194,22 +194,22 @@ const sessionListSorted = computed(() => {
 })
 
 const showName = computed(() => {
-  switch (choosedSession.value.sessionType) {
+  switch (selectedSession.value.sessionType) {
     case MsgType.CHAT:
-      return choosedSession.value.objectInfo.nickName
+      return selectedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return choosedSession.value.objectInfo.groupName
+      return selectedSession.value.objectInfo.groupName
     default:
       return ''
   }
 })
 
 const showId = computed(() => {
-  switch (choosedSession.value.sessionType) {
+  switch (selectedSession.value.sessionType) {
     case MsgType.CHAT:
-      return choosedSession.value.objectInfo.account
+      return selectedSession.value.objectInfo.account
     case MsgType.GROUP_CHAT:
-      return choosedSession.value.objectInfo.groupId
+      return selectedSession.value.objectInfo.groupId
     default:
       return ''
   }
@@ -299,25 +299,25 @@ const pullMsg = async (mode = 0, ref = -1) => {
 }
 
 // 表示有个session被选中了
-const handleChooseSession = async (choosedSessionId) => {
-  if (sessionId.value !== choosedSessionId) {
-    sessionId.value = choosedSessionId
+const handleSelecteSession = async (selectedSessionId) => {
+  if (sessionId.value !== selectedSessionId) {
+    sessionId.value = selectedSessionId
     reset()
-    locateSession(choosedSessionId)
+    locateSession(selectedSessionId)
     
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
-    if (!msgRecords.value && choosedSession.value.lastMsgId) {
+    if (!msgRecords.value && selectedSession.value.lastMsgId) {
       await pullMsg()
       msgListReachBottom()
     }
-    lastReadMsgId.value = choosedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
+    lastReadMsgId.value = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
     handleRead()
   }
 }
 
 const handleRead = () => {
-  if (sessionId.value && choosedSession.value.readMsgId < choosedSession.value.lastMsgId) {
-    const content = choosedSession.value.lastMsgId.toString()
+  if (sessionId.value && selectedSession.value.readMsgId < selectedSession.value.lastMsgId) {
+    const content = selectedSession.value.lastMsgId.toString()
     wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
     // 更新本地缓存的已读位置
     messageData.updateSession({
@@ -335,7 +335,7 @@ const handleSwitchTag = (obj) => {
 
 const handleSendMessage = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
-  wsConnect.sendMsg(showId.value, choosedSession.value.sessionType, content, (msgId) => {
+  wsConnect.sendMsg(showId.value, selectedSession.value.sessionType, content, (msgId) => {
     const now = new Date()
     messageData.updateSession({
       sessionId: sessionId.value,
@@ -352,7 +352,7 @@ const handleSendMessage = (content) => {
       sessionId: sessionId.value,
       msgId: msgId,  
       fromId: userData.user.account,
-      msgType: choosedSession.value.sessionType,
+      msgType: selectedSession.value.sessionType,
       content: content,
       msgTime: now
     }])
@@ -462,7 +462,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
   }
   const sessionId = combineId(userData.user.account, objectInfo.account)
   if (messageData.sessionList[sessionId]) {
-    handleChooseSession(sessionId)
+    handleSelecteSession(sessionId)
   }
   else {
     const res = await msgChatCreateSessionService({
@@ -472,7 +472,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
         sessionType: msgType
       })
     messageData.addSession(res.data.data)
-    handleChooseSession(sessionId)
+    handleSelecteSession(sessionId)
   }
 }
 
@@ -480,7 +480,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
  * 监视msgRecords的数据变化,给出新消息的tips提示
  */
 watch(() => msgRecords.value, (oldValue) => {
-  if (!oldValue || choosedSession.value.unreadCount === 0) return
+  if (!oldValue || selectedSession.value.unreadCount === 0) return
   nextTick(() => {
     const unreadMsgEls = document.querySelectorAll('.unreadMsg');
     if (unreadMsgEls.length === 0) return
@@ -489,13 +489,13 @@ watch(() => msgRecords.value, (oldValue) => {
       const rect = el.getBoundingClientRect()
       if (rect.bottom < msgListRect.top) {
         newMsgTips.value.isShowTopTips = true
-        newMsgTips.value.unreadCount = choosedSession.value.unreadCount
+        newMsgTips.value.unreadCount = selectedSession.value.unreadCount
         newMsgTips.value.firstElement = el
         return true
       }
       else if (rect.top > msgListRect.bottom) {
         newMsgTips.value.isShowBottomTips = true
-        newMsgTips.value.unreadCount = choosedSession.value.unreadCount
+        newMsgTips.value.unreadCount = selectedSession.value.unreadCount
         return true
       }
     })
@@ -519,8 +519,8 @@ watch(() => msgRecords.value, (oldValue) => {
             v-for="item in sessionListSorted"
             :key="item.sessionId"
             :sessionId="item.sessionId"
-            :choosedSessionId="sessionId"
-            @isChoosed="handleChooseSession"
+            :selectedSessionId="sessionId"
+            @isselected="handleSelecteSession"
             @switchTag="handleSwitchTag"
             @showUserCard="onShowUserCard"
             @showGroupCard="onShowGroupCard"
@@ -549,7 +549,7 @@ watch(() => msgRecords.value, (oldValue) => {
         <el-header class="header bdr-b">
           <div class="show-name-id">
             <span class="show-name">{{ showName }}</span>
-            <span v-if="choosedSession?.sessionType === MsgType.CHAT" class="show-id">{{
+            <span v-if="selectedSession?.sessionType === MsgType.CHAT" class="show-id">{{
               showId
             }}</span>
           </div>
@@ -576,8 +576,8 @@ watch(() => msgRecords.value, (oldValue) => {
                 :key="index"
                 :sessionId="sessionId"
                 :msg="item"
-                :obj="choosedSession.objectInfo"
-                :remoteRead="choosedSession.remoteRead"
+                :obj="selectedSession.objectInfo"
+                :remoteRead="selectedSession.remoteRead"
                 :lastMsgTime="getLastMsgTime(index)"
                 :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
@@ -666,7 +666,7 @@ watch(() => msgRecords.value, (oldValue) => {
               <el-main class="input-box-main">
                 <InputEditor
                   :sessionId="sessionId"
-                  :draft="choosedSession.draft || ''"
+                  :draft="selectedSession.draft || ''"
                   @sendMessage="handleSendMessage"
                 ></InputEditor>
               </el-main>

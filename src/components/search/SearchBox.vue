@@ -49,7 +49,6 @@ const onOpenSession = (obj) => {
 
 // 1.失去焦点或按Enter时触发查询
 // 2.延时+防抖查询
-// TODO 如果缓存有值，且keywords没有改变就不重新查了
 let timer
 const onQuery = () => {
   if (!keyWordsTrim.value) return
