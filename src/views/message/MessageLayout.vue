@@ -520,7 +520,7 @@ watch(() => msgRecords.value, (oldValue) => {
             :key="item.sessionId"
             :sessionId="item.sessionId"
             :selectedSessionId="sessionId"
-            @isselected="handleSelecteSession"
+            @isSelected="handleSelecteSession"
             @switchTag="handleSwitchTag"
             @showUserCard="onShowUserCard"
             @showGroupCard="onShowGroupCard"
