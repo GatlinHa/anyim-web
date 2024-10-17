@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
 const props = defineProps(['menu'])
 const emit = defineEmits(['selectMenu'])
 
 const containerRef = ref()
+const menuRef = ref()
 const isShowMenu = ref(false)
 const x = ref(0)
 const y = ref(0)
@@ -29,6 +30,15 @@ const handleContextMenu = (e) => {
   isShowMenu.value = true
   x.value = e.clientX
   y.value = e.clientY
+
+  // 如果发现菜单超出containerRef的底部了，y要修正一下，往上面弹出菜单
+  nextTick(() => {
+    if (e.clientY + menuRef.value.clientHeight > containerRef.value.clientHeight) {
+      y.value = e.clientY - menuRef.value.clientHeight
+    } else {
+      y.value = e.clientY
+    }
+  })
 }
 
 const handleEscEvent = (event) => {
@@ -54,6 +64,7 @@ const handleClick = (item) => {
         class="context-menu"
         :style="{ left: x + 'px', top: y + 'px' }"
         @contextmenu.prevent
+        ref="menuRef"
       >
         <div class="menu-list">
           <div
