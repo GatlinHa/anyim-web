@@ -520,6 +520,10 @@ const onUpdateMenu = (menu) => {
   showMenu.value = menu
 }
 
+const onNoneSelected = () => {
+  selectedSessionId.value = ''
+}
+
 </script>
 
 <template>
@@ -547,6 +551,7 @@ const onUpdateMenu = (menu) => {
               @showGroupCard="onShowGroupCard"
               @customContextmenu="onCustomContextmenu"
               @updateMenu="onUpdateMenu"
+              @noneSelected="onNoneSelected"
             ></SessionBox>
           </div>
         </ContextMenu>

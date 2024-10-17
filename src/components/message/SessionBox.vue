@@ -20,7 +20,8 @@ const emit = defineEmits([
   'showUserCard',
   'showGroupCard',
   'customContextmenu',
-  'updateMenu'
+  'updateMenu',
+  'noneSelected'
 ])
 const messageData = messageStore()
 const sessionInfo = computed(() => {
@@ -141,20 +142,23 @@ watch(
       switch (props.selectedMenuItem.label) {
         case 'top':
           top.value = !top.value
+          switchTag(() => {})
+          emit('updateMenu', menu.value) //更新之后要同步菜单变化
           break
         case 'muted':
           muted.value = !muted.value
+          switchTag(() => {})
+          emit('updateMenu', menu.value) //更新之后要同步菜单变化
           break
         case 'delete':
           await msgChatDeleteSessionService({ sessionId: props.sessionId })
+          // 如果删除的session是这个选中的session，需要通知父组件处理
+          if (hasBeenSelected.value) emit('noneSelected')
           messageData.deleteSession(props.sessionId)
           break
         default:
           break
       }
-
-      switchTag(() => {})
-      emit('updateMenu', menu.value) //更新之后要同步菜单变化
     }
   }
 )
