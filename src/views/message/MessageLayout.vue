@@ -35,12 +35,16 @@ import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/utils/common'
+import ContextMenu from '@/components/common/ContextMenu.vue'
 
 const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
-const sessionId = ref('')
+const sessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
+const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）
+const showMenu = ref([]) //传递给菜单组件的菜单选项
+const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单项
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -502,6 +506,20 @@ watch(() => msgRecords.value, (oldValue) => {
   })
 })
 
+const onSelectMenu = (item) => {
+  selectedMenuItem.value = item
+  
+}
+
+const onCustomContextmenu = ({ sessionId, menu }) => {
+  showMenuSessionId.value = sessionId
+  showMenu.value = menu
+}
+
+const onUpdateMenu = (menu) => {
+  showMenu.value = menu
+}
+
 </script>
 
 <template>
@@ -513,19 +531,25 @@ watch(() => msgRecords.value, (oldValue) => {
           <AddBotton></AddBotton>
         </div>
 
-        <div class="session-list my-scrollbar" ref="sessionListRef">
-          <SessionBox
-            :id="`session-box-${sessionIdConvert(item.sessionId)}`"
-            v-for="item in sessionListSorted"
-            :key="item.sessionId"
-            :sessionId="item.sessionId"
-            :selectedSessionId="sessionId"
-            @isSelected="handleSelecteSession"
-            @switchTag="handleSwitchTag"
-            @showUserCard="onShowUserCard"
-            @showGroupCard="onShowGroupCard"
-          ></SessionBox>
-        </div>
+        <ContextMenu :menu="showMenu" @selectMenu="onSelectMenu">
+          <div class="session-list my-scrollbar" ref="sessionListRef">
+            <SessionBox
+              :id="`session-box-${sessionIdConvert(item.sessionId)}`"
+              v-for="item in sessionListSorted"
+              :key="item.sessionId"
+              :sessionId="item.sessionId"
+              :selectedSessionId="sessionId"
+              :showMenuSessionId="showMenuSessionId"
+              :selectedMenuItem="selectedMenuItem"
+              @isSelected="handleSelecteSession"
+              @switchTag="handleSwitchTag"
+              @showUserCard="onShowUserCard"
+              @showGroupCard="onShowGroupCard"
+              @customContextmenu="onCustomContextmenu"
+              @updateMenu="onUpdateMenu"
+            ></SessionBox>
+          </div>
+        </ContextMenu>
       </div>
 
       <DragLine
@@ -713,6 +737,9 @@ watch(() => msgRecords.value, (oldValue) => {
 
       .session-list {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0; // 防止右键点击到两个sessionBox中间的真空地带，造成弹出的菜单不能准确找到到session
         overflow-y: scroll; // 用它的滚动条
       }
     }

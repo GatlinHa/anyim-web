@@ -1,14 +1,27 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import AvatarIcon from './AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore } from '@/stores'
+import { msgChatDeleteSessionService } from '@/api/message'
 
-const props = defineProps(['sessionId', 'selectedSessionId'])
-const emit = defineEmits(['isSelected', 'switchTag', 'showUserCard', 'showGroupCard'])
+const props = defineProps([
+  'sessionId',
+  'selectedSessionId',
+  'showMenuSessionId',
+  'selectedMenuItem'
+])
+const emit = defineEmits([
+  'isSelected',
+  'switchTag',
+  'showUserCard',
+  'showGroupCard',
+  'customContextmenu',
+  'updateMenu'
+])
 const messageData = messageStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
@@ -17,8 +30,33 @@ const sessionInfo = computed(() => {
 const top = ref(sessionInfo.value.top)
 const muted = ref(sessionInfo.value.muted)
 
+// 这里不能用ref，因为这个结构不能响应top和muted变化
+const menu = computed(() => {
+  return [
+    {
+      label: 'top',
+      value: top.value,
+      desc: top.value ? '取消置顶' : '置顶'
+    },
+    {
+      label: 'muted',
+      value: muted.value,
+      desc: muted.value ? '取消免打扰' : '设置免打扰'
+    },
+    {
+      label: 'delete',
+      value: '',
+      desc: '删除会话'
+    }
+  ]
+})
+
 const hasBeenSelected = computed(() => {
   return props.sessionId === props.selectedSessionId
+})
+
+const hasBeenShowMenu = computed(() => {
+  return props.sessionId === props.showMenuSessionId
 })
 
 const showName = computed(() => {
@@ -95,64 +133,95 @@ const switchTag = (func) => {
     })
   }, 100) // 这个时间太长会影响置顶按钮的响应时长
 }
+
+watch(
+  () => props.selectedMenuItem,
+  async () => {
+    if (hasBeenShowMenu.value && props.selectedMenuItem) {
+      switch (props.selectedMenuItem.label) {
+        case 'top':
+          top.value = !top.value
+          break
+        case 'muted':
+          muted.value = !muted.value
+          break
+        case 'delete':
+          await msgChatDeleteSessionService({ sessionId: props.sessionId })
+          messageData.deleteSession(props.sessionId)
+          break
+        default:
+          break
+      }
+
+      switchTag(() => {})
+      emit('updateMenu', menu.value) //更新之后要同步菜单变化
+    }
+  }
+)
+
+const onContextmenu = () => {
+  emit('customContextmenu', { sessionId: props.sessionId, menu: menu.value })
+}
 </script>
 
 <template>
-  <div class="session-box" :class="{ 'session-box-active': hasBeenSelected }">
-    <AvatarIcon
-      class="avatar-session-box"
-      :showName="showName"
-      :showId="showId"
-      :showAvatarThumb="showAvatarThumb"
-      @click="onShowCard"
-    ></AvatarIcon>
-    <div v-if="isShowUnreadCount" class="unread-tips"></div>
-    <div class="content-box" @click="emit('isSelected', props.sessionId)">
-      <div class="header">
-        <div class="title">
-          <span class="showName">{{ showName || showId }}</span>
-          <span v-if="sessionInfo.objectInfo.account" class="showAccount">
-            {{ sessionInfo.objectInfo.account }}
-          </span>
-          <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>
-          <SessionTag v-if="top" tagType="top"></SessionTag>
-          <SessionTag v-if="muted" tagType="mute"></SessionTag>
+  <div class="session-box-wrapper" @contextmenu.prevent="onContextmenu">
+    <div class="session-box" :class="{ 'session-box-active': hasBeenSelected }">
+      <AvatarIcon
+        class="avatar-session-box"
+        :showName="showName"
+        :showId="showId"
+        :showAvatarThumb="showAvatarThumb"
+        @click="onShowCard"
+      ></AvatarIcon>
+      <div v-if="isShowUnreadCount" class="unread-tips"></div>
+      <div class="content-box" @click="emit('isSelected', props.sessionId)">
+        <div class="header">
+          <div class="title">
+            <span class="showName">{{ showName || showId }}</span>
+            <span v-if="sessionInfo.objectInfo.account" class="showAccount">
+              {{ sessionInfo.objectInfo.account }}
+            </span>
+            <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>
+            <SessionTag v-if="top" tagType="top"></SessionTag>
+            <SessionTag v-if="muted" tagType="mute"></SessionTag>
+          </div>
+          <div class="datetime">
+            <span>{{ showTime }}</span>
+          </div>
         </div>
-        <div class="datetime">
-          <span>{{ showTime }}</span>
-        </div>
-      </div>
-      <div class="body">
-        <div class="content">
-          <span v-if="isShowUnreadCount" class="unread-count"
-            >[{{ sessionInfo.unreadCount }}条]</span
-          >
-          <span v-if="isShowDraft" class="draft">[草稿]</span>
-          <span class="detail">{{
-            isShowDraft ? sessionInfo.draft : sessionInfo.lastMsgContent
-          }}</span>
-        </div>
-        <div class="action">
-          <el-button
-            class="action-button"
-            :icon="top ? Bottom : Top"
-            @click="
-              switchTag(() => {
-                top = !top
-              })
-            "
-            circle
-          />
-          <el-button
-            class="action-button"
-            :icon="muted ? Bell : MuteNotification"
-            @click="
-              switchTag(() => {
-                muted = !muted
-              })
-            "
-            circle
-          />
+        <div class="body">
+          <div class="content">
+            <span v-if="isShowUnreadCount" class="unread-count"
+              >[{{ sessionInfo.unreadCount }}条]</span
+            >
+            <span v-if="isShowDraft" class="draft">[草稿]</span>
+            <span class="detail">{{
+              isShowDraft ? sessionInfo.draft : sessionInfo.lastMsgContent
+            }}</span>
+          </div>
+          <div class="action">
+            <el-button
+              class="action-button"
+              :icon="top ? Bottom : Top"
+              @click="
+                switchTag(() => {
+                  top = !top
+                })
+              "
+              circle
+            />
+            <el-button
+              class="action-button"
+              :icon="muted ? Bell : MuteNotification"
+              @click="
+                switchTag(() => {
+                  muted = !muted
+                })
+              "
+              circle
+            />
+          </div>
         </div>
       </div>
     </div>

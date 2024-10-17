@@ -18,6 +18,10 @@ export const messageStore = defineStore('anyim-message', () => {
     sessionList.value[session.sessionId] = session
   }
 
+  const deleteSession = (sessionId) => {
+    delete sessionList.value[sessionId]
+  }
+
   const updateSession = (obj) => {
     let params = { sessionId: obj.sessionId }
     let flag = false // 是否需要更新云端的数据
@@ -110,6 +114,7 @@ export const messageStore = defineStore('anyim-message', () => {
     sessionList,
     setSessionList,
     addSession,
+    deleteSession,
     updateSession,
 
     msgRecordsList,

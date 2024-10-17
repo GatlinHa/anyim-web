@@ -78,7 +78,7 @@ const onExit = async () => {
 </script>
 
 <template>
-  <el-container class="layout-container">
+  <el-container class="layout-container" @contextmenu.prevent>
     <el-aside width="100px">
       <span class="avatar">
         <AvatarIcon
