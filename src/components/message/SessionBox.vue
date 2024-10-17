@@ -239,7 +239,8 @@ const onContextmenu = () => {
 
 .session-box {
   height: 60px;
-  margin: 5px;
+  margin: 1px;
+  margin-left: 5px;
   padding: 5px;
   border-radius: 6px;
   padding-right: 0;
