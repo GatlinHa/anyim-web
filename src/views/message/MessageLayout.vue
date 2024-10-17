@@ -40,7 +40,7 @@ import ContextMenu from '@/components/common/ContextMenu.vue'
 const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
-const sessionId = ref('') //当前被选中的session
+const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
 const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）
 const showMenu = ref([]) //传递给菜单组件的菜单选项
@@ -71,8 +71,8 @@ const isShowReturnBottom = ref(false)
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
 const startIndex = computed(() => {
-  if (sessionId.value) {
-    const len = messageData.msgRecordsList[sessionId.value]?.length
+  if (selectedSessionId.value) {
+    const len = messageData.msgRecordsList[selectedSessionId.value]?.length
     return len > capacity.value ? len - capacity.value : 0
   }
   else {
@@ -104,11 +104,11 @@ const locateSession = (sessionId) => {
 }
 
 const msgRecords = computed(() => {
-  return messageData.msgRecordsList[sessionId.value]?.slice(startIndex.value)
+  return messageData.msgRecordsList[selectedSessionId.value]?.slice(startIndex.value)
 })
 
 const selectedSession = computed(() => {
-  return messageData.sessionList[sessionId.value]
+  return messageData.sessionList[selectedSessionId.value]
 })
 
 onMounted(async () => {
@@ -128,11 +128,11 @@ onUnmounted(() => {
 const handleMsgListWheel = async () => {
   if (msgListDiv.value.scrollTop === 0 && !isLoadMoreLoading.value && !hasNoMoreMsg.value) {
     const scrollHeight = msgListDiv.value.scrollHeight
-    if (messageData.msgRecordsList[sessionId.value]?.length <= capacity.value) {
+    if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
       await pullMsg(1, msgRecords.value[0].msgId)
     }
 
-    const len = messageData.msgRecordsList[sessionId.value]?.length
+    const len = messageData.msgRecordsList[selectedSessionId.value]?.length
     if (len > capacity.value) {
       if (len - capacity.value > step) {
         capacity.value += step
@@ -220,7 +220,7 @@ const showId = computed(() => {
 })
 
 const firstMsgId = computed(() => {
-  return messageData.msgRecordsList[sessionId.value][0].msgId
+  return messageData.msgRecordsList[selectedSessionId.value][0].msgId
 })
 
 const getLastMsgTime = (index) => {
@@ -272,7 +272,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
 
   const pageSize = 30;
   const params = {
-    sessionId: sessionId.value, 
+    sessionId: selectedSessionId.value, 
     pageSize: pageSize, 
     mode: mode, 
     refMsgId: ref
@@ -283,10 +283,10 @@ const pullMsg = async (mode = 0, ref = -1) => {
   const res = await msgChatPullMsgService(params)
   const msgCount = res.data.data.count
   if (msgCount > 0) {
-    messageData.addMsgRecords(sessionId.value, res.data.data.msgList)
+    messageData.addMsgRecords(selectedSessionId.value, res.data.data.msgList)
     if (mode === 0) {
       messageData.updateSession({
-        sessionId: sessionId.value, 
+        sessionId: selectedSessionId.value, 
         lastMsgId: res.data.data.lastMsgId,
         lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
         lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
@@ -303,11 +303,11 @@ const pullMsg = async (mode = 0, ref = -1) => {
 }
 
 // 表示有个session被选中了
-const handleSelecteSession = async (selectedSessionId) => {
-  if (sessionId.value !== selectedSessionId) {
-    sessionId.value = selectedSessionId
+const handleSelecteSession = async (sessionId) => {
+  if (selectedSessionId.value !== sessionId) {
+    selectedSessionId.value = sessionId
     reset()
-    locateSession(selectedSessionId)
+    locateSession(sessionId)
     
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
     if (!msgRecords.value && selectedSession.value.lastMsgId) {
@@ -320,12 +320,12 @@ const handleSelecteSession = async (selectedSessionId) => {
 }
 
 const handleRead = () => {
-  if (sessionId.value && selectedSession.value.readMsgId < selectedSession.value.lastMsgId) {
+  if (selectedSessionId.value && selectedSession.value.readMsgId < selectedSession.value.lastMsgId) {
     const content = selectedSession.value.lastMsgId.toString()
     wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
     // 更新本地缓存的已读位置
     messageData.updateSession({
-      sessionId: sessionId.value, 
+      sessionId: selectedSessionId.value, 
       readMsgId: content,
       readTime: new Date(),
       unreadCount: 0
@@ -342,7 +342,7 @@ const handleSendMessage = (content) => {
   wsConnect.sendMsg(showId.value, selectedSession.value.sessionType, content, (msgId) => {
     const now = new Date()
     messageData.updateSession({
-      sessionId: sessionId.value,
+      sessionId: selectedSessionId.value,
       lastMsgId: msgId,  // 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
@@ -352,8 +352,8 @@ const handleSendMessage = (content) => {
       draft: ''  //草稿意味着要清空
     })
     
-    messageData.addMsgRecords(sessionId.value, [{
-      sessionId: sessionId.value,
+    messageData.addMsgRecords(selectedSessionId.value, [{
+      sessionId: selectedSessionId.value,
       msgId: msgId,  
       fromId: userData.user.account,
       msgType: selectedSession.value.sessionType,
@@ -369,7 +369,7 @@ const onLoadMore = async () => {
   const scrollHeight = msgListDiv.value.scrollHeight
   const scrollTop = msgListDiv.value.scrollTop
   await pullMsg(1, msgRecords.value[0].msgId)
-  const len = messageData.msgRecordsList[sessionId.value]?.length
+  const len = messageData.msgRecordsList[selectedSessionId.value]?.length
   if (len > capacity.value) {
     if (len - capacity.value > step) {
       capacity.value += step
@@ -538,7 +538,7 @@ const onUpdateMenu = (menu) => {
               v-for="item in sessionListSorted"
               :key="item.sessionId"
               :sessionId="item.sessionId"
-              :selectedSessionId="sessionId"
+              :selectedSessionId="selectedSessionId"
               :showMenuSessionId="showMenuSessionId"
               :selectedMenuItem="selectedMenuItem"
               @isSelected="handleSelecteSession"
@@ -564,7 +564,7 @@ const onUpdateMenu = (menu) => {
     <el-main class="msg-box">
       <el-image
         class="backgroup-image"
-        v-if="!sessionId"
+        v-if="!selectedSessionId"
         :src="backgroupImage"
         fit="cover"
       ></el-image>
@@ -598,7 +598,7 @@ const onUpdateMenu = (menu) => {
               <MessageItem
                 v-for="(item, index) in msgRecords"
                 :key="index"
-                :sessionId="sessionId"
+                :sessionId="selectedSessionId"
                 :msg="item"
                 :obj="selectedSession.objectInfo"
                 :remoteRead="selectedSession.remoteRead"
@@ -689,7 +689,7 @@ const onUpdateMenu = (menu) => {
               </el-header>
               <el-main class="input-box-main">
                 <InputEditor
-                  :sessionId="sessionId"
+                  :sessionId="selectedSessionId"
                   :draft="selectedSession.draft || ''"
                   @sendMessage="handleSendMessage"
                 ></InputEditor>
