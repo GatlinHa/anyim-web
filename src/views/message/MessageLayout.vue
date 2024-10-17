@@ -535,8 +535,13 @@ const onNoneSelected = () => {
           <AddBotton></AddBotton>
         </div>
 
-        <ContextMenu :menu="showMenu" @selectMenu="onSelectMenu">
-          <div class="session-list my-scrollbar" ref="sessionListRef">
+        <ContextMenu
+          class="my-scrollbar"
+          :menu="showMenu"
+          @selectMenu="onSelectMenu"
+          style="overflow-y: scroll"
+        >
+          <div class="session-list" ref="sessionListRef">
             <SessionBox
               :id="`session-box-${sessionIdConvert(item.sessionId)}`"
               v-for="item in sessionListSorted"
@@ -745,7 +750,6 @@ const onNoneSelected = () => {
         display: flex;
         flex-direction: column;
         gap: 0; // 防止右键点击到两个sessionBox中间的真空地带，造成弹出的菜单不能准确找到到session
-        overflow-y: scroll; // 用它的滚动条
       }
     }
   }
