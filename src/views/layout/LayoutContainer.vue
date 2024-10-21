@@ -16,7 +16,7 @@ import wsConnect from '@/js/websocket/wsConnect'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
-import AvatarIcon from '@/components/message/AvatarIcon.vue'
+import AvatarIcon from '@/components/common/AvatarIcon.vue'
 
 const myCardDialog = ref()
 const myAvatar = ref()

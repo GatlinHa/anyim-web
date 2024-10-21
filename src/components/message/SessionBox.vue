@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import AvatarIcon from './AvatarIcon.vue'
+import AvatarIcon from '../common/AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'

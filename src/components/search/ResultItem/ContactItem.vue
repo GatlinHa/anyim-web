@@ -1,5 +1,5 @@
 <script setup>
-import AvatarIcon from '@/components/message/AvatarIcon.vue'
+import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['contactInfo'])
