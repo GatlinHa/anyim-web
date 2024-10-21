@@ -176,9 +176,9 @@ const onContextmenu = () => {
         :showName="showName"
         :showId="showId"
         :showAvatarThumb="showAvatarThumb"
+        :userStatus="sessionInfo.objectInfo.status"
         @click="onShowCard"
       ></AvatarIcon>
-      <div v-if="isShowUnreadCount" class="unread-tips"></div>
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">
           <div class="title">
@@ -253,16 +253,6 @@ const onContextmenu = () => {
     background-color: #c6e2ff;
   }
 
-  .unread-tips {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: red;
-    position: absolute;
-    top: 5px;
-    left: 40px;
-  }
-
   .content-box {
     width: 100%;
     height: 100%;
@@ -326,7 +316,7 @@ const onContextmenu = () => {
         overflow: hidden;
 
         .unread-count {
-          color: gray;
+          color: red;
           flex-shrink: 0;
         }
 

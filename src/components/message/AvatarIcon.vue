@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { getRandomColor, getFontColor } from '@/utils/common'
 
-const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'size'])
+const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'userStatus', 'size'])
 
 const avatarSize = props.size || 40
 
@@ -16,6 +16,20 @@ const firstChar = computed(() => {
 
 const randomColor = getRandomColor(props.showName || props.showId)
 const fontColor = getFontColor(randomColor)
+
+const statusCircleColor = computed(() => {
+  switch (props.userStatus) {
+    case 1:
+      return 'yellow'
+    case 2:
+      return '#95d475'
+    case 3:
+      return 'red'
+    case 0:
+    default:
+      return 'gray'
+  }
+})
 </script>
 
 <template>
@@ -24,6 +38,11 @@ const fontColor = getFontColor(randomColor)
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
     </span>
+    <div
+      v-if="props.userStatus != null"
+      class="status-circle"
+      :style="{ backgroundColor: statusCircleColor }"
+    ></div>
   </div>
 </template>
 
@@ -32,6 +51,7 @@ const fontColor = getFontColor(randomColor)
   flex-shrink: 0;
   cursor: pointer;
   overflow: hidden;
+  position: relative;
 
   .first-char-box {
     font-size: 18px;
@@ -41,6 +61,16 @@ const fontColor = getFontColor(randomColor)
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .status-circle {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
 }
 </style>

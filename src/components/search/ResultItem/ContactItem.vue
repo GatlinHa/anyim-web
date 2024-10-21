@@ -21,6 +21,7 @@ const onOpenSession = () => {
       :showName="props.contactInfo.nickName"
       :showId="props.contactInfo.account"
       :showAvatarThumb="props.contactInfo.avatarThumb"
+      :userStatus="props.contactInfo.status"
       @click="onShowCard"
     ></AvatarIcon>
     <div class="body" @click="onOpenSession">

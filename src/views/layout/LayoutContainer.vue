@@ -86,6 +86,7 @@ const onExit = async () => {
           :showName="userData.user.nickName"
           :showId="userData.user.account"
           :showAvatarThumb="userData.user.avatarThumb"
+          :userStatus="userData.user.status"
           @click="openMyCardDialog"
         >
         </AvatarIcon>
