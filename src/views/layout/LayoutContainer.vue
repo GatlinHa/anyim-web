@@ -40,7 +40,26 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('click', clickListener)
   clearInterval(statusReqTask)
+  timer && clearTimeout(timer)
 })
+
+// 监听用户的离开事件：5分钟内未移动鼠标表示离开
+let timer
+const onListenLeave = () => {
+  if (!document.hasFocus()) return
+
+  if (userData.user.status === 1) {
+    userData.updateUserStatus(2) //修改本地状态
+    wsConnect.statusSync(2) //状态同步给云端
+  }
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    if (userData.user.status === 2) {
+      userData.updateUserStatus(1) //修改本地状态
+      wsConnect.statusSync(1) //状态同步给云端
+    }
+  }, 300000)
+}
 
 const clickListener = (e) => {
   if (!myCardDialog.value.isOpen()) return
@@ -87,7 +106,7 @@ const onExit = async () => {
 </script>
 
 <template>
-  <el-container class="layout-container" @contextmenu.prevent>
+  <el-container class="layout-container" @contextmenu.prevent @mousemove="onListenLeave">
     <el-aside width="100px">
       <span class="avatar">
         <AvatarIcon

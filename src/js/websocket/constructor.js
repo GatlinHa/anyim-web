@@ -98,6 +98,27 @@ export const statusReqConstructor = (accounts) => {
   return data
 }
 
+export const statusSyncConstructor = (status) => {
+  const header = Header.create({
+    magic: proto.magic,
+    version: proto.version,
+    msgType: MsgType.STATUS_SYNC,
+    isExtension: false
+  })
+
+  const userData = userStore()
+  const body = Body.create({
+    fromId: userData.user.account,
+    fromClient: userData.clientId,
+    content: `${status}` //content定义是String类型，这里需要转一下
+  })
+
+  const msg = Msg.create({ header: header, body: body })
+  const payload = Msg.encode(msg).finish()
+  const data = encodePayload(payload)
+  return data
+}
+
 /**
  * 发送前对长度编码，配合服务端解决半包黏包问题
  * @param {*} payload

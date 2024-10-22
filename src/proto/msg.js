@@ -292,8 +292,9 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} SENDER_SYNC=7 SENDER_SYNC value
  * @property {number} STATUS_REQ=8 STATUS_REQ value
  * @property {number} STATUS_RES=9 STATUS_RES value
- * @property {number} CLOSE_BY_READ_IDLE=10 CLOSE_BY_READ_IDLE value
- * @property {number} CLOSE_BY_ERROR_MAGIC=11 CLOSE_BY_ERROR_MAGIC value
+ * @property {number} STATUS_SYNC=10 STATUS_SYNC value
+ * @property {number} CLOSE_BY_READ_IDLE=50 CLOSE_BY_READ_IDLE value
+ * @property {number} CLOSE_BY_ERROR_MAGIC=51 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
  */
 export const MsgType = ($root.MsgType = (() => {
@@ -309,8 +310,9 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[7] = 'SENDER_SYNC')] = 7
   values[(valuesById[8] = 'STATUS_REQ')] = 8
   values[(valuesById[9] = 'STATUS_RES')] = 9
-  values[(valuesById[10] = 'CLOSE_BY_READ_IDLE')] = 10
-  values[(valuesById[11] = 'CLOSE_BY_ERROR_MAGIC')] = 11
+  values[(valuesById[10] = 'STATUS_SYNC')] = 10
+  values[(valuesById[50] = 'CLOSE_BY_READ_IDLE')] = 50
+  values[(valuesById[51] = 'CLOSE_BY_ERROR_MAGIC')] = 51
   values[(valuesById[99] = 'DEFAULT')] = 99
   return values
 })())
@@ -505,7 +507,8 @@ export const Header = ($root.Header = (() => {
         case 8:
         case 9:
         case 10:
-        case 11:
+        case 50:
+        case 51:
         case 99:
           break
       }
@@ -574,13 +577,17 @@ export const Header = ($root.Header = (() => {
       case 9:
         message.msgType = 9
         break
-      case 'CLOSE_BY_READ_IDLE':
+      case 'STATUS_SYNC':
       case 10:
         message.msgType = 10
         break
+      case 'CLOSE_BY_READ_IDLE':
+      case 50:
+        message.msgType = 50
+        break
       case 'CLOSE_BY_ERROR_MAGIC':
-      case 11:
-        message.msgType = 11
+      case 51:
+        message.msgType = 51
         break
       case 'DEFAULT':
       case 99:
@@ -689,20 +696,20 @@ export const Body = ($root.Body = (() => {
    * | 10 | tempMsgId    |   -  |    -      |  O  |     O     |     O    |        O       |    M     |     O      |       todo        |         todo        |
    * | 11 | sessionId    |   -  |    -      |  -  |     -     |     -    |        -       |    M     |     M      |       todo        |         todo        |
    * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+------------+-------------------+---------------------+
-   * NO       filed      STATUS_REQ   STATUS_RES
-   * +----+--------------+------------+------------+
-   * | 1  | fromId       |      M     |      M     |
-   * | 2  | fromClient   |      M     |      M     |
-   * | 3  | toId         |      -     |      -     |
-   * | 4  | toClient     |      -     |      -     |
-   * | 5  | groupId      |      -     |      -     |
-   * | 6  | msgId        |      -     |      -     |
-   * | 7  | seq(todo)    |      -     |      -     |
-   * | 8  | ack(todo)    |      -     |      -     |
-   * | 9  | content      |      M     |      M     |
-   * | 10 | tempMsgId    |      -     |      -     |
-   * | 11 | sessionId    |      O     |      O     |
-   * +----+--------------+------------+------------+
+   * NO       filed      STATUS_REQ   STATUS_RES   STATUS_SYNC
+   * +----+--------------+------------+------------+------------+
+   * | 1  | fromId       |      M     |      M     |      M     |
+   * | 2  | fromClient   |      M     |      M     |      M     |
+   * | 3  | toId         |      -     |      -     |      -     |
+   * | 4  | toClient     |      -     |      -     |      -     |
+   * | 5  | groupId      |      -     |      -     |      -     |
+   * | 6  | msgId        |      -     |      -     |      -     |
+   * | 7  | seq(todo)    |      -     |      -     |      -     |
+   * | 8  | ack(todo)    |      -     |      -     |      -     |
+   * | 9  | content      |      M     |      M     |      M     |
+   * | 10 | tempMsgId    |      -     |      -     |      -     |
+   * | 11 | sessionId    |      -     |      -     |      -     |
+   * +----+--------------+------------+------------+------------+
    * @implements IBody
    * @constructor
    * @param {IBody=} [properties] Properties to set

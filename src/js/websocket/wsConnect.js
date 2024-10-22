@@ -7,7 +7,8 @@ import {
   heartBeatConstructor,
   helloConstructor,
   chatReadConstructor,
-  statusReqConstructor
+  statusReqConstructor,
+  statusSyncConstructor
 } from './constructor'
 import { onReceiveStatusResMsg } from '@/js/event'
 
@@ -112,7 +113,8 @@ class WsConnect {
     [MsgType.HEART_BEAT]: heartBeatConstructor,
     [MsgType.CHAT]: chatConstructor,
     [MsgType.CHAT_READ]: chatReadConstructor,
-    [MsgType.STATUS_REQ]: statusReqConstructor
+    [MsgType.STATUS_REQ]: statusReqConstructor,
+    [MsgType.STATUS_SYNC]: statusSyncConstructor
   }
 
   /**
@@ -306,7 +308,7 @@ class WsConnect {
       this.isConnect = false
       this.reconnect.start()
     } else {
-      this.connect.send(heartBeatConstructor())
+      this.isConnect && this.connect.send(heartBeatConstructor())
       this.heartBeat.healthPoint++
     }
   }
@@ -352,7 +354,12 @@ class WsConnect {
 
   statusReq(accounts) {
     const data = this.dataConstructor[MsgType.STATUS_REQ](accounts)
-    this.connect.send(data)
+    this.isConnect && this.connect.send(data)
+  }
+
+  statusSync(status) {
+    const data = this.dataConstructor[MsgType.STATUS_SYNC](status)
+    this.isConnect && this.connect.send(data)
   }
 }
 
