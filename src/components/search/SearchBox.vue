@@ -109,13 +109,7 @@ watch(searchTab, () => {
       @open="onOpen"
     >
       <template #header>
-        <el-input
-          ref="inputRef"
-          v-model="keyWords"
-          :clearable="true"
-          @change="onQuery"
-          @input="onQuery"
-        >
+        <el-input ref="inputRef" v-model="keyWords" :clearable="true" @input="onQuery">
           <template #prefix>
             <el-icon><search /></el-icon>
             <span v-if="tabTipsContent" class="tab-tips">{{ tabTipsContent }}</span>
