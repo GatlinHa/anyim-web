@@ -104,6 +104,10 @@ export const userStore = defineStore(
       user.value = obj
     }
 
+    const updateUserStatus = (status) => {
+      user.value.status = status
+    }
+
     const isRemenberMe = ref(false)
 
     const setIsRemenberMe = (flag) => {
@@ -129,6 +133,7 @@ export const userStore = defineStore(
       user,
       updateUser,
       setUser,
+      updateUserStatus,
       isRemenberMe,
       setIsRemenberMe,
       clientId,

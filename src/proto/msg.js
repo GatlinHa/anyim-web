@@ -290,6 +290,8 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} GROUP_CHAT_READ=5 GROUP_CHAT_READ value
  * @property {number} DELIVERED=6 DELIVERED value
  * @property {number} SENDER_SYNC=7 SENDER_SYNC value
+ * @property {number} STATUS_REQ=8 STATUS_REQ value
+ * @property {number} STATUS_RES=9 STATUS_RES value
  * @property {number} CLOSE_BY_READ_IDLE=10 CLOSE_BY_READ_IDLE value
  * @property {number} CLOSE_BY_ERROR_MAGIC=11 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
@@ -305,6 +307,8 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[5] = 'GROUP_CHAT_READ')] = 5
   values[(valuesById[6] = 'DELIVERED')] = 6
   values[(valuesById[7] = 'SENDER_SYNC')] = 7
+  values[(valuesById[8] = 'STATUS_REQ')] = 8
+  values[(valuesById[9] = 'STATUS_RES')] = 9
   values[(valuesById[10] = 'CLOSE_BY_READ_IDLE')] = 10
   values[(valuesById[11] = 'CLOSE_BY_ERROR_MAGIC')] = 11
   values[(valuesById[99] = 'DEFAULT')] = 99
@@ -498,6 +502,8 @@ export const Header = ($root.Header = (() => {
         case 5:
         case 6:
         case 7:
+        case 8:
+        case 9:
         case 10:
         case 11:
         case 99:
@@ -559,6 +565,14 @@ export const Header = ($root.Header = (() => {
       case 'SENDER_SYNC':
       case 7:
         message.msgType = 7
+        break
+      case 'STATUS_REQ':
+      case 8:
+        message.msgType = 8
+        break
+      case 'STATUS_RES':
+      case 9:
+        message.msgType = 9
         break
       case 'CLOSE_BY_READ_IDLE':
       case 10:
@@ -660,7 +674,35 @@ export const Body = ($root.Body = (() => {
   /**
    * Constructs a new Body.
    * @exports Body
-   * @classdesc Represents a Body.
+   * @classdesc 每种消息需要携带的字段规定：M必须，o非必须，-不带
+   * NO       filed      HELLO  HEART_BEAT  CHAT  GROUP_CHAT  CHAT_READ  GROUP_CHAT_READ  DELIVERED  SENDER_SYNC  CLOSE_BY_READ_IDLE  CLOSE_BY_ERROR_MAGIC
+   * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+------------+-------------------+---------------------+
+   * | 1  | fromId       |   -  |    -      |  M  |     M     |     M    |        M       |    -     |     M      |       todo        |         todo        |
+   * | 2  | fromClient   |   -  |    -      |  M  |     M     |     M    |        M       |    -     |     M      |       todo        |         todo        |
+   * | 3  | toId         |   -  |    -      |  M  |     O     |     M    |        O       |    -     |     M      |       todo        |         todo        |
+   * | 4  | toClient     |   -  |    -      |  O  |     O     |     O    |        O       |    -     |     M      |       todo        |         todo        |
+   * | 5  | groupId      |   -  |    -      |  -  |     M     |     -    |        M       |    -     |     O      |       todo        |         todo        |
+   * | 6  | msgId        |   -  |    -      |  O  |     O     |     O    |        O       |    M     |     M      |       todo        |         todo        |
+   * | 7  | seq(todo)    |   -  |    -      |  -  |     -     |     -    |        -       |    -     |     -      |       todo        |         todo        |
+   * | 8  | ack(todo)    |   -  |    -      |  -  |     -     |     -    |        -       |    -     |     -      |       todo        |         todo        |
+   * | 9  | content      |   -  |    -      |  M  |     M     |     M    |        M       |    -     |     M      |       todo        |         todo        |
+   * | 10 | tempMsgId    |   -  |    -      |  O  |     O     |     O    |        O       |    M     |     O      |       todo        |         todo        |
+   * | 11 | sessionId    |   -  |    -      |  -  |     -     |     -    |        -       |    M     |     M      |       todo        |         todo        |
+   * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+------------+-------------------+---------------------+
+   * NO       filed      STATUS_REQ   STATUS_RES
+   * +----+--------------+------------+------------+
+   * | 1  | fromId       |      M     |      M     |
+   * | 2  | fromClient   |      M     |      M     |
+   * | 3  | toId         |      -     |      -     |
+   * | 4  | toClient     |      -     |      -     |
+   * | 5  | groupId      |      -     |      -     |
+   * | 6  | msgId        |      -     |      -     |
+   * | 7  | seq(todo)    |      -     |      -     |
+   * | 8  | ack(todo)    |      -     |      -     |
+   * | 9  | content      |      M     |      M     |
+   * | 10 | tempMsgId    |      -     |      -     |
+   * | 11 | sessionId    |      O     |      O     |
+   * +----+--------------+------------+------------+
    * @implements IBody
    * @constructor
    * @param {IBody=} [properties] Properties to set

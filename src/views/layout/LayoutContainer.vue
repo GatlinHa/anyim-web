@@ -21,16 +21,25 @@ import AvatarIcon from '@/components/common/AvatarIcon.vue'
 const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
+let statusReqTask
 
 onMounted(async () => {
   setTimeout(() => {
     wsConnect.createWs()
   }, 1500) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
+
+  // 定时查询自己的状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
+  let accounts = []
+  accounts.push(userData.user.account)
+  statusReqTask = setInterval(() => {
+    wsConnect.statusReq(JSON.stringify(accounts))
+  }, 5000)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', clickListener)
+  clearInterval(statusReqTask)
 })
 
 const clickListener = (e) => {

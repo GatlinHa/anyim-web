@@ -6,8 +6,10 @@ import {
   chatConstructor,
   heartBeatConstructor,
   helloConstructor,
-  chatReadConstructor
+  chatReadConstructor,
+  statusReqConstructor
 } from './constructor'
+import { onReceiveStatusResMsg } from '@/js/event'
 
 class WsConnect {
   /**
@@ -98,7 +100,8 @@ class WsConnect {
     [MsgType.CHAT]: () => {},
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
-    }
+    },
+    [MsgType.STATUS_RES]: onReceiveStatusResMsg()
   }
 
   /**
@@ -108,7 +111,8 @@ class WsConnect {
     [MsgType.HELLO]: helloConstructor,
     [MsgType.HEART_BEAT]: heartBeatConstructor,
     [MsgType.CHAT]: chatConstructor,
-    [MsgType.CHAT_READ]: chatReadConstructor
+    [MsgType.CHAT_READ]: chatReadConstructor,
+    [MsgType.STATUS_REQ]: statusReqConstructor
   }
 
   /**
@@ -344,6 +348,11 @@ class WsConnect {
     console.log('中止重连任务')
     this.reconnect.taskObj && clearInterval(this.reconnect.taskObj)
     this.reconnect.taskObj = null
+  }
+
+  statusReq(accounts) {
+    const data = this.dataConstructor[MsgType.STATUS_REQ](accounts)
+    this.connect.send(data)
   }
 }
 

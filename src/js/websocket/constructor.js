@@ -77,6 +77,27 @@ export const chatReadConstructor = (toId, content) => {
   return data
 }
 
+export const statusReqConstructor = (accounts) => {
+  const header = Header.create({
+    magic: proto.magic,
+    version: proto.version,
+    msgType: MsgType.STATUS_REQ,
+    isExtension: false
+  })
+
+  const userData = userStore()
+  const body = Body.create({
+    fromId: userData.user.account,
+    fromClient: userData.clientId,
+    content: accounts
+  })
+
+  const msg = Msg.create({ header: header, body: body })
+  const payload = Msg.encode(msg).finish()
+  const data = encodePayload(payload)
+  return data
+}
+
 /**
  * 发送前对长度编码，配合服务端解决半包黏包问题
  * @param {*} payload

@@ -111,6 +111,7 @@ const selectedSession = computed(() => {
   return messageData.sessionList[selectedSessionId.value]
 })
 
+let statusReqTask
 onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
@@ -119,10 +120,25 @@ onMounted(async () => {
   messageData.setSessionList(res.data.data) //入缓存
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
+
+    // 定时更新单聊对象的状态
+  const accounts = []
+  Object.keys(messageData.sessionList).forEach(key => {
+    const session = messageData.sessionList[key]
+    const sessionType = session.sessionType
+    if (sessionType === MsgType.CHAT) { //只看单聊的，群里在打开聊天窗时触发查询
+      accounts.push(session.objectInfo.account)
+    }
+  })
+  
+  statusReqTask = setInterval(() => {
+    wsConnect.statusReq(JSON.stringify(accounts))
+  }, 5000)
 })
 
 onUnmounted(() => {
   messageData.clear()
+  clearInterval(statusReqTask)
 })
 
 const handleMsgListWheel = async () => {
