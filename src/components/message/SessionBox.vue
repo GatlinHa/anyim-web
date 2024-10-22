@@ -208,7 +208,7 @@ const onContextmenu = () => {
             <el-button
               class="action-button"
               :icon="top ? Bottom : Top"
-              @click="
+              @click.stop="
                 switchTag(() => {
                   top = !top
                 })
@@ -218,7 +218,7 @@ const onContextmenu = () => {
             <el-button
               class="action-button"
               :icon="muted ? Bell : MuteNotification"
-              @click="
+              @click.stop="
                 switchTag(() => {
                   muted = !muted
                 })
