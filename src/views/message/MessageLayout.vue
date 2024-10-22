@@ -207,7 +207,6 @@ const sessionListSorted = computed(() => {
             // 排序第四优先级：昵称字典序
             return a.objectInfo.nickName > b.objectInfo.nickName ? 1 : -1
           }
-          // TODO 还有一个优先级，是在线和不在线的状态
         }
       }
     })
