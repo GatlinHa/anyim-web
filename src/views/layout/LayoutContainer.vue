@@ -6,7 +6,7 @@ import {
   Setting,
   SwitchButton
 } from '@element-plus/icons-vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { userStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
@@ -21,8 +21,36 @@ import AvatarIcon from '@/components/common/AvatarIcon.vue'
 const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
-let statusReqTask
 
+const userStatusDesc = computed(() => {
+  switch (userData.user.status) {
+    case 1:
+      return '离开'
+    case 2:
+      return '在线'
+    case 3:
+      return '忙碌'
+    case 0:
+    default:
+      return '离线'
+  }
+})
+
+const statusCircleColor = computed(() => {
+  switch (userData.user.status) {
+    case 1:
+      return 'yellow'
+    case 2:
+      return '#95d475'
+    case 3:
+      return 'red'
+    case 0:
+    default:
+      return 'gray'
+  }
+})
+
+let statusReqTask
 onMounted(async () => {
   setTimeout(() => {
     wsConnect.createWs()
@@ -114,10 +142,13 @@ const onExit = async () => {
           :showName="userData.user.nickName"
           :showId="userData.user.account"
           :showAvatarThumb="userData.user.avatarThumb"
-          :userStatus="userData.user.status"
           @click="openMyCardDialog"
         >
         </AvatarIcon>
+        <div class="user-status">
+          <div class="status-circle" :style="{ backgroundColor: statusCircleColor }"></div>
+          <span class="status-desc">{{ userStatusDesc }}</span>
+        </div>
       </span>
 
       <el-menu
@@ -172,13 +203,33 @@ const onExit = async () => {
 
     .avatar {
       display: flex;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
       margin-top: 20px;
       margin-bottom: 30px;
-      cursor: pointer;
+
       .el-avatar {
         width: 40px;
         height: 40px;
+        cursor: pointer;
+      }
+
+      .user-status {
+        display: flex;
+        align-items: center;
+
+        .status-circle {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 1px solid #fff;
+        }
+
+        .status-desc {
+          padding-left: 2px;
+          font-size: 14px;
+        }
       }
     }
 
