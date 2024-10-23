@@ -19,7 +19,31 @@ const router = createRouter({
         },
         {
           path: '/contacts',
-          component: () => import('@/views/contacts/ContactsLayout.vue')
+          component: () => import('@/views/contacts/ContactsLayout.vue'),
+          redirect: '/contacts/user',
+          children: [
+            {
+              path: '/contacts/user',
+              component: () => import('@/views/contacts/children/ContactsUser.vue'),
+              meta: {
+                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+              }
+            },
+            {
+              path: '/contacts/group',
+              component: () => import('@/views/contacts/children/ContactsGroup.vue'),
+              meta: {
+                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+              }
+            },
+            {
+              path: '/contacts/organization',
+              component: () => import('@/views/contacts/children/ContactsOrganization.vue'),
+              meta: {
+                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+              }
+            }
+          ]
         },
         {
           path: '/meeting',
