@@ -170,7 +170,10 @@ const onContextmenu = () => {
 
 <template>
   <div class="session-box-wrapper" @contextmenu.prevent="onContextmenu">
-    <div class="session-box" :class="{ 'bgc-for-active': hasBeenSelected, 'bgc-for-top': top }">
+    <div
+      class="session-box"
+      :class="{ 'bgc-for-active': hasBeenSelected, 'bgc-for-top': top && !hasBeenSelected }"
+    >
       <AvatarIcon
         class="avatar-session-box"
         :showName="showName"
