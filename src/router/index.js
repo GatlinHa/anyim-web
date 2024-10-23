@@ -56,14 +56,14 @@ const router = createRouter({
           children: [
             {
               path: '/setting/personal',
-              component: () => import('@/views/setting/SettingPersonal.vue'),
+              component: () => import('@/views/setting/children/SettingPersonal.vue'),
               meta: {
                 active: '/setting' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
               }
             },
             {
               path: '/setting/security',
-              component: () => import('@/views/setting/SettingSecurity.vue'),
+              component: () => import('@/views/setting/children/SettingSecurity.vue'),
               meta: {
                 active: '/setting' //同上
               }
