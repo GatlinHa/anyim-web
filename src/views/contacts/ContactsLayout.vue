@@ -53,16 +53,22 @@ import organizationIcon from '@/assets/svg/organization.svg'
 }
 
 .el-menu {
-  --el-menu-bg-color: #f5f5f5;
+  --el-menu-bg-color: #f5f5f5; // 这个是控制整个菜单的背景色，不是某个菜单选项
 }
 
 .el-menu-item {
   border-radius: 8px;
   margin-bottom: 2px;
+
+  &:hover {
+    background-color: #dedfe0;
+  }
 }
 
 .is-active {
   --fillColor: #409eff; // 与el-menu-item的active-text-color默认颜色保持一致
+  background-color: #dedfe0; // 这个是控制被选中菜单的背景色
+  //文字颜色默认是#409eff，可以用color修改
 }
 
 .svg-icon {
@@ -70,11 +76,6 @@ import organizationIcon from '@/assets/svg/organization.svg'
   height: 20px;
   fill: var(--fillColor);
   margin-right: 8px;
-}
-
-.el-menu-item.is-active {
-  background-color: #dedfe0;
-  color: #409eff;
-  border-radius: 8px;
+  transition: fill var(--el-transition-duration); //过度时长沿用el-menu-item的
 }
 </style>

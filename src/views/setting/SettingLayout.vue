@@ -7,14 +7,7 @@ import { User, Key } from '@element-plus/icons-vue'
     <el-header class="bdr-b">我的设置</el-header>
     <el-container class="el-container__body">
       <el-aside class="bdr-r body" width="200px">
-        <el-menu
-          active-text-color="#a0cfff"
-          background-color="#f5f5f5"
-          :default-active="$route.path"
-          text-color="black"
-          style="border: 0"
-          router
-        >
+        <el-menu :default-active="$route.path" text-color="black" style="border: 0" router>
           <el-menu-item index="/setting/personal">
             <el-icon><User /></el-icon>
             <span>个人信息</span>
@@ -54,13 +47,21 @@ import { User, Key } from '@element-plus/icons-vue'
   }
 }
 
-.el-menu-item {
-  border-radius: 8px;
+.el-menu {
+  --el-menu-bg-color: #f5f5f5; // 这个是控制整个菜单的背景色，不是某个菜单选项
 }
 
-.el-menu-item.is-active {
-  background-color: #dedfe0;
-  color: #409eff;
+.el-menu-item {
   border-radius: 8px;
+  margin-bottom: 2px;
+
+  &:hover {
+    background-color: #dedfe0;
+  }
+}
+
+.is-active {
+  background-color: #dedfe0;
+  //文字颜色默认是#409eff，可以用color修改
 }
 </style>
