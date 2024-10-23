@@ -184,7 +184,7 @@ const onExit = async () => {
         <el-icon :size="20"><SwitchButton /></el-icon>
       </div>
     </el-aside>
-    <el-main style="padding: 0">
+    <el-main class="my-scrollbar" style="padding: 0">
       <router-view></router-view>
     </el-main>
     <MyCard ref="myCardDialog"></MyCard>

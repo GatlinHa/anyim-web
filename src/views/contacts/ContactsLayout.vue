@@ -5,10 +5,10 @@ import organizationIcon from '@/assets/svg/organization.svg'
 </script>
 
 <template>
-  <el-container>
+  <el-container class="constact">
     <el-header class="bdr-b">通讯录</el-header>
     <el-container class="el-container__body">
-      <el-aside class="bdr-r body">
+      <el-aside class="bdr-r">
         <el-menu :default-active="$route.path" text-color="black" router>
           <el-menu-item index="/contacts/user">
             <contactsIcon></contactsIcon>
@@ -34,6 +34,10 @@ import organizationIcon from '@/assets/svg/organization.svg'
 </template>
 
 <style lang="scss" scoped>
+.constact {
+  height: 100vh;
+}
+
 .el-header {
   width: 100%;
   height: 60px;
@@ -42,14 +46,10 @@ import organizationIcon from '@/assets/svg/organization.svg'
   font-size: 18px;
 }
 
-.el-container__body {
-  height: 100vh;
-
-  .el-aside {
-    width: 130px;
-    height: 100%;
-    padding: 8px;
-  }
+.el-aside {
+  width: 130px;
+  height: 100%;
+  padding: 8px;
 }
 
 .el-menu {
@@ -59,7 +59,7 @@ import organizationIcon from '@/assets/svg/organization.svg'
 
 .el-menu-item {
   border-radius: 8px;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 
   &:hover {
     background-color: #dedfe0;

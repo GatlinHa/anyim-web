@@ -3,7 +3,7 @@ import { User, Key } from '@element-plus/icons-vue'
 </script>
 
 <template>
-  <el-container>
+  <el-container class="setting-layout">
     <el-header class="bdr-b">我的设置</el-header>
     <el-container class="el-container__body">
       <el-aside class="bdr-r body" width="200px">
@@ -27,6 +27,10 @@ import { User, Key } from '@element-plus/icons-vue'
 </template>
 
 <style lang="scss" scoped>
+.setting-layout {
+  height: 100vh;
+}
+
 .el-header {
   width: 100%;
   height: 60px;
@@ -35,16 +39,10 @@ import { User, Key } from '@element-plus/icons-vue'
   font-size: 18px;
 }
 
-.el-container__body {
-  height: 100vh;
-
-  .el-aside {
-    width: 150px;
-    height: 100%;
-    margin-top: 8px;
-    padding: 8px;
-    padding-top: 3px;
-  }
+.el-aside {
+  width: 150px;
+  height: 100%;
+  padding: 8px;
 }
 
 .el-menu {
@@ -53,7 +51,7 @@ import { User, Key } from '@element-plus/icons-vue'
 
 .el-menu-item {
   border-radius: 8px;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 
   &:hover {
     background-color: #dedfe0;
