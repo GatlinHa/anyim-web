@@ -8,8 +8,8 @@ import organizationIcon from '@/assets/svg/organization.svg'
   <el-container>
     <el-header class="bdr-b">通讯录</el-header>
     <el-container class="el-container__body">
-      <el-aside class="bdr-r body" width="200px">
-        <el-menu :default-active="$route.path" text-color="black" style="border: 0" router>
+      <el-aside class="bdr-r body">
+        <el-menu :default-active="$route.path" text-color="black" router>
           <el-menu-item index="/contacts/user">
             <contactsIcon></contactsIcon>
             <span>联系人</span>
@@ -54,6 +54,7 @@ import organizationIcon from '@/assets/svg/organization.svg'
 
 .el-menu {
   --el-menu-bg-color: #f5f5f5; // 这个是控制整个菜单的背景色，不是某个菜单选项
+  border: 0;
 }
 
 .el-menu-item {
