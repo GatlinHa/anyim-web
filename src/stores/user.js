@@ -120,6 +120,12 @@ export const userStore = defineStore(
       clientId.value = id
     }
 
+    const clear = () => {
+      clearAt()
+      clearRt()
+      setUser({ account: user.value.account })
+    }
+
     return {
       at,
       rt,
@@ -137,7 +143,8 @@ export const userStore = defineStore(
       isRemenberMe,
       setIsRemenberMe,
       clientId,
-      setClientId
+      setClientId,
+      clear
     }
   },
   {

@@ -55,6 +55,15 @@ export const searchStore = defineStore('anyim-search', () => {
     return todoResult.value[keywords.value] || []
   })
 
+  const clear = () => {
+    keywords.value = ''
+    contactResult.value = {}
+    groupResult.value = {}
+    organizationResult.value = {}
+    hisotryResult.value = {}
+    todoResult.value = {}
+  }
+
   return {
     keywords,
     setKeywords,
@@ -74,6 +83,8 @@ export const searchStore = defineStore('anyim-search', () => {
     addHisotryResult,
     getHisotryResult,
     addTodoResult,
-    getTodoResult
+    getTodoResult,
+
+    clear
   }
 })

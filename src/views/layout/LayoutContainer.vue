@@ -7,7 +7,7 @@ import {
   SwitchButton
 } from '@element-plus/icons-vue'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { userStore } from '@/stores'
+import { userStore, messageStore, searchStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/components/navigate/MyCard.vue'
 import NaviMenu from '@/components/navigate/NaviMenu.vue'
@@ -21,6 +21,8 @@ import AvatarIcon from '@/components/common/AvatarIcon.vue'
 const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
+const messageData = messageStore()
+const searchData = searchStore()
 
 const userStatusDesc = computed(() => {
   switch (userData.user.status) {
@@ -69,6 +71,11 @@ onUnmounted(() => {
   document.removeEventListener('click', clickListener)
   clearInterval(statusReqTask)
   timer && clearTimeout(timer)
+
+  userData.clear()
+  messageData.clear()
+  searchData.clear()
+  wsConnect.closeWs()
 })
 
 // 监听用户的离开事件：5分钟内未移动鼠标表示离开
@@ -120,9 +127,9 @@ const onExit = async () => {
   })
     .then(() => {
       userLogoutService(userData.user.account).finally(() => {
-        userData.clearAt()
-        userData.clearRt()
-        userData.setUser({ account: userData.user.account })
+        userData.clear()
+        messageData.clear()
+        searchData.clear()
         wsConnect.closeWs()
         router.push('/login')
       })
