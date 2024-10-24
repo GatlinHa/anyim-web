@@ -185,7 +185,7 @@ const onContextmenu = () => {
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">
           <div class="title">
-            <span class="showName">{{ showName || showId }}</span>
+            <span class="showName text-ellipsis">{{ showName || showId }}</span>
             <span v-if="sessionInfo.objectInfo.account" class="showAccount">
               {{ sessionInfo.objectInfo.account }}
             </span>
@@ -203,7 +203,7 @@ const onContextmenu = () => {
               >[{{ sessionInfo.unreadCount }}条]</span
             >
             <span v-if="isShowDraft" class="draft">[草稿]</span>
-            <span class="detail">{{
+            <span class="detail text-ellipsis">{{
               isShowDraft ? sessionInfo.draft : sessionInfo.lastMsgContent
             }}</span>
           </div>
@@ -287,9 +287,6 @@ const onContextmenu = () => {
         .showName {
           font-size: 14px;
           margin-right: 5px;
-          white-space: nowrap; /*不换行*/
-          overflow: hidden; /*超出的文本隐藏*/
-          text-overflow: ellipsis; /* 溢出用省略号*/
           flex-shrink: 0;
         }
 
@@ -334,9 +331,6 @@ const onContextmenu = () => {
 
         .detail {
           color: gray;
-          white-space: nowrap; /*不换行*/
-          overflow: hidden; /*超出的文本隐藏*/
-          text-overflow: ellipsis; /* 溢出用省略号*/
         }
       }
 

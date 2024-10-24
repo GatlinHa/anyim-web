@@ -26,7 +26,7 @@ const onOpenSession = () => {
     ></AvatarIcon>
     <div class="body" @click="onOpenSession">
       <div class="title">
-        <span class="name">{{ props.contactInfo.nickName }}</span>
+        <span class="name text-ellipsis">{{ props.contactInfo.nickName }}</span>
         <span class="account">{{ props.contactInfo.account }}</span>
       </div>
       <div class="info">
@@ -65,9 +65,6 @@ const onOpenSession = () => {
       .name {
         margin-right: 5px;
         font-size: 14px;
-        white-space: nowrap; /*不换行*/
-        overflow: hidden; /*超出的文本隐藏*/
-        text-overflow: ellipsis; /* 溢出用省略号*/
         color: #000;
       }
 

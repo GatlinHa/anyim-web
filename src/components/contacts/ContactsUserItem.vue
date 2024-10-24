@@ -36,16 +36,16 @@ const goToSessionTab = () => {
         @click="onShowCard"
       ></AvatarIcon>
       <div class="name-account">
-        <div class="nick-name">{{ props.session.objectInfo.nickName }}</div>
-        <div class="account">{{ props.session.objectInfo.account }}</div>
+        <div class="nick-name text-ellipsis">{{ props.session.objectInfo.nickName }}</div>
+        <div class="account text-ellipsis">{{ props.session.objectInfo.account }}</div>
       </div>
-      <div class="organization" :title="props.session.objectInfo.organization">
+      <div class="organization text-ellipsis" :title="props.session.objectInfo.organization">
         {{ props.session.objectInfo.organization || '没有部门' }}
       </div>
       <div class="diff-display">
         <div v-if="props.type === 'last'" class="last">
           <div class="last-time">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
-          <div class="last-content" :title="props.session.lastMsgContent">
+          <div class="last-content text-ellipsis" :title="props.session.lastMsgContent">
             {{ props.session.lastMsgContent }}
           </div>
         </div>
@@ -100,27 +100,18 @@ const goToSessionTab = () => {
 
   .nick-name {
     padding: 0;
-    white-space: nowrap; /*不换行*/
-    overflow: hidden; /*超出的文本隐藏*/
-    text-overflow: ellipsis; /* 溢出用省略号*/
   }
 
   .account {
     padding: 0;
     font-size: 14px;
     color: gray;
-    white-space: nowrap; /*不换行*/
-    overflow: hidden; /*超出的文本隐藏*/
-    text-overflow: ellipsis; /* 溢出用省略号*/
   }
 }
 
 .organization {
   width: 120px;
   margin-left: 20px;
-  white-space: nowrap; /*不换行*/
-  overflow: hidden; /*超出的文本隐藏*/
-  text-overflow: ellipsis; /* 溢出用省略号*/
   user-select: text;
 }
 
@@ -143,9 +134,6 @@ const goToSessionTab = () => {
     }
     .last-content {
       margin-left: 5px;
-      white-space: nowrap; /*不换行*/
-      overflow: hidden; /*超出的文本隐藏*/
-      text-overflow: ellipsis; /* 溢出用省略号*/
     }
   }
 }
