@@ -1,5 +1,5 @@
 import { userStore, messageStore } from '@/stores'
-import { combineId } from '@/utils/common'
+import { combineId } from '@/js/utils/common'
 
 export const onReceiveStatusResMsg = () => {
   return async (msg) => {

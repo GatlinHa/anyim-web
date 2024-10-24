@@ -1,5 +1,5 @@
 import { nextTick } from 'vue'
-import { combineId } from '@/utils/common'
+import { combineId } from '@/js/utils/common'
 import { messageStore } from '@/stores'
 import { msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'

@@ -5,7 +5,7 @@ import router from '@/router'
 import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
-import { maskPhoneNum } from '@/utils/common'
+import { maskPhoneNum } from '@/js/utils/common'
 import EditeAvatar from '@/components/user/EditeAvatar.vue'
 import { ElMessage } from 'element-plus'
 

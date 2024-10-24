@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/js/utils/request'
 import { getReqBody } from '@/api/common'
 import { userStore } from '@/stores'
 import { CLIENT_TYPE, CLIENT_NAME, CLIENT_VERSION } from '@/const/userConst'

@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/js/utils/request'
 import { getReqBody } from '@/api/common'
 
 export const msgChatSessionListService = () => {

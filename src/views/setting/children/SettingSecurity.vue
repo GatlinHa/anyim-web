@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { userStore } from '@/stores'
-import { maskPhoneNum } from '@/utils/common'
+import { maskPhoneNum } from '@/js/utils/common'
 import EditEmail from '@/components/user/EditEmail.vue'
 import EditPassword from '@/components/user/EditPassword.vue'
 import EditPhone from '@/components/user/EditPhone.vue'

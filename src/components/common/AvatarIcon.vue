@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { getRandomColor, getFontColor } from '@/utils/common'
+import { getRandomColor, getFontColor } from '@/js/utils/common'
 
 const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'userStatus', 'size'])
 

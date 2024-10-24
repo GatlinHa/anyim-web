@@ -1,7 +1,7 @@
 <script setup>
 import { ChatRound, Phone, VideoCamera, MoreFilled } from '@element-plus/icons-vue'
 import AvatarIcon from '../common/AvatarIcon.vue'
-import { sessionShowTime } from '@/utils/common'
+import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 
 const props = defineProps(['type', 'session'])

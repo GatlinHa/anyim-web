@@ -1,4 +1,4 @@
-import { combineId } from '@/utils/common'
+import { combineId } from '@/js/utils/common'
 import { messageStore } from '@/stores'
 
 export const onReceiveChatReadMsg = () => {

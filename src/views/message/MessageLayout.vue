@@ -34,7 +34,7 @@ import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { combineId, sessionIdConvert } from '@/utils/common'
+import { combineId, sessionIdConvert } from '@/js/utils/common'
 import ContextMenu from '@/components/common/ContextMenu.vue'
 import router from '@/router'
 
