@@ -1,6 +1,8 @@
 <script setup>
+import { ChatRound, Phone, VideoCamera, MoreFilled } from '@element-plus/icons-vue'
 import AvatarIcon from '../common/AvatarIcon.vue'
 import { sessionShowTime } from '@/utils/common'
+import router from '@/router'
 
 const props = defineProps(['type', 'session'])
 const emit = defineEmits(['showUserCard'])
@@ -11,10 +13,19 @@ const onShowCard = () => {
     account: props.session.objectInfo.account
   })
 }
+
+const goToSessionTab = () => {
+  router.push({
+    path: '/message',
+    query: {
+      sessionId: props.session.sessionId
+    }
+  })
+}
 </script>
 
 <template>
-  <div class="contacts-user-item">
+  <div class="contacts-user-item" @dblclick="goToSessionTab">
     <div class="content">
       <AvatarIcon
         class="avatar"
@@ -42,7 +53,17 @@ const onShowCard = () => {
         <div v-if="props.type === 'partition'" class="partition">partition</div>
       </div>
     </div>
-    <div class="action">action</div>
+    <div class="action">
+      <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
+      <el-button size="large" :icon="Phone" circle />
+      <el-button size="large" :icon="VideoCamera" circle />
+      <el-button
+        v-if="['mark', 'partition'].includes(props.type)"
+        size="large"
+        :icon="MoreFilled"
+        circle
+      />
+    </div>
   </div>
 </template>
 
@@ -130,9 +151,8 @@ const onShowCard = () => {
 }
 
 .action {
-  width: 120px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
 }
 </style>

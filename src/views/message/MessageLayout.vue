@@ -36,6 +36,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/utils/common'
 import ContextMenu from '@/components/common/ContextMenu.vue'
+import router from '@/router'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -138,6 +139,11 @@ onMounted(async () => {
   statusReqTask = setInterval(() => {
     wsConnect.statusReq(JSON.stringify(accounts))
   }, 5000)
+
+  // 这里要接收从其他页面跳转过来传递的sessionId参数
+  if (router.currentRoute.value.query.sessionId) {
+    handleSelecteSession(router.currentRoute.value.query.sessionId);
+  }
 })
 
 onUnmounted(() => {
