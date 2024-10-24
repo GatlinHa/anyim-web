@@ -1,6 +1,6 @@
 <!-- eslint-disable prettier/prettier -->
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { 
   Phone, 
   VideoCamera, 
@@ -112,7 +112,6 @@ const selectedSession = computed(() => {
   return messageData.sessionList[selectedSessionId.value]
 })
 
-let statusReqTask
 onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
@@ -136,7 +135,7 @@ onMounted(async () => {
     }
   })
   
-  statusReqTask = setInterval(() => {
+  setInterval(() => {
     wsConnect.statusReq(JSON.stringify(accounts))
   }, 5000)
 
@@ -144,10 +143,6 @@ onMounted(async () => {
   if (router.currentRoute.value.query.sessionId) {
     handleSelecteSession(router.currentRoute.value.query.sessionId);
   }
-})
-
-onUnmounted(() => {
-  clearInterval(statusReqTask)
 })
 
 const handleMsgListWheel = async () => {
