@@ -60,6 +60,19 @@ const initLastData = async () => {
   })
 }
 
+const lastDataSorted = computed(() => {
+  if (!Object.keys(lastData)) {
+    return []
+  }
+
+  let lastDataArr = Object.values(lastData.value)
+  return lastDataArr.sort((a, b) => {
+    const bTime = new Date(b.lastMsgTime).getTime()
+    const aTIme = new Date(a.lastMsgTime).getTime()
+    return bTime - aTIme
+  })
+})
+
 const isShowUserCard = ref(false)
 const userInfo = ref()
 const onShowUserCard = async ({ sessionId, account }) => {
@@ -109,7 +122,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
         </el-header>
         <el-main class="el-main__last my-scrollbar" style="padding: 8px">
           <ContactsUserItem
-            v-for="item in lastData"
+            v-for="item in lastDataSorted"
             :key="item.sessionId"
             :session="item"
             :type="indexActive"

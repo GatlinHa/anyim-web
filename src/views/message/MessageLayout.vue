@@ -210,7 +210,7 @@ const sessionListSorted = computed(() => {
           const bTime = new Date(b.lastMsgTime).getTime()
           const aTIme = new Date(a.lastMsgTime).getTime()
           if (bTime !== aTIme) {
-            return new Date(b.lastMsgTime).getTime() - new Date(a.lastMsgTime).getTime()
+            return bTime - aTIme
           }
           else {
             // 排序第四优先级：昵称字典序
