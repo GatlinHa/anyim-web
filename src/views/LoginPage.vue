@@ -22,10 +22,10 @@ const isRemenberMe = ref(false)
 // 表单的校验规则
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { required: true, message: '请输入账号', trigger: 'blur' },
     {
       pattern: /^[a-zA-Z0-9_]{6,32}$/,
-      message: '用户名必须是6-32位的字母、数字或下划线',
+      message: '账号必须是6-32位的字母、数字或下划线',
       trigger: 'blur'
     }
   ],
@@ -122,7 +122,7 @@ watch(isRegister, () => {
           <el-input
             v-model="formModel.username"
             :prefix-icon="User"
-            placeholder="请输入用户名"
+            placeholder="请输入账号"
           ></el-input>
         </el-form-item>
         <el-form-item prop="password">
@@ -158,7 +158,7 @@ watch(isRegister, () => {
           <el-input
             v-model="formModel.username"
             :prefix-icon="User"
-            placeholder="请输入用户名"
+            placeholder="请输入账号"
           ></el-input>
         </el-form-item>
         <el-form-item prop="password">
