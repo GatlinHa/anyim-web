@@ -10,6 +10,7 @@ import ContactsUserItem from '@/components/contacts/ContactsUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
+import { Search } from '@element-plus/icons-vue'
 
 const messageData = messageStore()
 const indexActive = ref('last')
@@ -60,12 +61,26 @@ const initLastData = async () => {
   })
 }
 
+const searchKey = ref('')
 const lastDataSorted = computed(() => {
-  if (!Object.keys(lastData)) {
-    return []
-  }
+  if (!Object.keys(lastData)) return []
 
-  let lastDataArr = Object.values(lastData.value)
+  let lastDataArr = []
+  Object.values(lastData.value).forEach((item) => {
+    if (!searchKey.value) {
+      lastDataArr.push(item)
+    } else {
+      if (
+        item.objectInfo.nickName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
+        item.objectInfo.account === searchKey.value
+      ) {
+        lastDataArr.push(item)
+      }
+    }
+  })
+
+  if (!lastDataArr.length) return []
+
   return lastDataArr.sort((a, b) => {
     const bTime = new Date(b.lastMsgTime).getTime()
     const aTIme = new Date(a.lastMsgTime).getTime()
@@ -118,7 +133,13 @@ const onShowUserCard = async ({ sessionId, account }) => {
 
       <el-container v-if="indexActive === 'last'" class="el-container__last">
         <el-header class="bdr-b el-header__last" style="height: 48px">
-          全部({{ totalCount }})
+          <div class="total-count">全部({{ totalCount }})</div>
+          <el-input
+            v-model="searchKey"
+            placeholder="搜索：昵称/账号"
+            :prefix-icon="Search"
+            :clearable="true"
+          />
         </el-header>
         <el-main class="el-main__last my-scrollbar" style="padding: 8px">
           <ContactsUserItem
@@ -190,9 +211,21 @@ const onShowUserCard = async ({ sessionId, account }) => {
 
 .el-header__last {
   display: flex;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
   align-items: center;
   color: #409eff;
   font-size: 14px;
+}
+
+.el-input {
+  width: 150px;
+  height: 30px;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 25px;
 }
 
 .svg-icon {
