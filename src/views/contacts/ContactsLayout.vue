@@ -46,6 +46,10 @@ import organizationIcon from '@/assets/svg/organization.svg'
   font-size: 18px;
 }
 
+.el-container__body {
+  height: calc(100vh - 60px);
+}
+
 .el-aside {
   width: 130px;
   height: 100%;
