@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import lastIcon from '@/assets/svg/last.svg'
 import markIcon from '@/assets/svg/mark.svg'
+import noData from '@/assets/svg/noData.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
 import { msgChatSessionListService } from '@/api/message'
 import { userQueryService } from '@/api/user'
@@ -142,13 +143,19 @@ const onShowUserCard = async ({ sessionId, account }) => {
           />
         </el-header>
         <el-main class="el-main__last my-scrollbar" style="padding: 8px">
-          <ContactsUserItem
-            v-for="item in lastDataSorted"
-            :key="item.sessionId"
-            :session="item"
-            :type="indexActive"
-            @showUserCard="onShowUserCard"
-          ></ContactsUserItem>
+          <div v-if="lastDataSorted.length">
+            <ContactsUserItem
+              v-for="item in lastDataSorted"
+              :key="item.sessionId"
+              :session="item"
+              :type="indexActive"
+              @showUserCard="onShowUserCard"
+            ></ContactsUserItem>
+          </div>
+          <div v-else class="has-no-data-wrapper">
+            <noData class="has-no-data"></noData>
+            <span>暂无数据</span>
+          </div>
         </el-main>
       </el-container>
       <el-container v-if="indexActive === 'mark'" class="el-container__mark">
@@ -234,5 +241,22 @@ const onShowUserCard = async ({ sessionId, account }) => {
   fill: var(--fillColor);
   margin-right: 8px;
   transition: fill var(--el-transition-duration); //过度时长沿用el-menu-item的
+}
+
+.has-no-data-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: gray;
+
+  .has-no-data {
+    width: 100px;
+    height: 100px;
+    margin: 0;
+    fill: gray;
+  }
 }
 </style>
