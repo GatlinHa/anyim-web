@@ -1,4 +1,5 @@
 <script setup>
+import HashNoData from '../common/HasNoData.vue'
 import ContactItem from './ResultItem/ContactItem.vue'
 import { searchStore } from '@/stores'
 
@@ -18,7 +19,7 @@ const onOpenSession = (obj) => {
 
 <template>
   <div class="result-box my-scrollbar">
-    <div v-if="searchTab === 'contact'">
+    <div v-if="searchTab === 'contact' && Object.keys(searchData.getContactResult).length">
       <ContactItem
         v-for="account in Object.keys(searchData.getContactResult)"
         :key="account"
@@ -27,15 +28,27 @@ const onOpenSession = (obj) => {
         @openSession="onOpenSession"
       ></ContactItem>
     </div>
-    <div v-else-if="props.searchTab === 'group'"></div>
-    <div v-else-if="props.searchTab === 'organization'"></div>
-    <div v-else-if="props.searchTab === 'hisotry'"></div>
-    <div v-else-if="props.searchTab === 'todo'"></div>
+    <div
+      v-else-if="props.searchTab === 'group' && Object.keys(searchData.getGroupResult).length"
+    ></div>
+    <div
+      v-else-if="
+        props.searchTab === 'organization' && Object.keys(searchData.getOrganizationResult).length
+      "
+    ></div>
+    <div
+      v-else-if="props.searchTab === 'hisotry' && Object.keys(searchData.getHisotryResult).length"
+    ></div>
+    <div
+      v-else-if="props.searchTab === 'todo' && Object.keys(searchData.getTodoResult).length"
+    ></div>
+    <HashNoData v-else></HashNoData>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .result-box {
+  height: 100%;
   margin: 10px;
   overflow-x: hidden;
   overflow-y: auto;
