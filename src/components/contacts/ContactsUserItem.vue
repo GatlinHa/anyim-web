@@ -3,8 +3,14 @@ import AvatarIcon from '../common/AvatarIcon.vue'
 import { sessionShowTime } from '@/utils/common'
 
 const props = defineProps(['type', 'session'])
+const emit = defineEmits(['showUserCard'])
 
-const onShowCard = () => {}
+const onShowCard = () => {
+  emit('showUserCard', {
+    sessionId: props.session.sessionId,
+    account: props.session.objectInfo.account
+  })
+}
 </script>
 
 <template>
@@ -46,7 +52,7 @@ const onShowCard = () => {}
   margin-bottom: 8px;
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid rgb(221.7, 222.6, 224.4);
+  border: 1px solid #e9e9eb;
   display: flex;
   justify-content: space-between;
 
@@ -111,19 +117,14 @@ const onShowCard = () => {}
       justify-content: start;
       border-radius: 4px;
       padding: 4px;
-      background: rgb(221.7, 222.6, 224.4);
+      background: #c8c9cc;
       flex-shrink: 0;
     }
     .last-content {
-      height: 100%;
       margin-left: 5px;
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      flex: 1;
-      word-wrap: break-word;
-      word-break: break-word;
+      white-space: nowrap; /*不换行*/
       overflow: hidden; /*超出的文本隐藏*/
+      text-overflow: ellipsis; /* 溢出用省略号*/
     }
   }
 }

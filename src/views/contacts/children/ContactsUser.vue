@@ -4,8 +4,12 @@ import lastIcon from '@/assets/svg/last.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
 import { msgChatSessionListService } from '@/api/message'
+import { userQueryService } from '@/api/user'
 import { messageStore } from '@/stores'
 import ContactsUserItem from '@/components/contacts/ContactsUserItem.vue'
+import UserCard from '@/components/user/UserCard.vue'
+import { ElLoading } from 'element-plus'
+import { el_loading_options } from '@/const/commonConst'
 
 const messageData = messageStore()
 const indexActive = ref('last')
@@ -55,6 +59,28 @@ const initLastData = async () => {
     }
   })
 }
+
+const isShowUserCard = ref(false)
+const userInfo = ref()
+const onShowUserCard = async ({ sessionId, account }) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  const res = await userQueryService({ account: account })
+  messageData.updateSession({
+    sessionId: sessionId,
+    objectInfo: {
+      ...messageData.sessionList[sessionId].objectInfo,
+      nickName: res.data.data.nickName,
+      signature: res.data.data.signature,
+      avatarThumb: res.data.data.avatarThumb,
+      gender: res.data.data.gender,
+      phoneNum: res.data.data.phoneNum,
+      email: res.data.data.email
+    }
+  })
+  userInfo.value = messageData.sessionList[sessionId].objectInfo
+  loadingInstance.close()
+  isShowUserCard.value = true
+}
 </script>
 
 <template>
@@ -87,6 +113,7 @@ const initLastData = async () => {
             :key="item.sessionId"
             :session="item"
             :type="indexActive"
+            @showUserCard="onShowUserCard"
           ></ContactsUserItem>
         </el-main>
       </el-container>
@@ -100,6 +127,11 @@ const initLastData = async () => {
       </el-container>
     </el-container>
   </el-container>
+  <UserCard
+    :isShow="isShowUserCard"
+    :userInfo="userInfo"
+    @close="isShowUserCard = false"
+  ></UserCard>
 </template>
 
 <style lang="scss" scoped>
