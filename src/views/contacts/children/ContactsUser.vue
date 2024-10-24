@@ -1,18 +1,35 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import lastIcon from '@/assets/svg/last.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
 import { msgChatSessionListService } from '@/api/message'
 import { messageStore } from '@/stores'
+import ContactsUserItem from '@/components/contacts/ContactsUserItem.vue'
 
 const messageData = messageStore()
 const indexActive = ref('last')
 const lastData = ref({})
+const markData = ref({})
+const partionData = ref({})
+const totalCount = computed(() => {
+  switch (indexActive.value) {
+    case 'last':
+      return Object.keys(lastData.value).length
+    case 'mark':
+      return Object.keys(markData.value).length
+    case 'partition':
+      return Object.keys(partionData.value).length
+    default:
+      return 0
+  }
+})
+
+onMounted(() => {
+  initLastData()
+})
 
 const onSelect = (key) => {
-  console.log('onSelect触发了')
-
   indexActive.value = key
   switch (key) {
     case 'last':
@@ -26,14 +43,14 @@ const onSelect = (key) => {
 }
 
 const initLastData = async () => {
-  if (!messageData.sessionList) {
+  if (!Object.keys(messageData.sessionList).length) {
     const res = await msgChatSessionListService()
     messageData.setSessionList(res.data.data) //入缓存
   }
 
   Object.keys(messageData.sessionList).forEach((key) => {
     const lastMsgTime = messageData.sessionList[key].lastMsgTime
-    if (Date.now().getTime() - lastMsgTime.getTime() < 24 * 60 * 60 * 1000) {
+    if (lastMsgTime && Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000) {
       lastData.value[key] = messageData.sessionList[key]
     }
   })
@@ -42,13 +59,12 @@ const initLastData = async () => {
 
 <template>
   <el-container class="constact-user">
-    <el-header class="bdr-b el-header__contact-user">联系人</el-header>
     <el-container>
       <el-aside class="bdr-r el-aside__contact-user">
         <el-menu default-active="last" @select="onSelect">
           <el-menu-item index="last">
             <lastIcon></lastIcon>
-            <span>最近1天</span>
+            <span>最近7天</span>
           </el-menu-item>
           <el-menu-item index="mark">
             <markIcon></markIcon>
@@ -62,8 +78,17 @@ const initLastData = async () => {
       </el-aside>
 
       <el-container v-if="indexActive === 'last'" class="el-container__last">
-        <el-header class="bdr-b el-header__last" style="height: 48px">last</el-header>
-        <el-main class="el-main__last my-scrollbar"> </el-main>
+        <el-header class="bdr-b el-header__last" style="height: 48px">
+          全部({{ totalCount }})
+        </el-header>
+        <el-main class="el-main__last my-scrollbar" style="padding: 8px">
+          <ContactsUserItem
+            v-for="item in lastData"
+            :key="item.sessionId"
+            :session="item"
+            :type="indexActive"
+          ></ContactsUserItem>
+        </el-main>
       </el-container>
       <el-container v-if="indexActive === 'mark'" class="el-container__mark">
         <el-header class="bdr-b el-header__mark" style="height: 48px">mark</el-header>
@@ -93,7 +118,7 @@ const initLastData = async () => {
 }
 
 .el-aside__contact-user {
-  width: 200px;
+  width: 150px;
   height: 100%;
   padding: 8px;
 }
@@ -116,6 +141,13 @@ const initLastData = async () => {
   --fillColor: #409eff;
   background-color: #dedfe0;
   //文字颜色默认是#409eff，可以用color修改
+}
+
+.el-header__last {
+  display: flex;
+  align-items: center;
+  color: #409eff;
+  font-size: 14px;
 }
 
 .svg-icon {

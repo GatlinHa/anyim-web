@@ -116,8 +116,12 @@ onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
 
-  const res = await msgChatSessionListService()
-  messageData.setSessionList(res.data.data) //入缓存
+  // 如果有缓存了，就不查
+  if (!Object.keys(messageData.sessionList).length) {
+    const res = await msgChatSessionListService()
+    messageData.setSessionList(res.data.data) //入缓存
+  }
+
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
 
@@ -137,7 +141,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  messageData.clear()
   clearInterval(statusReqTask)
 })
 
@@ -177,7 +180,7 @@ const handleMsgListWheel = async () => {
 
 // 把sessionList转成数组，并按照lastMsgTime排序
 const sessionListSorted = computed(() => {
-  if (!messageData.sessionList) {
+  if (!Object.keys(messageData.sessionList)) {
     return []
   }
   else {
