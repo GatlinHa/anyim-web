@@ -12,6 +12,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { Search } from '@element-plus/icons-vue'
 import HashNoData from '@/components/common/HasNoData.vue'
+import { MsgType } from '@/proto/msg'
 
 const messageData = messageStore()
 const indexActive = ref('last')
@@ -56,7 +57,12 @@ const initLastData = async () => {
 
   Object.keys(messageData.sessionList).forEach((key) => {
     const lastMsgTime = messageData.sessionList[key].lastMsgTime
-    if (lastMsgTime && Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000) {
+    const sessionType = messageData.sessionList[key].sessionType
+    if (
+      sessionType === MsgType.CHAT &&
+      lastMsgTime &&
+      Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000
+    ) {
       lastData.value[key] = messageData.sessionList[key]
     }
   })

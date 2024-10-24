@@ -128,8 +128,9 @@ const goToSessionTab = () => {
     .last-time {
       justify-content: start;
       border-radius: 4px;
-      padding: 4px;
-      background: #c8c9cc;
+      padding-left: 5px;
+      padding-right: 5px;
+      background: rgb(221.7, 222.6, 224.4);
       flex-shrink: 0;
     }
     .last-content {
