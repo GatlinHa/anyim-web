@@ -23,7 +23,6 @@ import SessionItem from '@/components/message/SessionItem.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
 import MessageItem from '@/components/message/MessageItem.vue'
-import UpdateMarkDialog from '@/components/message/UpdateMarkDialog.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import GroupCard from '@/components/group/GroupCard.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
@@ -44,9 +43,6 @@ const settingData = settingStore()
 const messageData = messageStore()
 const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
-const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）
-const showMenu = ref([]) //传递给菜单组件的菜单选项
-const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单项
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -470,13 +466,28 @@ const onShowUserCard = async ({ sessionId, account }) => {
   isShowUserCard.value = true
 }
 
+const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）
+const showMenu = ref([]) //传递给菜单组件的菜单选项
+const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单项
+
 const isShowUpdateMarkDialog = ref(false)
 const accountForUpdateMark = ref('')
-const oldMarkForUpdateMark = ref('')
-const onShowUpdateMarkDialog = (sessionId) => {
+const newMarkForUpdateMark = ref('')
+const onShowUpdateMarkDialog = () => {
   isShowUpdateMarkDialog.value = true
-  accountForUpdateMark.value = messageData.sessionList[sessionId].objectInfo.account
-  oldMarkForUpdateMark.value = messageData.sessionList[sessionId].mark
+  accountForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].objectInfo.account
+  newMarkForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].mark //newMark默认是已有的备注
+}
+
+const onUpdateMarkConfirm = () => {
+  // 如果没有更改，不需要执行保存
+  if (newMarkForUpdateMark.value !== messageData.sessionList[showMenuSessionId.value].mark) {
+    onUpdateMark({
+      account: accountForUpdateMark.value,
+      mark: newMarkForUpdateMark.value
+    })
+  }
+  isShowUpdateMarkDialog.value = false
 }
 
 const onUpdateMark = async (obj) => {
@@ -550,8 +561,17 @@ watch(() => msgRecords.value, (oldValue) => {
   })
 })
 
+const sessionItemRefCollection = ref({})
+const setSessionItemRef = (sessionId, el) => {
+  sessionItemRefCollection.value[sessionId] = el
+}
+
 const onSelectMenu = (item) => {
   selectedMenuItem.value = item
+  nextTick(() => {
+    // 要延后执行，否则selectedMenuItem的值还没有传过去，点击无效
+    sessionItemRefCollection.value[showMenuSessionId.value].handleSelectedMenuItem()
+  })
 }
 
 const onCustomContextmenu = ({ sessionId, menu }) => {
@@ -581,6 +601,7 @@ const onNoneSelected = () => {
         <ContextMenu :menu="showMenu" @selectMenu="onSelectMenu">
           <div class="session-list my-scrollbar" ref="sessionListRef">
             <SessionItem
+              :ref="(el) => setSessionItemRef(item.sessionId, el)"
               :id="`session-item-${sessionIdConvert(item.sessionId)}`"
               v-for="item in sessionListSorted"
               :key="item.sessionId"
@@ -763,12 +784,30 @@ const onNoneSelected = () => {
     :groupInfo="groupInfo"
     @close="isShowGroupCard = false"
   ></GroupCard>
-  <UpdateMarkDialog
-    :isShow="isShowUpdateMarkDialog"
-    :account="accountForUpdateMark"
-    :oldMark="oldMarkForUpdateMark"
-    @updateMark="onUpdateMark"
-  ></UpdateMarkDialog>
+  <el-dialog
+    class="update-mark"
+    v-model="isShowUpdateMarkDialog"
+    :modal="false"
+    title="修改备注"
+    :top="'40vh'"
+    :width="'300px'"
+    :z-index="1"
+    style="border-radius: 10px"
+  >
+    <el-input
+      v-model="newMarkForUpdateMark"
+      placeholder="请输入备注"
+      maxlength="10"
+      show-word-limit
+      clearable
+    ></el-input>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="info" @click="isShowUpdateMarkDialog = false" plain>取消</el-button>
+        <el-button type="primary" @click="onUpdateMarkConfirm" plain>保存</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="scss" scoped>

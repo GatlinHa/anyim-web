@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import AvatarIcon from '../common/AvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/js/utils/common'
@@ -133,6 +133,7 @@ const switchTag = (func) => {
       return
     }
 
+    //自己可以自己就处理了，不用交给父组件
     emit('switchTag', {
       sessionId: props.sessionId,
       top: top.value,
@@ -142,40 +143,41 @@ const switchTag = (func) => {
 }
 
 // TODO 这里不能监视不变化的情况，比如两次点的都是同一个菜单项
-watch(
-  () => props.selectedMenuItem,
-  async () => {
-    if (hasBeenShowMenu.value && props.selectedMenuItem) {
-      switch (props.selectedMenuItem.label) {
-        case 'top':
-          top.value = !top.value
-          switchTag(() => {})
-          emit('updateMenu', menu.value) //更新之后要同步菜单变化
-          break
-        case 'muted':
-          muted.value = !muted.value
-          switchTag(() => {})
-          emit('updateMenu', menu.value) //更新之后要同步菜单变化
-          break
-        case 'delete':
-          await msgChatDeleteSessionService({ sessionId: props.sessionId })
-          // 如果删除的session是这个选中的session，需要通知父组件处理
-          if (hasBeenSelected.value) emit('noneSelected')
-          messageData.deleteSession(props.sessionId)
-          break
-        case 'mark':
-          emit('showUpdateMarkDialog', props.sessionId) //返回父组件处理：弹窗 + 保存修改
-          break
-        default:
-          break
-      }
+const handleSelectedMenuItem = async () => {
+  if (hasBeenShowMenu.value && props.selectedMenuItem) {
+    switch (props.selectedMenuItem.label) {
+      case 'top':
+        top.value = !top.value
+        switchTag(() => {})
+        emit('updateMenu', menu.value) //更新之后要同步菜单变化
+        break
+      case 'muted':
+        muted.value = !muted.value
+        switchTag(() => {})
+        emit('updateMenu', menu.value) //更新之后要同步菜单变化
+        break
+      case 'delete':
+        await msgChatDeleteSessionService({ sessionId: props.sessionId })
+        // 如果删除的session是这个选中的session，需要通知父组件处理
+        if (hasBeenSelected.value) emit('noneSelected')
+        messageData.deleteSession(props.sessionId)
+        break
+      case 'mark':
+        emit('showUpdateMarkDialog') //返回父组件处理：弹窗 + 保存修改
+        break
+      default:
+        break
     }
   }
-)
+}
 
 const onContextmenu = () => {
   emit('customContextmenu', { sessionId: props.sessionId, menu: menu.value })
 }
+
+defineExpose({
+  handleSelectedMenuItem
+})
 </script>
 
 <template>
