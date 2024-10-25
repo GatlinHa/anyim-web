@@ -61,11 +61,16 @@ const hasBeenShowMenu = computed(() => {
 })
 
 const showName = computed(() => {
+  const mark = sessionInfo.value.mark
   switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
-      return sessionInfo.value.objectInfo.nickName
+      return mark
+        ? `${mark}(${sessionInfo.value.objectInfo.nickName})`
+        : sessionInfo.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return sessionInfo.value.objectInfo.groupName
+      return mark
+        ? `${mark}(${sessionInfo.value.objectInfo.groupName})`
+        : sessionInfo.value.objectInfo.groupName
     default:
       return ''
   }

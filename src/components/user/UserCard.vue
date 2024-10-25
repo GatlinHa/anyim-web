@@ -1,14 +1,17 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Close, Male, Female } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore } from '@/stores'
 
 const props = defineProps(['isShow', 'userInfo'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'update:mark'])
 
 const userCardRef = ref()
 const userData = userStore()
+const markEditing = ref(false)
+const newMark = ref('')
+const markEditRef = ref()
 
 const isSelf = computed(() => {
   return userData.user.account === props.userInfo.account
@@ -24,7 +27,9 @@ const closeCardIfOutside = (event) => {
     !event.target.closest('.user-card') &&
     !event.target.closest('.avatar-session-box') &&
     !event.target.closest('.avatar-message-item') &&
-    !event.target.closest('.avatar-contact-item')
+    !event.target.closest('.avatar-contact-item') &&
+    !event.target.closest('.value') &&
+    !event.target.closest('.edit')
   ) {
     onClose()
   }
@@ -45,6 +50,29 @@ const truncatedSignature = computed(() => {
 // 关闭的时候触发
 const onClose = () => {
   emit('close')
+  markEditing.value = false
+}
+
+const onClickEditMark = () => {
+  newMark.value = props.userInfo.mark || ''
+  markEditing.value = true
+  nextTick(() => {
+    markEditRef.value.focus()
+  })
+}
+
+const saveMark = () => {
+  if (newMark.value !== props.userInfo.mark) {
+    emit('update:mark', {
+      ...props.userInfo,
+      mark: newMark.value
+    })
+  }
+  markEditing.value = false
+}
+
+const cancelMark = () => {
+  markEditing.value = false
 }
 
 onMounted(() => {
@@ -96,9 +124,46 @@ onUnmounted(() => {
             <span class="label">部门：</span>
             <span class="value">{{ props.userInfo.organize || '-' }}</span>
           </div>
-          <div v-if="!isSelf" class="info-item remark">
+          <div v-if="!isSelf" class="info-item mark">
             <span class="label">备注：</span>
-            <span class="value">{{ props.userInfo.remark || 'TODO' }}</span>
+            <div v-if="!markEditing" class="value value-mark">
+              <span @click="onClickEditMark" style="cursor: pointer">{{
+                props.userInfo.mark || '-'
+              }}</span>
+              <el-button
+                type="primary"
+                :icon="Edit"
+                size="small"
+                circle
+                @click="onClickEditMark"
+              ></el-button>
+            </div>
+            <div v-else class="edit">
+              <el-input
+                ref="markEditRef"
+                v-model="newMark"
+                maxlength="10"
+                show-word-limit
+                size="small"
+                style="margin: 0 2px 0 10px"
+              ></el-input>
+              <el-button
+                type="success"
+                :icon="Check"
+                size="small"
+                circle
+                style="margin: 0 2px 0 2px"
+                @click="saveMark"
+              ></el-button>
+              <el-button
+                type="info"
+                :icon="Close"
+                size="small"
+                circle
+                style="margin: 0 2px 0 2px"
+                @click="cancelMark"
+              ></el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -236,6 +301,17 @@ onUnmounted(() => {
         margin-left: 10px;
         color: #409eff;
         user-select: text;
+      }
+
+      .value-mark {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .edit {
+        display: flex;
+        justify-content: space-between;
       }
     }
   }

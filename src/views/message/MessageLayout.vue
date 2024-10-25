@@ -218,11 +218,12 @@ const sessionListSorted = computed(() => {
 })
 
 const showName = computed(() => {
+  const mark = selectedSession.value.mark
   switch (selectedSession.value.sessionType) {
     case MsgType.CHAT:
-      return selectedSession.value.objectInfo.nickName
+      return mark ? `${mark}(${selectedSession.value.objectInfo.nickName})` : selectedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return selectedSession.value.objectInfo.groupName
+      return mark ? `${mark}(${selectedSession.value.objectInfo.groupName})` : selectedSession.value.objectInfo.groupName
     default:
       return ''
   }
@@ -460,10 +461,20 @@ const onShowUserCard = async ({ sessionId, account }) => {
       }
     })
     userInfo.value = messageData.sessionList[sessionId].objectInfo
+    userInfo.value['mark'] = messageData.sessionList[sessionId].mark
   }
   loadingInstance.close()
   isShowGroupCard.value = false
   isShowUserCard.value = true
+}
+
+const onUpdateMark = async (obj) => {
+  const sessionId = combineId(userData.user.account, obj.account)
+  messageData.updateSession({
+    sessionId: sessionId,
+    mark: obj.mark
+  })
+  userInfo.value['mark'] = obj.mark
 }
 
 // TODO
@@ -728,6 +739,7 @@ const onNoneSelected = () => {
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfo"
+    @update:mark="onUpdateMark"
     @close="isShowUserCard = false"
   ></UserCard>
   <GroupCard

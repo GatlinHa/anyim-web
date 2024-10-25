@@ -22,14 +22,13 @@ export const messageStore = defineStore('anyim-message', () => {
     delete sessionList.value[sessionId]
   }
 
-  const updateSession = (obj) => {
+  const updateSession = async (obj) => {
     let params = { sessionId: obj.sessionId }
     let flag = false // 是否需要更新云端的数据
     if ('top' in obj) {
       params.top = obj.top
       flag = true
     }
-
     if ('muted' in obj) {
       params.muted = obj.muted
       flag = true
@@ -39,9 +38,9 @@ export const messageStore = defineStore('anyim-message', () => {
       params.draft = obj.draft
       flag = true
     }
-
-    if (flag) {
-      msgUpdateSessionService(params)
+    if ('mark' in obj) {
+      params.mark = obj.mark
+      flag = true
     }
 
     const mySession = sessionList.value[obj.sessionId]
@@ -50,12 +49,24 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
     if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
     if ('remoteRead' in obj) mySession.remoteRead = obj.remoteRead
-    if ('top' in obj) mySession.top = obj.top
-    if ('muted' in obj) mySession.muted = obj.muted
-    if ('draft' in obj) mySession.draft = obj.draft
     if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
     if ('readTime' in obj) mySession.readTime = obj.readTime
     if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
+
+    if (flag) {
+      const res = await msgUpdateSessionService(params)
+      // 云端更新成功再更新本地，保持数据同步
+      if (res.data.code === 0) {
+        if ('top' in obj) mySession.top = obj.top
+        if ('muted' in obj) mySession.muted = obj.muted
+        if ('draft' in obj) mySession.draft = obj.draft
+        if ('mark' in obj) mySession.mark = obj.mark
+      } else {
+        return false
+      }
+    }
+
+    return true
   }
 
   const totalUnReadCount = computed(() => {
