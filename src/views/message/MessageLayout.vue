@@ -431,18 +431,18 @@ const onClickMsgContainer = () => {
 }
 
 const isShowUserCard = ref(false)
-const userInfo = ref()
+const userInfoForShowCard = ref()
 
 const isShowGroupCard = ref(false)
-const groupInfo = ref()
+const groupInfoForShowCard = ref()
 
-const mark = ref('')
+const markForShowCard = ref('')
 
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
     await userData.updateUser()
-    userInfo.value = userData.user
+    userInfoForShowCard.value = userData.user
   }
   else {
     const res = await userQueryService({ account: account })
@@ -458,8 +458,8 @@ const onShowUserCard = async ({ sessionId, account }) => {
         email: res.data.data.email
       }
     })
-    userInfo.value = messageData.sessionList[sessionId].objectInfo
-    mark.value = messageData.sessionList[sessionId].mark
+    userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
+    markForShowCard.value = messageData.sessionList[sessionId].mark
   }
   loadingInstance.close()
   isShowGroupCard.value = false
@@ -496,20 +496,20 @@ const onUpdateMark = async (obj) => {
     sessionId: sessionId,
     mark: obj.mark
   })
-  mark.value = obj.mark
+  markForShowCard.value = obj.mark
 }
 
 // TODO
 const onShowGroupCard = () => {
   isShowUserCard.value = false
   isShowGroupCard.value = true
-  groupInfo.value = {} 
+  groupInfoForShowCard.value = {} 
 }
 
 const onShowContactCard = (contactInfo) => {
-  userInfo.value = contactInfo
+  userInfoForShowCard.value = contactInfo
   const sessionId = combineId(userData.user.account, contactInfo.account)
-  mark.value = messageData.sessionList[sessionId].mark
+  markForShowCard.value = messageData.sessionList[sessionId].mark
   isShowGroupCard.value = false
   isShowUserCard.value = true
 }
@@ -774,14 +774,14 @@ const onNoneSelected = () => {
   </el-container>
   <UserCard
     :isShow="isShowUserCard"
-    :userInfo="userInfo"
-    :mark="mark"
+    :userInfo="userInfoForShowCard"
+    :mark="markForShowCard"
     @update:mark="onUpdateMark"
     @close="isShowUserCard = false"
   ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
-    :groupInfo="groupInfo"
+    :groupInfo="groupInfoForShowCard"
     @close="isShowGroupCard = false"
   ></GroupCard>
   <el-dialog
