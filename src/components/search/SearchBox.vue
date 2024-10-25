@@ -106,6 +106,7 @@ watch(searchTab, () => {
       v-model="isShowSearchDialog"
       :show-close="false"
       :modal="false"
+      :z-index="1"
       @open="onOpen"
     >
       <template #header>
