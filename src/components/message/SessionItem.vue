@@ -16,7 +16,6 @@ const props = defineProps([
 ])
 const emit = defineEmits([
   'isSelected',
-  'switchTag',
   'showUserCard',
   'showGroupCard',
   'customContextmenu',
@@ -134,7 +133,7 @@ const switchTag = (func) => {
     }
 
     //自己可以自己就处理了，不用交给父组件
-    emit('switchTag', {
+    messageData.updateSession({
       sessionId: props.sessionId,
       top: top.value,
       muted: muted.value

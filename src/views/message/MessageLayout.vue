@@ -350,10 +350,6 @@ const handleRead = () => {
   }
 }
 
-const handleSwitchTag = (obj) => {
-  messageData.updateSession(obj)
-}
-
 const handleSendMessage = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(showId.value, selectedSession.value.sessionType, content, (msgId) => {
@@ -610,7 +606,6 @@ const onNoneSelected = () => {
               :showMenuSessionId="showMenuSessionId"
               :selectedMenuItem="selectedMenuItem"
               @isSelected="handleSelecteSession"
-              @switchTag="handleSwitchTag"
               @showUserCard="onShowUserCard"
               @showGroupCard="onShowGroupCard"
               @customContextmenu="onCustomContextmenu"
