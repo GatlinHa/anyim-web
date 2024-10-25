@@ -440,6 +440,8 @@ const userInfo = ref()
 const isShowGroupCard = ref(false)
 const groupInfo = ref()
 
+const mark = ref('')
+
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
@@ -461,7 +463,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
       }
     })
     userInfo.value = messageData.sessionList[sessionId].objectInfo
-    userInfo.value['mark'] = messageData.sessionList[sessionId].mark
+    mark.value = messageData.sessionList[sessionId].mark
   }
   loadingInstance.close()
   isShowGroupCard.value = false
@@ -474,7 +476,7 @@ const onUpdateMark = async (obj) => {
     sessionId: sessionId,
     mark: obj.mark
   })
-  userInfo.value['mark'] = obj.mark
+  mark.value = obj.mark
 }
 
 // TODO
@@ -486,6 +488,8 @@ const onShowGroupCard = () => {
 
 const onShowContactCard = (contactInfo) => {
   userInfo.value = contactInfo
+  const sessionId = combineId(userData.user.account, contactInfo.account)
+  mark.value = messageData.sessionList[sessionId].mark
   isShowGroupCard.value = false
   isShowUserCard.value = true
 }
@@ -739,6 +743,7 @@ const onNoneSelected = () => {
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfo"
+    :mark="mark"
     @update:mark="onUpdateMark"
     @close="isShowUserCard = false"
   ></UserCard>

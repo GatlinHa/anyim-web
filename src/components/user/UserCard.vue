@@ -4,7 +4,7 @@ import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore } from '@/stores'
 
-const props = defineProps(['isShow', 'userInfo'])
+const props = defineProps(['isShow', 'userInfo', 'mark'])
 const emit = defineEmits(['close', 'update:mark'])
 
 const userCardRef = ref()
@@ -54,7 +54,7 @@ const onClose = () => {
 }
 
 const onClickEditMark = () => {
-  newMark.value = props.userInfo.mark || ''
+  newMark.value = props.mark || ''
   markEditing.value = true
   nextTick(() => {
     markEditRef.value.focus()
@@ -62,7 +62,7 @@ const onClickEditMark = () => {
 }
 
 const saveMark = () => {
-  if (newMark.value !== props.userInfo.mark) {
+  if (newMark.value !== props.mark) {
     emit('update:mark', {
       ...props.userInfo,
       mark: newMark.value
@@ -127,9 +127,7 @@ onUnmounted(() => {
           <div v-if="!isSelf" class="info-item mark">
             <span class="label">备注：</span>
             <div v-if="!markEditing" class="value value-mark">
-              <span @click="onClickEditMark" style="cursor: pointer">{{
-                props.userInfo.mark || '-'
-              }}</span>
+              <span @click="onClickEditMark" style="cursor: pointer">{{ props.mark || '-' }}</span>
               <el-button
                 type="primary"
                 :icon="Edit"
