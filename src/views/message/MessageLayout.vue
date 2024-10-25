@@ -23,6 +23,7 @@ import SessionBox from '@/components/message/SessionBox.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
 import MessageItem from '@/components/message/MessageItem.vue'
+import UpdateMarkDialog from '@/components/message/UpdateMarkDialog.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import GroupCard from '@/components/group/GroupCard.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
@@ -470,6 +471,15 @@ const onShowUserCard = async ({ sessionId, account }) => {
   isShowUserCard.value = true
 }
 
+const isShowUpdateMarkDialog = ref(false)
+const accountForUpdateMark = ref('')
+const oldMarkForUpdateMark = ref('')
+const onShowUpdateMarkDialog = (sessionId) => {
+  isShowUpdateMarkDialog.value = true
+  accountForUpdateMark.value = messageData.sessionList[sessionId].objectInfo.account
+  oldMarkForUpdateMark.value = messageData.sessionList[sessionId].mark
+}
+
 const onUpdateMark = async (obj) => {
   const sessionId = combineId(userData.user.account, obj.account)
   messageData.updateSession({
@@ -543,7 +553,6 @@ watch(() => msgRecords.value, (oldValue) => {
 
 const onSelectMenu = (item) => {
   selectedMenuItem.value = item
-  
 }
 
 const onCustomContextmenu = ({ sessionId, menu }) => {
@@ -587,6 +596,7 @@ const onNoneSelected = () => {
               @customContextmenu="onCustomContextmenu"
               @updateMenu="onUpdateMenu"
               @noneSelected="onNoneSelected"
+              @showUpdateMarkDialog="onShowUpdateMarkDialog"
             ></SessionBox>
           </div>
         </ContextMenu>
@@ -752,6 +762,12 @@ const onNoneSelected = () => {
     :groupInfo="groupInfo"
     @close="isShowGroupCard = false"
   ></GroupCard>
+  <UpdateMarkDialog
+    :isShow="isShowUpdateMarkDialog"
+    :account="accountForUpdateMark"
+    :oldMark="oldMarkForUpdateMark"
+    @updateMark="onUpdateMark"
+  ></UpdateMarkDialog>
 </template>
 
 <style lang="scss" scoped>

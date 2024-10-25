@@ -21,7 +21,8 @@ const emit = defineEmits([
   'showGroupCard',
   'customContextmenu',
   'updateMenu',
-  'noneSelected'
+  'noneSelected',
+  'showUpdateMarkDialog'
 ])
 const messageData = messageStore()
 const sessionInfo = computed(() => {
@@ -48,6 +49,11 @@ const menu = computed(() => {
       label: 'delete',
       value: '',
       desc: '删除会话'
+    },
+    {
+      label: 'mark',
+      value: '',
+      desc: '修改备注'
     }
   ]
 })
@@ -140,6 +146,7 @@ const switchTag = (func) => {
   }, 100) // 这个时间太长会影响置顶按钮的响应时长
 }
 
+// TODO 这里不能监视不变化的情况，比如两次点的都是同一个菜单项
 watch(
   () => props.selectedMenuItem,
   async () => {
@@ -160,6 +167,9 @@ watch(
           // 如果删除的session是这个选中的session，需要通知父组件处理
           if (hasBeenSelected.value) emit('noneSelected')
           messageData.deleteSession(props.sessionId)
+          break
+        case 'mark':
+          emit('showUpdateMarkDialog', props.sessionId) //返回父组件处理：弹窗 + 保存修改
           break
         default:
           break
