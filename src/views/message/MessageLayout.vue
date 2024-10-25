@@ -138,7 +138,7 @@ onMounted(async () => {
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
   if (router.currentRoute.value.query.sessionId) {
-    handleSelecteSession(router.currentRoute.value.query.sessionId);
+    handleSelectedSession(router.currentRoute.value.query.sessionId);
   }
 })
 
@@ -320,7 +320,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
 }
 
 // 表示有个session被选中了
-const handleSelecteSession = async (sessionId) => {
+const handleSelectedSession = async (sessionId) => {
   if (selectedSessionId.value !== sessionId) {
     selectedSessionId.value = sessionId
     reset()
@@ -517,7 +517,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
   }
   const sessionId = combineId(userData.user.account, objectInfo.account)
   if (messageData.sessionList[sessionId]) {
-    handleSelecteSession(sessionId)
+    handleSelectedSession(sessionId)
   }
   else {
     const res = await msgChatCreateSessionService({
@@ -527,7 +527,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
         sessionType: msgType
       })
     messageData.addSession(res.data.data)
-    handleSelecteSession(sessionId)
+    handleSelectedSession(sessionId)
   }
 }
 
@@ -605,7 +605,7 @@ const onNoneSelected = () => {
               :selectedSessionId="selectedSessionId"
               :showMenuSessionId="showMenuSessionId"
               :selectedMenuItem="selectedMenuItem"
-              @isSelected="handleSelecteSession"
+              @isSelected="handleSelectedSession"
               @showUserCard="onShowUserCard"
               @showGroupCard="onShowGroupCard"
               @customContextmenu="onCustomContextmenu"
