@@ -219,12 +219,11 @@ const sessionListSorted = computed(() => {
 })
 
 const showName = computed(() => {
-  const mark = selectedSession.value.mark
   switch (selectedSession.value.sessionType) {
     case MsgType.CHAT:
-      return mark ? `${mark}(${selectedSession.value.objectInfo.nickName})` : selectedSession.value.objectInfo.nickName
+      return selectedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return mark ? `${mark}(${selectedSession.value.objectInfo.groupName})` : selectedSession.value.objectInfo.groupName
+      return selectedSession.value.objectInfo.groupName
     default:
       return ''
   }
@@ -622,7 +621,9 @@ const onNoneSelected = () => {
       <el-container v-else class="container">
         <el-header class="header bdr-b">
           <div class="show-name-id">
-            <span class="show-name">{{ showName }}</span>
+            <span class="show-name">{{
+              selectedSession.mark ? `${selectedSession.mark}(${showName})` : showName
+            }}</span>
             <span v-if="selectedSession?.sessionType === MsgType.CHAT" class="show-id">{{
               showId
             }}</span>

@@ -67,16 +67,11 @@ const hasBeenShowMenu = computed(() => {
 })
 
 const showName = computed(() => {
-  const mark = sessionInfo.value.mark
   switch (sessionInfo.value.sessionType) {
     case MsgType.CHAT:
-      return mark
-        ? `${mark}(${sessionInfo.value.objectInfo.nickName})`
-        : sessionInfo.value.objectInfo.nickName
+      return sessionInfo.value.objectInfo.nickName || '没有昵称'
     case MsgType.GROUP_CHAT:
-      return mark
-        ? `${mark}(${sessionInfo.value.objectInfo.groupName})`
-        : sessionInfo.value.objectInfo.groupName
+      return sessionInfo.value.objectInfo.groupName || '没有群名称'
     default:
       return ''
   }
@@ -200,7 +195,9 @@ const onContextmenu = () => {
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">
           <div class="title">
-            <span class="showName text-ellipsis">{{ showName || showId }}</span>
+            <span class="showName text-ellipsis">{{
+              sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName
+            }}</span>
             <span v-if="sessionInfo.objectInfo.account" class="showAccount">
               {{ sessionInfo.objectInfo.account }}
             </span>
