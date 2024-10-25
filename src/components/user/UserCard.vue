@@ -25,7 +25,7 @@ const closeCardIfOutside = (event) => {
   if (!props.isShow) return
   if (
     !event.target.closest('.user-card') &&
-    !event.target.closest('.avatar-session-box') &&
+    !event.target.closest('.avatar-session-item') &&
     !event.target.closest('.avatar-message-item') &&
     !event.target.closest('.avatar-contact-item') &&
     !event.target.closest('.value') &&

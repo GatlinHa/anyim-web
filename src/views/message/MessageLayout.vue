@@ -19,7 +19,7 @@ import {
 import DragLine from '@/components/common/DragLine.vue'
 import SearchBox from '@/components/search/SearchBox.vue'
 import AddBotton from '@/components/common/AddBotton.vue'
-import SessionBox from '@/components/message/SessionBox.vue'
+import SessionItem from '@/components/message/SessionItem.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
 import MessageItem from '@/components/message/MessageItem.vue'
@@ -93,7 +93,7 @@ const reset = () => {
 
 const locateSession = (sessionId) => {
   nextTick(() => {
-    const selectedElement = document.querySelector(`#session-box-${sessionIdConvert(sessionId)}`)
+    const selectedElement = document.querySelector(`#session-item-${sessionIdConvert(sessionId)}`)
     // 如果被选中元素的上边在scrollTop之的上面，或这在下边在scrollTop+clientHeight的下面（显示不全或者完全没有显示），则需要重新定位
     // 由于offsetTop和offsetHeight不包含外边距，因此定位存在细小误差，暂不处理
     if (selectedElement.offsetTop - selectedElement.offsetHeight < sessionListRef.value.scrollTop) {
@@ -581,8 +581,8 @@ const onNoneSelected = () => {
 
         <ContextMenu :menu="showMenu" @selectMenu="onSelectMenu">
           <div class="session-list my-scrollbar" ref="sessionListRef">
-            <SessionBox
-              :id="`session-box-${sessionIdConvert(item.sessionId)}`"
+            <SessionItem
+              :id="`session-item-${sessionIdConvert(item.sessionId)}`"
               v-for="item in sessionListSorted"
               :key="item.sessionId"
               :sessionId="item.sessionId"
@@ -597,7 +597,7 @@ const onNoneSelected = () => {
               @updateMenu="onUpdateMenu"
               @noneSelected="onNoneSelected"
               @showUpdateMarkDialog="onShowUpdateMarkDialog"
-            ></SessionBox>
+            ></SessionItem>
           </div>
         </ContextMenu>
       </div>
@@ -801,7 +801,7 @@ const onNoneSelected = () => {
           height: 100%;
           display: flex;
           flex-direction: column;
-          gap: 0; // 防止右键点击到两个sessionBox中间的真空地带，造成弹出的菜单不能准确找到到session
+          gap: 0; // 防止右键点击到两个sessionItem中间的真空地带，造成弹出的菜单不能准确找到到session
           overflow-y: scroll;
         }
       }

@@ -184,13 +184,13 @@ const onContextmenu = () => {
 </script>
 
 <template>
-  <div class="session-box-wrapper" @contextmenu.prevent="onContextmenu">
+  <div class="session-item-wrapper" @contextmenu.prevent="onContextmenu">
     <div
-      class="session-box"
+      class="session-item"
       :class="{ 'bgc-for-active': hasBeenSelected, 'bgc-for-top': top && !hasBeenSelected }"
     >
       <AvatarIcon
-        class="avatar-session-box"
+        class="avatar-session-item"
         :showName="showName"
         :showId="showId"
         :showAvatarThumb="showAvatarThumb"
@@ -259,7 +259,7 @@ const onContextmenu = () => {
   background-color: #ecf5ff;
 }
 
-.session-box {
+.session-item {
   height: 60px;
   margin: 1px;
   margin-left: 5px;
