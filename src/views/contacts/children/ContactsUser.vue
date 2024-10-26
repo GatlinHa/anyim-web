@@ -18,45 +18,32 @@ import { combineId } from '@/js/utils/common'
 const userData = userStore()
 const messageData = messageStore()
 const indexActive = ref('last')
-const lastData = ref({})
-const markData = ref({})
-const partionData = ref({})
 const totalCount = computed(() => {
   switch (indexActive.value) {
     case 'last':
       return Object.keys(lastData.value).length
     case 'mark':
       return Object.keys(markData.value).length
-    case 'partition':
-      return Object.keys(partionData.value).length
+    // case 'partition':
+    //   return Object.keys(partionData.value).length
     default:
       return 0
   }
 })
 
-onMounted(() => {
-  initLastData()
-})
-
-const onSelect = (key) => {
-  indexActive.value = key
-  switch (key) {
-    case 'last':
-      initLastData()
-      break
-    case 'mark':
-      break
-    case 'partition':
-      break
-  }
-}
-
-const initLastData = async () => {
+onMounted(async () => {
   if (!Object.keys(messageData.sessionList).length) {
     const res = await msgChatSessionListService()
     messageData.setSessionList(res.data.data) //入缓存
   }
+})
 
+const onSelect = (key) => {
+  indexActive.value = key
+}
+
+const lastData = computed(() => {
+  const data = {}
   Object.keys(messageData.sessionList).forEach((key) => {
     const lastMsgTime = messageData.sessionList[key].lastMsgTime
     const sessionType = messageData.sessionList[key].sessionType
@@ -65,23 +52,35 @@ const initLastData = async () => {
       lastMsgTime &&
       Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000
     ) {
-      lastData.value[key] = messageData.sessionList[key]
+      data[key] = messageData.sessionList[key]
     }
   })
-}
+  return data
+})
 
-const searchKey = ref('')
+const markData = computed(() => {
+  const data = {}
+  Object.keys(messageData.sessionList).forEach((key) => {
+    const mark = messageData.sessionList[key].mark
+    if (mark) {
+      data[key] = messageData.sessionList[key]
+    }
+  })
+  return data
+})
+
+const lastSearchKey = ref('')
 const lastDataSorted = computed(() => {
-  if (!Object.keys(lastData)) return []
+  if (!Object.keys(lastData.value)) return []
 
   let lastDataArr = []
   Object.values(lastData.value).forEach((item) => {
-    if (!searchKey.value) {
+    if (!lastSearchKey.value) {
       lastDataArr.push(item)
     } else {
       if (
-        item.objectInfo.nickName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
-        item.objectInfo.account === searchKey.value
+        item.objectInfo.nickName.toLowerCase().includes(lastSearchKey.value.toLowerCase()) ||
+        item.objectInfo.account === lastSearchKey.value
       ) {
         lastDataArr.push(item)
       }
@@ -94,6 +93,32 @@ const lastDataSorted = computed(() => {
     const bTime = new Date(b.lastMsgTime).getTime()
     const aTIme = new Date(a.lastMsgTime).getTime()
     return bTime - aTIme
+  })
+})
+
+const markSearchKey = ref('')
+const markDataSorted = computed(() => {
+  if (!Object.keys(markData.value)) return []
+
+  let markDataArr = []
+  Object.values(markData.value).forEach((item) => {
+    if (!markSearchKey.value) {
+      markDataArr.push(item)
+    } else {
+      if (
+        item.objectInfo.nickName.toLowerCase().includes(markSearchKey.value.toLowerCase()) ||
+        item.objectInfo.account === markSearchKey.value ||
+        item.mark.toLowerCase().includes(markSearchKey.value.toLowerCase())
+      ) {
+        markDataArr.push(item)
+      }
+    }
+  })
+
+  if (!markDataArr.length) return []
+
+  return markDataArr.sort((a, b) => {
+    return a.objectInfo.account > b.objectInfo.account ? 1 : -1
   })
 })
 
@@ -153,10 +178,10 @@ const onUpdateMark = async (obj) => {
       </el-aside>
 
       <el-container v-if="indexActive === 'last'" class="el-container__last">
-        <el-header class="bdr-b el-header__last" style="height: 48px">
+        <el-header class="bdr-b el-header__last">
           <div class="total-count">全部({{ totalCount }})</div>
           <el-input
-            v-model="searchKey"
+            v-model="lastSearchKey"
             placeholder="搜索：昵称/账号"
             :prefix-icon="Search"
             :clearable="true"
@@ -176,8 +201,28 @@ const onUpdateMark = async (obj) => {
         </el-main>
       </el-container>
       <el-container v-if="indexActive === 'mark'" class="el-container__mark">
-        <el-header class="bdr-b el-header__mark" style="height: 48px">mark</el-header>
-        <el-main class="el-main__mark my-scrollbar"></el-main>
+        <el-header class="bdr-b el-header__mark">
+          <div class="total-count">全部({{ totalCount }})</div>
+          <el-input
+            v-model="markSearchKey"
+            placeholder="搜索：昵称/账号/备注"
+            :prefix-icon="Search"
+            :clearable="true"
+            style="width: 180px"
+          />
+        </el-header>
+        <el-main class="el-main__mark my-scrollbar" style="padding: 8px">
+          <div v-if="markDataSorted.length">
+            <ContactsUserItem
+              v-for="item in markDataSorted"
+              :key="item.sessionId"
+              :session="item"
+              :type="indexActive"
+              @showUserCard="onShowUserCard"
+            ></ContactsUserItem>
+          </div>
+          <HashNoData v-else :size="100"></HashNoData>
+        </el-main>
       </el-container>
       <el-container v-if="indexActive === 'partition'" class="el-container__partition">
         <el-header class="bdr-b el-header__partition" style="height: 48px">partition</el-header>
@@ -235,7 +280,9 @@ const onUpdateMark = async (obj) => {
   //文字颜色默认是#409eff，可以用color修改
 }
 
-.el-header__last {
+.el-header__last,
+.el-header__mark {
+  height: 48px;
   display: flex;
   justify-content: space-between;
   padding-left: 16px;
@@ -248,10 +295,10 @@ const onUpdateMark = async (obj) => {
 .el-input {
   width: 150px;
   height: 30px;
-}
 
-:deep(.el-input__wrapper) {
-  border-radius: 25px;
+  :deep(.el-input__wrapper) {
+    border-radius: 25px;
+  }
 }
 
 .svg-icon {
