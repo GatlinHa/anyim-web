@@ -144,6 +144,7 @@ onUnmounted(() => {
                 show-word-limit
                 size="small"
                 style="margin: 0 2px 0 10px"
+                @keyup.enter="saveMark"
               ></el-input>
               <el-button
                 type="success"

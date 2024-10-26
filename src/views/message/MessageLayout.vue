@@ -808,6 +808,7 @@ const onNoneSelected = () => {
       show-word-limit
       style="padding: 10px 0 10px 0"
       clearable
+      @keyup.enter="onUpdateMarkConfirm"
     ></el-input>
     <template #footer>
       <div class="dialog-footer">
