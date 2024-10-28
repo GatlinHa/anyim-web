@@ -87,7 +87,12 @@ export const sessionShowTime = (datetime) => {
     let month = inputDate.getMonth() + 1
     let day = inputDate.getDate()
     day = day < 10 ? day.toString() : day
-    return `${year}/${month}/${day}`
+
+    if (now.getFullYear() === inputDate.getFullYear()) {
+      return `${month}/${day}`
+    } else {
+      return `${year}/${month}/${day}`
+    }
   }
 }
 
@@ -130,7 +135,12 @@ export const messageSysShowTime = (datetime) => {
     const day = inputDate.getDate()
     const hours = inputDate.getHours().toString().padStart(2, '0')
     const minutes = inputDate.getMinutes().toString().padStart(2, '0')
-    return `${year}年${month}月${day}日 ${hours}:${minutes}`
+
+    if (now.getFullYear() === inputDate.getFullYear()) {
+      return `${month}月${day}日 ${hours}:${minutes}`
+    } else {
+      return `${year}年${month}月${day}日 ${hours}:${minutes}`
+    }
   }
 }
 
