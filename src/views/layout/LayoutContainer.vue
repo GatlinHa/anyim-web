@@ -17,7 +17,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
-import { STATUS } from '@/const/userConst'
+import { STATUS, LEAVING_AFTER_DURATION, LOGOUT_AFTER_DURATION } from '@/const/userConst'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -71,7 +71,8 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('click', clickListener)
   clearInterval(statusReqTask)
-  timer && clearTimeout(timer)
+  statusSyncTimer && clearTimeout(statusSyncTimer)
+  autoLogoutTimer && clearTimeout(autoLogoutTimer)
 
   userData.clear()
   messageData.clear()
@@ -79,22 +80,40 @@ onUnmounted(() => {
   wsConnect.closeWs()
 })
 
-// 监听用户的离开事件：5分钟内未移动鼠标表示离开
-let timer
-const onListenLeave = () => {
+const onMouseMove = () => {
   if (!document.hasFocus()) return
 
+  statusSync() //状态同步：5分钟内未移动鼠标表示离开
+  autoLogout() //自动登出：8小时内未移动鼠标就会自动登出
+}
+
+let statusSyncTimer
+const statusSync = () => {
   if (userData.user.status === STATUS.LEAVING) {
     userData.updateUserStatus(STATUS.ONLINE) //修改本地状态
     wsConnect.statusSync(STATUS.ONLINE) //状态同步给云端
   }
-  clearTimeout(timer)
-  timer = setTimeout(() => {
+  clearTimeout(statusSyncTimer)
+  statusSyncTimer = setTimeout(() => {
     if (userData.user.status === STATUS.ONLINE) {
       userData.updateUserStatus(STATUS.LEAVING) //修改本地状态
       wsConnect.statusSync(STATUS.LEAVING) //状态同步给云端
     }
-  }, 300000)
+  }, LEAVING_AFTER_DURATION)
+}
+
+let autoLogoutTimer
+const autoLogout = () => {
+  clearTimeout(autoLogoutTimer)
+  autoLogoutTimer = setTimeout(() => {
+    userLogoutService(userData.user.account).finally(() => {
+      userData.clear()
+      messageData.clear()
+      searchData.clear()
+      wsConnect.closeWs()
+      router.push('/login')
+    })
+  }, LOGOUT_AFTER_DURATION)
 }
 
 const clickListener = (e) => {
@@ -142,7 +161,7 @@ const onExit = async () => {
 </script>
 
 <template>
-  <el-container class="layout-container" @contextmenu.prevent @mousemove="onListenLeave">
+  <el-container class="layout-container" @contextmenu.prevent @mousemove="onMouseMove">
     <el-aside width="100px">
       <span class="avatar">
         <AvatarIcon
