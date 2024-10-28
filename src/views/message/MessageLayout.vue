@@ -437,29 +437,40 @@ const markForShowCard = ref('')
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
-    await userData.updateUser()
-    userInfoForShowCard.value = userData.user
+    userData.updateUser()
+    .then(() => {
+      userInfoForShowCard.value = userData.user
+      isShowGroupCard.value = false
+      isShowUserCard.value = true
+    })
+    .finally(() => { //防止请求异常，导致loading关不掉
+      loadingInstance.close() 
+    })
   }
   else {
-    const res = await userQueryService({ account: account })
-    messageData.updateSession({
-      sessionId: sessionId,
-      objectInfo: {
-        ...messageData.sessionList[sessionId].objectInfo,
-        nickName: res.data.data.nickName,
-        signature: res.data.data.signature,
-        avatarThumb: res.data.data.avatarThumb,
-        gender: res.data.data.gender,
-        phoneNum: res.data.data.phoneNum,
-        email: res.data.data.email
-      }
+    userQueryService({ account: account })
+    .then((res) => {
+      messageData.updateSession({
+        sessionId: sessionId,
+        objectInfo: {
+          ...messageData.sessionList[sessionId].objectInfo,
+          nickName: res.data.data.nickName,
+          signature: res.data.data.signature,
+          avatarThumb: res.data.data.avatarThumb,
+          gender: res.data.data.gender,
+          phoneNum: res.data.data.phoneNum,
+          email: res.data.data.email
+        }
+      })
+      userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
+      markForShowCard.value = messageData.sessionList[sessionId].mark
+      isShowGroupCard.value = false
+      isShowUserCard.value = true
     })
-    userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
-    markForShowCard.value = messageData.sessionList[sessionId].mark
+    .finally(() => { //防止请求异常，导致loading关不掉
+      loadingInstance.close()
+    })
   }
-  loadingInstance.close()
-  isShowGroupCard.value = false
-  isShowUserCard.value = true
 }
 
 const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）

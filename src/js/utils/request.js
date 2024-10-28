@@ -17,15 +17,16 @@ const instance = axios.create({
 instance.interceptors.request.use(
   async (config) => {
     const userData = userStore()
-    if (config.url === '/user/refreshToken' && userData.rt.token !== '') {
+    if (config.url === '/user/refreshToken') {
+      const token = userData.getRefreshToken()
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)
       const sign = generateSign(userData.rt.secret, `${traceId}${timestamp}`)
       config.headers.traceId = traceId
       config.headers.timestamp = timestamp
       config.headers.sign = sign
-      config.headers.refreshToken = userData.rt.token
-    } else if (!noTokenReqList.includes(config.url) && userData.at.token !== '') {
+      config.headers.refreshToken = token
+    } else if (!noTokenReqList.includes(config.url)) {
       const token = await userData.getAccessToken()
       const traceId = uuidv4()
       const timestamp = Math.floor(new Date().getTime() / 1000)
@@ -51,13 +52,11 @@ instance.interceptors.response.use(
     return Promise.reject(res.data)
   },
   async (err) => {
-    if (err.response?.status === 403) {
-      // 403表示访问禁止，由于AccessToken或RefreshToken过期导致
-      ElMessage.error('会话过期，请退出后重新登录')
-    } else if (err.response?.status === 401) {
-      // 401错误返回登录页
-      router.push('/login')
+    if (err.response?.status === 401) {
+      userStore().clearAt()
+      userStore().clearRt()
       ElMessage.error('您还未登录，请先登录')
+      router.push('/login')
     } else {
       ElMessage.error(err.response?.message || '服务异常')
     }

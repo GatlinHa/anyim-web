@@ -29,8 +29,12 @@ export const userStore = defineStore(
         } else {
           if (rt.value.token && rt.value.expiretime && now < rt.value.expiretime) {
             const res = await refreshToken()
-            setAt(res.data.data.accessToken)
-            return true
+            if (res.data.data.accessToken) {
+              setAt(res.data.data.accessToken)
+              return true
+            } else {
+              return false
+            }
           } else {
             return false
           }
@@ -38,10 +42,12 @@ export const userStore = defineStore(
       }
     }
 
-    // 注意这个是异步的，取到的token一定是有效期内的
+    // 如果AT过期，则用RT去刷新AT
     const getAccessToken = async () => {
-      if (!at.value.expiretime) {
+      if (!at.value.token || !at.value.expiretime) {
         // 没有值表示未登录
+        clearAt()
+        clearRt()
         return ''
       }
 
@@ -60,8 +66,16 @@ export const userStore = defineStore(
     }
 
     const getRefreshToken = () => {
-      return rt.value.token
+      const now = new Date().getTime()
+      if (rt.value.token && rt.value.expiretime && now < rt.value.expiretime) {
+        return rt.value.token
+      } else {
+        clearAt()
+        clearRt()
+        return ''
+      }
     }
+
     const setAt = (newAt) => {
       const now = new Date()
       at.value = {
