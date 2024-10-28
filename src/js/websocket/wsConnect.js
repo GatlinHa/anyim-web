@@ -140,7 +140,7 @@ class WsConnect {
     if (this.isConnect) {
       return
     }
-    console.log('create websocket')
+    // console.log('create websocket')
     const userData = userStore()
     const token = await userData.getAccessToken()
     const traceId = uuidv4()
@@ -159,7 +159,7 @@ class WsConnect {
    * @param {*} code 正常登出code填0
    */
   closeWs() {
-    console.log('client close the websocket connect')
+    // console.log('client close the websocket connect')
     this.heartBeat.stop()
     this.reconnect.stop()
     this.connect && this.connect.close(1000) //1000表示正常退出
@@ -167,8 +167,8 @@ class WsConnect {
     this.isConnect = false
   }
 
-  onOpen(evt) {
-    console.log('onOpen', evt)
+  onOpen() {
+    // console.log('onOpen', evt)
     this.connect.send(helloConstructor())
   }
 
@@ -185,7 +185,7 @@ class WsConnect {
   }
 
   async onClose(evt) {
-    console.log('onClose', evt)
+    // console.log('onClose', evt)
     this.heartBeat.stop()
     this.connect && this.connect.close()
     this.connect = null
@@ -195,8 +195,8 @@ class WsConnect {
     }
   }
 
-  onError(evt) {
-    console.log('onError', evt)
+  onError() {
+    // console.log('onError', evt)
     this.heartBeat.stop()
     this.connect && this.connect.close()
     this.connect = null
@@ -237,7 +237,7 @@ class WsConnect {
       }
 
       if (this.buffer.length < byteIndex + length) {
-        console.log('receive half message, cache it first')
+        // console.log('receive half message, cache it first')
         break
       }
 
@@ -287,7 +287,7 @@ class WsConnect {
       this.connect.send(data)
     } else {
       if (this.reSend.curReSendTimes >= this.reSend.timeoutTimes) {
-        console.log('resend too many times')
+        // console.log('resend too many times')
         this.reSend.curReSendTimes = 0
         // TODO 应该反馈到业务层给提示
       } else {
@@ -301,7 +301,7 @@ class WsConnect {
 
   sendHeartBeat() {
     if (this.heartBeat.healthPoint >= this.heartBeat.timeoutTimes) {
-      console.log('heart beat timeout')
+      // console.log('heart beat timeout')
       this.heartBeatStop()
       this.connect && this.connect.close()
       this.connect = null
@@ -314,7 +314,7 @@ class WsConnect {
   }
 
   heartBeatStart() {
-    console.log('启动心跳任务')
+    // console.log('启动心跳任务')
     if (this.heartBeat.taskObj) {
       return
     }
@@ -322,7 +322,7 @@ class WsConnect {
   }
 
   heartBeatStop() {
-    console.log('中止心跳任务')
+    // console.log('中止心跳任务')
     this.heartBeat.taskObj && clearInterval(this.heartBeat.taskObj)
     this.heartBeat.taskObj = null
     this.heartBeat.healthPoint = 0
@@ -330,16 +330,16 @@ class WsConnect {
 
   reconnectTask() {
     if (!this.isConnect) {
-      console.log('reconnecting websocket')
+      // console.log('reconnecting websocket')
       this.createWs()
     } else {
-      console.log('no need to reconnect websocket')
+      // console.log('no need to reconnect websocket')
       this.reconnectStop()
     }
   }
 
   reconnectStart() {
-    console.log('启动重连任务')
+    // console.log('启动重连任务')
     if (this.reconnect.taskObj) {
       return
     }
@@ -347,7 +347,7 @@ class WsConnect {
   }
 
   reconnectStop() {
-    console.log('中止重连任务')
+    // console.log('中止重连任务')
     this.reconnect.taskObj && clearInterval(this.reconnect.taskObj)
     this.reconnect.taskObj = null
   }
