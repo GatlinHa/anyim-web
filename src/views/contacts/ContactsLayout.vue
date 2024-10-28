@@ -9,7 +9,7 @@ import organizationIcon from '@/assets/svg/organization.svg'
     <el-header class="bdr-b">通讯录</el-header>
     <el-container class="el-container__body">
       <el-aside class="bdr-r">
-        <el-menu :default-active="$route.path" text-color="black" router>
+        <el-menu :default-active="$route.meta.active_2" text-color="black" router>
           <el-menu-item index="/contacts/user">
             <contactsIcon></contactsIcon>
             <span>联系人</span>

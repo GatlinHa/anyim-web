@@ -24,23 +24,47 @@ const router = createRouter({
           children: [
             {
               path: '/contacts/user',
-              component: () => import('@/views/contacts/children/ContactsUser.vue'),
-              meta: {
-                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
-              }
+              component: () => import('@/views/contacts/user/ContactsUser.vue'),
+              redirect: '/contacts/user/last',
+              children: [
+                {
+                  path: '/contacts/user/last',
+                  component: () => import('@/views/contacts/user/SubLast.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/user' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/user/mark',
+                  component: () => import('@/views/contacts/user/SubMark.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/user' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/user/partition',
+                  component: () => import('@/views/contacts/user/SubPartition.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/user' // 二级导航default-active
+                  }
+                }
+              ]
             },
             {
               path: '/contacts/group',
-              component: () => import('@/views/contacts/children/ContactsGroup.vue'),
+              component: () => import('@/views/contacts/group/ContactsGroup.vue'),
               meta: {
-                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+                active_1: '/contacts' // 一级导航default-active
               }
             },
             {
               path: '/contacts/organization',
-              component: () => import('@/views/contacts/children/ContactsOrganization.vue'),
+              component: () => import('@/views/contacts/organization/ContactsOrganization.vue'),
               meta: {
-                active: '/contacts' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+                active_1: '/contacts' // 一级导航default-active
               }
             }
           ]
@@ -58,14 +82,14 @@ const router = createRouter({
               path: '/setting/personal',
               component: () => import('@/views/setting/children/SettingPersonal.vue'),
               meta: {
-                active: '/setting' //对于二级子路由的active路径还是指向父路径，方便一级导航菜单被显示为激活，同时要写:default-active="$route.meta.active || $route.path"
+                active_1: '/setting' // 一级导航default-active
               }
             },
             {
               path: '/setting/security',
               component: () => import('@/views/setting/children/SettingSecurity.vue'),
               meta: {
-                active: '/setting' //同上
+                active_1: '/setting' // 一级导航default-active
               }
             }
           ]
