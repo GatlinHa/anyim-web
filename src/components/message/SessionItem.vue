@@ -18,8 +18,7 @@ const emit = defineEmits([
   'isSelected',
   'showUserCard',
   'showGroupCard',
-  'customContextmenu',
-  'updateMenu',
+  'openSessionMenu',
   'noneSelected',
   'showUpdateMarkDialog'
 ])
@@ -30,32 +29,6 @@ const sessionInfo = computed(() => {
 
 const top = ref(sessionInfo.value.top)
 const muted = ref(sessionInfo.value.muted)
-
-// 这里不能用ref，因为这个结构不能响应top和muted变化
-const menu = computed(() => {
-  return [
-    {
-      label: 'top',
-      value: top.value,
-      desc: top.value ? '取消置顶' : '置顶'
-    },
-    {
-      label: 'muted',
-      value: muted.value,
-      desc: muted.value ? '取消免打扰' : '设置免打扰'
-    },
-    {
-      label: 'delete',
-      value: '',
-      desc: '删除会话'
-    },
-    {
-      label: 'mark',
-      value: '',
-      desc: '修改备注'
-    }
-  ]
-})
 
 const hasBeenSelected = computed(() => {
   return props.sessionId === props.selectedSessionId
@@ -141,24 +114,22 @@ const switchTag = (func) => {
   }, 100) // 这个时间太长会影响置顶按钮的响应时长
 }
 
-// TODO 这里不能监视不变化的情况，比如两次点的都是同一个菜单项
 const handleSelectedMenuItem = async () => {
   if (hasBeenShowMenu.value && props.selectedMenuItem) {
     switch (props.selectedMenuItem.label) {
       case 'top':
-        top.value = !top.value
-        switchTag(() => {})
-        emit('updateMenu', menu.value) //更新之后要同步菜单变化
+        switchTag(() => {
+          top.value = !top.value
+        })
         break
       case 'muted':
-        muted.value = !muted.value
-        switchTag(() => {})
-        emit('updateMenu', menu.value) //更新之后要同步菜单变化
+        switchTag(() => {
+          muted.value = !muted.value
+        })
         break
       case 'delete':
         await msgChatDeleteSessionService({ sessionId: props.sessionId })
-        // 如果删除的session是这个选中的session，需要通知父组件处理
-        if (hasBeenSelected.value) emit('noneSelected')
+        if (hasBeenSelected.value) emit('noneSelected') // 如果删除的session是这个选中的session，需要通知父组件处理
         messageData.deleteSession(props.sessionId)
         break
       case 'mark':
@@ -170,8 +141,8 @@ const handleSelectedMenuItem = async () => {
   }
 }
 
-const onContextmenu = () => {
-  emit('customContextmenu', { sessionId: props.sessionId, menu: menu.value })
+const openSessionMenu = () => {
+  emit('openSessionMenu', props.sessionId)
 }
 
 defineExpose({
@@ -180,7 +151,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="session-item-wrapper" @contextmenu.prevent="onContextmenu">
+  <div class="session-item-wrapper" @contextmenu.prevent="openSessionMenu">
     <div
       class="session-item"
       :class="{ 'bgc-for-active': hasBeenSelected, 'bgc-for-top': top && !hasBeenSelected }"

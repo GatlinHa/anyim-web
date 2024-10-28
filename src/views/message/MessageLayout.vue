@@ -39,7 +39,7 @@ import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/js/utils/common'
-import ContextMenu from '@/components/common/ContextMenu.vue'
+import SessionMenu from '@/components/message/SessionMenu.vue'
 import router from '@/router'
 
 const userData = userStore()
@@ -477,7 +477,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
 }
 
 const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可以不是选中的）
-const showMenu = ref([]) //传递给菜单组件的菜单选项
 const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单项
 
 const isShowUpdateMarkDialog = ref(false)
@@ -577,13 +576,8 @@ const onSelectMenu = (item) => {
   })
 }
 
-const onCustomContextmenu = ({ sessionId, menu }) => {
+const onOpenSessionMenu = (sessionId) => {
   showMenuSessionId.value = sessionId
-  showMenu.value = menu
-}
-
-const onUpdateMenu = (menu) => {
-  showMenu.value = menu
 }
 
 const onNoneSelected = () => {
@@ -600,7 +594,7 @@ const onNoneSelected = () => {
           <AddBotton></AddBotton>
         </div>
 
-        <ContextMenu :menu="showMenu" @selectMenu="onSelectMenu">
+        <SessionMenu :sessionId="showMenuSessionId" @selectMenu="onSelectMenu">
           <div class="session-list my-scrollbar" ref="sessionListRef">
             <SessionItem
               :ref="(el) => setSessionItemRef(item.sessionId, el)"
@@ -614,13 +608,12 @@ const onNoneSelected = () => {
               @isSelected="handleSelectedSession"
               @showUserCard="onShowUserCard"
               @showGroupCard="onShowGroupCard"
-              @customContextmenu="onCustomContextmenu"
-              @updateMenu="onUpdateMenu"
+              @openSessionMenu="onOpenSessionMenu"
               @noneSelected="onNoneSelected"
               @showUpdateMarkDialog="onShowUpdateMarkDialog"
             ></SessionItem>
           </div>
-        </ContextMenu>
+        </SessionMenu>
       </div>
 
       <DragLine
