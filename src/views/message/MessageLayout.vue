@@ -65,7 +65,9 @@ const newMsgTips = ref({
 })
 
 const lastReadMsgId = ref()
-const hasNoMoreMsg = ref(false)
+const hasNoMoreMsg = computed(() => {
+  return selectedSession.value.noMoreMsg || false
+})
 const isLoadMoreLoading = ref(false)
 const isLoading = ref(false)
 const isShowReturnBottom = ref(false)
@@ -84,7 +86,6 @@ const startIndex = computed(() => {
 const reset = () => {
   capacity.value = 15
   msgListReachBottom(false)
-  hasNoMoreMsg.value = false
   isLoadMoreLoading.value = false
   isLoading.value = false
   isShowReturnBottom.value = false
@@ -312,7 +313,10 @@ const pullMsg = async (mode = 0, ref = -1) => {
   }
 
   if (msgCount < pageSize) {
-    hasNoMoreMsg.value = true
+    messageData.updateSession({
+      sessionId: selectedSessionId.value,
+      noMoreMsg: true
+    })
   }
 
   if (mode === 0) isLoading.value = false

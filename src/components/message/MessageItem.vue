@@ -89,7 +89,6 @@ const msgTime = computed(() => {
 })
 
 const onLoadMore = () => {
-  loadMoreTips.value = ''
   emit('loadMore')
 }
 

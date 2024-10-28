@@ -51,6 +51,7 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('remoteRead' in obj) mySession.remoteRead = obj.remoteRead
     if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
     if ('readTime' in obj) mySession.readTime = obj.readTime
+    if ('noMoreMsg' in obj) mySession.noMoreMsg = obj.noMoreMsg
     if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
 
     if (flag) {
