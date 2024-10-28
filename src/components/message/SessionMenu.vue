@@ -20,25 +20,21 @@ const menu = computed(() => {
   return [
     {
       label: 'top',
-      value: top.value,
       desc: top.value ? '取消置顶' : '置顶',
       icon: top.value ? Bottom : Top
     },
     {
       label: 'muted',
-      value: muted.value,
       desc: muted.value ? '取消免打扰' : '设置免打扰',
       icon: muted.value ? Bell : MuteNotification
     },
     {
       label: 'delete',
-      value: '',
       desc: '删除会话',
       icon: Delete
     },
     {
       label: 'mark',
-      value: '',
       desc: '修改备注',
       icon: Edit
     }
@@ -109,7 +105,8 @@ const handleClick = (item) => {
       >
         <div class="menu-list">
           <div class="menu-item" v-for="item in menu" :key="item.label" @click="handleClick(item)">
-            <span class="desc">{{ item.desc }}</span>
+            <component class="menu-icon" :is="item.icon" />
+            <span class="menu-desc text-ellipsis">{{ item.desc }}</span>
           </div>
         </div>
       </div>
@@ -127,17 +124,24 @@ const handleClick = (item) => {
   .menu-item {
     padding: 5px;
     padding-left: 10px;
-    padding-right: 20px;
+    padding-right: 10px;
     margin-top: 3px;
     border-radius: 4px;
     display: flex;
     cursor: pointer;
 
     &:hover {
-      background-color: #f0f0f0;
+      background-color: #e6e8eb;
     }
 
-    .desc {
+    .menu-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .menu-desc {
+      padding-left: 10px;
+      padding-right: 10px;
       display: flex;
       justify-content: start;
       align-items: center;
