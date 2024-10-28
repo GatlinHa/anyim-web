@@ -432,8 +432,6 @@ const userInfoForShowCard = ref()
 const isShowGroupCard = ref(false)
 const groupInfoForShowCard = ref()
 
-const markForShowCard = ref('')
-
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
@@ -463,7 +461,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
         }
       })
       userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
-      markForShowCard.value = messageData.sessionList[sessionId].mark
       isShowGroupCard.value = false
       isShowUserCard.value = true
     })
@@ -491,21 +488,13 @@ const onShowUpdateMarkDialog = () => {
 const onUpdateMarkConfirm = () => {
   // 如果没有更改，不需要执行保存
   if (newMarkForUpdateMark.value !== messageData.sessionList[showMenuSessionId.value].mark) {
-    onUpdateMark({
-      account: accountForUpdateMark.value,
+    const sessionId = combineId(userData.user.account, accountForUpdateMark.value)
+    messageData.updateSession({
+      sessionId: sessionId,
       mark: newMarkForUpdateMark.value
     })
   }
   isShowUpdateMarkDialog.value = false
-}
-
-const onUpdateMark = async (obj) => {
-  const sessionId = combineId(userData.user.account, obj.account)
-  messageData.updateSession({
-    sessionId: sessionId,
-    mark: obj.mark
-  })
-  markForShowCard.value = obj.mark
 }
 
 // TODO
@@ -517,8 +506,6 @@ const onShowGroupCard = () => {
 
 const onShowContactCard = (contactInfo) => {
   userInfoForShowCard.value = contactInfo
-  const sessionId = combineId(userData.user.account, contactInfo.account)
-  markForShowCard.value = messageData.sessionList[sessionId].mark
   isShowGroupCard.value = false
   isShowUserCard.value = true
 }
@@ -783,8 +770,6 @@ const onNoneSelected = () => {
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfoForShowCard"
-    :mark="markForShowCard"
-    @update:mark="onUpdateMark"
     @close="isShowUserCard = false"
   ></UserCard>
   <GroupCard

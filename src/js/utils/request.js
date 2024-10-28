@@ -16,7 +16,7 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(
   async (config) => {
-    console.log('=========>1.1 ')
+    console.log('==========>1.1 ')
     const userData = userStore()
     if (config.url === '/user/refreshToken') {
       const token = userData.getRefreshToken()
@@ -27,7 +27,7 @@ instance.interceptors.request.use(
       config.headers.timestamp = timestamp
       config.headers.sign = sign
       config.headers.refreshToken = token
-      console.log('=========>1.2 config: ', config)
+      console.log('==========>1.2 config: ', config)
     } else if (!noTokenReqList.includes(config.url)) {
       const token = await userData.getAccessToken()
       const traceId = uuidv4()
@@ -37,7 +37,7 @@ instance.interceptors.request.use(
       config.headers.timestamp = timestamp
       config.headers.sign = sign
       config.headers.accessToken = token
-      console.log('=========>1.3 config: ', config)
+      console.log('==========>1.3 config: ', config)
     }
     return config
   },
@@ -56,7 +56,7 @@ instance.interceptors.response.use(
   },
   async (err) => {
     if (err.response?.status === 401) {
-      console.log('=========>2 ')
+      console.log('==========>2 ')
       userStore().clearAt()
       userStore().clearRt()
       ElMessage.error('您还未登录，请先登录')

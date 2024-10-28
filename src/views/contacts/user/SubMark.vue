@@ -2,16 +2,14 @@
 import { ref, onMounted, computed } from 'vue'
 import { msgChatSessionListService } from '@/api/message'
 import { userQueryService } from '@/api/user'
-import { userStore, messageStore } from '@/stores'
+import { messageStore } from '@/stores'
 import ContactsUserItem from '@/components/contacts/ContactsUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { Search } from '@element-plus/icons-vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import { combineId } from '@/js/utils/common'
 
-const userData = userStore()
 const messageData = messageStore()
 const totalCount = computed(() => {
   return Object.keys(markData.value).length
@@ -63,7 +61,6 @@ const markDataSorted = computed(() => {
 
 const isShowUserCard = ref(false)
 const userInfo = ref()
-const mark = ref('')
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   const res = await userQueryService({ account: account })
@@ -80,18 +77,8 @@ const onShowUserCard = async ({ sessionId, account }) => {
     }
   })
   userInfo.value = messageData.sessionList[sessionId].objectInfo
-  mark.value = messageData.sessionList[sessionId].mark
   loadingInstance.close()
   isShowUserCard.value = true
-}
-
-const onUpdateMark = async (obj) => {
-  const sessionId = combineId(userData.user.account, obj.account)
-  messageData.updateSession({
-    sessionId: sessionId,
-    mark: obj.mark
-  })
-  mark.value = obj.mark
 }
 </script>
 
@@ -123,8 +110,6 @@ const onUpdateMark = async (obj) => {
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfo"
-    :mark="mark"
-    @update:mark="onUpdateMark"
     @close="isShowUserCard = false"
   ></UserCard>
 </template>

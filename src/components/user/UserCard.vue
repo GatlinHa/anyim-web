@@ -2,13 +2,23 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
-import { userStore } from '@/stores'
+import { userStore, messageStore } from '@/stores'
+import { combineId } from '@/js/utils/common'
 
-const props = defineProps(['isShow', 'userInfo', 'mark'])
-const emit = defineEmits(['close', 'update:mark'])
+const props = defineProps(['isShow', 'userInfo'])
+const emit = defineEmits(['close'])
+
+const userData = userStore()
+const messageData = messageStore()
 
 const userCardRef = ref()
-const userData = userStore()
+
+const sessionId = computed(() => {
+  return combineId(userData.user.account, props.userInfo?.account)
+})
+const mark = computed(() => {
+  return messageData.sessionList[sessionId.value].mark
+})
 const markEditing = ref(false)
 const newMark = ref('')
 const markEditRef = ref()
@@ -54,7 +64,7 @@ const onClose = () => {
 }
 
 const onClickEditMark = () => {
-  newMark.value = props.mark || ''
+  newMark.value = mark.value || ''
   markEditing.value = true
   nextTick(() => {
     markEditRef.value.focus()
@@ -62,9 +72,9 @@ const onClickEditMark = () => {
 }
 
 const saveMark = () => {
-  if (newMark.value !== props.mark) {
-    emit('update:mark', {
-      ...props.userInfo,
+  if (newMark.value !== mark.value) {
+    messageData.updateSession({
+      sessionId: sessionId.value,
       mark: newMark.value
     })
   }
@@ -127,7 +137,7 @@ onUnmounted(() => {
           <div v-if="!isSelf" class="info-item mark">
             <span class="label">备注：</span>
             <div v-if="!markEditing" class="value value-mark">
-              <span @click="onClickEditMark" style="cursor: pointer">{{ props.mark || '-' }}</span>
+              <span @click="onClickEditMark" style="cursor: pointer">{{ mark || '-' }}</span>
               <el-button
                 type="primary"
                 :icon="Edit"
