@@ -17,7 +17,13 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
-import { STATUS, LEAVING_AFTER_DURATION, LOGOUT_AFTER_DURATION } from '@/const/userConst'
+import {
+  STATUS,
+  LEAVING_AFTER_DURATION,
+  LOGOUT_AFTER_DURATION,
+  CREATE_WS_DELAY,
+  SYNC_STATUS_INTERVAL
+} from '@/const/userConst'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -57,7 +63,7 @@ let statusReqTask
 onMounted(async () => {
   setTimeout(() => {
     wsConnect.createWs()
-  }, 1500) // 延迟启动，防止token刷新碰撞
+  }, CREATE_WS_DELAY) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
 
   // 定时查询自己的状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
@@ -65,7 +71,7 @@ onMounted(async () => {
   accounts.push(userData.user.account)
   statusReqTask = setInterval(() => {
     wsConnect.statusReq(JSON.stringify(accounts))
-  }, 5000)
+  }, SYNC_STATUS_INTERVAL)
 })
 
 onUnmounted(() => {
