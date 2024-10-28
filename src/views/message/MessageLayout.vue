@@ -1,14 +1,14 @@
-<!-- eslint-disable prettier/prettier -->
+eslint-disable prettier/prettier
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import { 
-  Phone, 
-  VideoCamera, 
-  Position, 
+import {
+  Phone,
+  VideoCamera,
+  Position,
   CirclePlus,
-  Setting, 
-  LocationInformation, 
-  Clock, 
+  Setting,
+  LocationInformation,
+  Clock,
   Picture,
   FolderAdd,
   CreditCard,
@@ -27,7 +27,11 @@ import UserCard from '@/components/user/UserCard.vue'
 import GroupCard from '@/components/group/GroupCard.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import { msgChatSessionListService, msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
+import {
+  msgChatSessionListService,
+  msgChatPullMsgService,
+  msgChatCreateSessionService
+} from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
@@ -72,9 +76,8 @@ const startIndex = computed(() => {
   if (selectedSessionId.value) {
     const len = messageData.msgRecordsList[selectedSessionId.value]?.length
     return len > capacity.value ? len - capacity.value : 0
-  }
-  else {
-     return 0
+  } else {
+    return 0
   }
 })
 
@@ -94,8 +97,10 @@ const locateSession = (sessionId) => {
     // 由于offsetTop和offsetHeight不包含外边距，因此定位存在细小误差，暂不处理
     if (selectedElement.offsetTop - selectedElement.offsetHeight < sessionListRef.value.scrollTop) {
       sessionListRef.value.scrollTop = selectedElement.offsetTop - selectedElement.offsetHeight
-    }
-    else if (selectedElement.offsetTop > sessionListRef.value.scrollTop + sessionListRef.value.clientHeight) {
+    } else if (
+      selectedElement.offsetTop >
+      sessionListRef.value.scrollTop + sessionListRef.value.clientHeight
+    ) {
       sessionListRef.value.scrollTop = selectedElement.offsetTop - sessionListRef.value.clientHeight
     }
   })
@@ -122,23 +127,24 @@ onMounted(async () => {
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
 
-    // 定时更新单聊对象的状态
+  // 定时更新单聊对象的状态
   const accounts = []
-  Object.keys(messageData.sessionList).forEach(key => {
+  Object.keys(messageData.sessionList).forEach((key) => {
     const session = messageData.sessionList[key]
     const sessionType = session.sessionType
-    if (sessionType === MsgType.CHAT) { //只看单聊的，群里在打开聊天窗时触发查询
+    if (sessionType === MsgType.CHAT) {
+      //只看单聊的，群里在打开聊天窗时触发查询
       accounts.push(session.objectInfo.account)
     }
   })
-  
+
   setInterval(() => {
     wsConnect.statusReq(JSON.stringify(accounts))
   }, 5000)
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
   if (router.currentRoute.value.query.sessionId) {
-    handleSelectedSession(router.currentRoute.value.query.sessionId);
+    handleSelectedSession(router.currentRoute.value.query.sessionId)
   }
 })
 
@@ -153,8 +159,7 @@ const handleMsgListWheel = async () => {
     if (len > capacity.value) {
       if (len - capacity.value > step) {
         capacity.value += step
-      }
-      else {
+      } else {
         capacity.value = len
       }
     }
@@ -162,7 +167,7 @@ const handleMsgListWheel = async () => {
     // 保持页面对话的锚定位置
     nextTick(() => {
       msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
-    });
+    })
   }
 
   //控制是否显示"回到底部"的按钮
@@ -180,31 +185,27 @@ const handleMsgListWheel = async () => {
 const sessionListSorted = computed(() => {
   if (!Object.keys(messageData.sessionList)) {
     return []
-  }
-  else {
+  } else {
     let sessionArr = Object.values(messageData.sessionList)
     return sessionArr.sort((a, b) => {
-      if (a.top && !b.top) { // 排序第一优先级：是否置顶
+      if (a.top && !b.top) {
+        // 排序第一优先级：是否置顶
         return -1
-      }
-      else if (!a.top && b.top) {
+      } else if (!a.top && b.top) {
         return 1
-      }
-      else {
-        if (a.draft && !b.draft) { // 排序第二优先级：是否有草稿
+      } else {
+        if (a.draft && !b.draft) {
+          // 排序第二优先级：是否有草稿
           return -1
-        }
-        else if (!a.draft && b.draft) {
+        } else if (!a.draft && b.draft) {
           return 1
-        }
-        else {
+        } else {
           // 排序第三优先级：最后一条消息的时间
           const bTime = new Date(b.lastMsgTime).getTime()
           const aTIme = new Date(a.lastMsgTime).getTime()
           if (bTime !== aTIme) {
             return bTime - aTIme
-          }
-          else {
+          } else {
             // 排序第四优先级：昵称字典序
             return a.objectInfo.nickName > b.objectInfo.nickName ? 1 : -1
           }
@@ -242,22 +243,21 @@ const firstMsgId = computed(() => {
 
 const getLastMsgTime = (index) => {
   if (index > 0) {
-    return msgRecords.value[index - 1].msgTime;
+    return msgRecords.value[index - 1].msgTime
   } else {
-    return null;
+    return null
   }
 }
 
 /**
  * 判断是否是打开session后的第一条未读消息
- * @param index 
+ * @param index
  */
 const isFirstNew = (index) => {
-  if (index > 0 
-    && msgRecords.value[index - 1].msgId == lastReadMsgId.value) {
+  if (index > 0 && msgRecords.value[index - 1].msgId == lastReadMsgId.value) {
     return true
   }
-  return false;
+  return false
 }
 
 const onAsideDragUpdate = ({ width }) => {
@@ -287,11 +287,11 @@ const pullMsg = async (mode = 0, ref = -1) => {
     return
   }
 
-  const pageSize = 30;
+  const pageSize = 30
   const params = {
-    sessionId: selectedSessionId.value, 
-    pageSize: pageSize, 
-    mode: mode, 
+    sessionId: selectedSessionId.value,
+    pageSize: pageSize,
+    mode: mode,
     refMsgId: ref
   }
 
@@ -303,9 +303,9 @@ const pullMsg = async (mode = 0, ref = -1) => {
     messageData.addMsgRecords(selectedSessionId.value, res.data.data.msgList)
     if (mode === 0) {
       messageData.updateSession({
-        sessionId: selectedSessionId.value, 
+        sessionId: selectedSessionId.value,
         lastMsgId: res.data.data.lastMsgId,
-        lastMsgContent: res.data.data.msgList[msgCount - 1].content, 
+        lastMsgContent: res.data.data.msgList[msgCount - 1].content,
         lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
       })
     }
@@ -325,7 +325,7 @@ const handleSelectedSession = async (sessionId) => {
     selectedSessionId.value = sessionId
     reset()
     locateSession(sessionId)
-    
+
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
     if (!msgRecords.value && selectedSession.value.lastMsgId) {
       await pullMsg()
@@ -337,12 +337,15 @@ const handleSelectedSession = async (sessionId) => {
 }
 
 const handleRead = () => {
-  if (selectedSessionId.value && selectedSession.value.readMsgId < selectedSession.value.lastMsgId) {
+  if (
+    selectedSessionId.value &&
+    selectedSession.value.readMsgId < selectedSession.value.lastMsgId
+  ) {
     const content = selectedSession.value.lastMsgId.toString()
     wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
     // 更新本地缓存的已读位置
     messageData.updateSession({
-      sessionId: selectedSessionId.value, 
+      sessionId: selectedSessionId.value,
       readMsgId: content,
       readTime: new Date(),
       unreadCount: 0
@@ -356,23 +359,25 @@ const handleSendMessage = (content) => {
     const now = new Date()
     messageData.updateSession({
       sessionId: selectedSessionId.value,
-      lastMsgId: msgId,  // 最后一条消息（自己发的）
+      lastMsgId: msgId, // 最后一条消息（自己发的）
       lastMsgContent: content,
       lastMsgTime: now,
       readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到最大（刚发的这条消息的msgId）
       readTime: now,
-      unreadCount: 0,  // 最后一条消息是自己发的，因此未读是0
-      draft: ''  //草稿意味着要清空
+      unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
+      draft: '' //草稿意味着要清空
     })
-    
-    messageData.addMsgRecords(selectedSessionId.value, [{
-      sessionId: selectedSessionId.value,
-      msgId: msgId,  
-      fromId: userData.user.account,
-      msgType: selectedSession.value.sessionType,
-      content: content,
-      msgTime: now
-    }])
+
+    messageData.addMsgRecords(selectedSessionId.value, [
+      {
+        sessionId: selectedSessionId.value,
+        msgId: msgId,
+        fromId: userData.user.account,
+        msgType: selectedSession.value.sessionType,
+        content: content,
+        msgTime: now
+      }
+    ])
 
     msgListReachBottom(false) // 发送消息之后,msgList要触底
   })
@@ -386,8 +391,7 @@ const onLoadMore = async () => {
   if (len > capacity.value) {
     if (len - capacity.value > step) {
       capacity.value += step
-    }
-    else {
+    } else {
       capacity.value = len
     }
   }
@@ -395,7 +399,7 @@ const onLoadMore = async () => {
   // 保持页面对话的锚定位置
   nextTick(() => {
     msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight + scrollTop
-  });
+  })
 }
 
 const msgListReachBottom = (isSmooth = true) => {
@@ -414,11 +418,11 @@ const onReturnBottom = () => {
 }
 
 const onReachFirtUnReadMsg = () => {
-  const msgListRect = msgListDiv.value.getBoundingClientRect();
+  const msgListRect = msgListDiv.value.getBoundingClientRect()
   const firstElRect = newMsgTips.value.firstElement.getBoundingClientRect()
   nextTick(() => {
     msgListDiv.value.scrollTop = msgListDiv.value.scrollTop - (msgListRect.top - firstElRect.top)
-  });
+  })
   newMsgTips.value.isShowTopTips = false
 }
 
@@ -435,38 +439,40 @@ const groupInfoForShowCard = ref()
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
-    userData.updateUser()
-    .then(() => {
-      userInfoForShowCard.value = userData.user
-      isShowGroupCard.value = false
-      isShowUserCard.value = true
-    })
-    .finally(() => { //防止请求异常，导致loading关不掉
-      loadingInstance.close() 
-    })
-  }
-  else {
-    userQueryService({ account: account })
-    .then((res) => {
-      messageData.updateSession({
-        sessionId: sessionId,
-        objectInfo: {
-          ...messageData.sessionList[sessionId].objectInfo,
-          nickName: res.data.data.nickName,
-          signature: res.data.data.signature,
-          avatarThumb: res.data.data.avatarThumb,
-          gender: res.data.data.gender,
-          phoneNum: res.data.data.phoneNum,
-          email: res.data.data.email
-        }
+    userData
+      .updateUser()
+      .then(() => {
+        userInfoForShowCard.value = userData.user
+        isShowGroupCard.value = false
+        isShowUserCard.value = true
       })
-      userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
-      isShowGroupCard.value = false
-      isShowUserCard.value = true
-    })
-    .finally(() => { //防止请求异常，导致loading关不掉
-      loadingInstance.close()
-    })
+      .finally(() => {
+        //防止请求异常，导致loading关不掉
+        loadingInstance.close()
+      })
+  } else {
+    userQueryService({ account: account })
+      .then((res) => {
+        messageData.updateSession({
+          sessionId: sessionId,
+          objectInfo: {
+            ...messageData.sessionList[sessionId].objectInfo,
+            nickName: res.data.data.nickName,
+            signature: res.data.data.signature,
+            avatarThumb: res.data.data.avatarThumb,
+            gender: res.data.data.gender,
+            phoneNum: res.data.data.phoneNum,
+            email: res.data.data.email
+          }
+        })
+        userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
+        isShowGroupCard.value = false
+        isShowUserCard.value = true
+      })
+      .finally(() => {
+        //防止请求异常，导致loading关不掉
+        loadingInstance.close()
+      })
   }
 }
 
@@ -501,7 +507,7 @@ const onUpdateMarkConfirm = () => {
 const onShowGroupCard = () => {
   isShowUserCard.value = false
   isShowGroupCard.value = true
-  groupInfoForShowCard.value = {} 
+  groupInfoForShowCard.value = {}
 }
 
 const onShowContactCard = (contactInfo) => {
@@ -512,20 +518,19 @@ const onShowContactCard = (contactInfo) => {
 
 const onOpenSession = async ({ msgType, objectInfo }) => {
   if (userData.user.account === objectInfo.account) {
-    console.log('暂不支持自己给自己发消息'); //TODO
+    console.log('暂不支持自己给自己发消息') //TODO
     return
   }
   const sessionId = combineId(userData.user.account, objectInfo.account)
   if (messageData.sessionList[sessionId]) {
     handleSelectedSession(sessionId)
-  }
-  else {
+  } else {
     const res = await msgChatCreateSessionService({
-        sessionId: sessionId,
-        account: userData.user.account,
-        remoteId: objectInfo.account,
-        sessionType: msgType
-      })
+      sessionId: sessionId,
+      account: userData.user.account,
+      remoteId: objectInfo.account,
+      sessionType: msgType
+    })
     messageData.addSession(res.data.data)
     handleSelectedSession(sessionId)
   }
@@ -534,28 +539,30 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
 /**
  * 监视msgRecords的数据变化,给出新消息的tips提示
  */
-watch(() => msgRecords.value, (oldValue) => {
-  if (!oldValue || selectedSession.value.unreadCount === 0) return
-  nextTick(() => {
-    const unreadMsgEls = document.querySelectorAll('.unreadMsg');
-    if (unreadMsgEls.length === 0) return
-    const msgListRect = msgListDiv.value.getBoundingClientRect();
-    Array.from(unreadMsgEls).some((el) => {
-      const rect = el.getBoundingClientRect()
-      if (rect.bottom < msgListRect.top) {
-        newMsgTips.value.isShowTopTips = true
-        newMsgTips.value.unreadCount = selectedSession.value.unreadCount
-        newMsgTips.value.firstElement = el
-        return true
-      }
-      else if (rect.top > msgListRect.bottom) {
-        newMsgTips.value.isShowBottomTips = true
-        newMsgTips.value.unreadCount = selectedSession.value.unreadCount
-        return true
-      }
+watch(
+  () => msgRecords.value,
+  (oldValue) => {
+    if (!oldValue || selectedSession.value.unreadCount === 0) return
+    nextTick(() => {
+      const unreadMsgEls = document.querySelectorAll('.unreadMsg')
+      if (unreadMsgEls.length === 0) return
+      const msgListRect = msgListDiv.value.getBoundingClientRect()
+      Array.from(unreadMsgEls).some((el) => {
+        const rect = el.getBoundingClientRect()
+        if (rect.bottom < msgListRect.top) {
+          newMsgTips.value.isShowTopTips = true
+          newMsgTips.value.unreadCount = selectedSession.value.unreadCount
+          newMsgTips.value.firstElement = el
+          return true
+        } else if (rect.top > msgListRect.bottom) {
+          newMsgTips.value.isShowBottomTips = true
+          newMsgTips.value.unreadCount = selectedSession.value.unreadCount
+          return true
+        }
+      })
     })
-  })
-})
+  }
+)
 
 const sessionItemRefCollection = ref({})
 const setSessionItemRef = (sessionId, el) => {
@@ -582,7 +589,6 @@ const onUpdateMenu = (menu) => {
 const onNoneSelected = () => {
   selectedSessionId.value = ''
 }
-
 </script>
 
 <template>
