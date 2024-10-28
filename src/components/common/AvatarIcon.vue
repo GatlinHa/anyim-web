@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { getRandomColor, getFontColor } from '@/js/utils/common'
+import { STATUS } from '@/const/userConst'
 
 const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'userStatus', 'size'])
 
@@ -19,13 +20,13 @@ const fontColor = getFontColor(randomColor)
 
 const statusCircleColor = computed(() => {
   switch (props.userStatus) {
-    case 1:
+    case STATUS.LEAVING:
       return 'yellow'
-    case 2:
+    case STATUS.ONLINE:
       return '#95d475'
-    case 3:
+    case STATUS.BUSYING:
       return 'red'
-    case 0:
+    case STATUS.OFFLINE:
     default:
       return 'gray'
   }

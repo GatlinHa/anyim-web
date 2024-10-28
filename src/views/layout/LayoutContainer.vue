@@ -17,6 +17,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import { STATUS } from '@/const/userConst'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -26,13 +27,13 @@ const searchData = searchStore()
 
 const userStatusDesc = computed(() => {
   switch (userData.user.status) {
-    case 1:
+    case STATUS.LEAVING:
       return '离开'
-    case 2:
+    case STATUS.ONLINE:
       return '在线'
-    case 3:
+    case STATUS.BUSYING:
       return '忙碌'
-    case 0:
+    case STATUS.OFFLINE:
     default:
       return '离线'
   }
@@ -40,13 +41,13 @@ const userStatusDesc = computed(() => {
 
 const statusCircleColor = computed(() => {
   switch (userData.user.status) {
-    case 1:
+    case STATUS.LEAVING:
       return 'yellow'
-    case 2:
+    case STATUS.ONLINE:
       return '#95d475'
-    case 3:
+    case STATUS.BUSYING:
       return 'red'
-    case 0:
+    case STATUS.OFFLINE:
     default:
       return 'gray'
   }
@@ -83,15 +84,15 @@ let timer
 const onListenLeave = () => {
   if (!document.hasFocus()) return
 
-  if (userData.user.status === 1) {
-    userData.updateUserStatus(2) //修改本地状态
-    wsConnect.statusSync(2) //状态同步给云端
+  if (userData.user.status === STATUS.LEAVING) {
+    userData.updateUserStatus(STATUS.ONLINE) //修改本地状态
+    wsConnect.statusSync(STATUS.ONLINE) //状态同步给云端
   }
   clearTimeout(timer)
   timer = setTimeout(() => {
-    if (userData.user.status === 2) {
-      userData.updateUserStatus(1) //修改本地状态
-      wsConnect.statusSync(1) //状态同步给云端
+    if (userData.user.status === STATUS.ONLINE) {
+      userData.updateUserStatus(STATUS.LEAVING) //修改本地状态
+      wsConnect.statusSync(STATUS.LEAVING) //状态同步给云端
     }
   }, 300000)
 }
