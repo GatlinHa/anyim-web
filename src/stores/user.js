@@ -56,8 +56,14 @@ export const userStore = defineStore(
         return at.value.token
       } else if (rt.value.token && rt.value.expiretime && now < rt.value.expiretime) {
         const res = await refreshToken()
-        setAt(res.data.data.accessToken)
-        return at.value.token
+        if (res.data.data.accessToken) {
+          setAt(res.data.data.accessToken)
+          return at.value.token
+        } else {
+          clearAt()
+          clearRt()
+          return ''
+        }
       } else {
         clearAt()
         clearRt()
