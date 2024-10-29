@@ -68,9 +68,16 @@ const lastReadMsgId = ref()
 const hasNoMoreMsg = computed(() => {
   return selectedSession.value.noMoreMsg || false
 })
-const isLoadMoreLoading = ref(false)
-const isLoading = ref(false)
+
 const isShowReturnBottom = ref(false)
+
+// 留在该页面上的session状态缓存，例如：
+//  isLoading: 正在加载数据，解释：会话首次被打开时开场加载数据的loading场景
+//  isLoadMoreLoading: 是否加载更多中，解释：会话被打开后，向上移动滚轮到顶出现“加载更多”字样，继续滚动或者点击的loading场景
+// 这些数据不能放在messageData，因为它会随页面消亡而清除数据，重新回到页面后使用初始默认数据即可
+// 数据格式示例：{'sessionId_xxx': {isLoadMoreLoading: false, isLoading: false}}
+// 触发选中session事件后，才会给这个数据里面插入被选中session状态的缓存
+const selectedSessionCache = ref({})
 
 const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
@@ -83,12 +90,17 @@ const startIndex = computed(() => {
   }
 })
 
-const reset = () => {
-  capacity.value = 15
-  msgListReachBottom(false)
-  isLoadMoreLoading.value = false
-  isLoading.value = false
-  isShowReturnBottom.value = false
+const initSession = (sessionId) => {
+  capacity.value = 15 //会话的默认显示消息记录数
+  msgListReachBottom(false) //会话默认滚到最底部
+  isShowReturnBottom.value = false //会话默认不弹出“返回底部”的按钮
+  // 如果selectedSessionCache有这个sessionId就不重置
+  if (!selectedSessionCache.value[sessionId]) {
+    selectedSessionCache.value[sessionId] = {
+      isLoading: false,
+      isLoadMoreLoading: false
+    }
+  }
 }
 
 const locateSession = (sessionId) => {
@@ -150,7 +162,11 @@ onMounted(async () => {
 })
 
 const handleMsgListWheel = async () => {
-  if (msgListDiv.value.scrollTop === 0 && !isLoadMoreLoading.value && !hasNoMoreMsg.value) {
+  if (
+    msgListDiv.value.scrollTop === 0 &&
+    !selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading &&
+    !hasNoMoreMsg.value
+  ) {
     const scrollHeight = msgListDiv.value.scrollHeight
     if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
       await pullMsg(1, msgRecords.value[0].msgId)
@@ -284,7 +300,12 @@ const onInputBoxDragUpdate = ({ height }) => {
  * @param ref mode=1时要携带,标记更新的msgId位置
  */
 const pullMsg = async (mode = 0, ref = -1) => {
-  if (hasNoMoreMsg.value) {
+  // 下列三种情况不拉取数据
+  if (
+    hasNoMoreMsg.value ||
+    selectedSessionCache.value[selectedSessionId.value].isLoading ||
+    selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading
+  ) {
     return
   }
 
@@ -296,38 +317,44 @@ const pullMsg = async (mode = 0, ref = -1) => {
     refMsgId: ref
   }
 
-  if (mode === 0) isLoading.value = true // mode=0才需要显示"数据加载中..."
-  if (mode === 1) isLoadMoreLoading.value = true // mode=1才需要显示"加载更多中..."
-  const res = await msgChatPullMsgService(params)
-  const msgCount = res.data.data.count
-  if (msgCount > 0) {
-    messageData.addMsgRecords(selectedSessionId.value, res.data.data.msgList)
-    if (mode === 0) {
+  // mode=0才需要显示"数据加载中..."
+  if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = true
+  // mode=1才需要显示"加载更多中..."
+  if (mode === 1) selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = true
+  // 这里一定不要响应式的sessionId，否则快速点击切换session会导致数据都叠加到最后一次的selectedSessionId上面
+  const sessionId = selectedSessionId.value
+  try {
+    const res = await msgChatPullMsgService(params)
+    const msgCount = res.data.data.count
+    if (msgCount > 0) {
+      messageData.addMsgRecords(sessionId, res.data.data.msgList)
+      if (mode === 0) {
+        messageData.updateSession({
+          sessionId: sessionId,
+          lastMsgId: res.data.data.lastMsgId,
+          lastMsgContent: res.data.data.msgList[msgCount - 1].content,
+          lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
+        })
+      }
+    }
+
+    if (msgCount < pageSize) {
       messageData.updateSession({
-        sessionId: selectedSessionId.value,
-        lastMsgId: res.data.data.lastMsgId,
-        lastMsgContent: res.data.data.msgList[msgCount - 1].content,
-        lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
+        sessionId: sessionId,
+        noMoreMsg: true
       })
     }
+  } finally {
+    if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = false
+    if (mode === 1) selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = false
   }
-
-  if (msgCount < pageSize) {
-    messageData.updateSession({
-      sessionId: selectedSessionId.value,
-      noMoreMsg: true
-    })
-  }
-
-  if (mode === 0) isLoading.value = false
-  if (mode === 1) isLoadMoreLoading.value = false
 }
 
 // 表示有个session被选中了
 const handleSelectedSession = async (sessionId) => {
   if (selectedSessionId.value !== sessionId) {
     selectedSessionId.value = sessionId
-    reset()
+    initSession(sessionId)
     locateSession(sessionId)
 
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
@@ -658,7 +685,9 @@ const onNoneSelected = () => {
         </el-header>
         <el-main class="body">
           <div class="show-box">
-            <div v-if="isLoading" class="show-loading">数据加载中……</div>
+            <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
+              数据加载中……
+            </div>
             <div
               v-else
               class="message-main my-scrollbar"
@@ -676,7 +705,7 @@ const onNoneSelected = () => {
                 :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
-                :isLoadMoreLoading="isLoadMoreLoading"
+                :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
                 @loadMore="onLoadMore"
                 @showUserCard="onShowUserCard"
               ></MessageItem>
