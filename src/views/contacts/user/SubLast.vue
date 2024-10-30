@@ -93,7 +93,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
 <template>
   <el-container style="height: 100%">
     <el-header class="bdr-b">
-      <div style="color: #409eff; font-size: 14px">全部({{ totalCount }})</div>
+      <div style="font-size: 14px">全部({{ totalCount }})</div>
       <el-input
         v-model="lastSearchKey"
         placeholder="搜索：昵称/账号"
