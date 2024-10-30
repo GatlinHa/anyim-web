@@ -41,6 +41,7 @@ import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/js/utils/common'
 import SessionMenu from '@/components/message/SessionMenu.vue'
 import router from '@/router'
+import { BEGIN_MSG_ID } from '@/const/msgConst'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -64,9 +65,29 @@ const newMsgTips = ref({
   firstElement: null
 })
 
-const lastReadMsgId = ref()
+const lastReadMsgId = ref() // TODO 待会回头分析这个要不要放到session里面去
+// 消息拉取是否结束
+const pullMsgDone = computed(() => {
+  return selectedSession.value.pullMsgDone || false
+})
+// 是否是msgRecordsList为空
+const noMsgRecords = computed(() => {
+  return (
+    !messageData.msgRecordsList[selectedSessionId.value] ||
+    messageData.msgRecordsList[selectedSessionId.value].length === 0
+  )
+})
+// msgRecordsList的第一条消息ID
+const firstMsgId = computed(() => {
+  if (!noMsgRecords.value) {
+    return messageData.msgRecordsList[selectedSessionId.value][0].msgId
+  } else {
+    return 0
+  }
+})
+// 是否是没有更多消息了：从服务器拉取结束了，或者firstMsgId是BEGIN_MSG_ID
 const hasNoMoreMsg = computed(() => {
-  return selectedSession.value.noMoreMsg || false
+  return pullMsgDone.value || firstMsgId.value === BEGIN_MSG_ID
 })
 
 const isShowReturnBottom = ref(false)
@@ -74,7 +95,7 @@ const isShowReturnBottom = ref(false)
 // 留在该页面上的session状态缓存，例如：
 //  isLoading: 正在加载数据，解释：会话首次被打开时开场加载数据的loading场景
 //  isLoadMoreLoading: 是否加载更多中，解释：会话被打开后，向上移动滚轮到顶出现“加载更多”字样，继续滚动或者点击的loading场景
-// 这些数据不能放在messageData，因为它会随页面消亡而清除数据，重新回到页面后使用初始默认数据即可
+// 这些数据不能放在messageData，因为这个cache会随页面消亡而清除数据，重新回到页面后使用初始默认数据即可
 // 数据格式示例：{'sessionId_xxx': {isLoadMoreLoading: false, isLoading: false}}
 // 触发选中session事件后，才会给这个数据里面插入被选中session状态的缓存
 const selectedSessionCache = ref({})
@@ -254,11 +275,7 @@ const showId = computed(() => {
   }
 })
 
-const firstMsgId = computed(() => {
-  return messageData.msgRecordsList[selectedSessionId.value][0].msgId
-})
-
-const getLastMsgTime = (index) => {
+const getPreMsgTime = (index) => {
   if (index > 0) {
     return msgRecords.value[index - 1].msgTime
   } else {
@@ -341,7 +358,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
     if (msgCount < pageSize) {
       messageData.updateSession({
         sessionId: sessionId,
-        noMoreMsg: true
+        pullMsgDone: true
       })
     }
   } finally {
@@ -433,6 +450,7 @@ const onLoadMore = async () => {
   })
 }
 
+// 消息列表拉到最底部
 const msgListReachBottom = (isSmooth = true) => {
   const behavior = isSmooth ? 'smooth' : 'instant'
   nextTick(() => {
@@ -688,6 +706,7 @@ const onNoneSelected = () => {
             <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
               数据加载中……
             </div>
+            <div v-else-if="!selectedSession.lastMsgId" class="no-more-message">当前无更多消息</div>
             <div
               v-else
               class="message-main my-scrollbar"
@@ -701,7 +720,7 @@ const onNoneSelected = () => {
                 :msg="item"
                 :obj="selectedSession.objectInfo"
                 :remoteRead="selectedSession.remoteRead"
-                :lastMsgTime="getLastMsgTime(index)"
+                :preMsgTime="getPreMsgTime(index)"
                 :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
@@ -940,23 +959,35 @@ const onNoneSelected = () => {
         overflow: hidden; // 禁用它的滚动条
         position: relative;
 
-        .show-loading {
-          width: 100%;
-          height: 30px;
-          padding: 10px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: #409eff;
-          font-size: 14px;
-        }
-
         .show-box {
           width: 100%;
           display: flex;
           flex: 1;
           overflow: hidden;
           position: relative;
+
+          .show-loading {
+            width: 100%;
+            height: 30px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #409eff;
+            font-size: 14px;
+          }
+
+          .no-more-message {
+            width: 100%;
+            height: 30px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: gray;
+            user-select: text;
+          }
 
           .message-main {
             width: 100%;

@@ -11,7 +11,7 @@ const props = defineProps([
   'obj',
   'readMsgId',
   'remoteRead',
-  'lastMsgTime',
+  'preMsgTime',
   'firstMsgId',
   'isFirstNew',
   'hasNoMoreMsg',
@@ -72,11 +72,11 @@ const sysShowTime = computed(() => {
 
 // 判断是否是连续的会话，与上个会话时间差小于1分钟
 const isContinuousSession = computed(() => {
-  if (!props.lastMsgTime) {
+  if (!props.preMsgTime) {
     return false
   }
 
-  const diff = new Date(props.msg.msgTime).getTime() - new Date(props.lastMsgTime).getTime()
+  const diff = new Date(props.msg.msgTime).getTime() - new Date(props.preMsgTime).getTime()
   if (diff < 1 * 60 * 1000) {
     return true
   } else {
