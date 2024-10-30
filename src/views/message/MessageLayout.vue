@@ -969,7 +969,7 @@ const onNoneSelected = () => {
           .show-loading {
             width: 100%;
             height: 30px;
-            padding: 10px;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -980,7 +980,7 @@ const onNoneSelected = () => {
           .no-more-message {
             width: 100%;
             height: 30px;
-            padding: 10px;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -991,8 +991,7 @@ const onNoneSelected = () => {
 
           .message-main {
             width: 100%;
-            padding: 20px;
-            padding-right: 15px;
+            padding: 10px;
             overflow-y: scroll; // 用它的滚动条
           }
 
