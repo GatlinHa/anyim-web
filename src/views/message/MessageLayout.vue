@@ -65,7 +65,6 @@ const newMsgTips = ref({
   firstElement: null
 })
 
-const lastReadMsgId = ref() // TODO 待会回头分析这个要不要放到session里面去
 // 消息拉取是否结束
 const pullMsgDone = computed(() => {
   return selectedSession.value.pullMsgDone || false
@@ -283,6 +282,7 @@ const getPreMsgTime = (index) => {
   }
 }
 
+const lastReadMsgId = ref()
 /**
  * 判断是否是打开session后的第一条未读消息
  * @param index
