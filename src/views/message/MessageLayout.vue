@@ -189,11 +189,10 @@ const handleMsgListWheel = async () => {
     await onLoadMore()
   }
 
-  //控制是否显示"回到底部"的按钮
   const clientHeight = document.querySelector('.message-main').clientHeight
   const diffToBottom = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight
   newMsgTips.value.isShowBottomTips = diffToBottom < 50 ? false : newMsgTips.value.isShowBottomTips
-  // isShowReturnBottom.value = diffToBottom > 300  // 暂时取消这个提示功能，与消息提示的按钮显得有点重复
+  // isShowReturnBottom.value = diffToBottom > 300  // 控制是否显示"回到底部"的按钮。暂时取消这个提示功能，与消息提示的按钮显得有点重复
 
   if (newMsgTips.value.firstElement?.getBoundingClientRect().top > 0) {
     newMsgTips.value.isShowTopTips = false
@@ -703,6 +702,7 @@ const onNoneSelected = () => {
                 :sessionId="selectedSessionId"
                 :msg="item"
                 :obj="selectedSession.objectInfo"
+                :readMsgId="selectedSession.readMsgId"
                 :remoteRead="selectedSession.remoteRead"
                 :preMsgTime="getPreMsgTime(index)"
                 :isFirstNew="isFirstNew(index)"
