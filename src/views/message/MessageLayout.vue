@@ -18,7 +18,7 @@ import {
 } from '@element-plus/icons-vue'
 import DragLine from '@/components/common/DragLine.vue'
 import SearchBox from '@/components/search/SearchBox.vue'
-import AddBotton from '@/components/common/AddBotton.vue'
+import AddButton from '@/components/common/AddButton.vue'
 import SessionItem from '@/components/message/SessionItem.vue'
 import InputTool from '@/components/message/InputTool.vue'
 import InputEditor from '@/components/message/InputEditor.vue'
@@ -623,7 +623,7 @@ const onNoneSelected = () => {
       <div class="msg-aside-main">
         <div class="header">
           <SearchBox @showContactCard="onShowContactCard" @openSession="onOpenSession"></SearchBox>
-          <AddBotton></AddBotton>
+          <AddButton></AddButton>
         </div>
 
         <SessionMenu :sessionId="showMenuSessionId" @selectMenu="onSelectMenu">
