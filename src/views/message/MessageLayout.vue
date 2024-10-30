@@ -623,7 +623,7 @@ const onNoneSelected = () => {
       <div class="msg-aside-main">
         <div class="header">
           <SearchBox @showContactCard="onShowContactCard" @openSession="onOpenSession"></SearchBox>
-          <AddButton></AddButton>
+          <AddButton :size="30"></AddButton>
         </div>
 
         <SessionMenu :sessionId="showMenuSessionId" @selectMenu="onSelectMenu">
@@ -867,8 +867,7 @@ const onNoneSelected = () => {
       overflow: hidden; // 禁用它的滚动条
 
       .header {
-        margin-top: 10px;
-        margin-bottom: 10px;
+        padding: 10px 10px 10px 0;
         display: flex;
         align-items: center;
       }
