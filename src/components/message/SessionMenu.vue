@@ -25,7 +25,7 @@ const menu = computed(() => {
     },
     {
       label: 'muted',
-      desc: muted.value ? '取消免打扰' : '设置免打扰',
+      desc: muted.value ? '取消免打扰' : '开启免打扰',
       icon: muted.value ? Bell : MuteNotification
     },
     {
