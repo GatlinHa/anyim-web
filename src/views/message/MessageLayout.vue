@@ -184,27 +184,9 @@ onMounted(async () => {
 const handleMsgListWheel = async () => {
   if (
     msgListDiv.value.scrollTop === 0 &&
-    !selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading &&
-    !hasNoMoreMsg.value
+    !selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading
   ) {
-    const scrollHeight = msgListDiv.value.scrollHeight
-    if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
-      await pullMsg(1, msgRecords.value[0].msgId)
-    }
-
-    const len = messageData.msgRecordsList[selectedSessionId.value]?.length
-    if (len > capacity.value) {
-      if (len - capacity.value > step) {
-        capacity.value += step
-      } else {
-        capacity.value = len
-      }
-    }
-
-    // 保持页面对话的锚定位置
-    nextTick(() => {
-      msgListDiv.value.scrollTop = msgListDiv.value.scrollHeight - scrollHeight
-    })
+    await onLoadMore()
   }
 
   //控制是否显示"回到底部"的按钮
@@ -434,7 +416,9 @@ const handleSendMessage = (content) => {
 const onLoadMore = async () => {
   const scrollHeight = msgListDiv.value.scrollHeight
   const scrollTop = msgListDiv.value.scrollTop
-  await pullMsg(1, msgRecords.value[0].msgId)
+  if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
+    await pullMsg(1, msgRecords.value[0].msgId)
+  }
   const len = messageData.msgRecordsList[selectedSessionId.value]?.length
   if (len > capacity.value) {
     if (len - capacity.value > step) {
@@ -466,7 +450,7 @@ const onReturnBottom = () => {
   msgListReachBottom()
 }
 
-const onReachFirtUnReadMsg = () => {
+const onReachFirstUnReadMsg = () => {
   const msgListRect = msgListDiv.value.getBoundingClientRect()
   const firstElRect = newMsgTips.value.firstElement.getBoundingClientRect()
   nextTick(() => {
@@ -751,7 +735,7 @@ const onNoneSelected = () => {
               type="primary"
               class="top-tips"
               :class="{ showIt: newMsgTips.isShowTopTips }"
-              @click="onReachFirtUnReadMsg"
+              @click="onReachFirstUnReadMsg"
             >
               {{ newMsgTips.unreadCount }}条未读消息<el-icon class="el-icon--right"
                 ><ArrowUp
