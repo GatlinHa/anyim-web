@@ -11,7 +11,7 @@ import partitionIcon from '@/assets/svg/partition.svg'
         <el-menu :default-active="$route.path" text-color="black" router>
           <el-menu-item index="/contacts/user/last">
             <lastIcon></lastIcon>
-            <span>最近7天</span>
+            <span>最近</span>
           </el-menu-item>
           <el-menu-item index="/contacts/user/mark">
             <markIcon></markIcon>
@@ -37,7 +37,7 @@ import partitionIcon from '@/assets/svg/partition.svg'
 }
 
 .el-aside__contact-user {
-  width: 150px;
+  width: 120px;
   height: 100%;
   padding: 8px;
 }
