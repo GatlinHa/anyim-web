@@ -42,6 +42,7 @@ import { combineId, sessionIdConvert } from '@/js/utils/common'
 import SessionMenu from '@/components/message/SessionMenu.vue'
 import router from '@/router'
 import { BEGIN_MSG_ID } from '@/const/msgConst'
+import EditDialog from '@/components/common/EditDialog.vue'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -514,21 +515,19 @@ const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单
 const isShowUpdateMarkDialog = ref(false)
 const accountForUpdateMark = ref('')
 const nickForUpdateMark = ref('')
-const newMarkForUpdateMark = ref('')
 const onShowUpdateMarkDialog = () => {
   isShowUpdateMarkDialog.value = true
   accountForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].objectInfo.account
   nickForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].objectInfo.nickName
-  newMarkForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].mark //newMark默认是已有的备注
 }
 
-const onUpdateMarkConfirm = () => {
+const onUpdateMarkConfirm = (inputValue) => {
   // 如果没有更改，不需要执行保存
-  if (newMarkForUpdateMark.value !== messageData.sessionList[showMenuSessionId.value].mark) {
+  if (inputValue !== messageData.sessionList[showMenuSessionId.value].mark) {
     const sessionId = combineId(userData.user.account, accountForUpdateMark.value)
     messageData.updateSession({
       sessionId: sessionId,
-      mark: newMarkForUpdateMark.value
+      mark: inputValue
     })
   }
   isShowUpdateMarkDialog.value = false
@@ -812,42 +811,15 @@ const onNoneSelected = () => {
     :groupInfo="groupInfoForShowCard"
     @close="isShowGroupCard = false"
   ></GroupCard>
-  <el-dialog
-    class="update-mark"
-    v-model="isShowUpdateMarkDialog"
-    :modal="false"
-    :top="'40vh'"
-    :width="'360px'"
-    :z-index="1"
-    style="border-radius: 10px"
-  >
-    <template #header>
-      <div style="display: flex; flex-direction: row; justify-content: start; align-items: center">
-        <div style="font-size: 16px; font-weight: bold; white-space: nowrap">修改备注：</div>
-        <div
-          class="text-ellipsis"
-          style="padding: 2px 8px 2px 8px; font-size: 14px; border-radius: 4px; background: #ebedf0"
-        >
-          {{ nickForUpdateMark }} ({{ accountForUpdateMark }})
-        </div>
-      </div>
-    </template>
-    <el-input
-      v-model="newMarkForUpdateMark"
-      placeholder="请输入备注"
-      maxlength="10"
-      show-word-limit
-      style="padding: 10px 0 10px 0"
-      clearable
-      @keyup.enter="onUpdateMarkConfirm"
-    ></el-input>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="info" @click="isShowUpdateMarkDialog = false" plain>取消</el-button>
-        <el-button type="primary" @click="onUpdateMarkConfirm" plain>保存</el-button>
-      </div>
-    </template>
-  </el-dialog>
+  <EditDialog
+    :isShow="isShowUpdateMarkDialog"
+    :title="'修改备注：'"
+    :titleExt="`${nickForUpdateMark} ${accountForUpdateMark}`"
+    :placeholder="'请输入备注'"
+    :defaultInput="messageData.sessionList[showMenuSessionId]?.mark || ''"
+    @close="isShowUpdateMarkDialog = false"
+    @confirm="onUpdateMarkConfirm"
+  ></EditDialog>
 </template>
 
 <style lang="scss" scoped>
