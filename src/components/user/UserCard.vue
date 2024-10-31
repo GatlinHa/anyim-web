@@ -126,10 +126,6 @@ onUnmounted(() => {
             <span class="label">邮箱：</span>
             <span class="value">{{ props.userInfo.email || '-' }}</span>
           </div>
-          <div class="info-item email">
-            <span class="label">驻地：</span>
-            <span class="value">{{ props.userInfo.base || '-' }}</span>
-          </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
             <span class="value">{{ props.userInfo.organize || '-' }}</span>

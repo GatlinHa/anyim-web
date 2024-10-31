@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { msgUpdateSessionService } from '@/api/message'
+import { ElMessage } from 'element-plus'
 
 // 消息功能相关需要缓存的数据，不持久化存储
 export const messageStore = defineStore('anyim-message', () => {
@@ -55,19 +56,29 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
 
     if (flag) {
-      const res = await msgUpdateSessionService(params)
-      // 云端更新成功再更新本地，保持数据同步
-      if (res.data.code === 0) {
-        if ('top' in obj) mySession.top = obj.top
-        if ('muted' in obj) mySession.muted = obj.muted
-        if ('draft' in obj) mySession.draft = obj.draft
-        if ('mark' in obj) mySession.mark = obj.mark
-      } else {
-        return false
-      }
+      msgUpdateSessionService(params)
+        .then((res) => {
+          // 云端更新成功再更新本地，保持数据同步
+          if (res.data.code === 0) {
+            if ('top' in obj) mySession.top = obj.top
+            if ('muted' in obj) mySession.muted = obj.muted
+            if ('draft' in obj) mySession.draft = obj.draft
+            if ('mark' in obj) {
+              mySession.mark = obj.mark
+              ElMessage.success('保存成功')
+            }
+          } else {
+            if ('mark' in obj) {
+              ElMessage.success('保存失败')
+            }
+          }
+        })
+        .catch(() => {
+          if ('mark' in obj) {
+            ElMessage.success('保存失败')
+          }
+        })
     }
-
-    return true
   }
 
   const totalUnReadCount = computed(() => {
