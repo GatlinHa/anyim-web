@@ -56,28 +56,18 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
 
     if (flag) {
-      msgUpdateSessionService(params)
-        .then((res) => {
-          // 云端更新成功再更新本地，保持数据同步
-          if (res.data.code === 0) {
-            if ('top' in obj) mySession.top = obj.top
-            if ('muted' in obj) mySession.muted = obj.muted
-            if ('draft' in obj) mySession.draft = obj.draft
-            if ('mark' in obj) {
-              mySession.mark = obj.mark
-              ElMessage.success('保存成功')
-            }
-          } else {
-            if ('mark' in obj) {
-              ElMessage.success('保存失败')
-            }
-          }
-        })
-        .catch(() => {
+      msgUpdateSessionService(params).then((res) => {
+        // 云端更新成功再更新本地，保持数据同步
+        if (res.data.code === 0) {
+          if ('top' in obj) mySession.top = obj.top
+          if ('muted' in obj) mySession.muted = obj.muted
+          if ('draft' in obj) mySession.draft = obj.draft
           if ('mark' in obj) {
-            ElMessage.success('保存失败')
+            mySession.mark = obj.mark
+            ElMessage.success('保存成功')
           }
-        })
+        }
+      })
     }
   }
 
