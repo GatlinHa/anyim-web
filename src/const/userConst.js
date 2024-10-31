@@ -13,3 +13,8 @@ export const STATUS = {
   ONLINE: 2,
   BUSYING: 3
 }
+
+export const PARTITION_TYPE = {
+  USER: 0,
+  GROUP: 1
+}

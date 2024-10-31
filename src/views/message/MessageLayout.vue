@@ -35,7 +35,7 @@ import {
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
-import { userQueryService } from '@/api/user'
+import { userQueryService, userQueryPartitionService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/js/utils/common'
@@ -45,6 +45,7 @@ import { BEGIN_MSG_ID } from '@/const/msgConst'
 import EditDialog from '@/components/common/EditDialog.vue'
 
 const userData = userStore()
+const partitions = ref([])
 const settingData = settingStore()
 const messageData = messageStore()
 const selectedSessionId = ref('') //当前被选中的session
@@ -180,6 +181,10 @@ onMounted(async () => {
   if (router.currentRoute.value.query.sessionId) {
     handleSelectedSession(router.currentRoute.value.query.sessionId)
   }
+
+  userQueryPartitionService().then((res) => {
+    partitions.value = res.data.data
+  })
 })
 
 const handleMsgListWheel = async () => {

@@ -57,3 +57,11 @@ export const refreshToken = async () => {
     clientVersion: CLIENT_VERSION
   })
 }
+
+export const userCreatePartitionService = (obj) => {
+  return request.post('/user/createPartition', getReqBody(obj))
+}
+
+export const userQueryPartitionService = () => {
+  return request.post('/user/queryPartition', getReqBody())
+}
