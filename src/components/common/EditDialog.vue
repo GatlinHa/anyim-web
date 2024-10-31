@@ -7,7 +7,7 @@ const emit = defineEmits(['close', 'confirm'])
 const isShowDialog = ref(false)
 const inputValue = ref('')
 
-const onCancel = () => {
+const onClose = () => {
   isShowDialog.value = false
   emit('close')
 }
@@ -30,6 +30,7 @@ watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInp
     :width="'360px'"
     :z-index="1"
     style="border-radius: 10px"
+    @close="onClose"
   >
     <template #header>
       <div style="display: flex; flex-direction: row; justify-content: start; align-items: center">
@@ -54,7 +55,7 @@ watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInp
     ></el-input>
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="info" @click="onCancel" plain>取消</el-button>
+        <el-button type="info" @click="onClose" plain>取消</el-button>
         <el-button type="primary" @click="onComfirm" plain>保存</el-button>
       </div>
     </template>
