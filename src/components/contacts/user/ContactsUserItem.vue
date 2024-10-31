@@ -10,7 +10,7 @@ import {
   Check,
   Close
 } from '@element-plus/icons-vue'
-import AvatarIcon from '../common/AvatarIcon.vue'
+import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 import { messageStore } from '@/stores'
