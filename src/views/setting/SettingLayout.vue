@@ -28,7 +28,7 @@ import { User, Key } from '@element-plus/icons-vue'
 
 <style lang="scss" scoped>
 .setting-layout {
-  height: 100vh;
+  height: 100%;
 }
 
 .el-header {

@@ -190,7 +190,10 @@ watch(isRegister, () => {
 
 <style lang="scss" scoped>
 .login-page {
+  min-width: 1024px;
+  min-height: 768px;
   height: 100vh;
+  overflow: auto;
   background-color: #fff;
   .bg {
     background: url('@/assets/login_bg.png') no-repeat center / cover;

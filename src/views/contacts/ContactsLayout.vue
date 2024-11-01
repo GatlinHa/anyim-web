@@ -35,7 +35,7 @@ import organizationIcon from '@/assets/svg/organization.svg'
 
 <style lang="scss" scoped>
 .constact {
-  height: 100vh;
+  height: 100%;
 }
 
 .el-header {
