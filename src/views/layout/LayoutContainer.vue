@@ -236,6 +236,7 @@ const onExit = async () => {
     background-color: #409eff;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
+    position: relative;
 
     .avatar {
       display: flex;
