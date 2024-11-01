@@ -5,15 +5,19 @@ import AddButton from '@/components/common/AddButton.vue'
 import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import PartitionOprMenu from '@/components/contacts/user/PartitionOprMenu.vue'
+import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
 import {
   userCreatePartitionService,
   userQueryPartitionService,
   userDeletePartitionService,
   userUpdatePartitionService
 } from '@/api/user'
+import { msgChatSessionListService } from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { messageStore } from '@/stores'
 
+const messageData = messageStore()
 const partitions = ref({})
 const totalCount = ref(0)
 const partitionSearchKey = ref('')
@@ -22,12 +26,36 @@ const isShowAddPartitionDialog = ref(false)
 const isShowRenamePartitionDialog = ref(false)
 const oprMenuRef = ref()
 const showOprMenuPartitionId = ref(0)
+const selectedPartitionId = ref(null)
 
 onMounted(async () => {
+  if (!Object.keys(messageData.sessionList).length) {
+    const res = await msgChatSessionListService()
+    messageData.setSessionList(res.data.data) //入缓存
+  }
+
   const res = await userQueryPartitionService()
   res.data.data.forEach((item) => {
     partitions.value[item.partitionId] = item
   })
+
+  if (Object.keys(partitions.value).length > 0) {
+    selectedPartitionId.value = Object.keys(partitions.value)[0]
+  }
+})
+
+const onSelectPartitionItem = (key) => {
+  selectedPartitionId.value = key
+}
+
+const detailData = computed(() => {
+  const data = []
+  Object.values(messageData.sessionList).forEach((item) => {
+    if (item.partitionId.toString() === selectedPartitionId.value) {
+      data.push(item)
+    }
+  })
+  return data
 })
 
 const partitionShowList = computed(() => {
@@ -117,6 +145,8 @@ const showOperationMenu = (e, partitionId) => {
   showOprMenuPartitionId.value = partitionId
   oprMenuRef.value.handleSessionMenu(e)
 }
+
+const onShowUserCard = () => {}
 </script>
 
 <template>
@@ -136,6 +166,7 @@ const showOperationMenu = (e, partitionId) => {
           <el-menu
             v-if="Object.keys(partitionShowList).length > 0"
             :default-active="`${Object.keys(partitionShowList)[0]}`"
+            @select="onSelectPartitionItem"
           >
             <PartitionOprMenu ref="oprMenuRef" @selectMenu="onSelectMenu">
               <el-menu-item
@@ -157,7 +188,7 @@ const showOperationMenu = (e, partitionId) => {
         </el-main>
       </el-container>
     </el-aside>
-    <el-main class="detail">
+    <el-container class="detail">
       <el-header class="bdr-b">
         <div style="font-size: 14px">全部({{ totalCount }})</div>
         <div class="search-and-add">
@@ -170,8 +201,19 @@ const showOperationMenu = (e, partitionId) => {
           <AddButton :size="20"></AddButton>
         </div>
       </el-header>
-      <el-main></el-main>
-    </el-main>
+      <el-main class="my-scrollbar" style="height: 100%; padding: 8px; overflow-y: scroll">
+        <div v-if="detailData.length > 0">
+          <ContactsUserItem
+            v-for="item in detailData"
+            :key="item.sessionId"
+            :session="item"
+            :type="'partition'"
+            @showUserCard="onShowUserCard"
+          ></ContactsUserItem>
+        </div>
+        <HashNoData v-else :size="100"></HashNoData>
+      </el-main>
+    </el-container>
   </el-container>
   <EditDialog
     :isShow="isShowAddPartitionDialog"

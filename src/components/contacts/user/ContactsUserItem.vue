@@ -1,15 +1,6 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import {
-  ChatRound,
-  Phone,
-  VideoCamera,
-  MoreFilled,
-  Edit,
-  Delete,
-  Check,
-  Close
-} from '@element-plus/icons-vue'
+import { ChatRound, Phone, VideoCamera, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
@@ -161,7 +152,6 @@ const goToSessionTab = () => {
       <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
       <el-button size="large" :icon="Phone" circle />
       <el-button size="large" :icon="VideoCamera" circle />
-      <el-button v-if="['partition'].includes(props.type)" size="large" :icon="MoreFilled" circle />
     </div>
   </div>
 </template>
@@ -215,7 +205,6 @@ const goToSessionTab = () => {
 }
 
 .diff-display {
-  width: 300px;
   height: 100%;
   margin-left: 20px;
   user-select: text;
