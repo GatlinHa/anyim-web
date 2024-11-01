@@ -146,7 +146,7 @@ const openMyCardDialog = () => {
 }
 
 const onExit = async () => {
-  ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
+  ElMessageBox.confirm('确认要退出吗？', '温馨提示', {
     type: 'warning',
     confirmButtonText: '确认',
     cancelButtonText: '取消'

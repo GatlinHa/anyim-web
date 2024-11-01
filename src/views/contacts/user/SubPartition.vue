@@ -4,32 +4,47 @@ import { Search, MoreFilled } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import { userCreatePartitionService, userQueryPartitionService } from '@/api/user'
+import PartitionOprMenu from '@/components/contacts/user/PartitionOprMenu.vue'
+import {
+  userCreatePartitionService,
+  userQueryPartitionService,
+  userDeletePartitionService,
+  userUpdatePartitionService
+} from '@/api/user'
 import { PARTITION_TYPE } from '@/const/userConst'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const partitions = ref([])
+const partitions = ref({})
 const totalCount = ref(0)
 const partitionSearchKey = ref('')
 const userSearchKey = ref('')
-const isShowEditDialog = ref(false)
+const isShowAddPartitionDialog = ref(false)
+const isShowRenamePartitionDialog = ref(false)
+const oprMenuRef = ref()
+const showOprMenuPartitionId = ref(0)
 
 onMounted(async () => {
   const res = await userQueryPartitionService()
-  partitions.value = res.data.data
+  res.data.data.forEach((item) => {
+    partitions.value[item.partitionId] = item
+  })
 })
 
 const partitionShowList = computed(() => {
   if (!partitionSearchKey.value) {
     return partitions.value
   } else {
-    const arr = []
-    partitions.value.forEach((item) => {
-      if (item.partitionName.toLowerCase().includes(partitionSearchKey.value.toLowerCase())) {
-        arr.push(item)
+    const data = {}
+    Object.keys(partitions.value).forEach((key) => {
+      if (
+        partitions.value[key].partitionName
+          .toLowerCase()
+          .includes(partitionSearchKey.value.toLowerCase())
+      ) {
+        data[key] = partitions.value[key]
       }
     })
-    return arr
+    return data
   }
 })
 
@@ -39,15 +54,68 @@ const onAddPartitionConfirm = (inputValue) => {
     partitionType: PARTITION_TYPE.USER
   }).then((res) => {
     if (res.data.code === 0) {
-      partitions.value = res.data.data
+      const resData = res.data.data
+      partitions.value[resData.partitionId] = resData
       ElMessage.success('新建分组成功')
     }
   })
-  isShowEditDialog.value = false
+  isShowAddPartitionDialog.value = false
 }
 
-const showOperationMenu = (partitionId) => {
-  console.log(partitionId)
+const onRenamePartitionConfirm = (inputValue) => {
+  // 如果没有更新，不需要执行保存
+  if (inputValue !== partitions.value[showOprMenuPartitionId.value].partitionName) {
+    userUpdatePartitionService({
+      partitionId: showOprMenuPartitionId.value,
+      newPartitionName: inputValue
+    }).then((res) => {
+      if (res.data.code === 0) {
+        partitions.value[showOprMenuPartitionId.value]['partitionName'] = inputValue
+        ElMessage.success('修改成功')
+      }
+    })
+  }
+
+  isShowRenamePartitionDialog.value = false
+}
+
+const onSelectMenu = (label) => {
+  switch (label) {
+    case 'addUser':
+      break
+    case 'updateName':
+      isShowRenamePartitionDialog.value = true
+      break
+    case 'delete':
+      ElMessageBox.confirm(
+        `确认要【${partitions.value[showOprMenuPartitionId.value].partitionName}】及组内联系人吗？`,
+        '温馨提示',
+        {
+          type: 'warning',
+          confirmButtonText: '确认',
+          cancelButtonText: '取消'
+        }
+      ).then(() => {
+        userDeletePartitionService({ partitionId: showOprMenuPartitionId.value }).then((res) => {
+          if (res.data.code === 0) {
+            delete partitions.value[showOprMenuPartitionId.value]
+            ElMessage.success('删除成功')
+          }
+        })
+      })
+      break
+    default:
+      break
+  }
+}
+
+const onCustomContextMenu = (partitionId) => {
+  showOprMenuPartitionId.value = partitionId
+}
+
+const showOperationMenu = (e, partitionId) => {
+  showOprMenuPartitionId.value = partitionId
+  oprMenuRef.value.handleSessionMenu(e)
 }
 </script>
 
@@ -62,21 +130,28 @@ const showOperationMenu = (partitionId) => {
             :prefix-icon="Search"
             :clearable="true"
           />
-          <AddButton :size="20" @click="isShowEditDialog = true"></AddButton>
+          <AddButton :size="20" @click="isShowAddPartitionDialog = true"></AddButton>
         </el-header>
         <el-main class="my-scrollbar">
           <el-menu
-            v-if="partitionShowList.length > 0"
-            :default-active="partitionShowList[0].partitionId.toString()"
+            v-if="Object.keys(partitionShowList).length > 0"
+            :default-active="`${Object.keys(partitionShowList)[0]}`"
           >
-            <el-menu-item
-              v-for="item in partitionShowList"
-              :key="item.partitionId"
-              :index="item.partitionId.toString()"
-            >
-              <span class="text-ellipsis">{{ item.partitionName }}</span>
-              <el-icon @click="showOperationMenu(item.partitionId)"><MoreFilled /></el-icon>
-            </el-menu-item>
+            <PartitionOprMenu ref="oprMenuRef" @selectMenu="onSelectMenu">
+              <el-menu-item
+                v-for="item in Object.values(partitionShowList)"
+                :key="item.partitionId"
+                :index="`${item.partitionId}`"
+                @contextmenu.prevent="onCustomContextMenu(item.partitionId)"
+              >
+                <span class="text-ellipsis" :title="item.partitionName">
+                  {{ item.partitionName }}
+                </span>
+                <el-icon :size="15" @click.stop="showOperationMenu($event, item.partitionId)">
+                  <MoreFilled />
+                </el-icon>
+              </el-menu-item>
+            </PartitionOprMenu>
           </el-menu>
           <HashNoData v-else :size="50"></HashNoData>
         </el-main>
@@ -99,11 +174,20 @@ const showOperationMenu = (partitionId) => {
     </el-main>
   </el-container>
   <EditDialog
-    :isShow="isShowEditDialog"
+    :isShow="isShowAddPartitionDialog"
     :title="'添加分组'"
     :placeholder="'请输入分组名称'"
-    @close="isShowEditDialog = false"
+    @close="isShowAddPartitionDialog = false"
     @confirm="onAddPartitionConfirm"
+  ></EditDialog>
+  <EditDialog
+    :isShow="isShowRenamePartitionDialog"
+    :title="'修改分组名：'"
+    :titleExt="`${partitions[showOprMenuPartitionId]?.partitionName}`"
+    :placeholder="'请输入分组名称'"
+    :defaultInput="`${partitions[showOprMenuPartitionId]?.partitionName}`"
+    @close="isShowRenamePartitionDialog = false"
+    @confirm="onRenamePartitionConfirm"
   ></EditDialog>
 </template>
 

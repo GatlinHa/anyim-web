@@ -65,3 +65,11 @@ export const userCreatePartitionService = (obj) => {
 export const userQueryPartitionService = () => {
   return request.post('/user/queryPartition', getReqBody())
 }
+
+export const userUpdatePartitionService = (obj) => {
+  return request.post('/user/updatePartition', getReqBody(obj))
+}
+
+export const userDeletePartitionService = (obj) => {
+  return request.post('/user/delPartition', getReqBody(obj))
+}
