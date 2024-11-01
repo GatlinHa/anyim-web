@@ -226,7 +226,10 @@ const onExit = async () => {
 
 <style lang="scss" scoped>
 .layout-container {
+  min-width: 1024px;
+  min-height: 768px;
   height: 100vh;
+  overflow: auto;
   user-select: none;
 
   .el-aside {
