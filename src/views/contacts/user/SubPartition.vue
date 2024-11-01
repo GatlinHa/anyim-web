@@ -59,16 +59,13 @@ const detailData = computed(() => {
 })
 
 const partitionShowList = computed(() => {
-  if (!partitionSearchKey.value) {
+  const trimKey = partitionSearchKey.value.trim()
+  if (!trimKey) {
     return partitions.value
   } else {
     const data = {}
     Object.keys(partitions.value).forEach((key) => {
-      if (
-        partitions.value[key].partitionName
-          .toLowerCase()
-          .includes(partitionSearchKey.value.toLowerCase())
-      ) {
+      if (partitions.value[key].partitionName.toLowerCase().includes(trimKey.toLowerCase())) {
         data[key] = partitions.value[key]
       }
     })

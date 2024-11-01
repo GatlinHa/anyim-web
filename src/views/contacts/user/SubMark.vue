@@ -39,13 +39,14 @@ const markDataSorted = computed(() => {
 
   let markDataArr = []
   Object.values(markData.value).forEach((item) => {
-    if (!markSearchKey.value) {
+    const trimKey = markSearchKey.value.trim()
+    if (!trimKey) {
       markDataArr.push(item)
     } else {
       if (
-        item.objectInfo.nickName.toLowerCase().includes(markSearchKey.value.toLowerCase()) ||
-        item.objectInfo.account === markSearchKey.value ||
-        item.mark.toLowerCase().includes(markSearchKey.value.toLowerCase())
+        item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
+        item.objectInfo.account === trimKey ||
+        item.mark.toLowerCase().includes(trimKey.toLowerCase())
       ) {
         markDataArr.push(item)
       }

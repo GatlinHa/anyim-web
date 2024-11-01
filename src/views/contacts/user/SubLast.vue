@@ -46,12 +46,13 @@ const lastDataSorted = computed(() => {
 
   let lastDataArr = []
   Object.values(lastData.value).forEach((item) => {
-    if (!lastSearchKey.value) {
+    const trimKey = lastSearchKey.value.trim()
+    if (!trimKey) {
       lastDataArr.push(item)
     } else {
       if (
-        item.objectInfo.nickName.toLowerCase().includes(lastSearchKey.value.toLowerCase()) ||
-        item.objectInfo.account === lastSearchKey.value
+        item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
+        item.objectInfo.account === trimKey
       ) {
         lastDataArr.push(item)
       }
