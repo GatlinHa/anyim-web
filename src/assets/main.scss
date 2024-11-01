@@ -61,3 +61,14 @@ body {
     }
   }
 }
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: unset;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #cccccc;
+}
