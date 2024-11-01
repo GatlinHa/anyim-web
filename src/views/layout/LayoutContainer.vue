@@ -167,7 +167,7 @@ const onExit = async () => {
 </script>
 
 <template>
-  <el-container class="layout-container" @contextmenu.prevent @mousemove="onMouseMove">
+  <el-container class="layout-container" @mousemove="onMouseMove">
     <el-aside width="100px">
       <span class="avatar">
         <AvatarIcon
