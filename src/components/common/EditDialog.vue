@@ -13,7 +13,7 @@ const onClose = () => {
 }
 
 const onComfirm = () => {
-  emit('confirm', inputValue.value)
+  emit('confirm', inputValue.value.trim())
 }
 
 watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInput]) => {

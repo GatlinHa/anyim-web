@@ -31,11 +31,11 @@ const onClickEditMark = () => {
 }
 
 const saveMark = () => {
-  if (newMark.value !== props.session.mark) {
+  if (newMark.value.trim() !== props.session.mark) {
     const sessionId = props.session.sessionId
     messageData.updateSession({
       sessionId: sessionId,
-      mark: newMark.value
+      mark: newMark.value.trim()
     })
   }
   markEditing.value = false

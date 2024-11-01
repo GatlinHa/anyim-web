@@ -72,10 +72,10 @@ const onClickEditMark = () => {
 }
 
 const saveMark = () => {
-  if (newMark.value !== mark.value) {
+  if (newMark.value.trim() !== mark.value) {
     messageData.updateSession({
       sessionId: sessionId.value,
-      mark: newMark.value
+      mark: newMark.value.trim()
     })
   }
   markEditing.value = false
