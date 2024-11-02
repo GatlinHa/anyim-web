@@ -1,15 +1,6 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import {
-  ChatRound,
-  Phone,
-  VideoCamera,
-  Edit,
-  Delete,
-  Check,
-  Close,
-  Refresh
-} from '@element-plus/icons-vue'
+import { ChatRound, Phone, VideoCamera, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
@@ -23,6 +14,8 @@ const messageData = messageStore()
 const markEditing = ref(false)
 const newMark = ref('')
 const markEditRef = ref()
+
+const newPartitionId = ref(props.session.partitionId)
 
 const onShowCard = () => {
   emit('showUserCard', {
@@ -64,11 +57,21 @@ const cancelMark = () => {
 }
 
 const onChangePartition = () => {
-  console.log('onChangePartition')
+  if (newPartitionId.value !== props.session.partitionId) {
+    const sessionId = props.session.sessionId
+    messageData.updateSession({
+      sessionId: sessionId,
+      partitionId: newPartitionId.value
+    })
+  }
 }
 
 const onClearPartition = () => {
-  console.log('onClearPartition')
+  const sessionId = props.session.sessionId
+  messageData.updateSession({
+    sessionId: sessionId,
+    partitionId: 0 //和后端约定0表示不分组
+  })
 }
 
 const goToSessionTab = () => {
@@ -167,29 +170,28 @@ const goToSessionTab = () => {
         <div v-if="props.type === 'partition'" class="partition">
           <div class="tips-block">分组</div>
           <div class="partition-content-wrapper">
-            <div
-              class="partition-content text-ellipsis"
-              :title="props.partitions[props.session.partitionId].partitionName"
-              @click="onChangePartition"
+            <el-select
+              v-model="newPartitionId"
+              placeholder="请选择分组"
+              size="small"
+              style="margin-left: 5px"
+              @change="onChangePartition"
             >
-              {{ props.partitions[props.session.partitionId].partitionName }}
-            </div>
-            <div>
-              <el-button
-                type="primary"
-                :icon="Refresh"
-                size="small"
-                circle
-                @click="onChangePartition"
-              ></el-button>
-              <el-button
-                type="danger"
-                :icon="Delete"
-                size="small"
-                circle
-                @click="onClearPartition"
-              ></el-button>
-            </div>
+              <el-option
+                v-for="item in props.partitions"
+                :key="item.partitionId"
+                :label="item.partitionName"
+                :value="item.partitionId"
+              />
+            </el-select>
+            <el-button
+              type="danger"
+              :icon="Delete"
+              size="small"
+              circle
+              @click="onClearPartition"
+              style="margin-left: 5px"
+            ></el-button>
           </div>
         </div>
       </div>
@@ -315,14 +317,6 @@ const goToSessionTab = () => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        .partition-content {
-          margin-left: 5px;
-          display: flex;
-          align-items: center;
-          color: #409eff;
-          cursor: pointer;
-        }
       }
     }
   }

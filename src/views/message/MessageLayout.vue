@@ -30,12 +30,13 @@ import backgroupImage from '@/assets/messagebx_bg.webp'
 import {
   msgChatSessionListService,
   msgChatPullMsgService,
-  msgChatCreateSessionService
+  msgChatCreateSessionService,
+  msgQueryPartitionService
 } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
-import { userQueryService, userQueryPartitionService } from '@/api/user'
+import { userQueryService } from '@/api/user'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/js/utils/common'
@@ -182,7 +183,7 @@ onMounted(async () => {
     handleSelectedSession(router.currentRoute.value.query.sessionId)
   }
 
-  userQueryPartitionService().then((res) => {
+  msgQueryPartitionService().then((res) => {
     partitions.value = res.data.data
   })
 })

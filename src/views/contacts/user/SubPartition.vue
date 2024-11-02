@@ -7,14 +7,14 @@ import HashNoData from '@/components/common/HasNoData.vue'
 import PartitionOprMenu from '@/components/contacts/user/PartitionOprMenu.vue'
 import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
+import { userQueryService } from '@/api/user'
 import {
-  userQueryService,
-  userCreatePartitionService,
-  userQueryPartitionService,
-  userDeletePartitionService,
-  userUpdatePartitionService
-} from '@/api/user'
-import { msgChatSessionListService } from '@/api/message'
+  msgChatSessionListService,
+  msgCreatePartitionService,
+  msgDeletePartitionService,
+  msgUpdatePartitionService,
+  msgQueryPartitionService
+} from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { messageStore } from '@/stores'
@@ -29,7 +29,7 @@ const isShowAddPartitionDialog = ref(false)
 const isShowRenamePartitionDialog = ref(false)
 const oprMenuRef = ref()
 const showOprMenuPartitionId = ref(0)
-const selectedPartitionId = ref(null)
+const selectedIndex = ref('')
 
 onMounted(async () => {
   if (!Object.keys(messageData.sessionList).length) {
@@ -37,13 +37,13 @@ onMounted(async () => {
     messageData.setSessionList(res.data.data) //入缓存
   }
 
-  const res = await userQueryPartitionService()
+  const res = await msgQueryPartitionService()
   res.data.data.forEach((item) => {
     partitions.value[item.partitionId] = item
   })
 
   if (Object.keys(partitions.value).length > 0) {
-    selectedPartitionId.value = Object.keys(partitions.value)[0]
+    selectedIndex.value = Object.keys(partitions.value)[0].toString()
   }
 })
 
@@ -52,14 +52,14 @@ const totalCount = computed(() => {
 })
 
 const onSelectPartitionItem = (key) => {
-  selectedPartitionId.value = key
+  selectedIndex.value = key
 }
 
 const detailData = computed(() => {
   const trimKey = userSearchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
-    if (item.partitionId.toString() === selectedPartitionId.value) {
+    if (item.partitionId.toString() === selectedIndex.value) {
       if (!trimKey) {
         data.push(item)
       } else {
@@ -74,15 +74,15 @@ const detailData = computed(() => {
   return data
 })
 
-const partitionShowList = computed(() => {
+const partitionsBySearch = computed(() => {
   const trimKey = partitionSearchKey.value.trim()
   if (!trimKey) {
     return partitions.value
   } else {
     const data = {}
-    Object.keys(partitions.value).forEach((key) => {
-      if (partitions.value[key].partitionName.toLowerCase().includes(trimKey.toLowerCase())) {
-        data[key] = partitions.value[key]
+    Object.values(partitions.value).forEach((item) => {
+      if (item.partitionName.toLowerCase().includes(trimKey.toLowerCase())) {
+        data[item.partitionId] = item
       }
     })
     return data
@@ -90,7 +90,7 @@ const partitionShowList = computed(() => {
 })
 
 const onAddPartitionConfirm = (inputValue) => {
-  userCreatePartitionService({
+  msgCreatePartitionService({
     partitionName: inputValue,
     partitionType: PARTITION_TYPE.USER
   }).then((res) => {
@@ -106,7 +106,7 @@ const onAddPartitionConfirm = (inputValue) => {
 const onRenamePartitionConfirm = (inputValue) => {
   // 如果没有更新，不需要执行保存
   if (inputValue !== partitions.value[showOprMenuPartitionId.value].partitionName) {
-    userUpdatePartitionService({
+    msgUpdatePartitionService({
       partitionId: showOprMenuPartitionId.value,
       newPartitionName: inputValue
     }).then((res) => {
@@ -120,7 +120,7 @@ const onRenamePartitionConfirm = (inputValue) => {
   isShowRenamePartitionDialog.value = false
 }
 
-const onSelectMenu = (label) => {
+const onSelectOprMenu = (label) => {
   switch (label) {
     case 'addUser':
       break
@@ -137,9 +137,17 @@ const onSelectMenu = (label) => {
           cancelButtonText: '取消'
         }
       ).then(() => {
-        userDeletePartitionService({ partitionId: showOprMenuPartitionId.value }).then((res) => {
+        msgDeletePartitionService({ partitionId: showOprMenuPartitionId.value }).then((res) => {
           if (res.data.code === 0) {
             delete partitions.value[showOprMenuPartitionId.value]
+            if (
+              !Object.keys(partitions.value).includes(parseInt(selectedIndex.value)) &&
+              Object.keys(partitions.value).length > 0
+            ) {
+              selectedIndex.value = Object.keys(partitions.value)[0].toString()
+            } else if (Object.keys(partitions.value).length === 0) {
+              selectedIndex.value = ''
+            }
             ElMessage.success('删除成功')
           }
         })
@@ -197,13 +205,13 @@ const onShowUserCard = async ({ sessionId, account }) => {
         </el-header>
         <el-main class="my-scrollbar">
           <el-menu
-            v-if="Object.keys(partitionShowList).length > 0"
-            :default-active="`${Object.keys(partitionShowList)[0]}`"
+            v-if="Object.keys(partitionsBySearch).length > 0"
+            :default-active="selectedIndex"
             @select="onSelectPartitionItem"
           >
-            <PartitionOprMenu ref="oprMenuRef" @selectMenu="onSelectMenu">
+            <PartitionOprMenu ref="oprMenuRef" @selectMenu="onSelectOprMenu">
               <el-menu-item
-                v-for="item in Object.values(partitionShowList)"
+                v-for="item in Object.values(partitionsBySearch)"
                 :key="item.partitionId"
                 :index="`${item.partitionId}`"
                 @contextmenu.prevent="onCustomContextMenu(item.partitionId)"
@@ -356,9 +364,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
           }
         }
       }
-    }
-
-    .el-main {
     }
   }
 }

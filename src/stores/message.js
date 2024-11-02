@@ -43,6 +43,10 @@ export const messageStore = defineStore('anyim-message', () => {
       params.mark = obj.mark
       flag = true
     }
+    if ('partitionId' in obj) {
+      params.partitionId = obj.partitionId
+      flag = true
+    }
 
     const mySession = sessionList.value[obj.sessionId]
     if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
@@ -64,6 +68,10 @@ export const messageStore = defineStore('anyim-message', () => {
           if ('draft' in obj) mySession.draft = obj.draft
           if ('mark' in obj) {
             mySession.mark = obj.mark
+            ElMessage.success('保存成功')
+          }
+          if ('partitionId' in obj) {
+            mySession.partitionId = obj.partitionId
             ElMessage.success('保存成功')
           }
         }

@@ -20,3 +20,19 @@ export const msgChatCreateSessionService = (obj) => {
 export const msgChatDeleteSessionService = (obj) => {
   return request.post('/chat/deleteSession', getReqBody(obj))
 }
+
+export const msgCreatePartitionService = (obj) => {
+  return request.post('/chat/createPartition', getReqBody(obj))
+}
+
+export const msgQueryPartitionService = () => {
+  return request.post('/chat/queryPartition', getReqBody())
+}
+
+export const msgUpdatePartitionService = (obj) => {
+  return request.post('/chat/updatePartition', getReqBody(obj))
+}
+
+export const msgDeletePartitionService = (obj) => {
+  return request.post('/chat/delPartition', getReqBody(obj))
+}
