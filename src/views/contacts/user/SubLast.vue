@@ -14,7 +14,7 @@ import { MsgType } from '@/proto/msg'
 const messageData = messageStore()
 
 const totalCount = computed(() => {
-  return Object.keys(lastDataSorted.value).length
+  return Object.keys(lastData.value).length
 })
 
 onMounted(async () => {
@@ -24,48 +24,42 @@ onMounted(async () => {
   }
 })
 
+const lastSearchKey = ref('')
 const lastData = computed(() => {
-  const data = {}
-  Object.keys(messageData.sessionList).forEach((key) => {
-    const lastMsgTime = messageData.sessionList[key].lastMsgTime
-    const sessionType = messageData.sessionList[key].sessionType
+  if (Object.values(messageData.sessionList).length === 0) return []
+
+  const trimKey = lastSearchKey.value.trim()
+  const data = []
+  Object.values(messageData.sessionList).forEach((item) => {
+    const lastMsgTime = item.lastMsgTime
+    const sessionType = item.sessionType
     if (
       sessionType === MsgType.CHAT &&
       lastMsgTime &&
       Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000
     ) {
-      data[key] = messageData.sessionList[key]
-    }
-  })
-  return data
-})
-
-const lastSearchKey = ref('')
-const lastDataSorted = computed(() => {
-  if (!Object.keys(lastData.value)) return []
-
-  let lastDataArr = []
-  Object.values(lastData.value).forEach((item) => {
-    const trimKey = lastSearchKey.value.trim()
-    if (!trimKey) {
-      lastDataArr.push(item)
-    } else {
-      if (
-        item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
-        item.objectInfo.account === trimKey
-      ) {
-        lastDataArr.push(item)
+      if (!trimKey) {
+        data.push(item)
+      } else {
+        if (
+          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
+          item.objectInfo.account === trimKey
+        ) {
+          data.push(item)
+        }
       }
     }
   })
 
-  if (!lastDataArr.length) return []
-
-  return lastDataArr.sort((a, b) => {
-    const bTime = new Date(b.lastMsgTime).getTime()
-    const aTIme = new Date(a.lastMsgTime).getTime()
-    return bTime - aTIme
-  })
+  if (data.length === 0) {
+    return []
+  } else {
+    return data.sort((a, b) => {
+      const bTime = new Date(b.lastMsgTime).getTime()
+      const aTIme = new Date(a.lastMsgTime).getTime()
+      return bTime - aTIme
+    })
+  }
 })
 
 const isShowUserCard = ref(false)
@@ -104,9 +98,9 @@ const onShowUserCard = async ({ sessionId, account }) => {
       />
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <div v-if="lastDataSorted.length">
+      <div v-if="lastData.length">
         <ContactsUserItem
-          v-for="item in lastDataSorted"
+          v-for="item in lastData"
           :key="item.sessionId"
           :session="item"
           :type="'last'"
