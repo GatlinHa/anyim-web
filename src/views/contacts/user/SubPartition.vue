@@ -6,7 +6,9 @@ import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import PartitionOprMenu from '@/components/contacts/user/PartitionOprMenu.vue'
 import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
+import UserCard from '@/components/user/UserCard.vue'
 import {
+  userQueryService,
   userCreatePartitionService,
   userQueryPartitionService,
   userDeletePartitionService,
@@ -16,10 +18,11 @@ import { msgChatSessionListService } from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { messageStore } from '@/stores'
+import { ElLoading } from 'element-plus'
+import { el_loading_options } from '@/const/commonConst'
 
 const messageData = messageStore()
 const partitions = ref({})
-const totalCount = ref(0)
 const partitionSearchKey = ref('')
 const userSearchKey = ref('')
 const isShowAddPartitionDialog = ref(false)
@@ -44,15 +47,28 @@ onMounted(async () => {
   }
 })
 
+const totalCount = computed(() => {
+  return detailData.value.length
+})
+
 const onSelectPartitionItem = (key) => {
   selectedPartitionId.value = key
 }
 
 const detailData = computed(() => {
+  const trimKey = userSearchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
     if (item.partitionId.toString() === selectedPartitionId.value) {
-      data.push(item)
+      if (!trimKey) {
+        data.push(item)
+      } else {
+        if (
+          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
+          item.objectInfo.account === trimKey
+        )
+          data.push(item)
+      }
     }
   })
   return data
@@ -143,7 +159,27 @@ const showOperationMenu = (e, partitionId) => {
   oprMenuRef.value.handleSessionMenu(e)
 }
 
-const onShowUserCard = () => {}
+const isShowUserCard = ref(false)
+const userInfo = ref()
+const onShowUserCard = async ({ sessionId, account }) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  const res = await userQueryService({ account: account })
+  messageData.updateSession({
+    sessionId: sessionId,
+    objectInfo: {
+      ...messageData.sessionList[sessionId].objectInfo,
+      nickName: res.data.data.nickName,
+      signature: res.data.data.signature,
+      avatarThumb: res.data.data.avatarThumb,
+      gender: res.data.data.gender,
+      phoneNum: res.data.data.phoneNum,
+      email: res.data.data.email
+    }
+  })
+  userInfo.value = messageData.sessionList[sessionId].objectInfo
+  loadingInstance.close()
+  isShowUserCard.value = true
+}
 </script>
 
 <template>
@@ -205,6 +241,7 @@ const onShowUserCard = () => {}
             :key="item.sessionId"
             :session="item"
             :type="'partition'"
+            :partitions="partitions"
             @showUserCard="onShowUserCard"
           ></ContactsUserItem>
         </div>
@@ -228,6 +265,11 @@ const onShowUserCard = () => {}
     @close="isShowRenamePartitionDialog = false"
     @confirm="onRenamePartitionConfirm"
   ></EditDialog>
+  <UserCard
+    :isShow="isShowUserCard"
+    :userInfo="userInfo"
+    @close="isShowUserCard = false"
+  ></UserCard>
 </template>
 
 <style lang="scss" scoped>

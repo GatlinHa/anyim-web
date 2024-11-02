@@ -22,42 +22,28 @@ onMounted(async () => {
   }
 })
 
-const markData = computed(() => {
-  const data = {}
-  Object.keys(messageData.sessionList).forEach((key) => {
-    const mark = messageData.sessionList[key].mark
-    if (mark) {
-      data[key] = messageData.sessionList[key]
-    }
-  })
-  return data
-})
-
 const markSearchKey = ref('')
-const markDataSorted = computed(() => {
-  if (!Object.keys(markData.value)) return []
-
-  let markDataArr = []
-  Object.values(markData.value).forEach((item) => {
-    const trimKey = markSearchKey.value.trim()
-    if (!trimKey) {
-      markDataArr.push(item)
-    } else {
-      if (
-        item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
-        item.objectInfo.account === trimKey ||
-        item.mark.toLowerCase().includes(trimKey.toLowerCase())
-      ) {
-        markDataArr.push(item)
+const markData = computed(() => {
+  if (Object.values(messageData.sessionList).length === 0) return []
+  const trimKey = markSearchKey.value.trim()
+  const data = []
+  Object.values(messageData.sessionList).forEach((item) => {
+    if (item.mark) {
+      if (!trimKey) {
+        data.push(item)
+      } else {
+        if (
+          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
+          item.objectInfo.account === trimKey ||
+          item.mark.toLowerCase().includes(trimKey.toLowerCase())
+        ) {
+          data.push(item)
+        }
       }
     }
   })
 
-  if (!markDataArr.length) return []
-
-  return markDataArr.sort((a, b) => {
-    return a.objectInfo.account > b.objectInfo.account ? 1 : -1
-  })
+  return data
 })
 
 const isShowUserCard = ref(false)
@@ -96,9 +82,9 @@ const onShowUserCard = async ({ sessionId, account }) => {
       />
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <div v-if="markDataSorted.length">
+      <div v-if="markData.length">
         <ContactsUserItem
-          v-for="item in markDataSorted"
+          v-for="item in markData"
           :key="item.sessionId"
           :session="item"
           :type="'mark'"

@@ -14,7 +14,7 @@ import { MsgType } from '@/proto/msg'
 const messageData = messageStore()
 
 const totalCount = computed(() => {
-  return Object.keys(lastData.value).length
+  return Object.keys(lastDataSorted.value).length
 })
 
 onMounted(async () => {

@@ -1,12 +1,21 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import { ChatRound, Phone, VideoCamera, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
+import {
+  ChatRound,
+  Phone,
+  VideoCamera,
+  Edit,
+  Delete,
+  Check,
+  Close,
+  Refresh
+} from '@element-plus/icons-vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 import { messageStore } from '@/stores'
 
-const props = defineProps(['type', 'session'])
+const props = defineProps(['type', 'session', 'partitions'])
 const emit = defineEmits(['showUserCard'])
 
 const messageData = messageStore()
@@ -54,6 +63,14 @@ const cancelMark = () => {
   markEditing.value = false
 }
 
+const onChangePartition = () => {
+  console.log('onChangePartition')
+}
+
+const onClearPartition = () => {
+  console.log('onClearPartition')
+}
+
 const goToSessionTab = () => {
   router.push({
     path: '/message',
@@ -66,31 +83,33 @@ const goToSessionTab = () => {
 
 <template>
   <div class="contacts-user-item">
-    <div class="content">
-      <AvatarIcon
-        class="avatar"
-        :showName="props.session.objectInfo.nickName"
-        :showId="props.session.objectInfo.account"
-        :showAvatarThumb="props.session.objectInfo.avatarThumb"
-        :userStatus="props.session.objectInfo.status"
-        @click="onShowCard"
-      ></AvatarIcon>
-      <div class="name-account">
-        <div class="nick-name text-ellipsis">{{ props.session.objectInfo.nickName }}</div>
-        <div class="account text-ellipsis">{{ props.session.objectInfo.account }}</div>
+    <div class="content-wrapper">
+      <div class="avatar-name-account">
+        <AvatarIcon
+          class="avatar"
+          :showName="props.session.objectInfo.nickName"
+          :showId="props.session.objectInfo.account"
+          :showAvatarThumb="props.session.objectInfo.avatarThumb"
+          :userStatus="props.session.objectInfo.status"
+          @click="onShowCard"
+        ></AvatarIcon>
+        <div class="name-account">
+          <div class="nick-name text-ellipsis">{{ props.session.objectInfo.nickName }}</div>
+          <div class="account text-ellipsis">{{ props.session.objectInfo.account }}</div>
+        </div>
       </div>
       <div class="organization text-ellipsis" :title="props.session.objectInfo.organization">
         {{ props.session.objectInfo.organization || '没有部门' }}
       </div>
       <div class="diff-display">
         <div v-if="props.type === 'last'" class="last">
-          <div class="last-time">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
+          <div class="tips-block">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
           <div class="last-content text-ellipsis" :title="props.session.lastMsgContent">
             {{ props.session.lastMsgContent }}
           </div>
         </div>
         <div v-if="props.type === 'mark'" class="mark">
-          <div class="mark-tips-block">备注</div>
+          <div class="tips-block">备注</div>
           <div v-if="!markEditing" class="mark-content-wrapper">
             <div
               class="mark-content text-ellipsis"
@@ -145,13 +164,40 @@ const goToSessionTab = () => {
             </div>
           </div>
         </div>
-        <div v-if="props.type === 'partition'" class="partition">partition</div>
+        <div v-if="props.type === 'partition'" class="partition">
+          <div class="tips-block">分组</div>
+          <div class="partition-content-wrapper">
+            <div
+              class="partition-content text-ellipsis"
+              :title="props.partitions[props.session.partitionId].partitionName"
+              @click="onChangePartition"
+            >
+              {{ props.partitions[props.session.partitionId].partitionName }}
+            </div>
+            <div>
+              <el-button
+                type="primary"
+                :icon="Refresh"
+                size="small"
+                circle
+                @click="onChangePartition"
+              ></el-button>
+              <el-button
+                type="danger"
+                :icon="Delete"
+                size="small"
+                circle
+                @click="onClearPartition"
+              ></el-button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="action">
-      <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
-      <el-button size="large" :icon="Phone" circle />
-      <el-button size="large" :icon="VideoCamera" circle />
+      <div class="action">
+        <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
+        <el-button size="large" :icon="Phone" circle />
+        <el-button size="large" :icon="VideoCamera" circle />
+      </div>
     </div>
   </div>
 </template>
@@ -171,103 +217,120 @@ const goToSessionTab = () => {
   }
 }
 
-.content {
-  display: flex;
-  justify-content: start;
-  align-items: center;
+.content-wrapper {
+  width: 100%;
   font-size: 14px;
-}
-
-.avatar {
-  margin-left: 10px;
-}
-
-.name-account {
-  width: 100px;
-  margin-left: 20px;
-  user-select: text;
-
-  .nick-name {
-    padding: 0;
-  }
-
-  .account {
-    padding: 0;
-    font-size: 14px;
-    color: gray;
-  }
-}
-
-.organization {
-  width: 120px;
-  margin-left: 20px;
-  user-select: text;
-}
-
-.diff-display {
-  height: 100%;
-  margin-left: 20px;
-  user-select: text;
-
-  .last {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    .last-time {
-      justify-content: start;
-      border-radius: 4px;
-      padding-left: 5px;
-      padding-right: 5px;
-      background: rgb(221.7, 222.6, 224.4);
-      flex-shrink: 0;
-    }
-    .last-content {
-      margin-left: 5px;
-    }
-  }
-
-  .mark {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    .mark-tips-block {
-      justify-content: start;
-      border-radius: 4px;
-      padding-left: 5px;
-      padding-right: 5px;
-      background: rgb(221.7, 222.6, 224.4);
-      flex-shrink: 0;
-    }
-    .mark-content-wrapper {
-      width: 240px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-
-      .mark-content {
-        margin-left: 5px;
-        display: flex;
-        align-items: center;
-        color: #409eff;
-        cursor: pointer;
-      }
-    }
-    .mark-edit-wrapper {
-      width: 240px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      .mark-edit {
-        width: 160px;
-        margin: 0 2px 0 10px;
-      }
-    }
-  }
-}
-
-.action {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  user-select: text;
+
+  .avatar-name-account {
+    display: flex;
+    .avatar {
+      margin-left: 10px;
+    }
+
+    .name-account {
+      width: 100px;
+      margin-left: 10px;
+
+      .nick-name {
+        padding: 0;
+      }
+
+      .account {
+        padding: 0;
+        color: gray;
+      }
+    }
+  }
+
+  .organization {
+    width: 100px;
+    margin-left: 20px;
+  }
+
+  .diff-display {
+    height: 100%;
+    margin-left: 20px;
+
+    .tips-block {
+      justify-content: start;
+      border-radius: 4px;
+      padding-left: 5px;
+      padding-right: 5px;
+      background: rgb(221.7, 222.6, 224.4);
+      flex-shrink: 0;
+    }
+
+    .last {
+      width: 200px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .last-content {
+        margin-left: 5px;
+      }
+    }
+
+    .mark {
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .mark-content-wrapper {
+        width: 240px;
+        display: flex;
+        justify-content: space-between;
+
+        .mark-content {
+          margin-left: 5px;
+          display: flex;
+          align-items: center;
+          color: #409eff;
+          cursor: pointer;
+        }
+      }
+      .mark-edit-wrapper {
+        width: 240px;
+        display: flex;
+        justify-content: space-between;
+        .mark-edit {
+          width: 160px;
+          margin: 0 2px 0 10px;
+        }
+      }
+    }
+
+    .partition {
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .partition-content-wrapper {
+        width: 150px;
+        padding: 0 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .partition-content {
+          margin-left: 5px;
+          display: flex;
+          align-items: center;
+          color: #409eff;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 </style>
