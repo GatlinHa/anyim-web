@@ -15,6 +15,7 @@ const markEditing = ref(false)
 const newMark = ref('')
 const markEditRef = ref()
 
+const partitioEditing = ref(false)
 const newPartitionId = ref(props.session.partitionId)
 
 const onShowCard = () => {
@@ -56,6 +57,10 @@ const cancelMark = () => {
   markEditing.value = false
 }
 
+const onClickEditPartition = () => {
+  partitioEditing.value = true
+}
+
 const onChangePartition = () => {
   if (newPartitionId.value !== props.session.partitionId) {
     const sessionId = props.session.sessionId
@@ -64,6 +69,7 @@ const onChangePartition = () => {
       partitionId: newPartitionId.value
     })
   }
+  partitioEditing.value = false
 }
 
 const onClearPartition = () => {
@@ -72,6 +78,10 @@ const onClearPartition = () => {
     sessionId: sessionId,
     partitionId: 0 //和后端约定0表示不分组
   })
+}
+
+const cancelPartition = () => {
+  partitioEditing.value = false
 }
 
 const goToSessionTab = () => {
@@ -121,7 +131,7 @@ const goToSessionTab = () => {
             >
               {{ props.session.mark }}
             </div>
-            <div>
+            <div style="display: flex; flex-direction: row">
               <el-button
                 type="primary"
                 :icon="Edit"
@@ -135,6 +145,7 @@ const goToSessionTab = () => {
                 size="small"
                 circle
                 @click="deleteMark"
+                style="margin-left: 5px"
               ></el-button>
             </div>
           </div>
@@ -163,19 +174,46 @@ const goToSessionTab = () => {
                 size="small"
                 circle
                 @click="cancelMark"
+                style="margin-left: 5px"
               ></el-button>
             </div>
           </div>
         </div>
         <div v-if="props.type === 'partition'" class="partition">
           <div class="tips-block">分组</div>
-          <div class="partition-content-wrapper">
+          <div v-if="!partitioEditing" class="partition-content-wrapper">
+            <div
+              class="partition-content text-ellipsis"
+              :title="props.partitions[props.session.partitionId].partitionName"
+              @click="onClickEditPartition"
+            >
+              {{ props.partitions[props.session.partitionId].partitionName }}
+            </div>
+            <div style="display: flex; flex-direction: row">
+              <el-button
+                type="primary"
+                :icon="Edit"
+                size="small"
+                circle
+                @click="onClickEditPartition"
+              ></el-button>
+              <el-button
+                type="danger"
+                :icon="Delete"
+                size="small"
+                circle
+                @click="onClearPartition"
+                style="margin-left: 5px"
+              ></el-button>
+            </div>
+          </div>
+          <div v-else class="partition-edit-wrapper">
             <el-select
+              class="partition-edit"
               v-model="newPartitionId"
               placeholder="请选择分组"
               size="small"
               style="margin-left: 5px"
-              @change="onChangePartition"
             >
               <el-option
                 v-for="item in props.partitions"
@@ -184,14 +222,23 @@ const goToSessionTab = () => {
                 :value="item.partitionId"
               />
             </el-select>
-            <el-button
-              type="danger"
-              :icon="Delete"
-              size="small"
-              circle
-              @click="onClearPartition"
-              style="margin-left: 5px"
-            ></el-button>
+            <div style="display: flex; flex-direction: row">
+              <el-button
+                type="success"
+                :icon="Check"
+                size="small"
+                circle
+                @click="onChangePartition"
+              ></el-button>
+              <el-button
+                type="info"
+                :icon="Close"
+                size="small"
+                circle
+                @click="cancelPartition"
+                style="margin-left: 5px"
+              ></el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -283,7 +330,7 @@ const goToSessionTab = () => {
       align-items: center;
 
       .mark-content-wrapper {
-        width: 240px;
+        width: 220px;
         display: flex;
         justify-content: space-between;
 
@@ -295,13 +342,14 @@ const goToSessionTab = () => {
           cursor: pointer;
         }
       }
+
       .mark-edit-wrapper {
-        width: 240px;
+        width: 220px;
         display: flex;
         justify-content: space-between;
         .mark-edit {
           width: 160px;
-          margin: 0 2px 0 10px;
+          margin-left: 5px;
         }
       }
     }
@@ -312,16 +360,34 @@ const goToSessionTab = () => {
       align-items: center;
 
       .partition-content-wrapper {
-        width: 150px;
-        padding: 0 10px 0 0;
+        width: 220px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+
+        .partition-content {
+          margin-left: 5px;
+          display: flex;
+          align-items: center;
+          color: #409eff;
+          cursor: pointer;
+        }
+      }
+
+      .partition-edit-wrapper {
+        width: 220px;
+        display: flex;
+        justify-content: space-between;
+        .partition-edit {
+          width: 140px;
+          margin-left: 5px;
+        }
       }
     }
   }
 
   .action {
+    margin-left: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
