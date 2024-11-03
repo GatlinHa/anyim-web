@@ -115,9 +115,9 @@ const goToSessionTab = () => {
         {{ props.session.objectInfo.organization || '没有部门' }}
       </div>
       <div class="diff-display">
-        <div v-if="props.type === 'last'" class="last">
+        <div v-if="props.type === 'all'" class="all">
           <div class="tips-block">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
-          <div class="last-content text-ellipsis" :title="props.session.lastMsgContent">
+          <div class="all-content text-ellipsis" :title="props.session.lastMsgContent">
             {{ props.session.lastMsgContent }}
           </div>
         </div>
@@ -313,13 +313,13 @@ const goToSessionTab = () => {
       flex-shrink: 0;
     }
 
-    .last {
+    .all {
       width: 200px;
       height: 100%;
       display: flex;
       align-items: center;
 
-      .last-content {
+      .all-content {
         margin-left: 5px;
       }
     }

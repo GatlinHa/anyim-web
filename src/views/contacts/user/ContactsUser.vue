@@ -1,5 +1,5 @@
 <script setup>
-import lastIcon from '@/assets/svg/last.svg'
+import allIcon from '@/assets/svg/all.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
 </script>
@@ -9,9 +9,9 @@ import partitionIcon from '@/assets/svg/partition.svg'
     <el-container>
       <el-aside class="bdr-r el-aside__contact-user">
         <el-menu :default-active="$route.path" text-color="black" router>
-          <el-menu-item index="/contacts/user/last">
-            <lastIcon></lastIcon>
-            <span>最近</span>
+          <el-menu-item index="/contacts/user/all">
+            <allIcon></allIcon>
+            <span>所有</span>
           </el-menu-item>
           <el-menu-item index="/contacts/user/mark">
             <markIcon></markIcon>

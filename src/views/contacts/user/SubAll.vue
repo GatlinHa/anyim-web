@@ -14,7 +14,7 @@ import { MsgType } from '@/proto/msg'
 const messageData = messageStore()
 
 const totalCount = computed(() => {
-  return Object.keys(lastData.value).length
+  return Object.keys(allData.value).length
 })
 
 onMounted(async () => {
@@ -24,20 +24,15 @@ onMounted(async () => {
   }
 })
 
-const lastSearchKey = ref('')
-const lastData = computed(() => {
+const searchKey = ref('')
+const allData = computed(() => {
   if (Object.values(messageData.sessionList).length === 0) return []
 
-  const trimKey = lastSearchKey.value.trim()
+  const trimKey = searchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
-    const lastMsgTime = item.lastMsgTime
     const sessionType = item.sessionType
-    if (
-      sessionType === MsgType.CHAT &&
-      lastMsgTime &&
-      Date.now() - new Date(lastMsgTime).getTime() < 7 * 24 * 60 * 60 * 1000
-    ) {
+    if (sessionType === MsgType.CHAT) {
       if (!trimKey) {
         data.push(item)
       } else {
@@ -90,7 +85,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
     <el-header class="bdr-b">
       <div style="font-size: 14px">全部({{ totalCount }})</div>
       <el-input
-        v-model="lastSearchKey"
+        v-model="searchKey"
         placeholder="搜索：昵称/账号"
         :prefix-icon="Search"
         :clearable="true"
@@ -98,12 +93,12 @@ const onShowUserCard = async ({ sessionId, account }) => {
       />
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <div v-if="lastData.length">
+      <div v-if="allData.length">
         <ContactsUserItem
-          v-for="item in lastData"
+          v-for="item in allData"
           :key="item.sessionId"
           :session="item"
-          :type="'last'"
+          :type="'all'"
           @showUserCard="onShowUserCard"
         ></ContactsUserItem>
       </div>

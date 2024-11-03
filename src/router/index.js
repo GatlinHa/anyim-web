@@ -25,11 +25,11 @@ const router = createRouter({
             {
               path: '/contacts/user',
               component: () => import('@/views/contacts/user/ContactsUser.vue'),
-              redirect: '/contacts/user/last',
+              redirect: '/contacts/user/all',
               children: [
                 {
-                  path: '/contacts/user/last',
-                  component: () => import('@/views/contacts/user/SubLast.vue'),
+                  path: '/contacts/user/all',
+                  component: () => import('@/views/contacts/user/SubAll.vue'),
                   meta: {
                     active_1: '/contacts', // 一级导航default-active
                     active_2: '/contacts/user' // 二级导航default-active
