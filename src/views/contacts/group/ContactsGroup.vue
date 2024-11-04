@@ -8,7 +8,7 @@ import publicIcon from '@/assets/svg/public.svg'
 </script>
 
 <template>
-  <el-container class="constact-group">
+  <el-container class="contacts-group">
     <el-container>
       <el-aside class="bdr-r el-aside__contact-group">
         <el-menu :default-active="$route.path" text-color="black" router>

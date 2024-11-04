@@ -5,7 +5,7 @@ import partitionIcon from '@/assets/svg/partition.svg'
 </script>
 
 <template>
-  <el-container class="constact-user">
+  <el-container class="contacts-user">
     <el-container>
       <el-aside class="bdr-r el-aside__contact-user">
         <el-menu :default-active="$route.path" text-color="black" router>
@@ -32,7 +32,7 @@ import partitionIcon from '@/assets/svg/partition.svg'
 </template>
 
 <style lang="scss" scoped>
-.constact-user {
+.contacts-user {
   height: 100%;
 }
 

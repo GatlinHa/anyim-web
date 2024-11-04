@@ -22,7 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-container class="constact">
+  <el-container class="contacts">
     <el-header class="bdr-b">通讯录</el-header>
     <el-container class="el-container__body">
       <el-aside class="bdr-r">
@@ -51,7 +51,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-.constact {
+.contacts {
   height: 100%;
 }
 
