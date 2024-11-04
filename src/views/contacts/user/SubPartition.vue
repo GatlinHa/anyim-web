@@ -12,8 +12,7 @@ import {
   msgChatSessionListService,
   msgCreatePartitionService,
   msgDeletePartitionService,
-  msgUpdatePartitionService,
-  msgQueryPartitionService
+  msgUpdatePartitionService
 } from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -22,7 +21,6 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 
 const messageData = messageStore()
-const partitions = ref({})
 const partitionSearchKey = ref('')
 const userSearchKey = ref('')
 const isShowAddPartitionDialog = ref(false)
@@ -42,14 +40,13 @@ onMounted(async () => {
     messageData.setSessionList(res.data.data) //入缓存
   }
 
-  const res = await msgQueryPartitionService()
-  res.data.data.forEach((item) => {
-    partitions.value[item.partitionId] = item
-  })
-
   if (Object.keys(partitions.value).length > 0) {
     selectedIndex.value = Object.keys(partitions.value)[0].toString()
   }
+})
+
+const partitions = computed(() => {
+  return messageData.partitions
 })
 
 const totalCount = computed(() => {

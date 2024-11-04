@@ -60,22 +60,22 @@ export const messageStore = defineStore('anyim-message', () => {
     if ('objectInfo' in obj) mySession.objectInfo = obj.objectInfo
 
     if (flag) {
-      msgUpdateSessionService(params).then((res) => {
-        // 云端更新成功再更新本地，保持数据同步
-        if (res.data.code === 0) {
-          if ('top' in obj) mySession.top = obj.top
-          if ('muted' in obj) mySession.muted = obj.muted
-          if ('draft' in obj) mySession.draft = obj.draft
-          if ('mark' in obj) {
-            mySession.mark = obj.mark
-            ElMessage.success('保存成功')
-          }
-          if ('partitionId' in obj) {
-            mySession.partitionId = obj.partitionId
-            ElMessage.success('保存成功')
-          }
+      //TODO 这里可以加一个loading遮罩效果
+      const res = await msgUpdateSessionService(params)
+      // 云端更新成功再更新本地，保持数据同步
+      if (res.data.code === 0) {
+        if ('top' in obj) mySession.top = obj.top
+        if ('muted' in obj) mySession.muted = obj.muted
+        if ('draft' in obj) mySession.draft = obj.draft
+        if ('mark' in obj) {
+          mySession.mark = obj.mark
+          ElMessage.success('保存成功')
         }
-      })
+        if ('partitionId' in obj) {
+          mySession.partitionId = obj.partitionId
+          ElMessage.success('保存成功')
+        }
+      }
     }
   }
 
@@ -129,6 +129,16 @@ export const messageStore = defineStore('anyim-message', () => {
   const clear = () => {
     sessionList.value = {}
     msgRecordsList.value = {}
+    partitions.value = {}
+  }
+
+  /**
+   * 分组信息
+   */
+  const partitions = ref({})
+
+  const setPartitions = (obj) => {
+    partitions.value = obj
   }
 
   return {
@@ -140,6 +150,9 @@ export const messageStore = defineStore('anyim-message', () => {
 
     msgRecordsList,
     addMsgRecords,
+
+    partitions,
+    setPartitions,
 
     clear
   }

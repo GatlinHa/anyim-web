@@ -2,6 +2,21 @@
 import contactsIcon from '@/assets/svg/contacts.svg'
 import groupIcon from '@/assets/svg/group.svg'
 import organizationIcon from '@/assets/svg/organization.svg'
+import { onMounted } from 'vue'
+import { messageStore } from '@/stores'
+import { msgQueryPartitionService } from '@/api/message'
+
+const messageData = messageStore()
+
+onMounted(() => {
+  msgQueryPartitionService().then((res) => {
+    const partitions = {}
+    res.data.data.forEach((item) => {
+      partitions[item.partitionId] = item
+    })
+    messageData.setPartitions(partitions)
+  })
+})
 </script>
 
 <template>

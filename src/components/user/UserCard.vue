@@ -23,6 +23,15 @@ const markEditing = ref(false)
 const newMark = ref('')
 const markEditRef = ref()
 
+const partitions = computed(() => {
+  return messageData.partitions
+})
+const partitionId = computed(() => {
+  return messageData.sessionList[sessionId.value].partitionId || null
+})
+const partitioEditing = ref(false)
+const newPartitionId = ref(null)
+
 const isSelf = computed(() => {
   return userData.user.account === props.userInfo.account
 })
@@ -71,9 +80,9 @@ const onClickEditMark = () => {
   })
 }
 
-const saveMark = () => {
+const saveMark = async () => {
   if (newMark.value.trim() !== mark.value) {
-    messageData.updateSession({
+    await messageData.updateSession({
       sessionId: sessionId.value,
       mark: newMark.value.trim()
     })
@@ -83,6 +92,25 @@ const saveMark = () => {
 
 const cancelMark = () => {
   markEditing.value = false
+}
+
+const onClickEditParition = () => {
+  newPartitionId.value = partitionId.value
+  partitioEditing.value = true
+}
+
+const onChangePartition = async () => {
+  if (newPartitionId.value !== partitionId.value) {
+    await messageData.updateSession({
+      sessionId: sessionId.value,
+      partitionId: newPartitionId.value || 0
+    })
+  }
+  partitioEditing.value = false
+}
+
+const onCancelPartition = () => {
+  partitioEditing.value = false
 }
 
 onMounted(() => {
@@ -132,7 +160,7 @@ onUnmounted(() => {
           </div>
           <div v-if="!isSelf" class="info-item mark">
             <span class="label">备注：</span>
-            <div v-if="!markEditing" class="value value-mark">
+            <div v-if="!markEditing" class="value value-editable">
               <span @click="onClickEditMark" style="cursor: pointer">{{ mark || '-' }}</span>
               <el-button
                 type="primary"
@@ -145,11 +173,11 @@ onUnmounted(() => {
             <div v-else class="edit">
               <el-input
                 ref="markEditRef"
+                class="edit-component"
                 v-model="newMark"
                 maxlength="10"
                 show-word-limit
                 size="small"
-                style="margin: 0 2px 0 10px"
                 @keyup.enter="saveMark"
               ></el-input>
               <el-button
@@ -157,16 +185,59 @@ onUnmounted(() => {
                 :icon="Check"
                 size="small"
                 circle
-                style="margin: 0 2px 0 2px"
-                @click="saveMark"
+                @click.stop="saveMark"
               ></el-button>
               <el-button
                 type="info"
                 :icon="Close"
                 size="small"
                 circle
-                style="margin: 0 2px 0 2px"
-                @click="cancelMark"
+                @click.stop="cancelMark"
+              ></el-button>
+            </div>
+          </div>
+          <div v-if="!isSelf" class="info-item partition">
+            <span class="label">分组：</span>
+            <div v-if="!partitioEditing" class="value value-editable">
+              <span @click="onClickEditParition" style="cursor: pointer">
+                {{ partitions[partitionId]?.partitionName || '-' }}
+              </span>
+              <el-button
+                type="primary"
+                :icon="Edit"
+                size="small"
+                circle
+                @click="onClickEditParition"
+              ></el-button>
+            </div>
+            <div v-else class="edit">
+              <el-select
+                class="edit-component"
+                v-model="newPartitionId"
+                placeholder="请选择分组"
+                size="small"
+                clearable
+              >
+                <el-option
+                  v-for="item in partitions"
+                  :key="item.partitionId"
+                  :label="item.partitionName"
+                  :value="item.partitionId"
+                />
+              </el-select>
+              <el-button
+                type="success"
+                :icon="Check"
+                size="small"
+                circle
+                @click.stop="onChangePartition"
+              ></el-button>
+              <el-button
+                type="info"
+                :icon="Close"
+                size="small"
+                circle
+                @click.stop="onCancelPartition"
               ></el-button>
             </div>
           </div>
@@ -303,20 +374,29 @@ onUnmounted(() => {
       }
 
       .value {
-        margin-left: 10px;
         color: #409eff;
         user-select: text;
       }
 
-      .value-mark {
+      .value-editable {
         width: 100%;
         display: flex;
         justify-content: space-between;
       }
 
       .edit {
+        width: 100%;
         display: flex;
         justify-content: space-between;
+      }
+
+      .edit-component {
+        width: 130px;
+        margin: 0 2px 0 0;
+      }
+
+      .el-button {
+        margin: 0 2px 0 2px;
       }
     }
   }

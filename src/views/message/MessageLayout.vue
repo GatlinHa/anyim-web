@@ -46,7 +46,6 @@ import { BEGIN_MSG_ID } from '@/const/msgConst'
 import EditDialog from '@/components/common/EditDialog.vue'
 
 const userData = userStore()
-const partitions = ref([])
 const settingData = settingStore()
 const messageData = messageStore()
 const selectedSessionId = ref('') //当前被选中的session
@@ -184,7 +183,11 @@ onMounted(async () => {
   }
 
   msgQueryPartitionService().then((res) => {
-    partitions.value = res.data.data
+    const partitions = {}
+    res.data.data.forEach((item) => {
+      partitions[item.partitionId] = item
+    })
+    messageData.setPartitions(partitions)
   })
 })
 

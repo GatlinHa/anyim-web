@@ -80,7 +80,7 @@ const onClearPartition = () => {
   })
 }
 
-const cancelPartition = () => {
+const onCancelPartition = () => {
   partitioEditing.value = false
 }
 
@@ -235,7 +235,7 @@ const goToSessionTab = () => {
                 :icon="Close"
                 size="small"
                 circle
-                @click="cancelPartition"
+                @click="onCancelPartition"
                 style="margin-left: 5px"
               ></el-button>
             </div>
