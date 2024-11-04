@@ -15,7 +15,10 @@ const router = createRouter({
       children: [
         {
           path: '/message',
-          component: () => import('@/views/message/MessageLayout.vue')
+          component: () => import('@/views/message/MessageLayout.vue'),
+          meta: {
+            active_1: '/message' // 一级导航default-active
+          }
         },
         {
           path: '/contacts',
