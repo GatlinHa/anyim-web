@@ -319,7 +319,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
     v-model="isAddSession"
     :modal="false"
     :top="'30vh'"
-    :width="'600px'"
+    :width="'610px'"
     :z-index="1"
     style="border-radius: 10px"
     @close="onCloseAddSession"
@@ -349,6 +349,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
       filterable
       filter-placeholder="请输入昵称"
       :titles="['未分组联系人', '已选择']"
+      style="margin: 20px 8px 20px 8px"
     />
     <template #footer>
       <div class="dialog-footer">
