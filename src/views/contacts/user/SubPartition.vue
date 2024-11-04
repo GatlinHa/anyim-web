@@ -31,6 +31,11 @@ const oprMenuRef = ref()
 const showOprMenuPartitionId = ref(0)
 const selectedIndex = ref('')
 
+const isAddSession = ref(false)
+const addSessionSelected = ref([])
+const addSessionPartitionId = ref(null)
+const addSessionTransferRef = ref()
+
 onMounted(async () => {
   if (!Object.keys(messageData.sessionList).length) {
     const res = await msgChatSessionListService()
@@ -69,6 +74,19 @@ const detailData = computed(() => {
         )
           data.push(item)
       }
+    }
+  })
+  return data
+})
+
+const hasNoParitionSessions = computed(() => {
+  const data = []
+  Object.values(messageData.sessionList).forEach((item) => {
+    if (item.partitionId === 0) {
+      data.push({
+        key: item.sessionId,
+        label: item.objectInfo.nickName
+      })
     }
   })
   return data
@@ -122,7 +140,8 @@ const onRenamePartitionConfirm = (inputValue) => {
 
 const onSelectOprMenu = (label) => {
   switch (label) {
-    case 'addUser':
+    case 'addSession':
+      onShowAddSessionByButton(showOprMenuPartitionId.value)
       break
     case 'updateName':
       isShowRenamePartitionDialog.value = true
@@ -165,6 +184,28 @@ const onCustomContextMenu = (partitionId) => {
 const showOperationMenu = (e, partitionId) => {
   showOprMenuPartitionId.value = partitionId
   oprMenuRef.value.handleSessionMenu(e)
+}
+
+const onShowAddSessionByButton = (partitionId) => {
+  addSessionPartitionId.value = partitionId
+  addSessionSelected.value = []
+  isAddSession.value = true
+}
+
+const onCloseAddSession = () => {
+  addSessionTransferRef.value.clearQuery('left')
+  addSessionTransferRef.value.clearQuery('right')
+  isAddSession.value = false
+}
+
+const onSaveAddSession = () => {
+  addSessionSelected.value.forEach((sessionId) => {
+    messageData.updateSession({
+      sessionId: sessionId,
+      partitionId: partitions.value[addSessionPartitionId.value].partitionId
+    })
+  })
+  isAddSession.value = false
 }
 
 const isShowUserCard = ref(false)
@@ -239,7 +280,10 @@ const onShowUserCard = async ({ sessionId, account }) => {
             :prefix-icon="Search"
             :clearable="true"
           />
-          <AddButton :size="20"></AddButton>
+          <AddButton
+            :size="20"
+            @click="onShowAddSessionByButton(parseInt(selectedIndex))"
+          ></AddButton>
         </div>
       </el-header>
       <el-main class="my-scrollbar" style="height: 100%; padding: 8px; overflow-y: scroll">
@@ -273,6 +317,49 @@ const onShowUserCard = async ({ sessionId, account }) => {
     @close="isShowRenamePartitionDialog = false"
     @confirm="onRenamePartitionConfirm"
   ></EditDialog>
+  <el-dialog
+    class="add-session-dialog"
+    v-model="isAddSession"
+    :modal="false"
+    :top="'30vh'"
+    :width="'600px'"
+    :z-index="1"
+    style="border-radius: 10px"
+    @close="onCloseAddSession"
+  >
+    <template #header>
+      <div style="display: flex; flex-direction: row; justify-content: start; align-items: center">
+        <div style="font-size: 16px; font-weight: bold; white-space: nowrap">为分组</div>
+        <div
+          class="text-ellipsis"
+          style="
+            margin: 0 5px 0 5px;
+            padding: 2px;
+            font-size: 14px;
+            border-radius: 4px;
+            background: #ebedf0;
+          "
+        >
+          {{ partitions[addSessionPartitionId].partitionName }}
+        </div>
+        <div style="font-size: 16px; font-weight: bold; white-space: nowrap">添加联系人</div>
+      </div>
+    </template>
+    <el-transfer
+      ref="addSessionTransferRef"
+      v-model="addSessionSelected"
+      :data="hasNoParitionSessions"
+      filterable
+      filter-placeholder="请输入昵称"
+      :titles="['未分组联系人', '已选择']"
+    />
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="info" @click="isAddSession = false" plain>取消</el-button>
+        <el-button type="primary" @click="onSaveAddSession" plain>保存</el-button>
+      </div>
+    </template>
+  </el-dialog>
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfo"

@@ -7,7 +7,7 @@ const emit = defineEmits(['selectMenu'])
 const menu = computed(() => {
   return [
     {
-      label: 'addUser',
+      label: 'addSession',
       desc: '添加联系人',
       icon: CirclePlus
     },
