@@ -182,13 +182,15 @@ onMounted(async () => {
     handleSelectedSession(router.currentRoute.value.query.sessionId)
   }
 
-  msgQueryPartitionService().then((res) => {
-    const partitions = {}
-    res.data.data.forEach((item) => {
-      partitions[item.partitionId] = item
+  if (Object.keys(messageData.partitions).length === 0) {
+    msgQueryPartitionService().then((res) => {
+      const partitions = {}
+      res.data.data.forEach((item) => {
+        partitions[item.partitionId] = item
+      })
+      messageData.setPartitions(partitions)
     })
-    messageData.setPartitions(partitions)
-  })
+  }
 })
 
 const handleMsgListWheel = async () => {

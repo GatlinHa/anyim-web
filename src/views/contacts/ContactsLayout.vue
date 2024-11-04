@@ -9,13 +9,15 @@ import { msgQueryPartitionService } from '@/api/message'
 const messageData = messageStore()
 
 onMounted(() => {
-  msgQueryPartitionService().then((res) => {
-    const partitions = {}
-    res.data.data.forEach((item) => {
-      partitions[item.partitionId] = item
+  if (Object.keys(messageData.partitions).length === 0) {
+    msgQueryPartitionService().then((res) => {
+      const partitions = {}
+      res.data.data.forEach((item) => {
+        partitions[item.partitionId] = item
+      })
+      messageData.setPartitions(partitions)
     })
-    messageData.setPartitions(partitions)
-  })
+  }
 })
 </script>
 
