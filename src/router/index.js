@@ -59,9 +59,57 @@ const router = createRouter({
             {
               path: '/contacts/group',
               component: () => import('@/views/contacts/group/ContactsGroup.vue'),
-              meta: {
-                active_1: '/contacts' // 一级导航default-active
-              }
+              redirect: '/contacts/group/all',
+              children: [
+                {
+                  path: '/contacts/group/all',
+                  component: () => import('@/views/contacts/group/SubAll.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/group/managed',
+                  component: () => import('@/views/contacts/group/SubManaged.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/group/joined',
+                  component: () => import('@/views/contacts/group/SubJoined.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/group/mark',
+                  component: () => import('@/views/contacts/group/SubMark.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/group/partition',
+                  component: () => import('@/views/contacts/group/SubPartition.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                },
+                {
+                  path: '/contacts/group/public',
+                  component: () => import('@/views/contacts/group/SubPublic.vue'),
+                  meta: {
+                    active_1: '/contacts', // 一级导航default-active
+                    active_2: '/contacts/group' // 二级导航default-active
+                  }
+                }
+              ]
             },
             {
               path: '/contacts/organization',
