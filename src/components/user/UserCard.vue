@@ -81,10 +81,10 @@ const onClickEditMark = () => {
 }
 
 const saveMark = async () => {
-  if (newMark.value.trim() !== mark.value) {
+  if (newMark.value !== mark.value) {
     await messageData.updateSession({
       sessionId: sessionId.value,
-      mark: newMark.value.trim()
+      mark: newMark.value
     })
   }
   markEditing.value = false
@@ -174,7 +174,7 @@ onUnmounted(() => {
               <el-input
                 ref="markEditRef"
                 class="edit-component"
-                v-model="newMark"
+                v-model.trim="newMark"
                 maxlength="10"
                 show-word-limit
                 size="small"

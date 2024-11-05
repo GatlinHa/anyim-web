@@ -28,17 +28,16 @@ const searchKey = ref('')
 const allData = computed(() => {
   if (Object.values(messageData.sessionList).length === 0) return []
 
-  const trimKey = searchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
     const sessionType = item.sessionType
     if (sessionType === MsgType.CHAT) {
-      if (!trimKey) {
+      if (!searchKey.value) {
         data.push(item)
       } else {
         if (
-          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
-          item.objectInfo.account === trimKey
+          item.objectInfo.nickName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
+          item.objectInfo.account === searchKey.value
         ) {
           data.push(item)
         }
@@ -85,7 +84,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
     <el-header class="bdr-b">
       <div style="font-size: 14px">全部({{ totalCount }})</div>
       <el-input
-        v-model="searchKey"
+        v-model.trim="searchKey"
         placeholder="搜索：昵称/账号"
         :prefix-icon="Search"
         :clearable="true"

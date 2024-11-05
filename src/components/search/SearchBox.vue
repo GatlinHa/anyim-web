@@ -10,9 +10,6 @@ const emit = defineEmits(['showContactCard', 'openSession'])
 const searchData = searchStore()
 const inputRef = ref()
 const keyWords = ref('')
-const keyWordsTrim = computed(() => {
-  return keyWords.value.trim()
-})
 const isShowSearchDialog = ref(false)
 const searchTab = ref('contact')
 
@@ -51,33 +48,33 @@ const onOpenSession = (obj) => {
 // 2.延时+防抖查询
 let timer
 const onQuery = () => {
-  if (!keyWordsTrim.value) return
+  if (!keyWords.value) return
   clearTimeout(timer)
   timer = setTimeout(async () => {
-    searchData.setKeywords(keyWordsTrim.value)
+    searchData.setKeywords(keyWords.value)
     let response
     let result = {}
     switch (searchTab.value) {
       case 'contact':
-        response = await userQueryByNickService({ nickNameKeyWords: keyWordsTrim.value })
+        response = await userQueryByNickService({ nickNameKeyWords: keyWords.value })
         response.data.data?.forEach((element) => {
           result[element.account] = element
         })
-        response = await userQueryService({ account: keyWordsTrim.value }) // 账号是精确匹配，只查一个结果
+        response = await userQueryService({ account: keyWords.value }) // 账号是精确匹配，只查一个结果
         if (response.data.data) result[response.data.data.account] = response.data.data
         searchData.addContactResult(result)
         break
       case 'group':
-        console.log('group 待完成，搜索关键字：', keyWordsTrim.value)
+        console.log('group 待完成，搜索关键字：', keyWords.value)
         break
       case 'organization':
-        console.log('organization 待完成，搜索关键字：', keyWordsTrim.value)
+        console.log('organization 待完成，搜索关键字：', keyWords.value)
         break
       case 'hisotry':
-        console.log('hisotry 待完成，搜索关键字：', keyWordsTrim.value)
+        console.log('hisotry 待完成，搜索关键字：', keyWords.value)
         break
       case 'todo':
-        console.log('todo 待完成，搜索关键字：', keyWordsTrim.value)
+        console.log('todo 待完成，搜索关键字：', keyWords.value)
         break
       default:
         break
@@ -110,7 +107,7 @@ watch(searchTab, () => {
       @open="onOpen"
     >
       <template #header>
-        <el-input ref="inputRef" v-model="keyWords" :clearable="true" @input="onQuery">
+        <el-input ref="inputRef" v-model.trim="keyWords" :clearable="true" @input="onQuery">
           <template #prefix>
             <el-icon><search /></el-icon>
             <span v-if="tabTipsContent" class="tab-tips">{{ tabTipsContent }}</span>

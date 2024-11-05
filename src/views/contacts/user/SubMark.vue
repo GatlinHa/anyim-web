@@ -25,17 +25,16 @@ onMounted(async () => {
 const markSearchKey = ref('')
 const markData = computed(() => {
   if (Object.values(messageData.sessionList).length === 0) return []
-  const trimKey = markSearchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
     if (item.mark) {
-      if (!trimKey) {
+      if (!markSearchKey.value) {
         data.push(item)
       } else {
         if (
-          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
-          item.objectInfo.account === trimKey ||
-          item.mark.toLowerCase().includes(trimKey.toLowerCase())
+          item.objectInfo.nickName.toLowerCase().includes(markSearchKey.value.toLowerCase()) ||
+          item.objectInfo.account === markSearchKey.value ||
+          item.mark.toLowerCase().includes(markSearchKey.value.toLowerCase())
         ) {
           data.push(item)
         }
@@ -74,7 +73,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
     <el-header class="bdr-b">
       <div style="font-size: 14px">全部({{ totalCount }})</div>
       <el-input
-        v-model="markSearchKey"
+        v-model.trim="markSearchKey"
         placeholder="搜索：昵称/账号/备注"
         :prefix-icon="Search"
         :clearable="true"

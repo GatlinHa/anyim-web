@@ -13,7 +13,7 @@ const onClose = () => {
 }
 
 const onComfirm = () => {
-  emit('confirm', inputValue.value.trim())
+  emit('confirm', inputValue.value)
 }
 
 watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInput]) => {
@@ -45,7 +45,7 @@ watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInp
       </div>
     </template>
     <el-input
-      v-model="inputValue"
+      v-model.trim="inputValue"
       :placeholder="props.placeholder"
       maxlength="10"
       show-word-limit

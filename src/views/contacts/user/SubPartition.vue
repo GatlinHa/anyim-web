@@ -60,16 +60,15 @@ const onSelectPartitionItem = (key) => {
 }
 
 const detailData = computed(() => {
-  const trimKey = userSearchKey.value.trim()
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
     if (item.partitionId.toString() === selectedIndex.value) {
-      if (!trimKey) {
+      if (!userSearchKey.value) {
         data.push(item)
       } else {
         if (
-          item.objectInfo.nickName.toLowerCase().includes(trimKey.toLowerCase()) ||
-          item.objectInfo.account === trimKey
+          item.objectInfo.nickName.toLowerCase().includes(userSearchKey.value.toLowerCase()) ||
+          item.objectInfo.account === userSearchKey.value
         )
           data.push(item)
       }
@@ -89,13 +88,12 @@ const hasNoParitionSessions = computed(() => {
 })
 
 const partitionsBySearch = computed(() => {
-  const trimKey = partitionSearchKey.value.trim()
-  if (!trimKey) {
+  if (!partitionSearchKey.value) {
     return partitions.value
   } else {
     const data = {}
     Object.values(partitions.value).forEach((item) => {
-      if (item.partitionName.toLowerCase().includes(trimKey.toLowerCase())) {
+      if (item.partitionName.toLowerCase().includes(partitionSearchKey.value.toLowerCase())) {
         data[item.partitionId] = item
       }
     })
@@ -228,7 +226,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
       <el-container style="height: 100%">
         <el-header class="bdr-b">
           <el-input
-            v-model="partitionSearchKey"
+            v-model.trim="partitionSearchKey"
             placeholder="搜索: 分组名称"
             :prefix-icon="Search"
             :clearable="true"
@@ -266,7 +264,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
         <div style="font-size: 14px">全部({{ totalCount }})</div>
         <div class="search-and-add">
           <el-input
-            v-model="userSearchKey"
+            v-model.trim="userSearchKey"
             placeholder="搜索：昵称/账号"
             :prefix-icon="Search"
             :clearable="true"

@@ -34,11 +34,11 @@ const onClickEditMark = () => {
 }
 
 const saveMark = () => {
-  if (newMark.value.trim() !== props.session.mark) {
+  if (newMark.value !== props.session.mark) {
     const sessionId = props.session.sessionId
     messageData.updateSession({
       sessionId: sessionId,
-      mark: newMark.value.trim()
+      mark: newMark.value
     })
   }
   markEditing.value = false
@@ -153,7 +153,7 @@ const goToSessionTab = () => {
             <el-input
               ref="markEditRef"
               class="mark-edit"
-              v-model="newMark"
+              v-model.trim="newMark"
               maxlength="10"
               show-word-limit
               size="small"
