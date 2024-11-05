@@ -10,7 +10,7 @@ const props = defineProps(['size'])
       class="has-no-data"
       :style="{ width: props.size || 60 + 'px', height: props.size || 60 + 'px' }"
     ></noData>
-    <span>暂无数据</span>
+    <span>无数据</span>
   </div>
 </template>
 
