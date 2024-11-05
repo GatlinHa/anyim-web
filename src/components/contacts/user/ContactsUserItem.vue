@@ -262,32 +262,6 @@ const goToSessionTab = () => {
   align-items: center;
   user-select: text;
 
-  .avatar-name-account {
-    display: flex;
-    .avatar {
-      margin-left: 10px;
-    }
-
-    .name-account {
-      width: 100px;
-      margin-left: 10px;
-
-      .nick-name {
-        padding: 0;
-      }
-
-      .account {
-        padding: 0;
-        color: gray;
-      }
-    }
-  }
-
-  .organization {
-    width: 100px;
-    margin-left: 20px;
-  }
-
   .diff-display {
     height: 100%;
     margin-left: 20px;
