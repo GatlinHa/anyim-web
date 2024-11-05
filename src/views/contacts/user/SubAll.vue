@@ -89,7 +89,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
         placeholder="搜索：昵称/账号"
         :prefix-icon="Search"
         :clearable="true"
-        style="width: 150px"
       />
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
