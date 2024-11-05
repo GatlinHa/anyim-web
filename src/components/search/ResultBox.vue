@@ -54,6 +54,10 @@ const onOpenSession = (obj) => {
   overflow-y: auto;
 }
 
+.contact-item:hover {
+  background-color: #c6e2ff;
+}
+
 // 全局样式是hover才能看到滑块，这里需要一直显示滑块
 .my-scrollbar {
   &::-webkit-scrollbar-thumb {

@@ -62,10 +62,6 @@ const onOpenSession = () => {
   user-select: none;
   position: relative;
 
-  &:hover {
-    background-color: #c6e2ff;
-  }
-
   .body {
     margin-left: 5px;
     flex: 1;
