@@ -1,6 +1,6 @@
 <script setup>
 import HashNoData from '../common/HasNoData.vue'
-import ContactItem from './ResultItem/ContactItem.vue'
+import ContactItem from '@/components/item/ContactItem.vue'
 import { searchStore } from '@/stores'
 
 const props = defineProps(['searchTab'])
