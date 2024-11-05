@@ -16,11 +16,14 @@ import {
 } from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { messageStore } from '@/stores'
+import { messageStore, userStore } from '@/stores'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
+import SelectDialog from '@/components/common/SelectDialog.vue'
+import { combineId } from '@/js/utils/common'
 
 const messageData = messageStore()
+const userData = userStore()
 const partitionSearchKey = ref('')
 const userSearchKey = ref('')
 const isShowAddPartitionDialog = ref(false)
@@ -29,10 +32,9 @@ const oprMenuRef = ref()
 const showOprMenuPartitionId = ref(0)
 const selectedIndex = ref('')
 
-const isAddSession = ref(false)
+const isShowSelectDialog = ref(false)
 const addSessionSelected = ref([])
 const addSessionPartitionId = ref(null)
-const addSessionTransferRef = ref()
 
 onMounted(async () => {
   if (!Object.keys(messageData.sessionList).length) {
@@ -77,13 +79,10 @@ const detailData = computed(() => {
 })
 
 const hasNoParitionSessions = computed(() => {
-  const data = []
+  const data = {}
   Object.values(messageData.sessionList).forEach((item) => {
     if (item.partitionId === 0) {
-      data.push({
-        key: item.sessionId,
-        label: item.objectInfo.nickName
-      })
+      data[item.objectInfo.account] = item.objectInfo
     }
   })
   return data
@@ -186,23 +185,18 @@ const showOperationMenu = (e, partitionId) => {
 const onShowAddSessionByButton = (partitionId) => {
   addSessionPartitionId.value = partitionId
   addSessionSelected.value = []
-  isAddSession.value = true
+  isShowSelectDialog.value = true
 }
 
-const onCloseAddSession = () => {
-  addSessionTransferRef.value.clearQuery('left')
-  addSessionTransferRef.value.clearQuery('right')
-  isAddSession.value = false
-}
-
-const onSaveAddSession = () => {
-  addSessionSelected.value.forEach((sessionId) => {
+const onConfirmSelect = (selected) => {
+  addSessionSelected.value = selected
+  addSessionSelected.value.forEach((account) => {
+    const sessionId = combineId(account, userData.user.account)
     messageData.updateSession({
       sessionId: sessionId,
       partitionId: partitions.value[addSessionPartitionId.value].partitionId
     })
   })
-  isAddSession.value = false
 }
 
 const isShowUserCard = ref(false)
@@ -314,17 +308,12 @@ const onShowUserCard = async ({ sessionId, account }) => {
     @close="isShowRenamePartitionDialog = false"
     @confirm="onRenamePartitionConfirm"
   ></EditDialog>
-  <el-dialog
-    class="add-session-dialog"
-    v-model="isAddSession"
-    :modal="false"
-    :top="'30vh'"
-    :width="'610px'"
-    :z-index="1"
-    style="border-radius: 10px"
-    @close="onCloseAddSession"
+  <SelectDialog
+    v-model="isShowSelectDialog"
+    :options="hasNoParitionSessions"
+    @confirm="onConfirmSelect"
   >
-    <template #header>
+    <template #title>
       <div style="display: flex; flex-direction: row; justify-content: start; align-items: center">
         <div style="font-size: 16px; font-weight: bold; white-space: nowrap">为分组</div>
         <div
@@ -342,22 +331,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
         <div style="font-size: 16px; font-weight: bold; white-space: nowrap">添加联系人</div>
       </div>
     </template>
-    <el-transfer
-      ref="addSessionTransferRef"
-      v-model="addSessionSelected"
-      :data="hasNoParitionSessions"
-      filterable
-      filter-placeholder="请输入昵称"
-      :titles="['未分组联系人', '已选择']"
-      style="margin: 20px 8px 20px 8px"
-    />
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="info" @click="isAddSession = false" plain>取消</el-button>
-        <el-button type="primary" @click="onSaveAddSession" plain>保存</el-button>
-      </div>
-    </template>
-  </el-dialog>
+  </SelectDialog>
   <UserCard
     :isShow="isShowUserCard"
     :userInfo="userInfo"
