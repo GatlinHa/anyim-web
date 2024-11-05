@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick } from 'vue'
 import { ChatRound, Phone, VideoCamera, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import ContactItem from '@/components/item/ContactItem.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 import { messageStore } from '@/stores'
@@ -97,23 +97,11 @@ const goToSessionTab = () => {
 <template>
   <div class="contacts-user-item">
     <div class="content-wrapper">
-      <div class="avatar-name-account">
-        <AvatarIcon
-          class="avatar"
-          :showName="props.session.objectInfo.nickName"
-          :showId="props.session.objectInfo.account"
-          :showAvatarThumb="props.session.objectInfo.avatarThumb"
-          :userStatus="props.session.objectInfo.status"
-          @click="onShowCard"
-        ></AvatarIcon>
-        <div class="name-account">
-          <div class="nick-name text-ellipsis">{{ props.session.objectInfo.nickName }}</div>
-          <div class="account text-ellipsis">{{ props.session.objectInfo.account }}</div>
-        </div>
-      </div>
-      <div class="organization text-ellipsis" :title="props.session.objectInfo.organization">
-        {{ props.session.objectInfo.organization || '没有部门' }}
-      </div>
+      <ContactItem
+        :contactInfo="props.session.objectInfo"
+        @showContactCard="onShowCard"
+        style="width: 200px"
+      ></ContactItem>
       <div class="diff-display">
         <div v-if="props.type === 'all'" class="all">
           <div class="tips-block">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
