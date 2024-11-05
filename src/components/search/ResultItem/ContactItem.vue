@@ -1,9 +1,22 @@
 <script setup>
+import { computed } from 'vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { MsgType } from '@/proto/msg'
 
-const props = defineProps(['contactInfo'])
+const props = defineProps(['contactInfo', 'size'])
 const emit = defineEmits(['showContactCard', 'openSession'])
+
+const contactItemHeight = computed(() => {
+  switch (props.size) {
+    case 'large':
+      return 64
+    case 'small':
+      return 32
+    case 'default':
+    default:
+      return 48
+  }
+})
 
 const onShowCard = () => {
   emit('showContactCard', props.contactInfo)
@@ -15,13 +28,14 @@ const onOpenSession = () => {
 </script>
 
 <template>
-  <div class="contact-item">
+  <div class="contact-item" :style="{ height: contactItemHeight + 'px' }">
     <AvatarIcon
       class="avatar-contact-item"
       :showName="props.contactInfo.nickName"
       :showId="props.contactInfo.account"
       :showAvatarThumb="props.contactInfo.avatarThumb"
       :userStatus="props.contactInfo.status"
+      :size="props.size"
       @click="onShowCard"
     ></AvatarIcon>
     <div class="body" @click="onOpenSession">
@@ -53,7 +67,7 @@ const onOpenSession = () => {
   }
 
   .body {
-    margin-left: 10px;
+    margin-left: 5px;
     flex: 1;
     overflow: hidden;
 

@@ -5,7 +5,29 @@ import { STATUS } from '@/const/userConst'
 
 const props = defineProps(['showName', 'showId', 'showAvatarThumb', 'userStatus', 'size'])
 
-const avatarSize = props.size || 40
+const avatarSize = computed(() => {
+  switch (props.size) {
+    case 'large':
+      return 50
+    case 'small':
+      return 30
+    case 'default':
+    default:
+      return 40
+  }
+})
+
+const statusCircleSize = computed(() => {
+  switch (props.size) {
+    case 'large':
+      return 16
+    case 'small':
+      return 8
+    case 'default':
+    default:
+      return 12
+  }
+})
 
 const isShowImg = computed(() => {
   return props.showAvatarThumb ? true : false
@@ -42,7 +64,11 @@ const statusCircleColor = computed(() => {
     <div
       v-if="props.userStatus != null"
       class="status-circle"
-      :style="{ backgroundColor: statusCircleColor }"
+      :style="{
+        width: statusCircleSize + 'px',
+        height: statusCircleSize + 'px',
+        backgroundColor: statusCircleColor
+      }"
     ></div>
   </div>
 </template>
@@ -65,8 +91,6 @@ const statusCircleColor = computed(() => {
   }
 
   .status-circle {
-    width: 12px;
-    height: 12px;
     border: 1px solid #fff;
     border-radius: 50%;
     position: absolute;
