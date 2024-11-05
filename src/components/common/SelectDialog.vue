@@ -1,9 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
+import ContactItem from '@/components/item/ContactItem.vue'
 
 const props = defineProps(['modelValue', 'options', 'defaultSelected'])
-const emit = defineEmits(['update:modelValue', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
 
 const selected = ref(props.defaultSelected || [])
 const searchKey = ref('')
@@ -25,6 +26,10 @@ const optionsBySearch = computed(() => {
     return data
   }
 })
+
+const onShowCard = ({ account }) => {
+  emit('showUserCard', account)
+}
 
 const onConfirm = () => {
   emit('confirm', selected.value)
@@ -71,7 +76,12 @@ const onRemoveSelectedItem = (index) => {
         <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
           <el-checkbox-group v-model="selected">
             <el-checkbox v-for="item in Object.keys(optionsBySearch)" :key="item" :value="item">
-              {{ `${optionsBySearch[item]?.nickName} ${optionsBySearch[item]?.account}` }}
+              <ContactItem
+                :contactInfo="optionsBySearch[item]"
+                :size="'small'"
+                @showContactCard="onShowCard(optionsBySearch[item])"
+                style="width: 200px"
+              ></ContactItem>
             </el-checkbox>
           </el-checkbox-group>
         </div>
@@ -85,7 +95,12 @@ const onRemoveSelectedItem = (index) => {
         </div>
         <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
           <div class="selected-item" v-for="(item, index) in selected" :key="item.key">
-            <div>{{ `${optionsBySearch[item].nickName} ${optionsBySearch[item].account}` }}</div>
+            <ContactItem
+              :contactInfo="optionsBySearch[item]"
+              :size="'small'"
+              @showContactCard="onShowCard(optionsBySearch[item])"
+              style="width: 200px"
+            ></ContactItem>
             <el-button :icon="Close" size="small" circle @click="onRemoveSelectedItem(index)" />
           </div>
         </div>
@@ -106,11 +121,12 @@ const onRemoveSelectedItem = (index) => {
   margin: 10px 0 10px 0;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
 
   .left {
-    width: 50%;
+    width: 49%;
     padding: 10px;
+    overflow: hidden;
+
     .head {
       display: flex;
       align-items: center;
@@ -121,7 +137,7 @@ const onRemoveSelectedItem = (index) => {
       flex-direction: column;
 
       .el-checkbox {
-        width: 90%;
+        height: 45px;
         margin: 0;
         padding: 0 10px 0 10px;
         border-radius: 4px;
@@ -137,6 +153,8 @@ const onRemoveSelectedItem = (index) => {
   .right {
     padding: 10px;
     flex: 1;
+    overflow: hidden;
+
     .head {
       height: 30px;
       margin-bottom: 10px;
@@ -146,8 +164,7 @@ const onRemoveSelectedItem = (index) => {
     }
 
     .selected-item {
-      height: 30px;
-      width: 90%;
+      height: 45px;
       padding: 0 10px 0 10px;
       border-radius: 4px;
       display: flex;

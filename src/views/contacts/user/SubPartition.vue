@@ -218,6 +218,14 @@ const onShowUserCard = async ({ sessionId, account }) => {
   loadingInstance.close()
   isShowUserCard.value = true
 }
+
+const onShowUserCardFromSelectDialog = (account) => {
+  const sessionId = combineId(account, userData.user.account)
+  onShowUserCard({
+    sessionId: sessionId,
+    account: account
+  })
+}
 </script>
 
 <template>
@@ -309,6 +317,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
   <SelectDialog
     v-model="isShowSelectDialog"
     :options="hasNoParitionSessions"
+    @showUserCard="onShowUserCardFromSelectDialog"
     @confirm="onConfirmSelect"
   >
     <template #title>

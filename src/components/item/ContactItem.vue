@@ -18,7 +18,8 @@ const contactItemHeight = computed(() => {
   }
 })
 
-const onShowCard = () => {
+const onShowCard = (event) => {
+  event.preventDefault()
   emit('showContactCard', props.contactInfo)
 }
 
@@ -75,12 +76,10 @@ const onOpenSession = () => {
       .name {
         margin-right: 5px;
         font-size: 14px;
-        color: #000;
       }
 
       .account {
         font-size: 12px;
-        color: gray;
         white-space: nowrap; /*不换行*/
       }
     }
