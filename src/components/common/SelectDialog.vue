@@ -74,11 +74,7 @@ const onRemoveSelectedItem = (index) => {
           :prefix-icon="Search"
           :clearable="true"
         />
-        <div
-          v-if="optionKeys.length > 0"
-          class="my-scrollbar"
-          style="height: 300px; overflow-y: scroll"
-        >
+        <div v-if="optionKeys.length > 0" class="my-scrollbar" style="overflow-y: scroll">
           <el-checkbox-group v-model="selected">
             <el-checkbox v-for="item in optionKeys" :key="item" :value="item">
               <ContactItem
@@ -99,7 +95,7 @@ const onRemoveSelectedItem = (index) => {
           </div>
           <el-button type="info" size="small" @click="onClearSelected" plain>清空</el-button>
         </div>
-        <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
+        <div v-if="selected.length > 0" class="my-scrollbar" style="overflow-y: scroll">
           <div class="selected-item" v-for="(item, index) in selected" :key="item.key">
             <ContactItem
               :contactInfo="props.options[item]"
@@ -110,6 +106,7 @@ const onRemoveSelectedItem = (index) => {
             <el-button :icon="Close" size="small" circle @click="onRemoveSelectedItem(index)" />
           </div>
         </div>
+        <HashNoData v-else></HashNoData>
       </div>
     </div>
 
@@ -124,6 +121,7 @@ const onRemoveSelectedItem = (index) => {
 
 <style lang="scss" scoped>
 .main {
+  height: 360px;
   margin: 10px 0 10px 0;
   display: flex;
   flex-direction: row;
