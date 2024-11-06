@@ -29,14 +29,14 @@ const menu = computed(() => {
       icon: muted.value ? Bell : MuteNotification
     },
     {
-      label: 'delete',
-      desc: '删除会话',
-      icon: Delete
-    },
-    {
       label: 'mark',
       desc: '修改备注',
       icon: Edit
+    },
+    {
+      label: 'delete',
+      desc: '删除会话',
+      icon: Delete
     }
   ]
 })
