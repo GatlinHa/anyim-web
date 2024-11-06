@@ -108,7 +108,7 @@ const onRemoveSelectedItem = (index) => {
       <div class="left bdr-r">
         <el-input
           v-model.trim="searchKey"
-          placeholder="全局搜索：昵称/账号"
+          placeholder="搜索：昵称/账号"
           :prefix-icon="Search"
           :clearable="true"
           @input="onQuery"
@@ -183,14 +183,17 @@ const onRemoveSelectedItem = (index) => {
 
       .el-checkbox {
         height: 45px;
-        margin: 0;
+        margin: 0 2px 2px 0;
         padding: 0 10px 0 10px;
-        border-radius: 4px;
-        border: 1px solid transparent;
+        border-radius: 8px;
 
         &:hover {
-          border: 1px solid rgb(199.5, 201, 204);
+          background-color: #dedfe0;
         }
+      }
+
+      .is-checked {
+        background-color: #dedfe0;
       }
     }
   }
@@ -212,12 +215,12 @@ const onRemoveSelectedItem = (index) => {
 
     .selected-item {
       height: 45px;
+      margin: 0 0 2px 0;
       padding: 0 10px 0 10px;
       border-radius: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid transparent;
       --close-button-color: transparent;
 
       &:hover {
