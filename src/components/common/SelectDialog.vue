@@ -9,25 +9,25 @@ const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
 const selected = ref(props.defaultSelected || [])
 const searchKey = ref('')
 
-const optionsBySearch = computed(() => {
+const optionKeys = computed(() => {
   if (!searchKey.value) {
-    return props.options
+    return Object.keys(props.options)
   } else {
-    const data = {}
+    const data = []
     Object.keys(props.options).forEach((key) => {
       const item = props.options[key]
       if (
         item.account === searchKey.value ||
         item.nickName.toLowerCase().includes(searchKey.value.toLowerCase())
       ) {
-        data[key] = item
+        data.push(key)
       }
     })
     return data
   }
 })
 
-const onShowCard = ({ account }) => {
+const onShowUserCard = (account) => {
   emit('showUserCard', account)
 }
 
@@ -75,11 +75,11 @@ const onRemoveSelectedItem = (index) => {
         />
         <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
           <el-checkbox-group v-model="selected">
-            <el-checkbox v-for="item in Object.keys(optionsBySearch)" :key="item" :value="item">
+            <el-checkbox v-for="item in optionKeys" :key="item" :value="item">
               <ContactItem
-                :contactInfo="optionsBySearch[item]"
+                :contactInfo="props.options[item]"
                 :size="'small'"
-                @showContactCard="onShowCard(optionsBySearch[item])"
+                @showContactCard="onShowUserCard(props.options[item].account)"
                 style="width: 200px"
               ></ContactItem>
             </el-checkbox>
@@ -91,14 +91,14 @@ const onRemoveSelectedItem = (index) => {
           <div style="font-size: 13px; color: gray">
             {{ `已选择：${selected.length} 人` }}
           </div>
-          <el-button type="info" size="small" @click="onClearSelected" round>清空</el-button>
+          <el-button type="info" size="small" @click="onClearSelected" plain>清空</el-button>
         </div>
         <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
           <div class="selected-item" v-for="(item, index) in selected" :key="item.key">
             <ContactItem
-              :contactInfo="optionsBySearch[item]"
+              :contactInfo="props.options[item]"
               :size="'small'"
-              @showContactCard="onShowCard(optionsBySearch[item])"
+              @showContactCard="onShowCard(props.options[item])"
               style="width: 200px"
             ></ContactItem>
             <el-button :icon="Close" size="small" circle @click="onRemoveSelectedItem(index)" />
