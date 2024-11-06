@@ -669,7 +669,7 @@ export const Body = ($root.Body = (() => {
    * @property {string|null} [fromClient] Body fromClient
    * @property {string|null} [toId] Body toId
    * @property {string|null} [toClient] Body toClient
-   * @property {number|Long|null} [groupId] Body groupId
+   * @property {string|null} [groupId] Body groupId
    * @property {number|Long|null} [msgId] Body msgId
    * @property {number|null} [seq] Body seq
    * @property {number|null} [ack] Body ack
@@ -754,7 +754,7 @@ export const Body = ($root.Body = (() => {
 
   /**
    * Body groupId.
-   * @member {number|Long|null|undefined} groupId
+   * @member {string|null|undefined} groupId
    * @memberof Body
    * @instance
    */
@@ -909,7 +909,7 @@ export const Body = ($root.Body = (() => {
     if (message.toClient != null && Object.hasOwnProperty.call(message, 'toClient'))
       writer.uint32(/* id 4, wireType 2 =*/ 34).string(message.toClient)
     if (message.groupId != null && Object.hasOwnProperty.call(message, 'groupId'))
-      writer.uint32(/* id 5, wireType 0 =*/ 40).int64(message.groupId)
+      writer.uint32(/* id 5, wireType 2 =*/ 42).string(message.groupId)
     if (message.msgId != null && Object.hasOwnProperty.call(message, 'msgId'))
       writer.uint32(/* id 6, wireType 0 =*/ 48).int64(message.msgId)
     if (message.seq != null && Object.hasOwnProperty.call(message, 'seq'))
@@ -973,7 +973,7 @@ export const Body = ($root.Body = (() => {
           break
         }
         case 5: {
-          message.groupId = reader.int64()
+          message.groupId = reader.string()
           break
         }
         case 6: {
@@ -1052,15 +1052,7 @@ export const Body = ($root.Body = (() => {
     }
     if (message.groupId != null && message.hasOwnProperty('groupId')) {
       properties._groupId = 1
-      if (
-        !$util.isInteger(message.groupId) &&
-        !(
-          message.groupId &&
-          $util.isInteger(message.groupId.low) &&
-          $util.isInteger(message.groupId.high)
-        )
-      )
-        return 'groupId: integer|Long expected'
+      if (!$util.isString(message.groupId)) return 'groupId: string expected'
     }
     if (message.msgId != null && message.hasOwnProperty('msgId')) {
       properties._msgId = 1
@@ -1112,15 +1104,7 @@ export const Body = ($root.Body = (() => {
     if (object.fromClient != null) message.fromClient = String(object.fromClient)
     if (object.toId != null) message.toId = String(object.toId)
     if (object.toClient != null) message.toClient = String(object.toClient)
-    if (object.groupId != null)
-      if ($util.Long) (message.groupId = $util.Long.fromValue(object.groupId)).unsigned = false
-      else if (typeof object.groupId === 'string') message.groupId = parseInt(object.groupId, 10)
-      else if (typeof object.groupId === 'number') message.groupId = object.groupId
-      else if (typeof object.groupId === 'object')
-        message.groupId = new $util.LongBits(
-          object.groupId.low >>> 0,
-          object.groupId.high >>> 0
-        ).toNumber()
+    if (object.groupId != null) message.groupId = String(object.groupId)
     if (object.msgId != null)
       if ($util.Long) (message.msgId = $util.Long.fromValue(object.msgId)).unsigned = false
       else if (typeof object.msgId === 'string') message.msgId = parseInt(object.msgId, 10)
@@ -1167,15 +1151,7 @@ export const Body = ($root.Body = (() => {
       if (options.oneofs) object._toClient = 'toClient'
     }
     if (message.groupId != null && message.hasOwnProperty('groupId')) {
-      if (typeof message.groupId === 'number')
-        object.groupId = options.longs === String ? String(message.groupId) : message.groupId
-      else
-        object.groupId =
-          options.longs === String
-            ? $util.Long.prototype.toString.call(message.groupId)
-            : options.longs === Number
-              ? new $util.LongBits(message.groupId.low >>> 0, message.groupId.high >>> 0).toNumber()
-              : message.groupId
+      object.groupId = message.groupId
       if (options.oneofs) object._groupId = 'groupId'
     }
     if (message.msgId != null && message.hasOwnProperty('msgId')) {
