@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { userQueryService } from '@/api/user'
 import { messageStore } from '@/stores'
 import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
@@ -14,6 +14,10 @@ const messageData = messageStore()
 
 const totalCount = computed(() => {
   return Object.keys(allData.value).length
+})
+
+onMounted(async () => {
+  await messageData.loadSessionList()
 })
 
 const searchKey = ref('')

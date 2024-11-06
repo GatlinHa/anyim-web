@@ -146,15 +146,21 @@ export const messageStore = defineStore('anyim-message', () => {
   }
 
   /**
-   * 加载必要的数据
+   * 加载会话列表
    * @returns
    */
-  const load = async () => {
+  const loadSessionList = async () => {
     if (!Object.keys(sessionList.value).length) {
       const res = await msgChatSessionListService()
       setSessionList(res.data.data)
     }
+  }
 
+  /**
+   * 加载分组信息
+   * @returns
+   */
+  const loadPartitions = async () => {
     if (Object.keys(partitions.value).length === 0) {
       const res = await msgQueryPartitionService()
       const data = {}
@@ -171,14 +177,15 @@ export const messageStore = defineStore('anyim-message', () => {
     addSession,
     deleteSession,
     updateSession,
+    loadSessionList,
 
     msgRecordsList,
     addMsgRecords,
 
     partitions,
     setPartitions,
+    loadPartitions,
 
-    load,
     clear
   }
 })
