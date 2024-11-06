@@ -65,6 +65,10 @@ const onConfirm = () => {
   emit('update:modelValue', false)
 }
 
+const onOpen = () => {
+  searchKey.value = ''
+}
+
 const onClose = () => {
   emit('update:modelValue', false)
   selected.value = []
@@ -93,6 +97,7 @@ const onRemoveSelectedItem = (index) => {
     :width="'610px'"
     :z-index="1"
     style="border-radius: 10px"
+    @open="onOpen"
     @close="onClose"
   >
     <template #header>
