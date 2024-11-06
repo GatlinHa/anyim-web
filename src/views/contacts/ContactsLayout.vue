@@ -2,29 +2,6 @@
 import contactsIcon from '@/assets/svg/contacts.svg'
 import groupIcon from '@/assets/svg/group.svg'
 import organizationIcon from '@/assets/svg/organization.svg'
-import { onMounted } from 'vue'
-import { messageStore } from '@/stores'
-import { msgQueryPartitionService, msgChatSessionListService } from '@/api/message'
-
-const messageData = messageStore()
-
-onMounted(() => {
-  if (Object.keys(messageData.partitions).length === 0) {
-    msgQueryPartitionService().then((res) => {
-      const partitions = {}
-      res.data.data.forEach((item) => {
-        partitions[item.partitionId] = item
-      })
-      messageData.setPartitions(partitions)
-    })
-  }
-
-  if (!Object.keys(messageData.sessionList).length) {
-    msgChatSessionListService().then((res) => {
-      messageData.setSessionList(res.data.data) //入缓存
-    })
-  }
-})
 </script>
 
 <template>

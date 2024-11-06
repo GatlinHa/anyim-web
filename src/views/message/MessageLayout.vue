@@ -27,12 +27,7 @@ import UserCard from '@/components/user/UserCard.vue'
 import GroupCard from '@/components/group/GroupCard.vue'
 import { userStore, settingStore, messageStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import {
-  msgChatSessionListService,
-  msgChatPullMsgService,
-  msgChatCreateSessionService,
-  msgQueryPartitionService
-} from '@/api/message'
+import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
@@ -150,14 +145,11 @@ const selectedSession = computed(() => {
 })
 
 onMounted(async () => {
+  await messageData.loadSessionList()
+  await messageData.loadPartitions()
+
   asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
-
-  // 如果有缓存了，就不查
-  if (!Object.keys(messageData.sessionList).length) {
-    const res = await msgChatSessionListService()
-    messageData.setSessionList(res.data.data) //入缓存
-  }
 
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
@@ -180,16 +172,6 @@ onMounted(async () => {
   // 这里要接收从其他页面跳转过来传递的sessionId参数
   if (router.currentRoute.value.query.sessionId) {
     handleSelectedSession(router.currentRoute.value.query.sessionId)
-  }
-
-  if (Object.keys(messageData.partitions).length === 0) {
-    msgQueryPartitionService().then((res) => {
-      const partitions = {}
-      res.data.data.forEach((item) => {
-        partitions[item.partitionId] = item
-      })
-      messageData.setPartitions(partitions)
-    })
   }
 })
 
