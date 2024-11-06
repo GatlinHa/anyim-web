@@ -50,31 +50,32 @@ let timer
 const onQuery = () => {
   if (!keyWords.value) return
   clearTimeout(timer)
+  const key = keyWords.value //在异步执行中，变量禁止使用响应式，因为在将来执行的时候响应式数据随时会发生改变
   timer = setTimeout(async () => {
-    searchData.setKeywords(keyWords.value)
+    searchData.setKeywords(key)
     let response
     let result = {}
     switch (searchTab.value) {
       case 'contact':
-        response = await userQueryByNickService({ nickNameKeyWords: keyWords.value })
+        response = await userQueryByNickService({ nickNameKeyWords: key })
         response.data.data?.forEach((element) => {
           result[element.account] = element
         })
-        response = await userQueryService({ account: keyWords.value }) // 账号是精确匹配，只查一个结果
+        response = await userQueryService({ account: key }) // 账号是精确匹配，只查一个结果
         if (response.data.data) result[response.data.data.account] = response.data.data
         searchData.addContactResult(result)
         break
       case 'group':
-        console.log('group 待完成，搜索关键字：', keyWords.value)
+        console.log('group 待完成，搜索关键字：', key)
         break
       case 'organization':
-        console.log('organization 待完成，搜索关键字：', keyWords.value)
+        console.log('organization 待完成，搜索关键字：', key)
         break
       case 'hisotry':
-        console.log('hisotry 待完成，搜索关键字：', keyWords.value)
+        console.log('hisotry 待完成，搜索关键字：', key)
         break
       case 'todo':
-        console.log('todo 待完成，搜索关键字：', keyWords.value)
+        console.log('todo 待完成，搜索关键字：', key)
         break
       default:
         break

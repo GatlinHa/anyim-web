@@ -42,13 +42,14 @@ let timer
 const onQuery = () => {
   if (!searchKey.value || props.searchModel !== 'server') return
   clearTimeout(timer)
+  const key = searchKey.value //在异步执行中，变量禁止使用响应式，因为在将来执行的时候响应式数据随时会发生改变
   timer = setTimeout(async () => {
-    userQueryByNickService({ nickNameKeyWords: searchKey.value }).then((res) => {
+    userQueryByNickService({ nickNameKeyWords: key }).then((res) => {
       res.data.data?.forEach((item) => {
         optionsFromServer.value[item.account] = item
       })
     })
-    userQueryService({ account: searchKey.value }).then((res) => {
+    userQueryService({ account: key }).then((res) => {
       if (res.data.data) {
         optionsFromServer.value[res.data.data.account] = res.data.data
       }
