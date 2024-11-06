@@ -3,20 +3,30 @@ import { ref, computed } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import ContactItem from '@/components/item/ContactItem.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
+import { userQueryService, userQueryByNickService } from '@/api/user'
 
-const props = defineProps(['modelValue', 'options', 'defaultSelected'])
+// searchModel：default/local 仅搜索本地session，server 还搜索云端数据
+const props = defineProps(['modelValue', 'options', 'defaultSelected', 'searchModel'])
 const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
 
 const selected = ref(props.defaultSelected || [])
 const searchKey = ref('')
+const optionsFromServer = ref({})
+
+const optionsAll = computed(() => {
+  return {
+    ...props.options,
+    ...optionsFromServer.value
+  }
+})
 
 const optionKeys = computed(() => {
   if (!searchKey.value) {
-    return Object.keys(props.options)
+    return Object.keys(optionsAll.value)
   } else {
     const data = []
-    Object.keys(props.options).forEach((key) => {
-      const item = props.options[key]
+    Object.keys(optionsAll.value).forEach((key) => {
+      const item = optionsAll.value[key]
       if (
         item.account === searchKey.value ||
         item.nickName.toLowerCase().includes(searchKey.value.toLowerCase())
@@ -28,6 +38,24 @@ const optionKeys = computed(() => {
   }
 })
 
+let timer
+const onQuery = () => {
+  if (!searchKey.value || props.searchModel !== 'server') return
+  clearTimeout(timer)
+  timer = setTimeout(async () => {
+    userQueryByNickService({ nickNameKeyWords: searchKey.value }).then((res) => {
+      res.data.data?.forEach((item) => {
+        optionsFromServer.value[item.account] = item
+      })
+    })
+    userQueryService({ account: searchKey.value }).then((res) => {
+      if (res.data.data) {
+        optionsFromServer.value[res.data.data.account] = res.data.data
+      }
+    })
+  }, 300)
+}
+
 const onShowUserCard = (account) => {
   emit('showUserCard', account)
 }
@@ -35,12 +63,16 @@ const onShowUserCard = (account) => {
 const onConfirm = () => {
   emit('confirm', selected.value)
   emit('update:modelValue', false)
-  onClearSelected()
 }
 
 const onClose = () => {
   emit('update:modelValue', false)
-  onClearSelected()
+  selected.value = []
+  optionsFromServer.value = {}
+}
+
+const onCancle = () => {
+  emit('update:modelValue', false)
 }
 
 const onClearSelected = () => {
@@ -70,17 +102,18 @@ const onRemoveSelectedItem = (index) => {
       <div class="left bdr-r">
         <el-input
           v-model.trim="searchKey"
-          placeholder="搜索：昵称/账号"
+          placeholder="全局搜索：昵称/账号"
           :prefix-icon="Search"
           :clearable="true"
+          @input="onQuery"
         />
-        <div v-if="optionKeys.length > 0" class="my-scrollbar" style="overflow-y: scroll">
+        <div v-if="optionKeys.length > 0" class="my-scrollbar" style="flex: 1; overflow-y: scroll">
           <el-checkbox-group v-model="selected">
             <el-checkbox v-for="item in optionKeys" :key="item" :value="item">
               <ContactItem
-                :contactInfo="props.options[item]"
+                :contactInfo="optionsAll[item]"
                 :size="'small'"
-                @showContactCard="onShowUserCard(props.options[item].account)"
+                @showContactCard="onShowUserCard(optionsAll[item].account)"
                 style="width: 200px"
               ></ContactItem>
             </el-checkbox>
@@ -95,12 +128,12 @@ const onRemoveSelectedItem = (index) => {
           </div>
           <el-button type="info" size="small" @click="onClearSelected" plain>清空</el-button>
         </div>
-        <div v-if="selected.length > 0" class="my-scrollbar" style="overflow-y: scroll">
+        <div v-if="selected.length > 0" class="my-scrollbar" style="flex: 1; overflow-y: scroll">
           <div class="selected-item" v-for="(item, index) in selected" :key="item.key">
             <ContactItem
-              :contactInfo="props.options[item]"
+              :contactInfo="optionsAll[item]"
               :size="'small'"
-              @showContactCard="onShowCard(props.options[item])"
+              @showContactCard="onShowCard(optionsAll[item])"
               style="width: 200px"
             ></ContactItem>
             <el-button :icon="Close" size="small" circle @click="onRemoveSelectedItem(index)" />
@@ -112,7 +145,7 @@ const onRemoveSelectedItem = (index) => {
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="info" @click="onClose" plain>取消</el-button>
+        <el-button type="info" @click="onCancle" plain>取消</el-button>
         <el-button type="primary" @click="onConfirm" plain>确认</el-button>
       </div>
     </template>
@@ -129,6 +162,8 @@ const onRemoveSelectedItem = (index) => {
   .left {
     width: 49%;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 
     .head {
@@ -157,6 +192,8 @@ const onRemoveSelectedItem = (index) => {
   .right {
     padding: 10px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 
     .head {
