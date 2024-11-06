@@ -63,7 +63,6 @@ const onShowUserCard = (account) => {
 
 const onConfirm = () => {
   emit('confirm', selected.value)
-  emit('update:modelValue', false)
 }
 
 const onOpen = () => {

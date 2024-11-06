@@ -8,8 +8,9 @@ import SelectDialog from '@/components/common/SelectDialog.vue'
 import { messageStore, userStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
-import { ElLoading } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
+import { groupCreateService } from '@/api/group'
 
 const messageData = messageStore()
 const userData = userStore()
@@ -57,8 +58,18 @@ const onShowUserCard = async (account) => {
   isShowUserCard.value = true
 }
 
-const onConfirmSelect = (selected) => {
-  console.log('onConfirmSelect, selected: ', selected)
+const onConfirmSelect = async (selected) => {
+  if (selected.length < 2) {
+    ElMessage.warning('请至少选择两位群成员')
+    return
+  }
+
+  const res = await groupCreateService({
+    groupType: 1, //普通群
+    accounts: selected
+  })
+  console.log(res.data.data)
+  isShowSelectDialog.value = false
 }
 </script>
 

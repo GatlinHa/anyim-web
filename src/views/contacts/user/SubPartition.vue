@@ -192,6 +192,7 @@ const onConfirmSelect = (selected) => {
       partitionId: partitions.value[addSessionPartitionId.value].partitionId
     })
   })
+  isShowSelectDialog.value = false
 }
 
 const isShowUserCard = ref(false)
