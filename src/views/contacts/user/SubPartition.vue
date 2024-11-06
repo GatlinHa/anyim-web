@@ -36,6 +36,7 @@ const addSessionSelected = ref([])
 const addSessionPartitionId = ref(null)
 
 onMounted(async () => {
+  await messageData.load()
   if (Object.keys(partitions.value).length > 0) {
     selectedIndex.value = Object.keys(partitions.value)[0].toString()
   }

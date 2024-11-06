@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { msgUpdateSessionService } from '@/api/message'
+import {
+  msgUpdateSessionService,
+  msgChatSessionListService,
+  msgQueryPartitionService
+} from '@/api/message'
 import { ElMessage } from 'element-plus'
 
 // 消息功能相关需要缓存的数据，不持久化存储
@@ -141,6 +145,26 @@ export const messageStore = defineStore('anyim-message', () => {
     partitions.value = obj
   }
 
+  /**
+   * 加载必要的数据
+   * @returns
+   */
+  const load = async () => {
+    if (!Object.keys(sessionList.value).length) {
+      const res = await msgChatSessionListService()
+      setSessionList(res.data.data)
+    }
+
+    if (Object.keys(partitions.value).length === 0) {
+      const res = await msgQueryPartitionService()
+      const data = {}
+      res.data.data.forEach((item) => {
+        data[item.partitionId] = item
+      })
+      setPartitions(data)
+    }
+  }
+
   return {
     sessionList,
     setSessionList,
@@ -154,6 +178,7 @@ export const messageStore = defineStore('anyim-message', () => {
     partitions,
     setPartitions,
 
+    load,
     clear
   }
 })
