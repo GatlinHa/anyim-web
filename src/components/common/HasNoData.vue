@@ -17,7 +17,7 @@ const props = defineProps(['size'])
 <style lang="scss" scoped>
 .has-no-data-wrapper {
   width: 100%;
-  height: 100%;
+  height: 70%;
   display: flex;
   flex-direction: column;
   justify-content: center;

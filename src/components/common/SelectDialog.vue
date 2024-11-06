@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import ContactItem from '@/components/item/ContactItem.vue'
+import HashNoData from '@/components/common/HasNoData.vue'
 
 const props = defineProps(['modelValue', 'options', 'defaultSelected'])
 const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
@@ -73,7 +74,11 @@ const onRemoveSelectedItem = (index) => {
           :prefix-icon="Search"
           :clearable="true"
         />
-        <div class="my-scrollbar" style="height: 300px; overflow-y: scroll">
+        <div
+          v-if="optionKeys.length > 0"
+          class="my-scrollbar"
+          style="height: 300px; overflow-y: scroll"
+        >
           <el-checkbox-group v-model="selected">
             <el-checkbox v-for="item in optionKeys" :key="item" :value="item">
               <ContactItem
@@ -85,6 +90,7 @@ const onRemoveSelectedItem = (index) => {
             </el-checkbox>
           </el-checkbox-group>
         </div>
+        <HashNoData v-else></HashNoData>
       </div>
       <div class="right">
         <div class="head bdr-b">
