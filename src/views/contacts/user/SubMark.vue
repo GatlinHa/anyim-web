@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { msgChatSessionListService } from '@/api/message'
+import { ref, computed } from 'vue'
 import { userQueryService } from '@/api/user'
 import { messageStore } from '@/stores'
 import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
@@ -13,13 +12,6 @@ import HashNoData from '@/components/common/HasNoData.vue'
 const messageData = messageStore()
 const totalCount = computed(() => {
   return Object.keys(markData.value).length
-})
-
-onMounted(async () => {
-  if (!Object.keys(messageData.sessionList).length) {
-    const res = await msgChatSessionListService()
-    messageData.setSessionList(res.data.data) //入缓存
-  }
 })
 
 const markSearchKey = ref('')

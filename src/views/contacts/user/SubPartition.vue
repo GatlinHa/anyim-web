@@ -9,7 +9,6 @@ import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import { userQueryService } from '@/api/user'
 import {
-  msgChatSessionListService,
   msgCreatePartitionService,
   msgDeletePartitionService,
   msgUpdatePartitionService
@@ -37,11 +36,6 @@ const addSessionSelected = ref([])
 const addSessionPartitionId = ref(null)
 
 onMounted(async () => {
-  if (!Object.keys(messageData.sessionList).length) {
-    const res = await msgChatSessionListService()
-    messageData.setSessionList(res.data.data) //入缓存
-  }
-
   if (Object.keys(partitions.value).length > 0) {
     selectedIndex.value = Object.keys(partitions.value)[0].toString()
   }
