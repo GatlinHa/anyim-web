@@ -139,7 +139,7 @@ const onRemoveSelectedItem = (index) => {
             <ContactItem
               :contactInfo="optionsAll[item]"
               :size="'small'"
-              @showContactCard="onShowCard(optionsAll[item])"
+              @showContactCard="onShowUserCard(optionsAll[item].account)"
               style="width: 200px"
             ></ContactItem>
             <el-button :icon="Close" size="small" circle @click="onRemoveSelectedItem(index)" />
