@@ -62,7 +62,11 @@ const onShowUserCard = (account) => {
 }
 
 const onConfirm = () => {
-  emit('confirm', selected.value)
+  const data = []
+  selected.value.forEach((account) => {
+    data.push(optionsAll.value[account])
+  })
+  emit('confirm', data)
 }
 
 const onOpen = () => {

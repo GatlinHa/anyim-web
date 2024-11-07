@@ -32,7 +32,6 @@ const showOprMenuPartitionId = ref(0)
 const selectedIndex = ref('')
 
 const isShowSelectDialog = ref(false)
-const addSessionSelected = ref([])
 const addSessionPartitionId = ref(null)
 
 onMounted(async () => {
@@ -179,14 +178,12 @@ const showOperationMenu = (e, partitionId) => {
 
 const onShowAddSessionByButton = (partitionId) => {
   addSessionPartitionId.value = partitionId
-  addSessionSelected.value = []
   isShowSelectDialog.value = true
 }
 
 const onConfirmSelect = (selected) => {
-  addSessionSelected.value = selected
-  addSessionSelected.value.forEach((account) => {
-    const sessionId = combineId(account, userData.user.account)
+  selected.forEach((item) => {
+    const sessionId = combineId(item.account, userData.user.account)
     messageData.updateSession({
       sessionId: sessionId,
       partitionId: partitions.value[addSessionPartitionId.value].partitionId
