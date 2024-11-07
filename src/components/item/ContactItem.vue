@@ -53,7 +53,6 @@ const onOpenSession = () => {
 
 <style lang="scss" scoped>
 .contact-item {
-  height: 48px;
   padding: 2px;
   padding-left: 5px;
   border-radius: 6px;
