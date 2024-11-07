@@ -5,15 +5,17 @@ import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import SelectDialog from '@/components/common/SelectDialog.vue'
-import { messageStore, userStore } from '@/stores'
+import { groupStore, userStore, messageStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService } from '@/api/group'
+import ContactListGroupItem from '@/components/contactList/group/ContactListGroupItem.vue'
 
-const messageData = messageStore()
+const groupData = groupStore()
 const userData = userStore()
+const messageData = messageStore()
 const totalCount = ref(0)
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
@@ -26,7 +28,12 @@ const selectDialogOptions = computed(() => {
 })
 
 onMounted(async () => {
-  await messageData.loadSessionList()
+  messageData.loadSessionList()
+  groupData.loadGroupList()
+})
+
+const allData = computed(() => {
+  return Object.values(groupData.groupList)
 })
 
 const onCreateGroup = () => {
@@ -65,8 +72,9 @@ const onConfirmSelect = async (selected) => {
   }
 
   const res = await groupCreateService({
+    groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群聊`,
     groupType: 1, //普通群
-    accounts: selected
+    accounts: selected.map((item) => item.account)
   })
   console.log(res.data.data)
   isShowSelectDialog.value = false
@@ -88,7 +96,16 @@ const onConfirmSelect = async (selected) => {
       </div>
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <HashNoData :size="100"></HashNoData>
+      <div v-if="allData.length">
+        <ContactListGroupItem
+          v-for="item in allData"
+          :key="item.groupId"
+          :groupInfo="item"
+          @showUserCard="onShowUserCard"
+        >
+        </ContactListGroupItem>
+      </div>
+      <HashNoData v-else :size="100"></HashNoData>
     </el-main>
   </el-container>
   <SelectDialog
