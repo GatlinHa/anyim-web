@@ -10,15 +10,22 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { groupCreateService } from '@/api/group'
+import { groupCreateService, groupSearchByMemberService } from '@/api/group'
 import ContactListGroupItem from '@/components/contactList/group/ContactListGroupItem.vue'
 
 const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
-const totalCount = ref(0)
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
+const allData = ref([])
+
+onMounted(async () => {
+  messageData.loadSessionList()
+  await groupData.loadGroupList() //页面打开要立即展示，所以用await
+  allData.value = Object.values(groupData.groupList)
+})
+
 const selectDialogOptions = computed(() => {
   const data = {}
   Object.values(messageData.sessionList).forEach((item) => {
@@ -27,13 +34,37 @@ const selectDialogOptions = computed(() => {
   return data
 })
 
-onMounted(async () => {
-  messageData.loadSessionList()
-  groupData.loadGroupList()
-})
+// 这里不能使用计算属性的特点去改变allData的值
+// 因为这里有云端查询，会有延迟，会二次改变allData，造成页面数据跳变
+let timer
+const onSearch = () => {
+  if (!searchKey.value) return
+  clearTimeout(timer)
+  const key = searchKey.value
+  timer = setTimeout(() => {
+    const searchResult = []
+    groupSearchByMemberService({ searchKey: key }).then((res) => {
+      res.data.data?.forEach((item) => {
+        searchResult.push(item.groupId)
+      })
 
-const allData = computed(() => {
-  return Object.values(groupData.groupList)
+      const data = []
+      Object.values(groupData.groupList).forEach((item) => {
+        if (
+          item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
+          item.groupId === searchKey.value ||
+          searchResult.includes(item.groupId)
+        ) {
+          data.push(item)
+        }
+      })
+      allData.value = data
+    })
+  }, 300)
+}
+
+const totalCount = computed(() => {
+  return Object.keys(allData.value).length
 })
 
 const onCreateGroup = () => {
@@ -76,7 +107,7 @@ const onConfirmSelect = async (selected) => {
     groupType: 1, //普通群
     accounts: selected.map((item) => item.account)
   })
-  console.log(res.data.data)
+  groupData.addGroup(res.data.data.groupInfo)
   isShowSelectDialog.value = false
 }
 </script>
@@ -87,10 +118,11 @@ const onConfirmSelect = async (selected) => {
       <div style="font-size: 14px">全部({{ totalCount }})</div>
       <div class="search-and-add">
         <el-input
-          v-model="searchKey"
-          placeholder="搜索：群名称/群ID/群成员"
+          v-model.trim="searchKey"
+          placeholder="搜索：群名称/群ID/成员群昵称/成员账号"
           :prefix-icon="Search"
           :clearable="true"
+          @input="onSearch"
         />
         <AddButton :size="20" @click="onCreateGroup"></AddButton>
       </div>
@@ -103,6 +135,9 @@ const onConfirmSelect = async (selected) => {
           :groupInfo="item"
           @showUserCard="onShowUserCard"
         >
+          <template #showMore>
+            <div style="cursor: pointer; color: #409eff">点击查看详情</div>
+          </template>
         </ContactListGroupItem>
       </div>
       <HashNoData v-else :size="100"></HashNoData>
@@ -142,7 +177,7 @@ const onConfirmSelect = async (selected) => {
   align-items: center;
 
   .el-input {
-    width: 210px;
+    width: 300px;
     height: 30px;
     margin-right: 10px;
 

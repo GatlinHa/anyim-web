@@ -8,3 +8,7 @@ export const groupCreateService = (obj) => {
 export const groupListService = () => {
   return request.post('/groupmng/queryGroupList', getReqBody())
 }
+
+export const groupSearchByMemberService = (obj) => {
+  return request.post('/groupmng/searchGroupByMember', getReqBody(obj))
+}

@@ -66,6 +66,7 @@ const onOpenSession = () => {
     margin-left: 5px;
     flex: 1;
     overflow: hidden;
+    user-select: text;
 
     .title {
       height: 20px;

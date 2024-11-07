@@ -22,8 +22,6 @@ onMounted(async () => {
 
 const searchKey = ref('')
 const allData = computed(() => {
-  if (Object.values(messageData.sessionList).length === 0) return []
-
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
     const sessionType = item.sessionType
@@ -42,7 +40,7 @@ const allData = computed(() => {
   })
 
   if (data.length === 0) {
-    return []
+    return data
   } else {
     return data.sort((a, b) => {
       const bTime = new Date(b.lastMsgTime).getTime()

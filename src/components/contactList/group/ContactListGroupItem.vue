@@ -32,7 +32,7 @@ const goToSessionTab = () => {
         @showGroupCard="onShowGroupCard"
         style="width: 300px; margin-right: 20px"
       ></GroupItem>
-      <slot name="showData"></slot>
+      <slot name="showMore"></slot>
       <div class="action">
         <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
         <el-button size="large" :icon="Phone" circle />
