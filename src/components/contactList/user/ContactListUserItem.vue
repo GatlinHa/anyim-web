@@ -124,6 +124,7 @@ const goToSessionTab = () => {
                 type="primary"
                 :icon="Edit"
                 size="small"
+                title="编辑备注"
                 circle
                 @click="onClickEditMark"
               ></el-button>
@@ -131,6 +132,7 @@ const goToSessionTab = () => {
                 type="danger"
                 :icon="Delete"
                 size="small"
+                title="删除备注"
                 circle
                 @click="deleteMark"
                 style="margin-left: 5px"
@@ -153,6 +155,7 @@ const goToSessionTab = () => {
                 type="success"
                 :icon="Check"
                 size="small"
+                title="确认"
                 circle
                 @click="saveMark"
               ></el-button>
@@ -160,6 +163,7 @@ const goToSessionTab = () => {
                 type="info"
                 :icon="Close"
                 size="small"
+                title="取消"
                 circle
                 @click="cancelMark"
                 style="margin-left: 5px"
@@ -182,6 +186,7 @@ const goToSessionTab = () => {
                 type="primary"
                 :icon="Edit"
                 size="small"
+                title="调整分组"
                 circle
                 @click="onClickEditPartition"
               ></el-button>
@@ -189,6 +194,7 @@ const goToSessionTab = () => {
                 type="danger"
                 :icon="Delete"
                 size="small"
+                title="从该分组中移除"
                 circle
                 @click="onClearPartition"
                 style="margin-left: 5px"
@@ -215,6 +221,7 @@ const goToSessionTab = () => {
                 type="success"
                 :icon="Check"
                 size="small"
+                title="确认"
                 circle
                 @click="onChangePartition"
               ></el-button>
@@ -222,6 +229,7 @@ const goToSessionTab = () => {
                 type="info"
                 :icon="Close"
                 size="small"
+                title="取消"
                 circle
                 @click="onCancelPartition"
                 style="margin-left: 5px"
