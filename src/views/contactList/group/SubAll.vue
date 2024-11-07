@@ -18,12 +18,12 @@ const userData = userStore()
 const messageData = messageStore()
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
-const allData = ref([])
+const allData = ref({})
 
 onMounted(async () => {
   messageData.loadSessionList()
   await groupData.loadGroupList() //页面打开要立即展示，所以用await
-  allData.value = Object.values(groupData.groupList)
+  allData.value = groupData.groupList
 })
 
 const selectDialogOptions = computed(() => {
@@ -34,28 +34,64 @@ const selectDialogOptions = computed(() => {
   return data
 })
 
+// 需要给符合条件的groupId保存下查询结果高亮的提示
+const searchResultTips = ref({})
+
 // 这里不能使用计算属性的特点去改变allData的值
 // 因为这里有云端查询，会有延迟，会二次改变allData，造成页面数据跳变
 let timer
 const onSearch = () => {
-  if (!searchKey.value) return
+  if (!searchKey.value) {
+    allData.value = groupData.groupList
+    searchResultTips.value = {}
+    return
+  }
+
   clearTimeout(timer)
   const key = searchKey.value
   timer = setTimeout(() => {
-    const searchResult = []
+    const queryResult = {}
     groupSearchByMemberService({ searchKey: key }).then((res) => {
       res.data.data?.forEach((item) => {
-        searchResult.push(item.groupId)
+        queryResult[item.groupId] = item //如果有多个相同的groupid结果，这里只放最后个（后面覆盖前面）
       })
 
-      const data = []
+      const data = {}
+      searchResultTips.value = {}
       Object.values(groupData.groupList).forEach((item) => {
+        // 1.放群名称和群ID的匹配结果
         if (
           item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
-          item.groupId === searchKey.value ||
-          searchResult.includes(item.groupId)
+          item.groupId === searchKey.value
         ) {
-          data.push(item)
+          data[item.groupId] = item
+        }
+        // 2.放群成员的匹配结果
+        if (item.groupId in queryResult) {
+          data[item.groupId] = item
+
+          // 需要给符合条件的groupId保存下查询结果高亮的提示
+          const regex = new RegExp(searchKey.value, 'gi')
+          if (
+            queryResult[item.groupId].memberNickName
+              .toLowerCase()
+              .includes(searchKey.value.toLowerCase())
+          ) {
+            searchResultTips.value[item.groupId] =
+              '包含：' +
+              queryResult[item.groupId].memberNickName.replace(
+                regex,
+                `<span style="color: #409eff;">$&</span>`
+              )
+          } else if (queryResult[item.groupId].memberAccount === searchKey.value) {
+            searchResultTips.value[item.groupId] =
+              '包含：' +
+              queryResult[item.groupId].memberAccount.replace(
+                regex,
+                `<span style="color: #409eff;">$&</span>`
+              ) +
+              `(${queryResult[item.groupId].memberNickName})`
+          }
         }
       })
       allData.value = data
@@ -128,15 +164,19 @@ const onConfirmSelect = async (selected) => {
       </div>
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <div v-if="allData.length">
+      <div v-if="Object.keys(allData).length">
         <ContactListGroupItem
-          v-for="item in allData"
+          v-for="item in Object.values(allData)"
           :key="item.groupId"
           :groupInfo="item"
+          :keyWords="searchKey"
           @showUserCard="onShowUserCard"
         >
-          <template #showMore>
-            <div style="cursor: pointer; color: #409eff">点击查看详情</div>
+          <template #showMore_1>
+            <div v-html="searchResultTips[item.groupId]" style="min-width: 200px"></div>
+          </template>
+          <template #showMore_2>
+            <div style="cursor: pointer; color: #409eff; min-width: 60px">查看详情</div>
           </template>
         </ContactListGroupItem>
       </div>

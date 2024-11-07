@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import groupChatIcon from '@/assets/svg/groupchat.svg'
 
-const props = defineProps(['groupInfo', 'size'])
+const props = defineProps(['groupInfo', 'keyWords', 'size'])
 const emit = defineEmits(['showGroupCard', 'openSession'])
 
 const itemHeight = computed(() => {
@@ -42,6 +42,24 @@ const svgSize = computed(() => {
   }
 })
 
+const showName = computed(() => {
+  if (!props.keyWords) {
+    return props.groupInfo.groupName
+  } else {
+    const regex = new RegExp(props.keyWords, 'gi')
+    return props.groupInfo.groupName.replace(regex, `<span style="color: #409eff;">$&</span>`)
+  }
+})
+
+const showId = computed(() => {
+  if (!props.keyWords) {
+    return props.groupInfo.groupId
+  } else {
+    const regex = new RegExp(`\\b${props.keyWords}\\b`, 'gi')
+    return props.groupInfo.groupId.replace(regex, `<span style="color: #409eff;">$&</span>`)
+  }
+})
+
 const onShowCard = (event) => {
   event.preventDefault()
   emit('showGroupCard', props.groupInfo)
@@ -70,10 +88,12 @@ const onOpenSession = () => {
     </div>
 
     <div class="info" @click="onOpenSession">
-      <span class="group-name text-ellipsis" :title="props.groupInfo.groupName">
-        {{ props.groupInfo.groupName }}
+      <span class="group-name text-ellipsis" :title="props.groupInfo.groupName" v-html="showName">
       </span>
-      <span class="group-id">{{ `群Id：${props.groupInfo.groupId}` }}</span>
+      <span class="group-id" style="display: flex">
+        <span>群Id：</span>
+        <div v-html="showId"></div>
+      </span>
     </div>
   </div>
 </template>

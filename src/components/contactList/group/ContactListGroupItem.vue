@@ -6,7 +6,7 @@ import GroupItem from '@/components/item/GroupItem.vue'
 // import router from '@/router'
 // import { messageStore } from '@/stores'
 
-const props = defineProps(['groupInfo'])
+const props = defineProps(['groupInfo', 'keyWords'])
 // const emit = defineEmits(['showGroupCard'])
 
 const onShowGroupCard = () => {
@@ -29,10 +29,12 @@ const goToSessionTab = () => {
     <div class="content-wrapper">
       <GroupItem
         :groupInfo="props.groupInfo"
+        :keyWords="keyWords"
         @showGroupCard="onShowGroupCard"
         style="width: 300px; margin-right: 20px"
       ></GroupItem>
-      <slot name="showMore"></slot>
+      <slot name="showMore_1"></slot>
+      <slot name="showMore_2"></slot>
       <div class="action">
         <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
         <el-button size="large" :icon="Phone" circle />
