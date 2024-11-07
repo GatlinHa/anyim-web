@@ -175,3 +175,19 @@ export const combineId = (fromId, toId) => {
 export const sessionIdConvert = (sessionId) => {
   return sessionId.replace(/[@]/g, '-')
 }
+
+export const highLightedText = (content, keyWords, color, model = 'include') => {
+  if (!keyWords) {
+    return content
+  }
+  switch (model) {
+    case 'full':
+      return content.replace(
+        new RegExp(`\\b${keyWords}\\b`, 'gi'),
+        `<span style="color: ${color};">$&</span>`
+      )
+    case 'include':
+    default:
+      return content.replace(new RegExp(keyWords, 'gi'), `<span style="color: ${color};">$&</span>`)
+  }
+}

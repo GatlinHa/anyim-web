@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import groupChatIcon from '@/assets/svg/groupchat.svg'
+import { highLightedText } from '@/js/utils/common'
 
 const props = defineProps(['groupInfo', 'keyWords', 'size'])
 const emit = defineEmits(['showGroupCard', 'openSession'])
@@ -43,21 +44,11 @@ const svgSize = computed(() => {
 })
 
 const showName = computed(() => {
-  if (!props.keyWords) {
-    return props.groupInfo.groupName
-  } else {
-    const regex = new RegExp(props.keyWords, 'gi')
-    return props.groupInfo.groupName.replace(regex, `<span style="color: #409eff;">$&</span>`)
-  }
+  return highLightedText(props.groupInfo.groupName, props.keyWords, '#409eff')
 })
 
 const showId = computed(() => {
-  if (!props.keyWords) {
-    return props.groupInfo.groupId
-  } else {
-    const regex = new RegExp(`\\b${props.keyWords}\\b`, 'gi')
-    return props.groupInfo.groupId.replace(regex, `<span style="color: #409eff;">$&</span>`)
-  }
+  return highLightedText(props.groupInfo.groupId, props.keyWords, '#409eff', 'full')
 })
 
 const onShowCard = (event) => {
