@@ -2,39 +2,24 @@
 import allIcon from '@/assets/svg/all.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
-import managerIcon from '@/assets/svg/manager.svg'
-import joinIcon from '@/assets/svg/join.svg'
-import publicIcon from '@/assets/svg/public.svg'
 </script>
 
 <template>
-  <el-container class="contacts-group">
+  <el-container class="contactList-user">
     <el-container>
-      <el-aside class="bdr-r el-aside__contact-group">
+      <el-aside class="bdr-r el-aside__contact-user">
         <el-menu :default-active="$route.path" text-color="black" router>
-          <el-menu-item index="/contacts/group/all">
+          <el-menu-item index="/contactList/user/all">
             <allIcon></allIcon>
             <span>所有</span>
           </el-menu-item>
-          <el-menu-item index="/contacts/group/managed">
-            <managerIcon></managerIcon>
-            <span>我管理的</span>
-          </el-menu-item>
-          <el-menu-item index="/contacts/group/joined">
-            <joinIcon></joinIcon>
-            <span>我加入的</span>
-          </el-menu-item>
-          <el-menu-item index="/contacts/group/mark">
+          <el-menu-item index="/contactList/user/mark">
             <markIcon></markIcon>
             <span>备注</span>
           </el-menu-item>
-          <el-menu-item index="/contacts/group/partition">
+          <el-menu-item index="/contactList/user/partition">
             <partitionIcon></partitionIcon>
             <span>分组</span>
-          </el-menu-item>
-          <el-menu-item index="/contacts/group/public">
-            <publicIcon></publicIcon>
-            <span>公开群</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -47,12 +32,12 @@ import publicIcon from '@/assets/svg/public.svg'
 </template>
 
 <style lang="scss" scoped>
-.contacts-group {
+.contactList-user {
   height: 100%;
 }
 
-.el-aside__contact-group {
-  width: 150px;
+.el-aside__contact-user {
+  width: 120px;
   height: 100%;
   padding: 8px;
 }

@@ -1,13 +1,13 @@
 <script setup></script>
 
 <template>
-  <div class="contacts-organization">
-    <h1>Contacts organization</h1>
+  <div class="contactList-organization">
+    <h1>contactList organization</h1>
   </div>
 </template>
 
 <style scoped>
-.contacts-organization {
+.contactList-organization {
   /* Add your styles here */
 }
 </style>

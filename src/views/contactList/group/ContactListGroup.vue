@@ -2,24 +2,39 @@
 import allIcon from '@/assets/svg/all.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
+import managerIcon from '@/assets/svg/manager.svg'
+import joinIcon from '@/assets/svg/join.svg'
+import publicIcon from '@/assets/svg/public.svg'
 </script>
 
 <template>
-  <el-container class="contacts-user">
+  <el-container class="contactList-group">
     <el-container>
-      <el-aside class="bdr-r el-aside__contact-user">
+      <el-aside class="bdr-r el-aside__contact-group">
         <el-menu :default-active="$route.path" text-color="black" router>
-          <el-menu-item index="/contacts/user/all">
+          <el-menu-item index="/contactList/group/all">
             <allIcon></allIcon>
             <span>所有</span>
           </el-menu-item>
-          <el-menu-item index="/contacts/user/mark">
+          <el-menu-item index="/contactList/group/managed">
+            <managerIcon></managerIcon>
+            <span>我管理的</span>
+          </el-menu-item>
+          <el-menu-item index="/contactList/group/joined">
+            <joinIcon></joinIcon>
+            <span>我加入的</span>
+          </el-menu-item>
+          <el-menu-item index="/contactList/group/mark">
             <markIcon></markIcon>
             <span>备注</span>
           </el-menu-item>
-          <el-menu-item index="/contacts/user/partition">
+          <el-menu-item index="/contactList/group/partition">
             <partitionIcon></partitionIcon>
             <span>分组</span>
+          </el-menu-item>
+          <el-menu-item index="/contactList/group/public">
+            <publicIcon></publicIcon>
+            <span>公开群</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -32,12 +47,12 @@ import partitionIcon from '@/assets/svg/partition.svg'
 </template>
 
 <style lang="scss" scoped>
-.contacts-user {
+.contactList-group {
   height: 100%;
 }
 
-.el-aside__contact-user {
-  width: 120px;
+.el-aside__contact-group {
+  width: 150px;
   height: 100%;
   padding: 8px;
 }

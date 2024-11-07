@@ -1,26 +1,26 @@
 <script setup>
-import contactsIcon from '@/assets/svg/contacts.svg'
+import contactListIcon from '@/assets/svg/contactList.svg'
 import groupIcon from '@/assets/svg/group.svg'
 import organizationIcon from '@/assets/svg/organization.svg'
 </script>
 
 <template>
-  <el-container class="contacts">
+  <el-container class="contactList">
     <el-header class="bdr-b">通讯录</el-header>
     <el-container class="el-container__body">
       <el-aside class="bdr-r">
         <el-menu :default-active="$route.meta.active_2" text-color="black" router>
-          <el-menu-item index="/contacts/user">
-            <contactsIcon></contactsIcon>
+          <el-menu-item index="/contactList/user">
+            <contactListIcon></contactListIcon>
             <span>联系人</span>
           </el-menu-item>
 
-          <el-menu-item index="/contacts/group">
+          <el-menu-item index="/contactList/group">
             <groupIcon></groupIcon>
             <span>群组</span>
           </el-menu-item>
 
-          <el-menu-item index="/contacts/organization">
+          <el-menu-item index="/contactList/organization">
             <organizationIcon></organizationIcon>
             <span>组织</span>
           </el-menu-item>
@@ -34,7 +34,7 @@ import organizationIcon from '@/assets/svg/organization.svg'
 </template>
 
 <style lang="scss" scoped>
-.contacts {
+.contactList {
   height: 100%;
 }
 

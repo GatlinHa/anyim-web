@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { userQueryService } from '@/api/user'
 import { messageStore } from '@/stores'
-import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
+import ContactListUserItem from '@/components/contactList/user/ContactListUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
@@ -88,13 +88,13 @@ const onShowUserCard = async ({ sessionId, account }) => {
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
       <div v-if="allData.length">
-        <ContactsUserItem
+        <ContactListUserItem
           v-for="item in allData"
           :key="item.sessionId"
           :session="item"
           :type="'all'"
           @showUserCard="onShowUserCard"
-        ></ContactsUserItem>
+        ></ContactListUserItem>
       </div>
       <HashNoData v-else :size="100"></HashNoData>
     </el-main>

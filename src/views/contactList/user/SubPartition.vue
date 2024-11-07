@@ -4,8 +4,8 @@ import { Search, MoreFilled } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import PartitionOprMenu from '@/components/contacts/user/PartitionOprMenu.vue'
-import ContactsUserItem from '@/components/contacts/user/ContactsUserItem.vue'
+import PartitionOprMenu from '@/components/contactList/user/PartitionOprMenu.vue'
+import ContactListUserItem from '@/components/contactList/user/ContactListUserItem.vue'
 import UserCard from '@/components/user/UserCard.vue'
 import { userQueryService } from '@/api/user'
 import {
@@ -283,14 +283,14 @@ const onShowUserCardFromSelectDialog = (account) => {
       </el-header>
       <el-main class="my-scrollbar" style="height: 100%; padding: 8px; overflow-y: scroll">
         <div v-if="detailData.length > 0">
-          <ContactsUserItem
+          <ContactListUserItem
             v-for="item in detailData"
             :key="item.sessionId"
             :session="item"
             :type="'partition'"
             :partitions="partitions"
             @showUserCard="onShowUserCard"
-          ></ContactsUserItem>
+          ></ContactListUserItem>
         </div>
         <HashNoData v-else :size="100"></HashNoData>
       </el-main>

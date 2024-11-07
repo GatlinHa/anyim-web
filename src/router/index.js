@@ -21,101 +21,102 @@ const router = createRouter({
           }
         },
         {
-          path: '/contacts',
-          component: () => import('@/views/contacts/ContactsLayout.vue'),
-          redirect: '/contacts/user',
+          path: '/contactList',
+          component: () => import('@/views/contactList/ContactListLayout.vue'),
+          redirect: '/contactList/user',
           children: [
             {
-              path: '/contacts/user',
-              component: () => import('@/views/contacts/user/ContactsUser.vue'),
-              redirect: '/contacts/user/all',
+              path: '/contactList/user',
+              component: () => import('@/views/contactList/user/ContactListUser.vue'),
+              redirect: '/contactList/user/all',
               children: [
                 {
-                  path: '/contacts/user/all',
-                  component: () => import('@/views/contacts/user/SubAll.vue'),
+                  path: '/contactList/user/all',
+                  component: () => import('@/views/contactList/user/SubAll.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/user' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/user' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/user/mark',
-                  component: () => import('@/views/contacts/user/SubMark.vue'),
+                  path: '/contactList/user/mark',
+                  component: () => import('@/views/contactList/user/SubMark.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/user' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/user' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/user/partition',
-                  component: () => import('@/views/contacts/user/SubPartition.vue'),
+                  path: '/contactList/user/partition',
+                  component: () => import('@/views/contactList/user/SubPartition.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/user' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/user' // 二级导航default-active
                   }
                 }
               ]
             },
             {
-              path: '/contacts/group',
-              component: () => import('@/views/contacts/group/ContactsGroup.vue'),
-              redirect: '/contacts/group/all',
+              path: '/contactList/group',
+              component: () => import('@/views/contactList/group/ContactListGroup.vue'),
+              redirect: '/contactList/group/all',
               children: [
                 {
-                  path: '/contacts/group/all',
-                  component: () => import('@/views/contacts/group/SubAll.vue'),
+                  path: '/contactList/group/all',
+                  component: () => import('@/views/contactList/group/SubAll.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/group/managed',
-                  component: () => import('@/views/contacts/group/SubManaged.vue'),
+                  path: '/contactList/group/managed',
+                  component: () => import('@/views/contactList/group/SubManaged.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/group/joined',
-                  component: () => import('@/views/contacts/group/SubJoined.vue'),
+                  path: '/contactList/group/joined',
+                  component: () => import('@/views/contactList/group/SubJoined.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/group/mark',
-                  component: () => import('@/views/contacts/group/SubMark.vue'),
+                  path: '/contactList/group/mark',
+                  component: () => import('@/views/contactList/group/SubMark.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/group/partition',
-                  component: () => import('@/views/contacts/group/SubPartition.vue'),
+                  path: '/contactList/group/partition',
+                  component: () => import('@/views/contactList/group/SubPartition.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 },
                 {
-                  path: '/contacts/group/public',
-                  component: () => import('@/views/contacts/group/SubPublic.vue'),
+                  path: '/contactList/group/public',
+                  component: () => import('@/views/contactList/group/SubPublic.vue'),
                   meta: {
-                    active_1: '/contacts', // 一级导航default-active
-                    active_2: '/contacts/group' // 二级导航default-active
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
                   }
                 }
               ]
             },
             {
-              path: '/contacts/organization',
-              component: () => import('@/views/contacts/organization/ContactsOrganization.vue'),
+              path: '/contactList/organization',
+              component: () =>
+                import('@/views/contactList/organization/ContactListOrganization.vue'),
               meta: {
-                active_1: '/contacts' // 一级导航default-active
+                active_1: '/contactList' // 一级导航default-active
               }
             }
           ]

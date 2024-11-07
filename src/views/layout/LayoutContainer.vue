@@ -196,7 +196,7 @@ const onExit = async () => {
             <ChatRound />
           </template>
         </NaviMenu>
-        <NaviMenu funcName="通讯录" index="/contacts">
+        <NaviMenu funcName="通讯录" index="/contactList">
           <template #iconSlot>
             <Notebook />
           </template>

@@ -95,7 +95,7 @@ const goToSessionTab = () => {
 </script>
 
 <template>
-  <div class="contacts-user-item">
+  <div class="contactList-user-item">
     <div class="content-wrapper">
       <ContactItem
         :contactInfo="props.session.objectInfo"
@@ -240,7 +240,7 @@ const goToSessionTab = () => {
 </template>
 
 <style lang="scss" scoped>
-.contacts-user-item {
+.contactList-user-item {
   height: 40px;
   margin-bottom: 8px;
   padding: 8px;
