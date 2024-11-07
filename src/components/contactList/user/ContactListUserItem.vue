@@ -6,7 +6,7 @@ import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 import { messageStore } from '@/stores'
 
-const props = defineProps(['type', 'session', 'partitions'])
+const props = defineProps(['type', 'session', 'partitions', 'keyWords'])
 const emit = defineEmits(['showUserCard'])
 
 const messageData = messageStore()
@@ -99,6 +99,7 @@ const goToSessionTab = () => {
     <div class="content-wrapper">
       <ContactItem
         :contactInfo="props.session.objectInfo"
+        :keyWords="props.keyWords"
         @showContactCard="onShowCard"
         style="width: 200px"
       ></ContactItem>

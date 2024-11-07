@@ -19,7 +19,7 @@ import { messageStore, userStore } from '@/stores'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import SelectDialog from '@/components/common/SelectDialog.vue'
-import { combineId } from '@/js/utils/common'
+import { combineId, highLightedText } from '@/js/utils/common'
 
 const messageData = messageStore()
 const userData = userStore()
@@ -249,8 +249,11 @@ const onShowUserCardFromSelectDialog = (account) => {
                 :index="`${item.partitionId}`"
                 @contextmenu.prevent="onCustomContextMenu(item.partitionId)"
               >
-                <span class="text-ellipsis" :title="item.partitionName">
-                  {{ item.partitionName }}
+                <span
+                  class="text-ellipsis"
+                  :title="item.partitionName"
+                  v-html="highLightedText(item.partitionName, partitionSearchKey, '#409eff')"
+                >
                 </span>
                 <el-icon :size="15" @click.stop="showOperationMenu($event, item.partitionId)">
                   <MoreFilled />
@@ -286,6 +289,7 @@ const onShowUserCardFromSelectDialog = (account) => {
             :session="item"
             :type="'partition'"
             :partitions="partitions"
+            :keyWords="userSearchKey"
             @showUserCard="onShowUserCard"
           ></ContactListUserItem>
         </div>

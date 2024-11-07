@@ -3,7 +3,7 @@ import HashNoData from '../common/HasNoData.vue'
 import ContactItem from '@/components/item/ContactItem.vue'
 import { searchStore } from '@/stores'
 
-const props = defineProps(['searchTab'])
+const props = defineProps(['searchTab', 'keyWords'])
 const emit = defineEmits(['showContactCard', 'openSession'])
 
 const searchData = searchStore()
@@ -24,6 +24,7 @@ const onOpenSession = (obj) => {
         v-for="account in Object.keys(searchData.getContactResult)"
         :key="account"
         :contactInfo="searchData.getContactResult[account]"
+        :keyWords="props.keyWords"
         @showContactCard="onShowContactCard"
         @openSession="onOpenSession"
       ></ContactItem>

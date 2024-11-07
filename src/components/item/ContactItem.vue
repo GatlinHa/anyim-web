@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { MsgType } from '@/proto/msg'
+import { highLightedText } from '@/js/utils/common'
 
-const props = defineProps(['contactInfo', 'size'])
+const props = defineProps(['contactInfo', 'keyWords', 'size'])
 const emit = defineEmits(['showContactCard', 'openSession'])
 
 const contactItemHeight = computed(() => {
@@ -16,6 +17,14 @@ const contactItemHeight = computed(() => {
     default:
       return 48
   }
+})
+
+const showName = computed(() => {
+  return highLightedText(props.contactInfo.nickName, props.keyWords, '#409eff')
+})
+
+const showId = computed(() => {
+  return highLightedText(props.contactInfo.account, props.keyWords, '#409eff', 'full')
 })
 
 const onShowCard = (event) => {
@@ -41,8 +50,8 @@ const onOpenSession = () => {
     ></AvatarIcon>
     <div class="body" @click="onOpenSession">
       <div class="title">
-        <span class="name text-ellipsis">{{ props.contactInfo.nickName }}</span>
-        <span class="account">{{ props.contactInfo.account }}</span>
+        <span class="name text-ellipsis" v-html="showName"></span>
+        <span class="account" v-html="showId"></span>
       </div>
       <div class="info">
         <span class="organization">部门: {{ props.contactInfo.organization || '-' }}</span>

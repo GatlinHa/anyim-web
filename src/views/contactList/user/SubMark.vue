@@ -83,6 +83,7 @@ const onShowUserCard = async ({ sessionId, account }) => {
           :key="item.sessionId"
           :session="item"
           :type="'mark'"
+          :keyWords="markSearchKey"
           @showUserCard="onShowUserCard"
         ></ContactListUserItem>
       </div>

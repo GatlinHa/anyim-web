@@ -129,6 +129,7 @@ watch(searchTab, () => {
       </div>
       <ResultBox
         :searchTab="searchTab"
+        :keyWords="keyWords"
         @showContactCard="onShowContactCard"
         @openSession="onOpenSession"
       >
