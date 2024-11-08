@@ -21,6 +21,7 @@ const messageData = messageStore()
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
 const showData = ref({})
+const initDone = ref(false) //避免还未数据加载完时就显示无数据
 
 onMounted(async () => {
   messageData.loadSessionList()
@@ -41,7 +42,7 @@ onMounted(async () => {
     default:
       break
   }
-
+  initDone.value = true
   showData.value = initData.value
 })
 
@@ -214,7 +215,10 @@ const onConfirmSelect = async (selected) => {
           </template>
         </ContactListGroupItem>
       </div>
-      <HashNoData v-else :size="100"></HashNoData>
+      <HashNoData
+        v-else-if="Object.keys(showData).length === 0 && initDone"
+        :size="100"
+      ></HashNoData>
     </el-main>
   </el-container>
   <SelectDialog
