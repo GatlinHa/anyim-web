@@ -1,44 +1,93 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { groupListService } from '@/api/group'
+import {
+  groupListAllService,
+  groupListCreatedService,
+  groupListJoinedService,
+  groupListManagedService
+} from '@/api/group'
 
 // group群组相关的缓存数据，不持久化存储
 export const groupStore = defineStore('anyim-group', () => {
   /**
    * 格式：{groupId_1: group_1, groupId_2: group_2}
    */
-  const groupList = ref({})
+  const groupListAll = ref({})
 
-  const setGroupList = (list) => {
-    groupList.value = list
-  }
+  const groupListCreated = ref({})
 
-  const addGroup = (groupInfo) => {
-    groupList.value[groupInfo.groupId] = groupInfo
+  const groupListManaged = ref({})
+
+  const groupListJoined = ref({})
+
+  const addCreatedGroup = (groupInfo) => {
+    groupListAll.value[groupInfo.groupId] = groupInfo
+    groupListCreated.value[groupInfo.groupId] = groupInfo
+    groupListManaged.value[groupInfo.groupId] = groupInfo
   }
 
   const deleteGroup = (groupId) => {
-    delete groupList.value[groupId]
+    delete groupListAll.value[groupId]
+    delete groupListCreated.value[groupId]
+    delete groupListManaged.value[groupId]
+    delete groupListJoined.value[groupId]
   }
 
   const updateGroup = () => {}
 
-  const loadGroupList = async () => {
-    if (Object.keys(groupList.value).length === 0) {
-      const res = await groupListService()
+  const loadGroupListAll = async () => {
+    if (Object.keys(groupListAll.value).length === 0) {
+      const res = await groupListAllService()
 
       res.data.data.forEach((item) => {
-        groupList.value[item.groupId] = item
+        groupListAll.value[item.groupId] = item
+      })
+    }
+  }
+
+  const loadGroupListCreated = async () => {
+    if (Object.keys(groupListCreated.value).length === 0) {
+      const res = await groupListCreatedService()
+
+      res.data.data.forEach((item) => {
+        groupListCreated.value[item.groupId] = item
+      })
+    }
+  }
+
+  const loadGroupListManaged = async () => {
+    if (Object.keys(groupListManaged.value).length === 0) {
+      const res = await groupListManagedService()
+
+      res.data.data.forEach((item) => {
+        groupListManaged.value[item.groupId] = item
+      })
+    }
+  }
+
+  const loadGroupListJoined = async () => {
+    if (Object.keys(groupListJoined.value).length === 0) {
+      const res = await groupListJoinedService()
+
+      res.data.data.forEach((item) => {
+        groupListJoined.value[item.groupId] = item
       })
     }
   }
 
   return {
-    groupList,
-    setGroupList,
-    addGroup,
+    groupListAll,
+    groupListCreated,
+    groupListManaged,
+    groupListJoined,
+
+    addCreatedGroup,
     deleteGroup,
     updateGroup,
-    loadGroupList
+
+    loadGroupListAll,
+    loadGroupListCreated,
+    loadGroupListManaged,
+    loadGroupListJoined
   }
 })

@@ -2,6 +2,7 @@
 import allIcon from '@/assets/svg/all.svg'
 import markIcon from '@/assets/svg/mark.svg'
 import partitionIcon from '@/assets/svg/partition.svg'
+import creatorIcon from '@/assets/svg/creator.svg'
 import managerIcon from '@/assets/svg/manager.svg'
 import joinIcon from '@/assets/svg/join.svg'
 import publicIcon from '@/assets/svg/public.svg'
@@ -15,6 +16,10 @@ import publicIcon from '@/assets/svg/public.svg'
           <el-menu-item index="/contactList/group/all">
             <allIcon></allIcon>
             <span>所有</span>
+          </el-menu-item>
+          <el-menu-item index="/contactList/group/created">
+            <creatorIcon></creatorIcon>
+            <span>我创建的</span>
           </el-menu-item>
           <el-menu-item index="/contactList/group/managed">
             <managerIcon></managerIcon>

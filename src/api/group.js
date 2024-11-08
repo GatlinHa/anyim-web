@@ -5,8 +5,35 @@ export const groupCreateService = (obj) => {
   return request.post('/groupmng/createGroup', getReqBody(obj))
 }
 
-export const groupListService = () => {
+export const groupListAllService = () => {
   return request.post('/groupmng/queryGroupList', getReqBody())
+}
+
+export const groupListCreatedService = () => {
+  return request.post(
+    '/groupmng/queryGroupList',
+    getReqBody({
+      roleList: [2]
+    })
+  )
+}
+
+export const groupListManagedService = () => {
+  return request.post(
+    '/groupmng/queryGroupList',
+    getReqBody({
+      roleList: [1, 2]
+    })
+  )
+}
+
+export const groupListJoinedService = () => {
+  return request.post(
+    '/groupmng/queryGroupList',
+    getReqBody({
+      roleList: [0]
+    })
+  )
 }
 
 export const groupSearchByMemberService = (obj) => {

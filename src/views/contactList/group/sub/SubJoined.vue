@@ -1,5 +1,9 @@
-<script setup></script>
+<script setup>
+import SubCommon from '../components/SubCommon.vue'
+</script>
 
-<template>我加入的</template>
+<template>
+  <SubCommon :tab="'joined'"></SubCommon>
+</template>
 
 <style lang="scss" scoped></style>

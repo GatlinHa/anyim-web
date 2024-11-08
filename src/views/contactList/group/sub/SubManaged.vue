@@ -1,5 +1,9 @@
-<script setup></script>
+<script setup>
+import SubCommon from '../components/SubCommon.vue'
+</script>
 
-<template>我管理的</template>
+<template>
+  <SubCommon :tab="'managed'"></SubCommon>
+</template>
 
 <style lang="scss" scoped></style>

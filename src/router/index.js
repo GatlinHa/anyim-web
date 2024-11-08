@@ -70,6 +70,14 @@ const router = createRouter({
                   }
                 },
                 {
+                  path: '/contactList/group/created',
+                  component: () => import('@/views/contactList/group/sub/SubCreated.vue'),
+                  meta: {
+                    active_1: '/contactList', // 一级导航default-active
+                    active_2: '/contactList/group' // 二级导航default-active
+                  }
+                },
+                {
                   path: '/contactList/group/managed',
                   component: () => import('@/views/contactList/group/sub/SubManaged.vue'),
                   meta: {

@@ -3,7 +3,7 @@ import SubCommon from '../components/SubCommon.vue'
 </script>
 
 <template>
-  <SubCommon></SubCommon>
+  <SubCommon :tab="'created'"></SubCommon>
 </template>
 
 <style lang="scss" scoped></style>
