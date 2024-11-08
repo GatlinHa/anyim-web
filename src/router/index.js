@@ -27,12 +27,12 @@ const router = createRouter({
           children: [
             {
               path: '/contactList/user',
-              component: () => import('@/views/contactList/user/components/ContactListUser.vue'),
+              component: () => import('@/views/contactList/user/ContactListUser.vue'),
               redirect: '/contactList/user/all',
               children: [
                 {
                   path: '/contactList/user/all',
-                  component: () => import('@/views/contactList/user/SubAll.vue'),
+                  component: () => import('@/views/contactList/user/sub/SubAll.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/user' // 二级导航default-active
@@ -40,7 +40,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/user/mark',
-                  component: () => import('@/views/contactList/user/SubMark.vue'),
+                  component: () => import('@/views/contactList/user/sub/SubMark.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/user' // 二级导航default-active
@@ -48,7 +48,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/user/partition',
-                  component: () => import('@/views/contactList/user/SubPartition.vue'),
+                  component: () => import('@/views/contactList/user/sub/SubPartition.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/user' // 二级导航default-active
@@ -58,12 +58,12 @@ const router = createRouter({
             },
             {
               path: '/contactList/group',
-              component: () => import('@/views/contactList/group/components/ContactListGroup.vue'),
+              component: () => import('@/views/contactList/group/ContactListGroup.vue'),
               redirect: '/contactList/group/all',
               children: [
                 {
                   path: '/contactList/group/all',
-                  component: () => import('@/views/contactList/group/SubAll.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubAll.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
@@ -71,7 +71,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/group/managed',
-                  component: () => import('@/views/contactList/group/SubManaged.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubManaged.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
@@ -79,7 +79,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/group/joined',
-                  component: () => import('@/views/contactList/group/SubJoined.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubJoined.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
@@ -87,7 +87,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/group/mark',
-                  component: () => import('@/views/contactList/group/SubMark.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubMark.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
@@ -95,7 +95,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/group/partition',
-                  component: () => import('@/views/contactList/group/SubPartition.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubPartition.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
@@ -103,7 +103,7 @@ const router = createRouter({
                 },
                 {
                   path: '/contactList/group/public',
-                  component: () => import('@/views/contactList/group/SubPublic.vue'),
+                  component: () => import('@/views/contactList/group/sub/SubPublic.vue'),
                   meta: {
                     active_1: '/contactList', // 一级导航default-active
                     active_2: '/contactList/group' // 二级导航default-active
