@@ -27,7 +27,7 @@ const router = createRouter({
           children: [
             {
               path: '/contactList/user',
-              component: () => import('@/views/contactList/user/ContactListUser.vue'),
+              component: () => import('@/views/contactList/user/components/ContactListUser.vue'),
               redirect: '/contactList/user/all',
               children: [
                 {
@@ -58,7 +58,7 @@ const router = createRouter({
             },
             {
               path: '/contactList/group',
-              component: () => import('@/views/contactList/group/ContactListGroup.vue'),
+              component: () => import('@/views/contactList/group/components/ContactListGroup.vue'),
               redirect: '/contactList/group/all',
               children: [
                 {
@@ -132,14 +132,14 @@ const router = createRouter({
           children: [
             {
               path: '/setting/personal',
-              component: () => import('@/views/setting/children/SettingPersonal.vue'),
+              component: () => import('@/views/setting/sub/SettingPersonal.vue'),
               meta: {
                 active_1: '/setting' // 一级导航default-active
               }
             },
             {
               path: '/setting/security',
-              component: () => import('@/views/setting/children/SettingSecurity.vue'),
+              component: () => import('@/views/setting/sub/SettingSecurity.vue'),
               meta: {
                 active_1: '/setting' // 一级导航default-active
               }

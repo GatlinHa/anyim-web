@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/js/utils/common'
-import AvatarIcon from '../common/AvatarIcon.vue'
+import AvatarIcon from '@/components/common/AvatarIcon.vue'
 
 const props = defineProps([
   'sessionId',

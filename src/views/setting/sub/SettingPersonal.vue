@@ -6,7 +6,7 @@ import { userModifySelfService } from '@/api/user'
 import defaultImg from '@/assets/select_avatar.jpg'
 import { cloneDeep, isEqual } from 'lodash'
 import { maskPhoneNum } from '@/js/utils/common'
-import EditeAvatar from '@/components/user/EditeAvatar.vue'
+import EditeAvatar from '@/views/setting/components/EditeAvatar.vue'
 import { ElMessage } from 'element-plus'
 
 const userData = userStore()

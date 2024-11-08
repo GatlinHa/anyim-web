@@ -2,9 +2,9 @@
 import { ref, computed } from 'vue'
 import { userStore } from '@/stores'
 import { maskPhoneNum } from '@/js/utils/common'
-import EditEmail from '@/components/user/EditEmail.vue'
-import EditPassword from '@/components/user/EditPassword.vue'
-import EditPhone from '@/components/user/EditPhone.vue'
+import EditEmail from '@/views/setting/components/EditEmail.vue'
+import EditPassword from '@/views/setting/components/EditPassword.vue'
+import EditPhone from '@/views/setting/components/EditPhone.vue'
 
 const userData = userStore()
 const isShowEditPassword = ref(false)

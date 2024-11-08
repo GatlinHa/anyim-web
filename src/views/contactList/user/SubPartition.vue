@@ -4,9 +4,9 @@ import { Search, MoreFilled } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import PartitionOprMenu from '@/components/contactList/user/PartitionOprMenu.vue'
-import ContactListUserItem from '@/components/contactList/user/ContactListUserItem.vue'
-import UserCard from '@/components/user/UserCard.vue'
+import PartitionOprMenu from '@/views/contactList/user/components/PartitionOprMenu.vue'
+import ContactListUserItem from '@/views/contactList/user/components/ContactListUserItem.vue'
+import UserCard from '@/components/card/UserCard.vue'
 import { userQueryService } from '@/api/user'
 import {
   msgCreatePartitionService,

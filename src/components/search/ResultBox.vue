@@ -1,5 +1,5 @@
 <script setup>
-import HashNoData from '../common/HasNoData.vue'
+import HashNoData from '@/components/common/HasNoData.vue'
 import ContactItem from '@/components/item/ContactItem.vue'
 import { searchStore } from '@/stores'
 

@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import UserCard from '@/components/user/UserCard.vue'
+import UserCard from '@/components/card/UserCard.vue'
 import SelectDialog from '@/components/common/SelectDialog.vue'
 import { groupStore, userStore, messageStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
@@ -11,7 +11,7 @@ import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService, groupSearchByMemberService } from '@/api/group'
-import ContactListGroupItem from '@/components/contactList/group/ContactListGroupItem.vue'
+import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -139,7 +139,7 @@ const onConfirmSelect = async (selected) => {
   }
 
   const res = await groupCreateService({
-    groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群聊`,
+    groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群组`,
     groupType: 1, //普通群
     accounts: selected.map((item) => item.account)
   })
