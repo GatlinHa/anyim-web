@@ -68,6 +68,7 @@ const onOpenSession = () => {
         v-if="props.groupInfo.avatarThumb"
         :src="props.groupInfo.avatarThumb"
         :size="avatarSize"
+        shape="square"
       />
       <div
         v-else
@@ -79,10 +80,14 @@ const onOpenSession = () => {
     </div>
 
     <div class="info" @click="onOpenSession">
-      <span class="group-name text-ellipsis" :title="props.groupInfo.groupName" v-html="showName">
+      <span
+        class="text-ellipsis"
+        :title="props.groupInfo.groupName"
+        v-html="showName"
+        style="font-size: 14px"
+      >
       </span>
-      <span class="group-id" style="display: flex">
-        <span>群Id：</span>
+      <span class="group-id" style="color: gray; font-size: 12px">
         <div v-html="showId"></div>
       </span>
     </div>
@@ -100,7 +105,7 @@ const onOpenSession = () => {
     cursor: pointer;
 
     .svg-avatar {
-      border-radius: 50%;
+      border-radius: 4px;
       background-color: #c0c4cc;
       display: flex;
       justify-content: center;
@@ -117,16 +122,8 @@ const onOpenSession = () => {
     display: flex;
     flex-direction: column;
     flex: 1;
+    width: 0; //让浏览器在计算布局时不使用内部元素的宽度，而是完全依赖flex属性来确定高度
     user-select: text;
-
-    .group-name {
-      width: 240px;
-    }
-
-    .group-id {
-      color: gray;
-      font-size: 12px;
-    }
   }
 }
 </style>
