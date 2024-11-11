@@ -4,6 +4,11 @@ import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import { MsgType } from '@/proto/msg'
 import { highLightedText } from '@/js/utils/common'
 
+/**
+ * contactInfo：用户详情，至少包括昵称和账号，status不传则不显示状态圆圈
+ * keyWords：搜索关键字，用于高亮显示检索的关键字
+ * size：尺寸，不传即显示默认值
+ */
 const props = defineProps(['contactInfo', 'keyWords', 'size'])
 const emit = defineEmits(['showContactCard', 'openSession'])
 
@@ -62,6 +67,7 @@ const onOpenSession = () => {
 
 <style lang="scss" scoped>
 .contact-item {
+  min-width: 160px;
   padding: 2px;
   padding-left: 5px;
   border-radius: 6px;
