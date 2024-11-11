@@ -38,7 +38,7 @@ export const groupStore = defineStore('anyim-group', () => {
   const loadGroupListAll = async () => {
     if (Object.keys(groupListAll.value).length === 0) {
       const res = await groupListAllService()
-      res.data.data.forEach((item) => {
+      res.data.data?.forEach((item) => {
         groupListAll.value[item.groupId] = item
       })
     }
@@ -47,7 +47,7 @@ export const groupStore = defineStore('anyim-group', () => {
   const loadGroupListCreated = async () => {
     if (Object.keys(groupListCreated.value).length === 0) {
       const res = await groupListCreatedService()
-      res.data.data.forEach((item) => {
+      res.data.data?.forEach((item) => {
         groupListCreated.value[item.groupId] = item
       })
     }
@@ -56,7 +56,7 @@ export const groupStore = defineStore('anyim-group', () => {
   const loadGroupListManaged = async () => {
     if (Object.keys(groupListManaged.value).length === 0) {
       const res = await groupListManagedService()
-      res.data.data.forEach((item) => {
+      res.data.data?.forEach((item) => {
         groupListManaged.value[item.groupId] = item
       })
     }
@@ -65,7 +65,7 @@ export const groupStore = defineStore('anyim-group', () => {
   const loadGroupListJoined = async () => {
     if (Object.keys(groupListJoined.value).length === 0) {
       const res = await groupListJoinedService()
-      res.data.data.forEach((item) => {
+      res.data.data?.forEach((item) => {
         groupListJoined.value[item.groupId] = item
       })
     }
