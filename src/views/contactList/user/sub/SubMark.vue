@@ -16,6 +16,7 @@ const totalCount = computed(() => {
 
 onMounted(async () => {
   await messageData.loadSessionList()
+  await messageData.loadPartitions()
 })
 
 const markSearchKey = ref('')
