@@ -1,16 +1,24 @@
 <script setup>
+import { computed } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 const props = defineProps(['size'])
+
+// 实际大小要减去border的宽度
+const actualSize = computed(() => {
+  return `${props.size - 1}px`
+})
 </script>
 
 <template>
-  <div class="circle" :style="{ width: props.size + 'px', height: props.size + 'px' }">
+  <div class="circle">
     <el-icon :size="18"><Plus /></el-icon>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .circle {
+  width: v-bind('actualSize');
+  height: v-bind('actualSize');
   border: solid 1px;
   border-radius: 50%;
   display: flex;
