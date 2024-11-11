@@ -10,8 +10,9 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { groupCreateService, groupSearchByMemberService } from '@/api/group'
+import { groupCreateService, groupSearchByMemberService, groupMembersService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
+import GroupCard from '@/components/card/GroupCard.vue'
 
 const props = defineProps(['tab'])
 
@@ -23,8 +24,13 @@ const isShowSelectDialog = ref(false)
 const showData = ref({})
 const initDone = ref(false) //避免还未数据加载完时就显示无数据
 
+const isShowGroupCard = ref(false)
+const showGroupInfo = ref({})
+const showGroupMembers = ref([])
+
 onMounted(async () => {
-  messageData.loadSessionList()
+  await messageData.loadSessionList()
+  await messageData.loadPartitions()
   switch (props.tab) {
     case undefined:
     case 'all':
@@ -181,6 +187,17 @@ const onConfirmSelect = async (selected) => {
   groupData.addCreatedGroup(res.data.data.groupInfo)
   isShowSelectDialog.value = false
 }
+
+const onShowGroupCard = async (groupInfo) => {
+  const res = await groupMembersService({ groupId: groupInfo.groupId })
+  isShowGroupCard.value = true
+  showGroupInfo.value = groupInfo
+  showGroupMembers.value = res.data.data.members
+}
+
+const onGroupCardClose = () => {
+  isShowGroupCard.value = false
+}
 </script>
 
 <template>
@@ -205,13 +222,18 @@ const onConfirmSelect = async (selected) => {
           :key="item.groupId"
           :groupInfo="item"
           :keyWords="searchKey"
-          @showUserCard="onShowUserCard"
+          @showGroupCard="onShowGroupCard(item)"
         >
           <template #showMore_1>
             <div v-html="searchResultTips[item.groupId]" style="min-width: 200px"></div>
           </template>
           <template #showMore_2>
-            <div style="cursor: pointer; color: #409eff; min-width: 60px">查看详情</div>
+            <div
+              style="cursor: pointer; color: #409eff; min-width: 60px"
+              @click="onShowGroupCard(item)"
+            >
+              查看详情
+            </div>
           </template>
         </ContactListGroupItem>
       </div>
@@ -237,6 +259,12 @@ const onConfirmSelect = async (selected) => {
     :userInfo="userInfo"
     @close="isShowUserCard = false"
   ></UserCard>
+  <GroupCard
+    :isShow="isShowGroupCard"
+    :groupInfo="showGroupInfo"
+    :groupMembers="showGroupMembers"
+    @close="onGroupCardClose"
+  ></GroupCard>
 </template>
 
 <style lang="scss" scoped>

@@ -39,3 +39,7 @@ export const groupListJoinedService = () => {
 export const groupSearchByMemberService = (obj) => {
   return request.post('/groupmng/searchGroupByMember', getReqBody(obj))
 }
+
+export const groupMembersService = (obj) => {
+  return request.post('/groupmng/queryGroupMembers', getReqBody(obj))
+}

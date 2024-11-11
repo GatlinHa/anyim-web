@@ -4,7 +4,13 @@ import { MsgType } from '@/proto/msg'
 import groupChatIcon from '@/assets/svg/groupchat.svg'
 import { highLightedText } from '@/js/utils/common'
 
-const props = defineProps(['groupInfo', 'keyWords', 'size'])
+/**
+ * groupInfo: 群组详情
+ * keyWords：搜索关键字，用于高亮显示检索的关键字
+ * size：尺寸，不传即显示默认值
+ * disableClickAvatar：是否允许点击头像，默认false
+ */
+const props = defineProps(['groupInfo', 'keyWords', 'size', 'disableClickAvatar'])
 const emit = defineEmits(['showGroupCard', 'openSession'])
 
 const itemHeight = computed(() => {
@@ -53,7 +59,9 @@ const showId = computed(() => {
 
 const onShowCard = (event) => {
   event.preventDefault()
-  emit('showGroupCard', props.groupInfo)
+  if (!props.disableClickAvatar) {
+    emit('showGroupCard', props.groupInfo)
+  }
 }
 
 const onOpenSession = () => {
@@ -63,7 +71,11 @@ const onOpenSession = () => {
 
 <template>
   <div class="group-item" :style="{ height: itemHeight + 'px' }">
-    <div class="avatar" @click="onShowCard">
+    <div
+      class="avatar"
+      @click="onShowCard"
+      :style="{ cursor: !props.disableClickAvatar ? 'pointer' : 'auto' }"
+    >
       <el-avatar
         v-if="props.groupInfo.avatarThumb"
         :src="props.groupInfo.avatarThumb"

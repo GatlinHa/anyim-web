@@ -7,10 +7,10 @@ import GroupItem from '@/components/item/GroupItem.vue'
 // import { messageStore } from '@/stores'
 
 const props = defineProps(['groupInfo', 'keyWords'])
-// const emit = defineEmits(['showGroupCard'])
+const emit = defineEmits(['showGroupCard'])
 
 const onShowGroupCard = () => {
-  console.log('onShowGroupCard')
+  emit('showGroupCard')
 }
 
 const goToSessionTab = () => {
