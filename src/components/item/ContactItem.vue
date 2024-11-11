@@ -55,11 +55,17 @@ const onOpenSession = () => {
     ></AvatarIcon>
     <div class="body" @click="onOpenSession">
       <div class="title">
-        <span class="name text-ellipsis" v-html="showName"></span>
-        <span class="account" v-html="showId"></span>
+        <span
+          class="name text-ellipsis"
+          :title="props.contactInfo.nickName"
+          v-html="showName"
+        ></span>
+        <span class="account" :title="props.contactInfo.account" v-html="showId"></span>
       </div>
       <div class="info">
-        <span class="organization">部门: {{ props.contactInfo.organization || '-' }}</span>
+        <span class="organization" :title="props.contactInfo.organization || '-'"
+          >部门: {{ props.contactInfo.organization || '-' }}</span
+        >
       </div>
     </div>
   </div>
