@@ -211,6 +211,7 @@ const onRemoveSelectedItem = (index) => {
         margin: 0 2px 2px 0;
         padding: 0 10px 0 10px;
         border-radius: 8px;
+        color: black;
 
         &:hover {
           background-color: #dedfe0;
@@ -246,6 +247,7 @@ const onRemoveSelectedItem = (index) => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      color: black;
       --close-button-color: transparent;
 
       &:hover {
