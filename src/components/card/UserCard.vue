@@ -4,6 +4,8 @@ import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore, messageStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
+import { MsgType } from '@/proto/msg'
+import { msgChatCreateSessionService } from '@/api/message'
 
 const props = defineProps(['isShow', 'userInfo'])
 const emit = defineEmits(['close'])
@@ -80,8 +82,22 @@ const onClickEditMark = () => {
   })
 }
 
+const createSessionIfNotExist = async () => {
+  // 如果会话列表没有这个用户,则创建会话
+  if (messageData.sessionList[sessionId.value] === undefined) {
+    const res = await msgChatCreateSessionService({
+      sessionId: sessionId.value,
+      account: userData.user.account,
+      remoteId: props.userInfo.account,
+      sessionType: MsgType.CHAT
+    })
+    messageData.addSession(res.data.data)
+  }
+}
+
 const saveMark = async () => {
   if (newMark.value !== mark.value) {
+    await createSessionIfNotExist()
     await messageData.updateSession({
       sessionId: sessionId.value,
       mark: newMark.value
@@ -101,6 +117,7 @@ const onClickEditParition = () => {
 
 const onChangePartition = async () => {
   if (newPartitionId.value !== partitionId.value) {
+    await createSessionIfNotExist()
     await messageData.updateSession({
       sessionId: sessionId.value,
       partitionId: newPartitionId.value || 0
