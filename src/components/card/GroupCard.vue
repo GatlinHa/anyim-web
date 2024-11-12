@@ -35,6 +35,15 @@ const onShowMembers = () => {
 
 const showMembers = computed(() => groupData.groupMembers[props.groupInfo.groupId])
 
+/**
+ * 按照role倒序排
+ */
+const showMembersArrSorted = computed(() => {
+  return Object.values(groupData.groupMembers[props.groupInfo.groupId]).sort(
+    (a, b) => b.role - a.role
+  )
+})
+
 const isOwner = computed(() => {
   return showMembers.value[myAccount.value].role === 2
 })
@@ -119,7 +128,7 @@ const selectDialogOptions = computed(() => {
 
 const selectDialogDisabledOptions = computed(() => {
   if (method.value === 'add') {
-    return Object.values(showMembers.value).map((item) => item.account)
+    return Object.keys(showMembers.value)
   } else if (method.value === 'del') {
     const data = []
     Object.values(showMembers.value).forEach((item) => {
@@ -152,34 +161,19 @@ const selectDialogTitle = computed(() => {
 })
 
 const onConfirmSelect = (selected) => {
-  // 这里要先关闭，不然移除的时候会报错
-  isShowSelectDialog.value = false
-
+  isShowSelectDialog.value = false // 这里要先关闭，不然移除的时候会报错
+  const accounts = selected.map((item) => item.account)
+  const loadingInstance = ElLoading.service(el_loading_options)
   if (method.value === 'add') {
-    let members = []
-    selected.forEach((item) => {
-      const info = {
-        account: item.account,
-        nickName: item.nickName,
-        avatarThumb: item.avatarThumb,
-        role: 0
-      }
-      members.push(info)
-    })
-    const loadingInstance = ElLoading.service(el_loading_options)
     groupAddMembersService({
       groupId: props.groupInfo.groupId,
-      members: members
+      accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
-          const members = {}
-          res.data.data.members.forEach((item) => {
-            members[item.account] = item
-          })
           groupData.setGroupMembers({
             groupId: props.groupInfo.groupId,
-            members: members
+            members: res.data.data.members
           })
           ElMessage.success('添加成功')
         } else {
@@ -190,24 +184,15 @@ const onConfirmSelect = (selected) => {
         loadingInstance.close()
       })
   } else if (method.value === 'del') {
-    let accounts = []
-    selected.forEach((item) => {
-      accounts.push(item.account)
-    })
-    const loadingInstance = ElLoading.service(el_loading_options)
     groupDelMembersService({
       groupId: props.groupInfo.groupId,
       accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
-          const members = {}
-          res.data.data.members.forEach((item) => {
-            members[item.account] = item
-          })
           groupData.setGroupMembers({
             groupId: props.groupInfo.groupId,
-            members: members
+            members: res.data.data.members
           })
           ElMessage.success('移除成功')
         } else {
@@ -261,13 +246,14 @@ const onConfirmSelect = (selected) => {
         <div class="group-card-members-grid">
           <div
             class="group-card-members-grid-item"
-            v-for="item in Object.values(showMembers)?.slice(0, showMembersCount)"
+            v-for="item in showMembersArrSorted?.slice(0, showMembersCount)"
             :key="item.account"
           >
             <AvatarIcon
               :showName="item.nickName"
               :showId="item.account"
               :showAvatarThumb="item.avatarThumb"
+              :userStatus="item.status"
               @click="onShowUserCard(item.account)"
             ></AvatarIcon>
             <div class="text text-ellipsis" :title="item.nickName">

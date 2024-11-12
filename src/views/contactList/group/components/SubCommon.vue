@@ -10,7 +10,7 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { groupCreateService, groupSearchByMemberService, groupMembersService } from '@/api/group'
+import { groupCreateService, groupSearchByMemberService, groupInfoService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import GroupCard from '@/components/card/GroupCard.vue'
 
@@ -190,16 +190,12 @@ const onConfirmSelect = async (selected) => {
 }
 
 const onShowGroupCard = async (groupInfo) => {
-  const res = await groupMembersService({ groupId: groupInfo.groupId })
+  const res = await groupInfoService({ groupId: groupInfo.groupId })
   isShowGroupCard.value = true
   showGroupInfo.value = groupInfo
-  const members = {}
-  res.data.data.members.forEach((item) => {
-    members[item.account] = item
-  })
   groupData.setGroupMembers({
     groupId: groupInfo.groupId,
-    members: members
+    members: res.data.data.members
   })
 }
 
