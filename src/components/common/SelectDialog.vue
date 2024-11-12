@@ -5,8 +5,17 @@ import ContactItem from '@/components/item/ContactItem.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import { userQueryService, userQueryByNickService } from '@/api/user'
 
-// searchModel：default/local 仅搜索本地session，server 还搜索云端数据
-const props = defineProps(['modelValue', 'options', 'defaultSelected', 'searchModel'])
+/**
+ * disabledOptions: 排除项的账号数组，比如已经选过了某些用户，那么这么用户应该在待选项里被禁用
+ * searchModel：default/local 仅搜索本地session，server 还搜索云端数据
+ */
+const props = defineProps([
+  'modelValue',
+  'options',
+  'disabledOptions',
+  'defaultSelected',
+  'searchModel'
+])
 const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
 
 const selected = ref(props.defaultSelected || [])
@@ -37,6 +46,14 @@ const optionKeys = computed(() => {
     return data
   }
 })
+
+const isDisable = (account) => {
+  if (props.disabledOptions) {
+    return props.disabledOptions.includes(account)
+  } else {
+    return false
+  }
+}
 
 let timer
 const onQuery = () => {
@@ -118,11 +135,16 @@ const onRemoveSelectedItem = (index) => {
         />
         <div v-if="optionKeys.length > 0" class="my-scrollbar" style="flex: 1; overflow-y: scroll">
           <el-checkbox-group v-model="selected">
-            <el-checkbox v-for="item in optionKeys" :key="item" :value="item">
+            <el-checkbox
+              v-for="item in optionKeys"
+              :key="item"
+              :value="item"
+              :disabled="isDisable(item)"
+            >
               <ContactItem
                 :contactInfo="optionsAll[item]"
                 :size="'small'"
-                @showContactCard="onShowUserCard(optionsAll[item].account)"
+                @showContactCard="onShowUserCard(item)"
                 style="width: 200px"
               ></ContactItem>
             </el-checkbox>

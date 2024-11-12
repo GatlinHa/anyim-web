@@ -26,7 +26,6 @@ const initDone = ref(false) //避免还未数据加载完时就显示无数据
 
 const isShowGroupCard = ref(false)
 const showGroupInfo = ref({})
-const showGroupMembers = ref([])
 
 onMounted(async () => {
   await messageData.loadSessionList()
@@ -114,24 +113,22 @@ const onSearch = () => {
           // 需要给符合条件的groupId保存下查询结果高亮的提示
           const regex = new RegExp(searchKey.value, 'gi')
           if (
-            queryResult[item.groupId].memberNickName
-              .toLowerCase()
-              .includes(searchKey.value.toLowerCase())
+            queryResult[item.groupId].nickName.toLowerCase().includes(searchKey.value.toLowerCase())
           ) {
             searchResultTips.value[item.groupId] =
               '包含：' +
-              queryResult[item.groupId].memberNickName.replace(
+              queryResult[item.groupId].nickName.replace(
                 regex,
                 `<span style="color: #409eff;">$&</span>`
               )
-          } else if (queryResult[item.groupId].memberAccount === searchKey.value) {
+          } else if (queryResult[item.groupId].account === searchKey.value) {
             searchResultTips.value[item.groupId] =
               '包含：' +
-              queryResult[item.groupId].memberAccount.replace(
+              queryResult[item.groupId].account.replace(
                 regex,
                 `<span style="color: #409eff;">$&</span>`
               ) +
-              `(${queryResult[item.groupId].memberNickName})`
+              `(${queryResult[item.groupId].nickName})`
           }
         }
       })
@@ -192,7 +189,10 @@ const onShowGroupCard = async (groupInfo) => {
   const res = await groupMembersService({ groupId: groupInfo.groupId })
   isShowGroupCard.value = true
   showGroupInfo.value = groupInfo
-  showGroupMembers.value = res.data.data.members
+  groupData.setGroupMembers({
+    groupId: groupInfo.groupId,
+    members: res.data.data.members
+  })
 }
 
 const onGroupCardClose = () => {
@@ -262,7 +262,7 @@ const onGroupCardClose = () => {
   <GroupCard
     :isShow="isShowGroupCard"
     :groupInfo="showGroupInfo"
-    :groupMembers="showGroupMembers"
+    :groupMembers="groupData.groupMembers[showGroupInfo.groupId]"
     @close="onGroupCardClose"
   ></GroupCard>
 </template>

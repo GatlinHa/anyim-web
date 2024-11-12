@@ -10,15 +10,27 @@ import {
 // group群组相关的缓存数据，不持久化存储
 export const groupStore = defineStore('anyim-group', () => {
   /**
-   * 格式：{groupId_1: group_1, groupId_2: group_2}
+   * 和我有关的所有群组，格式：{groupId_1: group_1, groupId_2: group_2}
    */
   const groupListAll = ref({})
 
+  /**
+   * 我创建的群组
+   */
   const groupListCreated = ref({})
-
+  /**
+   * 我管理的群组
+   */
   const groupListManaged = ref({})
-
+  /**
+   * 我加入的群组
+   */
   const groupListJoined = ref({})
+
+  /**
+   * 群组成员，格式：{groupId_1: [{accoount: xx, nickName: xx,...}, ...], groupId_2: {...}}
+   */
+  const groupMembers = ref({})
 
   const addCreatedGroup = (groupInfo) => {
     groupListAll.value[groupInfo.groupId] = groupInfo
@@ -71,6 +83,14 @@ export const groupStore = defineStore('anyim-group', () => {
     }
   }
 
+  /**
+   * 这里只做全量更新，不做增量更新
+   * @param {} param0
+   */
+  const setGroupMembers = ({ groupId, members }) => {
+    groupMembers.value[groupId] = members
+  }
+
   return {
     groupListAll,
     groupListCreated,
@@ -84,6 +104,10 @@ export const groupStore = defineStore('anyim-group', () => {
     loadGroupListAll,
     loadGroupListCreated,
     loadGroupListManaged,
-    loadGroupListJoined
+    loadGroupListJoined,
+
+    groupMembers,
+
+    setGroupMembers
   }
 })

@@ -1,22 +1,28 @@
 <script setup>
-import { ref, onUpdated } from 'vue'
-import { ElLoading } from 'element-plus'
+import { ref, onUpdated, computed } from 'vue'
+import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import { ArrowRight } from '@element-plus/icons-vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import AddButton from '@/components/common/AddButton.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import UserCard from '@/components/card/UserCard.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
-import { userStore, messageStore } from '@/stores'
+import { groupStore, userStore, messageStore } from '@/stores'
+import SelectDialog from '../common/SelectDialog.vue'
+import { groupAddMembersService, groupDelMembersService } from '@/api/group'
 
 const props = defineProps(['isShow', 'groupInfo', 'groupMembers'])
 const emit = defineEmits(['close'])
 
+const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
 const showDraw = ref(props.isShow)
+const isShowSelectDialog = ref(false)
+const method = ref('') //有加人，减人两中method
 
 onUpdated(() => {
   showDraw.value = ref(props.isShow)
@@ -28,31 +34,137 @@ const showMembers = () => {
 
 const isShowUserCard = ref(false)
 const userInfo = ref()
-const onShowUserCard = async (account) => {
+const onShowUserCard = (account) => {
   const sessionId = combineId(account, userData.user.account)
   const loadingInstance = ElLoading.service(el_loading_options)
-  const res = await userQueryService({ account: account })
-  if (sessionId in messageData.sessionList) {
-    messageData.updateSession({
-      sessionId: sessionId,
-      objectInfo: {
-        ...messageData.sessionList[sessionId].objectInfo,
-        nickName: res.data.data.nickName,
-        signature: res.data.data.signature,
-        avatarThumb: res.data.data.avatarThumb,
-        gender: res.data.data.gender,
-        phoneNum: res.data.data.phoneNum,
-        email: res.data.data.email
+  userQueryService({ account: account })
+    .then((res) => {
+      if (sessionId in messageData.sessionList) {
+        messageData.updateSession({
+          sessionId: sessionId,
+          objectInfo: {
+            ...messageData.sessionList[sessionId].objectInfo,
+            nickName: res.data.data.nickName,
+            signature: res.data.data.signature,
+            avatarThumb: res.data.data.avatarThumb,
+            gender: res.data.data.gender,
+            phoneNum: res.data.data.phoneNum,
+            email: res.data.data.email
+          }
+        })
       }
+      userInfo.value = res.data.data
     })
-  }
-  userInfo.value = res.data.data
-  loadingInstance.close()
-  isShowUserCard.value = true
+    .finally(() => {
+      loadingInstance.close()
+      isShowUserCard.value = true
+    })
 }
 
+const selectDialogOptions = computed(() => {
+  if (method.value === 'add') {
+    const data = {}
+    Object.values(messageData.sessionList).forEach((item) => {
+      data[item.objectInfo.account] = item.objectInfo
+    })
+    return data
+  } else {
+    const data = {}
+    props.groupMembers?.forEach((item) => {
+      data[item.account] = item
+    })
+    return data
+  }
+})
+
+const selectDialogDisabledOptions = computed(() => {
+  if (method.value === 'add') {
+    return props.groupMembers.map((item) => item.account)
+  } else {
+    // 删除时要排除自己
+    return [userData.user.account]
+    //TODO 群主不能删
+    //TODO 管理员不能删管理员
+  }
+})
+
+const searchModel = computed(() => {
+  return method.value === 'add' ? 'server' : 'default'
+})
+
 const onAddmember = () => {
-  console.log('onAddmember')
+  isShowSelectDialog.value = true
+  method.value = 'add'
+}
+
+const delAddmember = () => {
+  isShowSelectDialog.value = true
+  method.value = 'del'
+}
+
+const selectDialogTitle = computed(() => {
+  return method.value === 'add' ? '添加成员' : '移除成员'
+})
+
+const onConfirmSelect = (selected) => {
+  // 这里要先关闭，不然移除的时候会报错
+  isShowSelectDialog.value = false
+
+  if (method.value === 'add') {
+    let members = []
+    selected.forEach((item) => {
+      const info = {
+        account: item.account,
+        nickName: item.nickName,
+        avatarThumb: item.avatarThumb,
+        role: 0
+      }
+      members.push(info)
+    })
+    const loadingInstance = ElLoading.service(el_loading_options)
+    groupAddMembersService({
+      groupId: props.groupInfo.groupId,
+      members: members
+    })
+      .then((res) => {
+        if (res.data.data) {
+          groupData.setGroupMembers({
+            groupId: props.groupInfo.groupId,
+            members: res.data.data.members
+          })
+          ElMessage.success('添加成功')
+        } else {
+          ElMessage.error('添加失败')
+        }
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  } else {
+    let accounts = []
+    selected.forEach((item) => {
+      accounts.push(item.account)
+    })
+    const loadingInstance = ElLoading.service(el_loading_options)
+    groupDelMembersService({
+      groupId: props.groupInfo.groupId,
+      accounts: accounts
+    })
+      .then((res) => {
+        if (res.data.data) {
+          groupData.setGroupMembers({
+            groupId: props.groupInfo.groupId,
+            members: res.data.data.members
+          })
+          ElMessage.success('移除成功')
+        } else {
+          ElMessage.error('移除失败')
+        }
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  }
 }
 </script>
 
@@ -96,22 +208,26 @@ const onAddmember = () => {
         <div class="group-card-members-grid">
           <div
             class="group-card-members-grid-item"
-            v-for="item in props.groupMembers.slice(0, 9)"
-            :key="item.memberAccount"
+            v-for="item in props.groupMembers.slice(0, 8)"
+            :key="item.account"
           >
             <AvatarIcon
-              :showName="item.memberNickName"
-              :showId="item.memberAccount"
-              :showAvatarThumb="item.memberAvatarThumb"
-              @click="onShowUserCard(item.memberAccount)"
+              :showName="item.nickName"
+              :showId="item.account"
+              :showAvatarThumb="item.avatarThumb"
+              @click="onShowUserCard(item.account)"
             ></AvatarIcon>
-            <div class="text text-ellipsis" :title="item.memberNickName">
-              {{ item.memberNickName }}
+            <div class="text text-ellipsis" :title="item.nickName">
+              {{ item.nickName }}
             </div>
           </div>
           <div class="group-card-members-grid-item">
             <AddButton :size="40" @click="onAddmember"></AddButton>
             <div class="text">添加成员</div>
+          </div>
+          <div class="group-card-members-grid-item">
+            <DeleteButton :size="40" @click="delAddmember"></DeleteButton>
+            <div class="text">移除成员</div>
           </div>
         </div>
       </div>
@@ -122,6 +238,20 @@ const onAddmember = () => {
     :userInfo="userInfo"
     @close="isShowUserCard = false"
   ></UserCard>
+  <SelectDialog
+    v-model="isShowSelectDialog"
+    :options="selectDialogOptions"
+    :disabledOptions="selectDialogDisabledOptions"
+    :searchModel="searchModel"
+    @showUserCard="onShowUserCard"
+    @confirm="onConfirmSelect"
+  >
+    <template #title>
+      <div style="font-size: 16px; font-weight: bold; white-space: nowrap">
+        {{ selectDialogTitle }}
+      </div>
+    </template>
+  </SelectDialog>
 </template>
 
 <style lang="scss">
