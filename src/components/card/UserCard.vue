@@ -2,21 +2,19 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
-import { userStore, messageStore } from '@/stores'
+import { userStore, messageStore, userCardStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { MsgType } from '@/proto/msg'
 import { msgChatCreateSessionService } from '@/api/message'
 
-const props = defineProps(['isShow', 'userInfo'])
-const emit = defineEmits(['close'])
-
 const userData = userStore()
 const messageData = messageStore()
+const userCardData = userCardStore()
 
 const userCardRef = ref()
 
 const sessionId = computed(() => {
-  return combineId(userData.user.account, props.userInfo?.account)
+  return combineId(userData.user.account, userCardData.userInfo?.account)
 })
 const mark = computed(() => {
   return messageData.sessionList[sessionId.value]?.mark || ''
@@ -35,7 +33,7 @@ const partitioEditing = ref(false)
 const newPartitionId = ref(null)
 
 const isSelf = computed(() => {
-  return userData.user.account === props.userInfo.account
+  return userData.user.account === userCardData.userInfo.account
 })
 
 const preventClose = (event) => {
@@ -43,7 +41,7 @@ const preventClose = (event) => {
 }
 
 const closeCardIfOutside = (event) => {
-  if (!props.isShow) return
+  if (!userCardData.isShow) return
   if (
     !event.target.closest('.user-card') &&
     !event.target.closest('.avatar-session-item') &&
@@ -63,14 +61,14 @@ const handleEscEvent = (event) => {
 }
 
 const truncatedSignature = computed(() => {
-  const signature = props.userInfo.signature || 'TA还没有个性签名。'
+  const signature = userCardData.userInfo.signature || 'TA还没有个性签名。'
   const lengthLimit = 50
   return signature.length > lengthLimit ? signature.slice(0, lengthLimit) + '...' : signature
 })
 
 // 关闭的时候触发
 const onClose = () => {
-  emit('close')
+  userCardData.setIsShow(false)
   markEditing.value = false
 }
 
@@ -88,7 +86,7 @@ const createSessionIfNotExist = async () => {
     const res = await msgChatCreateSessionService({
       sessionId: sessionId.value,
       account: userData.user.account,
-      remoteId: props.userInfo.account,
+      remoteId: userCardData.userInfo.account,
       sessionType: MsgType.CHAT
     })
     messageData.addSession(res.data.data)
@@ -144,17 +142,21 @@ onUnmounted(() => {
 <template>
   <div ref="userCardRef">
     <transition name="fade">
-      <div class="user-card" v-if="props.isShow" @click.self="preventClose($event)">
+      <div class="user-card" v-if="userCardData.isShow" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
-            <el-avatar class="avatar" :src="props.userInfo.avatarThumb || avatar" />
+            <el-avatar class="avatar" :src="userCardData.userInfo.avatarThumb || avatar" />
             <div class="gender">
-              <el-icon v-if="props.userInfo.gender === 1" color="#508afe"><Male /></el-icon>
-              <el-icon v-if="props.userInfo.gender === 2" color="#ff5722"><Female /></el-icon>
+              <el-icon v-if="userCardData.userInfo.gender === 1" color="#508afe"><Male /></el-icon>
+              <el-icon v-if="userCardData.userInfo.gender === 2" color="#ff5722"
+                ><Female
+              /></el-icon>
             </div>
             <div class="nickname">
-              {{ props.userInfo.nickName || '未设置昵称' }}({{ props.userInfo.account }})
+              {{ userCardData.userInfo.nickName || '未设置昵称' }}({{
+                userCardData.userInfo.account
+              }})
             </div>
           </div>
         </div>
@@ -165,15 +167,15 @@ onUnmounted(() => {
           </el-text>
           <div class="info-item phone">
             <span class="label">手机：</span>
-            <span class="value">{{ props.userInfo.phoneNum || '-' }}</span>
+            <span class="value">{{ userCardData.userInfo.phoneNum || '-' }}</span>
           </div>
           <div class="info-item email">
             <span class="label">邮箱：</span>
-            <span class="value">{{ props.userInfo.email || '-' }}</span>
+            <span class="value">{{ userCardData.userInfo.email || '-' }}</span>
           </div>
           <div class="info-item nickname">
             <span class="label">部门：</span>
-            <span class="value">{{ props.userInfo.organize || '-' }}</span>
+            <span class="value">{{ userCardData.userInfo.organize || '-' }}</span>
           </div>
           <div v-if="!isSelf" class="info-item mark">
             <span class="label">备注：</span>

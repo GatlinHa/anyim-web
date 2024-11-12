@@ -1,15 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { userQueryService } from '@/api/user'
-import { messageStore } from '@/stores'
+import { messageStore, userCardStore } from '@/stores'
 import ContactListUserItem from '@/views/contactList/user/components/ContactListUserItem.vue'
-import UserCard from '@/components/card/UserCard.vue'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { Search } from '@element-plus/icons-vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 
 const messageData = messageStore()
+const userCardData = userCardStore()
 const totalCount = computed(() => {
   return Object.keys(markData.value).length
 })
@@ -42,8 +42,6 @@ const markData = computed(() => {
   return data
 })
 
-const isShowUserCard = ref(false)
-const userInfo = ref()
 const onShowUserCard = ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   userQueryService({ account: account })
@@ -60,11 +58,11 @@ const onShowUserCard = ({ sessionId, account }) => {
           email: res.data.data.email
         }
       })
-      userInfo.value = messageData.sessionList[sessionId].objectInfo
+      userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
     })
     .finally(() => {
       loadingInstance.close()
-      isShowUserCard.value = true
+      userCardData.setIsShow(true)
     })
 }
 </script>
@@ -95,11 +93,6 @@ const onShowUserCard = ({ sessionId, account }) => {
       <HashNoData v-else :size="100"></HashNoData>
     </el-main>
   </el-container>
-  <UserCard
-    :isShow="isShowUserCard"
-    :userInfo="userInfo"
-    @close="isShowUserCard = false"
-  ></UserCard>
 </template>
 
 <style lang="scss" scoped>

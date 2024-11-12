@@ -24,6 +24,7 @@ import {
   CREATE_WS_DELAY,
   SYNC_STATUS_INTERVAL
 } from '@/const/userConst'
+import UserCard from '@/components/card/UserCard.vue'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -221,6 +222,7 @@ const onExit = async () => {
       <router-view></router-view>
     </el-main>
     <MyCard ref="myCardDialog"></MyCard>
+    <UserCard></UserCard>
   </el-container>
 </template>
 

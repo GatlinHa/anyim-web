@@ -6,7 +6,6 @@ import EditDialog from '@/components/common/EditDialog.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import PartitionOprMenu from '@/views/contactList/user/components/PartitionOprMenu.vue'
 import ContactListUserItem from '@/views/contactList/user/components/ContactListUserItem.vue'
-import UserCard from '@/components/card/UserCard.vue'
 import { userQueryService } from '@/api/user'
 import {
   msgCreatePartitionService,
@@ -15,7 +14,7 @@ import {
 } from '@/api/message'
 import { PARTITION_TYPE } from '@/const/userConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { messageStore, userStore } from '@/stores'
+import { messageStore, userStore, userCardStore } from '@/stores'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import SelectDialog from '@/components/common/SelectDialog.vue'
@@ -23,6 +22,7 @@ import { combineId, highLightedText } from '@/js/utils/common'
 
 const messageData = messageStore()
 const userData = userStore()
+const userCardData = userCardStore()
 const partitionSearchKey = ref('')
 const userSearchKey = ref('')
 const isShowAddPartitionDialog = ref(false)
@@ -192,8 +192,6 @@ const onConfirmSelect = (selected) => {
   isShowSelectDialog.value = false
 }
 
-const isShowUserCard = ref(false)
-const userInfo = ref()
 const onShowUserCard = ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   userQueryService({ account: account })
@@ -210,11 +208,11 @@ const onShowUserCard = ({ sessionId, account }) => {
           email: res.data.data.email
         }
       })
-      userInfo.value = messageData.sessionList[sessionId].objectInfo
+      userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
     })
     .finally(() => {
       loadingInstance.close()
-      isShowUserCard.value = true
+      userCardData.setIsShow(true)
     })
 }
 
@@ -342,11 +340,6 @@ const onShowUserCardFromSelectDialog = (account) => {
       </div>
     </template>
   </SelectDialog>
-  <UserCard
-    :isShow="isShowUserCard"
-    :userInfo="userInfo"
-    @close="isShowUserCard = false"
-  ></UserCard>
 </template>
 
 <style lang="scss" scoped>

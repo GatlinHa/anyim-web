@@ -23,9 +23,8 @@ import SessionItem from '@/views/message/components/SessionItem.vue'
 import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
-import UserCard from '@/components/card/UserCard.vue'
 import GroupCard from '@/components/card/GroupCard.vue'
-import { userStore, settingStore, messageStore } from '@/stores'
+import { userStore, settingStore, messageStore, userCardStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
@@ -43,6 +42,7 @@ import EditDialog from '@/components/common/EditDialog.vue'
 const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
+const userCardData = userCardStore()
 const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
 
@@ -456,9 +456,6 @@ const onClickMsgContainer = () => {
   handleRead()
 }
 
-const isShowUserCard = ref(false)
-const userInfoForShowCard = ref()
-
 const isShowGroupCard = ref(false)
 const groupInfoForShowCard = ref()
 
@@ -468,9 +465,9 @@ const onShowUserCard = async ({ sessionId, account }) => {
     userData
       .updateUser()
       .then(() => {
-        userInfoForShowCard.value = userData.user
         isShowGroupCard.value = false
-        isShowUserCard.value = true
+        userCardData.setUserInfo(userData.user)
+        userCardData.setIsShow(true)
       })
       .finally(() => {
         //防止请求异常，导致loading关不掉
@@ -491,9 +488,9 @@ const onShowUserCard = async ({ sessionId, account }) => {
             email: res.data.data.email
           }
         })
-        userInfoForShowCard.value = messageData.sessionList[sessionId].objectInfo
         isShowGroupCard.value = false
-        isShowUserCard.value = true
+        userCardData.setIsShow(true)
+        userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
       })
       .finally(() => {
         //防止请求异常，导致loading关不掉
@@ -528,15 +525,15 @@ const onUpdateMarkConfirm = (inputValue) => {
 
 // TODO
 const onShowGroupCard = () => {
-  isShowUserCard.value = false
+  userCardData.setIsShow(false)
   isShowGroupCard.value = true
   groupInfoForShowCard.value = {}
 }
 
 const onShowContactCard = (contactInfo) => {
-  userInfoForShowCard.value = contactInfo
+  userCardData.setUserInfo(contactInfo)
   isShowGroupCard.value = false
-  isShowUserCard.value = true
+  userCardData.setIsShow(true)
 }
 
 const onOpenSession = async ({ msgType, objectInfo }) => {
@@ -794,11 +791,6 @@ const onNoneSelected = () => {
       </el-container>
     </el-main>
   </el-container>
-  <UserCard
-    :isShow="isShowUserCard"
-    :userInfo="userInfoForShowCard"
-    @close="isShowUserCard = false"
-  ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
     :groupInfo="groupInfoForShowCard"

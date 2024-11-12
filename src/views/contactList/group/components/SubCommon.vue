@@ -3,9 +3,8 @@ import { ref, onMounted, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import UserCard from '@/components/card/UserCard.vue'
 import SelectDialog from '@/components/common/SelectDialog.vue'
-import { groupStore, userStore, messageStore } from '@/stores'
+import { groupStore, userStore, messageStore, userCardStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
@@ -19,6 +18,7 @@ const props = defineProps(['tab'])
 const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
+const userCardData = userCardStore()
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
 const showData = ref({})
@@ -145,8 +145,6 @@ const onCreateGroup = () => {
   isShowSelectDialog.value = true
 }
 
-const isShowUserCard = ref(false)
-const userInfo = ref()
 const onShowUserCard = (account) => {
   const sessionId = combineId(account, userData.user.account)
   const loadingInstance = ElLoading.service(el_loading_options)
@@ -166,11 +164,11 @@ const onShowUserCard = (account) => {
           }
         })
       }
-      userInfo.value = res.data.data
+      userCardData.setUserInfo(res.data.data)
     })
     .finally(() => {
       loadingInstance.close()
-      isShowUserCard.value = true
+      userCardData.setIsShow(true)
     })
 }
 
@@ -258,11 +256,6 @@ const onGroupCardClose = () => {
       <div style="font-size: 16px; font-weight: bold; white-space: nowrap">创建群组</div>
     </template>
   </SelectDialog>
-  <UserCard
-    :isShow="isShowUserCard"
-    :userInfo="userInfo"
-    @close="isShowUserCard = false"
-  ></UserCard>
   <GroupCard
     :isShow="isShowGroupCard"
     :groupInfo="showGroupInfo"

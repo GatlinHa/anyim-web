@@ -7,10 +7,9 @@ import { ArrowRight } from '@element-plus/icons-vue'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import AddButton from '@/components/common/AddButton.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
-import UserCard from '@/components/card/UserCard.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
-import { groupStore, userStore, messageStore } from '@/stores'
+import { groupStore, userStore, messageStore, userCardStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
 import { groupAddMembersService, groupDelMembersService } from '@/api/group'
 
@@ -20,6 +19,7 @@ const emit = defineEmits(['close'])
 const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
+const userCardData = userCardStore()
 const showDraw = ref(props.isShow)
 const isShowSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
@@ -83,8 +83,6 @@ const showMembersCount = computed(() => {
   return totalCount
 })
 
-const isShowUserCard = ref(false)
-const userInfo = ref()
 const onShowUserCard = (account) => {
   const sessionId = combineId(account, myAccount.value)
   const loadingInstance = ElLoading.service(el_loading_options)
@@ -104,11 +102,11 @@ const onShowUserCard = (account) => {
           }
         })
       }
-      userInfo.value = res.data.data
+      userCardData.setUserInfo(res.data.data)
     })
     .finally(() => {
       loadingInstance.close()
-      isShowUserCard.value = true
+      userCardData.setIsShow(true)
     })
 }
 
@@ -272,11 +270,6 @@ const onConfirmSelect = (selected) => {
       </div>
     </div>
   </el-drawer>
-  <UserCard
-    :isShow="isShowUserCard"
-    :userInfo="userInfo"
-    @close="isShowUserCard = false"
-  ></UserCard>
   <SelectDialog
     v-model="isShowSelectDialog"
     :options="selectDialogOptions"
