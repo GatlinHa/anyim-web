@@ -147,27 +147,31 @@ const onCreateGroup = () => {
 
 const isShowUserCard = ref(false)
 const userInfo = ref()
-const onShowUserCard = async (account) => {
+const onShowUserCard = (account) => {
   const sessionId = combineId(account, userData.user.account)
   const loadingInstance = ElLoading.service(el_loading_options)
-  const res = await userQueryService({ account: account })
-  if (sessionId in messageData.sessionList) {
-    messageData.updateSession({
-      sessionId: sessionId,
-      objectInfo: {
-        ...messageData.sessionList[sessionId].objectInfo,
-        nickName: res.data.data.nickName,
-        signature: res.data.data.signature,
-        avatarThumb: res.data.data.avatarThumb,
-        gender: res.data.data.gender,
-        phoneNum: res.data.data.phoneNum,
-        email: res.data.data.email
+  userQueryService({ account: account })
+    .then((res) => {
+      if (sessionId in messageData.sessionList) {
+        messageData.updateSession({
+          sessionId: sessionId,
+          objectInfo: {
+            ...messageData.sessionList[sessionId].objectInfo,
+            nickName: res.data.data.nickName,
+            signature: res.data.data.signature,
+            avatarThumb: res.data.data.avatarThumb,
+            gender: res.data.data.gender,
+            phoneNum: res.data.data.phoneNum,
+            email: res.data.data.email
+          }
+        })
       }
+      userInfo.value = res.data.data
     })
-  }
-  userInfo.value = res.data.data
-  loadingInstance.close()
-  isShowUserCard.value = true
+    .finally(() => {
+      loadingInstance.close()
+      isShowUserCard.value = true
+    })
 }
 
 const onConfirmSelect = async (selected) => {

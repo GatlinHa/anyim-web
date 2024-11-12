@@ -53,24 +53,28 @@ const allData = computed(() => {
 
 const isShowUserCard = ref(false)
 const userInfo = ref()
-const onShowUserCard = async ({ sessionId, account }) => {
+const onShowUserCard = ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
-  const res = await userQueryService({ account: account })
-  messageData.updateSession({
-    sessionId: sessionId,
-    objectInfo: {
-      ...messageData.sessionList[sessionId].objectInfo,
-      nickName: res.data.data.nickName,
-      signature: res.data.data.signature,
-      avatarThumb: res.data.data.avatarThumb,
-      gender: res.data.data.gender,
-      phoneNum: res.data.data.phoneNum,
-      email: res.data.data.email
-    }
-  })
-  userInfo.value = messageData.sessionList[sessionId].objectInfo
-  loadingInstance.close()
-  isShowUserCard.value = true
+  userQueryService({ account: account })
+    .then((res) => {
+      messageData.updateSession({
+        sessionId: sessionId,
+        objectInfo: {
+          ...messageData.sessionList[sessionId].objectInfo,
+          nickName: res.data.data.nickName,
+          signature: res.data.data.signature,
+          avatarThumb: res.data.data.avatarThumb,
+          gender: res.data.data.gender,
+          phoneNum: res.data.data.phoneNum,
+          email: res.data.data.email
+        }
+      })
+      userInfo.value = messageData.sessionList[sessionId].objectInfo
+    })
+    .finally(() => {
+      loadingInstance.close()
+      isShowUserCard.value = true
+    })
 }
 </script>
 
