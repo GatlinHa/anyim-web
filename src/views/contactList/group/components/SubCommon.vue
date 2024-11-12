@@ -193,9 +193,13 @@ const onShowGroupCard = async (groupInfo) => {
   const res = await groupMembersService({ groupId: groupInfo.groupId })
   isShowGroupCard.value = true
   showGroupInfo.value = groupInfo
+  const members = {}
+  res.data.data.members.forEach((item) => {
+    members[item.account] = item
+  })
   groupData.setGroupMembers({
     groupId: groupInfo.groupId,
-    members: res.data.data.members
+    members: members
   })
 }
 
@@ -266,7 +270,6 @@ const onGroupCardClose = () => {
   <GroupCard
     :isShow="isShowGroupCard"
     :groupInfo="showGroupInfo"
-    :groupMembers="groupData.groupMembers[showGroupInfo.groupId]"
     @close="onGroupCardClose"
   ></GroupCard>
 </template>

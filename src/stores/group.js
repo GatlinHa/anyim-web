@@ -28,7 +28,8 @@ export const groupStore = defineStore('anyim-group', () => {
   const groupListJoined = ref({})
 
   /**
-   * 群组成员，格式：{groupId_1: [{accoount: xx, nickName: xx,...}, ...], groupId_2: {...}}
+   * 群组成员，格式：双层对象结构，编译数据检索，第一层的key是groupId，第二层的key是account
+   * {groupId_1: [accoount1: {accoount: xx, nickName: xx,...}, ...], groupId_2: {...}}
    */
   const groupMembers = ref({})
 

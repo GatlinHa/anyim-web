@@ -14,7 +14,7 @@ import { groupStore, userStore, messageStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
 import { groupAddMembersService, groupDelMembersService } from '@/api/group'
 
-const props = defineProps(['isShow', 'groupInfo', 'groupMembers'])
+const props = defineProps(['isShow', 'groupInfo'])
 const emit = defineEmits(['close'])
 
 const groupData = groupStore()
@@ -23,19 +23,61 @@ const messageData = messageStore()
 const showDraw = ref(props.isShow)
 const isShowSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
+const myAccount = computed(() => userData.user.account)
 
 onUpdated(() => {
   showDraw.value = ref(props.isShow)
 })
 
-const showMembers = () => {
+const onShowMembers = () => {
   console.log('showMembers')
 }
+
+const showMembers = computed(() => groupData.groupMembers[props.groupInfo.groupId])
+
+const isOwner = computed(() => {
+  return showMembers.value[myAccount.value].role === 2
+})
+
+const isManager = computed(() => {
+  return showMembers.value[myAccount.value].role > 0
+})
+
+/**
+ * 如果开启全员邀请（默认开启）或者是管理员，可以看到加人按钮
+ * @param memberInfo 成员信息
+ */
+const isShowAddButton = computed(() => {
+  if (props.groupInfo.allInvite || isManager.value) {
+    return true
+  } else {
+    return false
+  }
+})
+
+/**
+ * 如果是管理员，可以看到移除按钮
+ * @param memberInfo 成员信息
+ */
+const isShowDelButton = computed(() => {
+  if (isManager.value) {
+    return true
+  } else {
+    return false
+  }
+})
+
+const showMembersCount = computed(() => {
+  let totalCount = 10 // 一共10个显示位，包括加人/减人按钮
+  if (isShowAddButton.value) totalCount--
+  if (isShowDelButton.value) totalCount--
+  return totalCount
+})
 
 const isShowUserCard = ref(false)
 const userInfo = ref()
 const onShowUserCard = (account) => {
-  const sessionId = combineId(account, userData.user.account)
+  const sessionId = combineId(account, myAccount.value)
   const loadingInstance = ElLoading.service(el_loading_options)
   userQueryService({ account: account })
     .then((res) => {
@@ -68,23 +110,26 @@ const selectDialogOptions = computed(() => {
       data[item.objectInfo.account] = item.objectInfo
     })
     return data
+  } else if (method.value === 'del') {
+    return showMembers.value
   } else {
-    const data = {}
-    props.groupMembers?.forEach((item) => {
-      data[item.account] = item
-    })
-    return data
+    return {}
   }
 })
 
 const selectDialogDisabledOptions = computed(() => {
   if (method.value === 'add') {
-    return props.groupMembers.map((item) => item.account)
+    return Object.values(showMembers.value).map((item) => item.account)
+  } else if (method.value === 'del') {
+    const data = []
+    Object.values(showMembers.value).forEach((item) => {
+      if (item.account === myAccount.value) data.push(item.account) // 删除时要排除自己
+      if (item.role === 2) data.push(item.account) // 群主不能删
+      if (item.role === 1 && !isOwner.value) data.push(item.account) //管理员只有群组能删
+    })
+    return data
   } else {
-    // 删除时要排除自己
-    return [userData.user.account]
-    //TODO 群主不能删
-    //TODO 管理员不能删管理员
+    return []
   }
 })
 
@@ -128,9 +173,13 @@ const onConfirmSelect = (selected) => {
     })
       .then((res) => {
         if (res.data.data) {
+          const members = {}
+          res.data.data.members.forEach((item) => {
+            members[item.account] = item
+          })
           groupData.setGroupMembers({
             groupId: props.groupInfo.groupId,
-            members: res.data.data.members
+            members: members
           })
           ElMessage.success('添加成功')
         } else {
@@ -140,7 +189,7 @@ const onConfirmSelect = (selected) => {
       .finally(() => {
         loadingInstance.close()
       })
-  } else {
+  } else if (method.value === 'del') {
     let accounts = []
     selected.forEach((item) => {
       accounts.push(item.account)
@@ -152,9 +201,13 @@ const onConfirmSelect = (selected) => {
     })
       .then((res) => {
         if (res.data.data) {
+          const members = {}
+          res.data.data.members.forEach((item) => {
+            members[item.account] = item
+          })
           groupData.setGroupMembers({
             groupId: props.groupInfo.groupId,
-            members: res.data.data.members
+            members: members
           })
           ElMessage.success('移除成功')
         } else {
@@ -199,16 +252,16 @@ const onConfirmSelect = (selected) => {
               align-items: center;
               cursor: pointer;
             "
-            @click="showMembers"
+            @click="onShowMembers"
           >
-            查看{{ props.groupMembers?.length }}名群组成员
+            查看{{ Object.values(showMembers)?.length }}名群组成员
             <el-icon><ArrowRight /></el-icon>
           </div>
         </div>
         <div class="group-card-members-grid">
           <div
             class="group-card-members-grid-item"
-            v-for="item in props.groupMembers.slice(0, 8)"
+            v-for="item in Object.values(showMembers)?.slice(0, showMembersCount)"
             :key="item.account"
           >
             <AvatarIcon
@@ -221,11 +274,11 @@ const onConfirmSelect = (selected) => {
               {{ item.nickName }}
             </div>
           </div>
-          <div class="group-card-members-grid-item">
+          <div class="group-card-members-grid-item" v-if="isShowAddButton">
             <AddButton :size="40" @click="onAddmember"></AddButton>
             <div class="text">添加成员</div>
           </div>
-          <div class="group-card-members-grid-item">
+          <div class="group-card-members-grid-item" v-if="isShowDelButton">
             <DeleteButton :size="40" @click="delAddmember"></DeleteButton>
             <div class="text">移除成员</div>
           </div>

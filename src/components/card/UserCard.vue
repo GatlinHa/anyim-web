@@ -17,7 +17,7 @@ const sessionId = computed(() => {
   return combineId(userData.user.account, props.userInfo?.account)
 })
 const mark = computed(() => {
-  return messageData.sessionList[sessionId.value].mark
+  return messageData.sessionList[sessionId.value]?.mark || ''
 })
 const markEditing = ref(false)
 const newMark = ref('')
@@ -27,7 +27,7 @@ const partitions = computed(() => {
   return messageData.partitions
 })
 const partitionId = computed(() => {
-  return messageData.sessionList[sessionId.value].partitionId || null
+  return messageData.sessionList[sessionId.value]?.partitionId || null
 })
 const partitioEditing = ref(false)
 const newPartitionId = ref(null)
