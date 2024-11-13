@@ -245,6 +245,7 @@ const onCancelPartition = () => {
 
 <style lang="scss" scoped>
 .user-card-wrapper {
+  //不需要用到el-dialog的布局,只是利用了其覆盖层
   :deep(.el-dialog) {
     background-color: transparent;
     width: 0;
