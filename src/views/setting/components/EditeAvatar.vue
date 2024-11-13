@@ -2,56 +2,73 @@
 import { ref } from 'vue'
 import { userStore } from '@/stores'
 import { Plus, Upload } from '@element-plus/icons-vue'
-import selectAvatar from '@/assets/select_avatar.jpg'
 import { userUploadAvatarService } from '@/api/user'
 import { ElMessage } from 'element-plus'
+import 'vue-cropper/dist/index.css'
+import { VueCropper } from 'vue-cropper'
 
 defineProps(['modelValue'])
 const emit = defineEmits(['update:modelValue', 'update:newAvatar'])
 const userData = userStore()
 
 const uploadRef = ref()
-const imgUrl = ref(userData.user.avatar)
+const cropper = ref()
+const img = ref('')
+const previewImg = ref('')
 const isLoading = ref(false)
-let selectedFile
-
-const onSelected = (file) => {
-  imgUrl.value = URL.createObjectURL(file.raw)
-  selectedFile = file.raw
-}
-
-const onSuccess = () => {}
-
-const beforeUpload = () => {}
-
-const onUpload = async () => {
-  if (!selectedFile) {
-    ElMessage.warning('您还未选择新头像！')
-    return
-  }
-
-  isLoading.value = true
-  try {
-    const res = await userUploadAvatarService({ file: selectedFile })
-    emit('update:newAvatar', res.data.data)
-    emit('update:modelValue', false)
-    selectedFile = null
-    ElMessage.success('头像上传成功')
-  } catch (error) {
-    /* empty */
-  } finally {
-    isLoading.value = false
-  }
-}
+const fileName = ref('')
 
 // 打开的时候触发
 const onOpen = () => {
-  imgUrl.value = userData.user.avatar
+  fileName.value = userData.user.avatar?.split('/').pop()
+  img.value = userData.user.avatar
+  previewImg.value = img.value
 }
 
 // 关闭的时候触发
 const onClose = () => {
   isLoading.value = false
+}
+
+// 选择了文件触发
+const onSelected = (file) => {
+  fileName.value = file.name
+  img.value = URL.createObjectURL(file.raw)
+  previewImg.value = img.value
+}
+
+const onUpload = async () => {
+  cropper.value.getCropBlob(async (blob) => {
+    const lastDotIndex = fileName.value.lastIndexOf('.')
+    const prefix = fileName.value.substring(0, lastDotIndex)
+    const suffix = fileName.value.substring(lastDotIndex)
+    let file = new File(
+      [blob],
+      `${prefix}_${cropper.value.cropW}x${cropper.value.cropH}${suffix}`,
+      {
+        type: blob.type,
+        lastModified: Date.now()
+      }
+    )
+
+    isLoading.value = true
+    try {
+      const res = await userUploadAvatarService({ file: file })
+      emit('update:newAvatar', res.data.data)
+      emit('update:modelValue', false)
+      ElMessage.success('头像上传成功')
+    } catch (error) {
+      /* empty */
+    } finally {
+      isLoading.value = false
+    }
+  })
+}
+
+const stopCrop = () => {
+  cropper.value.getCropData((data) => {
+    previewImg.value = data
+  })
 }
 </script>
 
@@ -72,10 +89,21 @@ const onClose = () => {
           :auto-upload="false"
           :show-file-list="false"
           :on-change="onSelected"
-          :on-success="onSuccess"
-          :before-upload="beforeUpload"
         >
-          <img :src="imgUrl || selectAvatar" class="avatar" />
+          <div class="canvas" @click.stop style="width: 400px; height: 400px">
+            <vueCropper
+              ref="cropper"
+              class="avatar"
+              :img="img"
+              :full="true"
+              :autoCrop="true"
+              :autoCropWidth="250"
+              :autoCropHeight="250"
+              :canScale="true"
+              :centerBox="true"
+              @mouseup="stopCrop"
+            ></vueCropper>
+          </div>
         </el-upload>
       </div>
 
@@ -83,9 +111,9 @@ const onClose = () => {
         <div class="preview-area">
           <span style="font-size: 16px">预览</span>
 
-          <el-avatar class="preview-100" :src="imgUrl || selectAvatar" />
+          <el-avatar class="preview-100" :src="previewImg" />
           <span>100×100</span>
-          <el-avatar class="preview-40" :src="imgUrl || selectAvatar" />
+          <el-avatar class="preview-40" :src="previewImg" />
           <span>40×40</span>
         </div>
         <div class="button-area">
@@ -150,13 +178,5 @@ const onClose = () => {
     width: 40px;
     height: 40px;
   }
-}
-
-img {
-  width: 400px;
-  height: 400px;
-  object-fit: cover;
-  text-align: center;
-  border-radius: 10px;
 }
 </style>
