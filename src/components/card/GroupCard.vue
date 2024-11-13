@@ -9,37 +9,35 @@ import AddButton from '@/components/common/AddButton.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
-import { groupStore, userStore, messageStore, userCardStore } from '@/stores'
+import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
 import { groupAddMembersService, groupDelMembersService } from '@/api/group'
-
-const props = defineProps(['isShow', 'groupInfo'])
-const emit = defineEmits(['close'])
 
 const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
-const showDraw = ref(props.isShow)
+const groupCardData = groupCardStore()
+const showDraw = ref(groupCardData.isShow)
 const isShowSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
 const myAccount = computed(() => userData.user.account)
 
 onUpdated(() => {
-  showDraw.value = ref(props.isShow)
+  showDraw.value = ref(groupCardData.isShow)
 })
 
 const onShowMembers = () => {
   console.log('showMembers')
 }
 
-const showMembers = computed(() => groupData.groupMembers[props.groupInfo.groupId])
+const showMembers = computed(() => groupData.groupMembers[groupCardData.groupInfo.groupId])
 
 /**
  * 按照role倒序排
  */
 const showMembersArrSorted = computed(() => {
-  return Object.values(groupData.groupMembers[props.groupInfo.groupId]).sort(
+  return Object.values(groupData.groupMembers[groupCardData.groupInfo.groupId]).sort(
     (a, b) => b.role - a.role
   )
 })
@@ -57,7 +55,7 @@ const isManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (props.groupInfo.allInvite || isManager.value) {
+  if (groupCardData.groupInfo.allInvite || isManager.value) {
     return true
   } else {
     return false
@@ -164,13 +162,13 @@ const onConfirmSelect = (selected) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (method.value === 'add') {
     groupAddMembersService({
-      groupId: props.groupInfo.groupId,
+      groupId: groupCardData.groupInfo.groupId,
       accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
           groupData.setGroupMembers({
-            groupId: props.groupInfo.groupId,
+            groupId: groupCardData.groupInfo.groupId,
             members: res.data.data.members
           })
           ElMessage.success('添加成功')
@@ -183,13 +181,13 @@ const onConfirmSelect = (selected) => {
       })
   } else if (method.value === 'del') {
     groupDelMembersService({
-      groupId: props.groupInfo.groupId,
+      groupId: groupCardData.groupInfo.groupId,
       accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
           groupData.setGroupMembers({
-            groupId: props.groupInfo.groupId,
+            groupId: groupCardData.groupInfo.groupId,
             members: res.data.data.members
           })
           ElMessage.success('移除成功')
@@ -207,13 +205,13 @@ const onConfirmSelect = (selected) => {
 <template>
   <el-drawer
     class="group-card"
-    :modelValue="props.isShow"
+    :modelValue="groupCardData.isShow"
     :direction="'rtl'"
     :size="380"
     :z-index="1"
     modal-class="group-card-modal"
     :show-close="false"
-    @close="emit('close')"
+    @close="groupCardData.setIsShow(false)"
   >
     <template #header>
       <span style="text-align: center; font-size: 16px">群信息</span>
@@ -221,7 +219,7 @@ const onConfirmSelect = (selected) => {
     <div class="group-card-body">
       <GroupItem
         class="group-card-avatar"
-        :groupInfo="props.groupInfo"
+        :groupInfo="groupCardData.groupInfo"
         :disableClickAvatar="true"
       ></GroupItem>
       <div class="group-card-members">

@@ -25,6 +25,7 @@ import {
   SYNC_STATUS_INTERVAL
 } from '@/const/userConst'
 import UserCard from '@/components/card/UserCard.vue'
+import GroupCard from '@/components/card/GroupCard.vue'
 
 const myCardDialog = ref()
 const myAvatar = ref()
@@ -223,6 +224,7 @@ const onExit = async () => {
     </el-main>
     <MyCard ref="myCardDialog"></MyCard>
     <UserCard></UserCard>
+    <GroupCard></GroupCard>
   </el-container>
 </template>
 

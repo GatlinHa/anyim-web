@@ -4,14 +4,13 @@ import { Search } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import SelectDialog from '@/components/common/SelectDialog.vue'
-import { groupStore, userStore, messageStore, userCardStore } from '@/stores'
+import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService, groupSearchByMemberService, groupInfoService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
-import GroupCard from '@/components/card/GroupCard.vue'
 
 const props = defineProps(['tab'])
 
@@ -19,13 +18,11 @@ const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
+const groupCardData = groupCardStore()
 const searchKey = ref('')
 const isShowSelectDialog = ref(false)
 const showData = ref({})
 const initDone = ref(false) //避免还未数据加载完时就显示无数据
-
-const isShowGroupCard = ref(false)
-const showGroupInfo = ref({})
 
 onMounted(async () => {
   await messageData.loadSessionList()
@@ -189,16 +186,12 @@ const onConfirmSelect = async (selected) => {
 
 const onShowGroupCard = async (groupInfo) => {
   const res = await groupInfoService({ groupId: groupInfo.groupId })
-  isShowGroupCard.value = true
-  showGroupInfo.value = groupInfo
+  groupCardData.setIsShow(true)
+  groupCardData.setGroupInfo(groupInfo)
   groupData.setGroupMembers({
     groupId: groupInfo.groupId,
     members: res.data.data.members
   })
-}
-
-const onGroupCardClose = () => {
-  isShowGroupCard.value = false
 }
 </script>
 
@@ -256,11 +249,6 @@ const onGroupCardClose = () => {
       <div style="font-size: 16px; font-weight: bold; white-space: nowrap">创建群组</div>
     </template>
   </SelectDialog>
-  <GroupCard
-    :isShow="isShowGroupCard"
-    :groupInfo="showGroupInfo"
-    @close="onGroupCardClose"
-  ></GroupCard>
 </template>
 
 <style lang="scss" scoped>

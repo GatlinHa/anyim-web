@@ -23,8 +23,7 @@ import SessionItem from '@/views/message/components/SessionItem.vue'
 import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
-import GroupCard from '@/components/card/GroupCard.vue'
-import { userStore, settingStore, messageStore, userCardStore } from '@/stores'
+import { userStore, settingStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
@@ -43,6 +42,7 @@ const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
+const groupCardData = groupCardStore()
 const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
 
@@ -456,16 +456,13 @@ const onClickMsgContainer = () => {
   handleRead()
 }
 
-const isShowGroupCard = ref(false)
-const groupInfoForShowCard = ref()
-
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (userData.user.account === account) {
     userData
       .updateUser()
       .then(() => {
-        isShowGroupCard.value = false
+        groupCardData.setIsShow(false)
         userCardData.setUserInfo(userData.user)
         userCardData.setIsShow(true)
       })
@@ -488,9 +485,9 @@ const onShowUserCard = async ({ sessionId, account }) => {
             email: res.data.data.email
           }
         })
-        isShowGroupCard.value = false
-        userCardData.setIsShow(true)
+        groupCardData.setIsShow(false)
         userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
+        userCardData.setIsShow(true)
       })
       .finally(() => {
         //防止请求异常，导致loading关不掉
@@ -526,13 +523,13 @@ const onUpdateMarkConfirm = (inputValue) => {
 // TODO
 const onShowGroupCard = () => {
   userCardData.setIsShow(false)
-  isShowGroupCard.value = true
-  groupInfoForShowCard.value = {}
+  groupCardData.setGroupInfo({})
+  groupCardData.setIsShow(true)
 }
 
 const onShowContactCard = (contactInfo) => {
+  groupCardData.setIsShow(false)
   userCardData.setUserInfo(contactInfo)
-  isShowGroupCard.value = false
   userCardData.setIsShow(true)
 }
 
@@ -791,11 +788,6 @@ const onNoneSelected = () => {
       </el-container>
     </el-main>
   </el-container>
-  <GroupCard
-    :isShow="isShowGroupCard"
-    :groupInfo="groupInfoForShowCard"
-    @close="isShowGroupCard = false"
-  ></GroupCard>
   <EditDialog
     :isShow="isShowUpdateMarkDialog"
     :title="'修改备注：'"
