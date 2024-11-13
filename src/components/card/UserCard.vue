@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore, messageStore, userCardStore } from '@/stores'
@@ -10,8 +10,6 @@ import { msgChatCreateSessionService } from '@/api/message'
 const userData = userStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
-
-const userCardRef = ref()
 
 const sessionId = computed(() => {
   return combineId(userData.user.account, userCardData.userInfo?.account)
@@ -38,26 +36,6 @@ const isSelf = computed(() => {
 
 const preventClose = (event) => {
   event.stopPropagation()
-}
-
-const closeCardIfOutside = (event) => {
-  if (!userCardData.isShow) return
-  if (
-    !event.target.closest('.user-card') &&
-    !event.target.closest('.avatar-session-item') &&
-    !event.target.closest('.avatar-message-item') &&
-    !event.target.closest('.avatar-contact-item') &&
-    !event.target.closest('.value') &&
-    !event.target.closest('.edit')
-  ) {
-    onClose()
-  }
-}
-
-const handleEscEvent = (event) => {
-  if (event.key === 'Escape') {
-    onClose()
-  }
 }
 
 const truncatedSignature = computed(() => {
@@ -127,22 +105,21 @@ const onChangePartition = async () => {
 const onCancelPartition = () => {
   partitioEditing.value = false
 }
-
-onMounted(() => {
-  document.addEventListener('click', closeCardIfOutside)
-  document.addEventListener('keydown', handleEscEvent)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeCardIfOutside)
-  document.removeEventListener('keydown', handleEscEvent)
-})
 </script>
 
 <template>
-  <div ref="userCardRef">
-    <transition name="fade">
-      <div class="user-card" v-if="userCardData.isShow" @click.self="preventClose($event)">
+  <div class="user-card-wrapper">
+    <el-dialog
+      :model-value="userCardData.isShow"
+      :modal="false"
+      :show-close="false"
+      @close="onClose"
+    >
+      <template #header>
+        <div style="background-color: red"></div>
+      </template>
+
+      <div class="user-card" @click.self="preventClose($event)">
         <div class="header">
           <el-icon class="close-button" @click="onClose"><Close /></el-icon>
           <div class="main">
@@ -262,11 +239,20 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-    </transition>
+    </el-dialog>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.user-card-wrapper {
+  :deep(.el-dialog) {
+    background-color: transparent;
+    width: 0;
+    height: 0;
+    padding: 0;
+  }
+}
+
 .user-card {
   width: 300px;
   height: 500px;
@@ -419,15 +405,5 @@ onUnmounted(() => {
       }
     }
   }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.1s ease-in;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
