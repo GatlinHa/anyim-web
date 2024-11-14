@@ -20,8 +20,8 @@ const messageData = messageStore()
 const userCardData = userCardStore()
 const groupCardData = groupCardStore()
 const searchKey = ref('')
+const searchData = ref([])
 const isShowSelectDialog = ref(false)
-const showData = ref({})
 const initDone = ref(false) //避免还未数据加载完时就显示无数据
 
 onMounted(async () => {
@@ -29,7 +29,6 @@ onMounted(async () => {
   await messageData.loadPartitions()
   await groupData.loadGroupInfoList()
   initDone.value = true
-  showData.value = initData.value
 })
 
 const initData = computed(() => {
@@ -66,73 +65,95 @@ const initData = computed(() => {
   }
 })
 
-const selectDialogOptions = computed(() => {
+const showData = computed(() => {
+  if (!searchKey.value) {
+    return initData.value
+  }
+
   const data = {}
-  Object.values(messageData.sessionList).forEach((item) => {
-    data[item.objectInfo.account] = item.objectInfo
+  const searchDataGroupIds = new Set(searchData.value?.map((item) => item.groupId))
+  Object.values(initData.value).forEach((item) => {
+    // 1.放群名称和群ID的匹配结果
+    if (
+      item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
+      item.groupId === searchKey.value
+    ) {
+      data[item.groupId] = item
+    }
+
+    // 2.放群成员的匹配结果
+    if (searchDataGroupIds?.has(item.groupId)) {
+      data[item.groupId] = item
+    }
   })
   return data
 })
 
 // 需要给符合条件的groupId保存下查询结果高亮的提示
-const searchResultTips = ref({})
+const searchResultTips = computed(() => {
+  const tips = {
+    title: {},
+    html: {}
+  }
 
-// 这里不能使用计算属性的特点去改变showData的值
-// 因为这里有云端查询，会有延迟，会二次改变showData，造成页面数据跳变
+  if (!searchKey.value) {
+    return tips
+  }
+
+  let nickNameMatchCnt = {} // 对同一个群的搜索结果个数计数
+  searchData.value.forEach((item) => {
+    const regex = new RegExp(searchKey.value, 'gi')
+    if (item.nickName.toLowerCase().includes(searchKey.value.toLowerCase())) {
+      if (item.groupId in nickNameMatchCnt) {
+        nickNameMatchCnt[item.groupId] = nickNameMatchCnt[item.groupId] + 1
+      } else {
+        nickNameMatchCnt[item.groupId] = 1
+      }
+
+      //最多展示3个昵称,多的用"等x人"表示
+      if (nickNameMatchCnt[item.groupId] === 4) {
+        tips.title[item.groupId] =
+          tips.title[item.groupId] + `等${nickNameMatchCnt[item.groupId]}人`
+        tips.html[item.groupId] = tips.html[item.groupId] + `等${nickNameMatchCnt[item.groupId]}人`
+      } else if (nickNameMatchCnt[item.groupId] > 4) {
+        //do nothing
+      } else {
+        if (item.groupId in tips.title) {
+          tips.title[item.groupId] = tips.title[item.groupId] + ', ' + item.nickName
+          tips.html[item.groupId] =
+            tips.html[item.groupId] +
+            ', ' +
+            item.nickName.replace(regex, `<span style="color: #409eff;">$&</span>`)
+        } else {
+          tips.title[item.groupId] = '包含：' + item.nickName
+          tips.html[item.groupId] =
+            '包含：' + item.nickName.replace(regex, `<span style="color: #409eff;">$&</span>`)
+        }
+      }
+    } else if (item.account === searchKey.value) {
+      tips.title[item.groupId] = '包含：' + item.account + `(${item.nickName})`
+      tips.html[item.groupId] =
+        '包含：' +
+        item.account.replace(regex, `<span style="color: #409eff;">$&</span>`) +
+        `(${item.nickName})`
+    }
+  })
+
+  return tips
+})
+
 let timer
 const onSearch = () => {
   if (!searchKey.value) {
-    showData.value = initData.value
-    searchResultTips.value = {}
+    searchData.value = []
     return
   }
 
   clearTimeout(timer)
   const key = searchKey.value
   timer = setTimeout(() => {
-    const queryResult = {}
     groupSearchByMemberService({ searchKey: key }).then((res) => {
-      res.data.data?.forEach((item) => {
-        queryResult[item.groupId] = item //如果有多个相同的groupid结果，这里只放最后个（后面覆盖前面）
-      })
-
-      const data = {}
-      searchResultTips.value = {}
-      Object.values(initData.value).forEach((item) => {
-        // 1.放群名称和群ID的匹配结果
-        if (
-          item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
-          item.groupId === searchKey.value
-        ) {
-          data[item.groupId] = item
-        }
-        // 2.放群成员的匹配结果
-        if (item.groupId in queryResult) {
-          data[item.groupId] = item
-
-          // 需要给符合条件的groupId保存下查询结果高亮的提示
-          const regex = new RegExp(searchKey.value, 'gi')
-          if (
-            queryResult[item.groupId].nickName.toLowerCase().includes(searchKey.value.toLowerCase())
-          ) {
-            searchResultTips.value[item.groupId] =
-              '包含：' +
-              queryResult[item.groupId].nickName.replace(
-                regex,
-                `<span style="color: #409eff;">$&</span>`
-              )
-          } else if (queryResult[item.groupId].account === searchKey.value) {
-            searchResultTips.value[item.groupId] =
-              '包含：' +
-              queryResult[item.groupId].account.replace(
-                regex,
-                `<span style="color: #409eff;">$&</span>`
-              ) +
-              `(${queryResult[item.groupId].nickName})`
-          }
-        }
-      })
-      showData.value = data
+      searchData.value = res.data.data
     })
   }, 300)
 }
@@ -172,16 +193,29 @@ const onShowUserCard = (account) => {
     })
 }
 
+/**
+ * 用于显示创建群组弹窗中的候选成员名单
+ */
+const selectDialogOptions = computed(() => {
+  const data = {}
+  Object.values(messageData.sessionList).forEach((item) => {
+    data[item.objectInfo.account] = item.objectInfo
+  })
+  return data
+})
+
 const onConfirmSelect = async (selected) => {
   if (selected.length < 2) {
     ElMessage.warning('请至少选择两位群成员')
     return
   }
 
+  const members = selected.map((item) => ({ account: item.account, nickName: item.nickName }))
+  members.push({ account: userData.user.account, nickName: userData.user.nickName })
   const res = await groupCreateService({
     groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群组`,
     groupType: 1, //普通群
-    accounts: selected.map((item) => item.account)
+    members: members
   })
   groupData.setGroupInfo(res.data.data.groupInfo)
   isShowSelectDialog.value = false
@@ -223,15 +257,20 @@ const onShowGroupCard = async (groupInfo) => {
           @showGroupCard="onShowGroupCard(item)"
         >
           <template #showMore_1>
-            <div v-html="searchResultTips[item.groupId]" style="min-width: 200px"></div>
-          </template>
-          <template #showMore_2>
             <div
-              style="cursor: pointer; color: #409eff; min-width: 60px"
+              style="cursor: pointer; color: #409eff; width: 100px; text-align: center"
               @click="onShowGroupCard(item)"
             >
               查看详情
             </div>
+          </template>
+          <template #showMore_2>
+            <div
+              class="text-ellipsis"
+              :title="searchResultTips.title[item.groupId]"
+              v-html="searchResultTips.html[item.groupId]"
+              style="width: 200px"
+            ></div>
           </template>
         </ContactListGroupItem>
       </div>
