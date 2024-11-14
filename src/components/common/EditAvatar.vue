@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { userStore } from '@/stores'
 import { Plus, Upload, RefreshLeft, RefreshRight, Refresh } from '@element-plus/icons-vue'
 import { userUploadAvatarService } from '@/api/user'
@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus'
 import 'vue-cropper/dist/index.css'
 import { VueCropper } from 'vue-cropper'
 
-defineProps(['modelValue'])
+const props = defineProps(['modelValue', 'model', 'groupInfo'])
 const emit = defineEmits(['update:modelValue', 'update:newAvatar'])
 const userData = userStore()
 
@@ -18,10 +18,20 @@ const isLoading = ref(false)
 const fileName = ref('')
 const resetData = ref({})
 
+const avatar = computed(() => {
+  if (props.model === 'user') {
+    return userData.user.avatar
+  } else if (props.model === 'group') {
+    return props.groupInfo.avatar
+  } else {
+    return ''
+  }
+})
+
 // 打开的时候触发
 const onOpen = () => {
-  fileName.value = userData.user.avatar?.split('/').pop()
-  srcImg.value = userData.user.avatar
+  fileName.value = avatar.value?.split('/').pop()
+  srcImg.value = avatar.value
   previewImg.value = srcImg.value
   resetData.value = {
     previewImg: previewImg.value
@@ -50,7 +60,7 @@ const onUpload = async () => {
     const suffix = fileName.value.substring(lastDotIndex)
     let file = new File(
       [blob],
-      `${prefix}_${cropper.value.cropW}x${cropper.value.cropH}${suffix}`,
+      `${prefix}_${Math.round(cropper.value.cropW)}x${Math.round(cropper.value.cropH)}${suffix}`,
       {
         type: blob.type,
         lastModified: Date.now()
@@ -60,7 +70,10 @@ const onUpload = async () => {
     isLoading.value = true
     try {
       const res = await userUploadAvatarService({ file: file })
-      emit('update:newAvatar', res.data.data)
+      emit('update:newAvatar', {
+        avatar: res.data.data.originUrl,
+        avatarThumb: res.data.data.thumbUrl
+      })
       emit('update:modelValue', false)
       ElMessage.success('头像上传成功')
     } catch (error) {
@@ -108,7 +121,7 @@ const onRotateRight = () => {
 <template>
   <div class="edit-avatar-wrapper">
     <el-dialog
-      :modelValue="modelValue"
+      :modelValue="props.modelValue"
       @update:modelValue="emit('update:modelValue', false)"
       @open="onOpen"
       @close="onClose"

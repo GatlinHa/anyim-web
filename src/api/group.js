@@ -51,3 +51,7 @@ export const groupAddMembersService = (obj) => {
 export const groupDelMembersService = (obj) => {
   return request.post('/groupmng/delMembers', getReqBody(obj))
 }
+
+export const groupUpdateInfoService = (obj) => {
+  return request.post('/groupmng/modifyGroup', getReqBody(obj))
+}

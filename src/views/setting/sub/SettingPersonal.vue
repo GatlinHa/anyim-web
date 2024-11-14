@@ -19,9 +19,9 @@ onMounted(() => {
   formModel.value = cloneDeep(userData.user)
 })
 
-const onNewAvatar = (newAvatar) => {
-  formModel.value.avatar = newAvatar.originUrl
-  formModel.value.avatarThumb = newAvatar.thumbUrl
+const onNewAvatar = ({ avatar, avatarThumb }) => {
+  formModel.value.avatar = avatar
+  formModel.value.avatarThumb = avatarThumb
 }
 
 const onSave = () => {
@@ -142,7 +142,11 @@ const displayPhone = computed(() => {
       </el-main>
     </el-container>
 
-    <EditAvatar v-model="isShowEditAvatar" @update:newAvatar="onNewAvatar"></EditAvatar>
+    <EditAvatar
+      v-model="isShowEditAvatar"
+      :model="'user'"
+      @update:newAvatar="onNewAvatar"
+    ></EditAvatar>
   </el-container>
 </template>
 

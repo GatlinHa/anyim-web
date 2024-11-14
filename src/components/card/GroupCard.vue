@@ -1,34 +1,44 @@
 <script setup>
-import { ref, onUpdated, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
-import { ArrowRight } from '@element-plus/icons-vue'
+import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
+import groupChatIcon from '@/assets/svg/groupchat.svg'
 import AvatarIcon from '@/components/common/AvatarIcon.vue'
 import AddButton from '@/components/common/AddButton.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
+import EditAvatar from '@/components/common/EditAvatar.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
-import { groupAddMembersService, groupDelMembersService } from '@/api/group'
+import { groupAddMembersService, groupDelMembersService, groupUpdateInfoService } from '@/api/group'
 
 const groupData = groupStore()
 const userData = userStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
 const groupCardData = groupCardStore()
-const showDraw = ref(groupCardData.isShow)
 const isShowSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
+const showModel = ref('info')
+const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop实现
+const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 
-onUpdated(() => {
-  showDraw.value = ref(groupCardData.isShow)
-})
+// 如果切换群组，重置数据
+watch(
+  () => groupCardData.groupInfo.groupId,
+  () => {
+    showModel.value = 'info'
+    returnModelList.value = []
+  }
+)
 
 const onShowMembers = () => {
-  console.log('showMembers')
+  returnModelList.value.push(showModel.value)
+  showModel.value = 'members'
 }
 
 const showMembers = computed(() => groupData.groupMembers[groupCardData.groupInfo.groupId])
@@ -200,6 +210,34 @@ const onConfirmSelect = (selected) => {
       })
   }
 }
+
+const onEditGroupAvatarAndName = () => {
+  returnModelList.value.push(showModel.value)
+  showModel.value = 'editAvatarAndName'
+}
+
+const onReturnModel = () => {
+  showModel.value = returnModelList.value.pop()
+}
+
+const onNewAvatar = ({ avatar, avatarThumb }) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupUpdateInfoService({
+    groupId: groupCardData.groupInfo.groupId,
+    avatar: avatar,
+    avatarThumb: avatarThumb
+  })
+    .then(() => {
+      groupCardData.setGroupInfo({
+        ...groupCardData.groupInfo,
+        avatar: avatar,
+        avatarThumb: avatarThumb
+      })
+    })
+    .finally(() => {
+      loadingInstance.close()
+    })
+}
 </script>
 
 <template>
@@ -214,14 +252,43 @@ const onConfirmSelect = (selected) => {
     @close="groupCardData.setIsShow(false)"
   >
     <template #header>
-      <span style="text-align: center; font-size: 16px">群信息</span>
+      <div style="height: 24px; display: flex">
+        <el-icon
+          v-if="returnModelList.length > 0"
+          size="24"
+          title="返回"
+          style="cursor: pointer"
+          @click="onReturnModel"
+        >
+          <ArrowLeft />
+        </el-icon>
+        <span v-if="showModel === 'info'" class="group-card-title"> 群信息 </span>
+        <span v-if="showModel === 'editAvatarAndName'" class="group-card-title">
+          修改群组名称或头像
+        </span>
+        <span v-if="showModel === 'members'" class="group-card-title">
+          群组成员 {{ Object.values(showMembers)?.length }}名
+        </span>
+      </div>
     </template>
-    <div class="group-card-body">
-      <GroupItem
-        class="group-card-avatar"
-        :groupInfo="groupCardData.groupInfo"
-        :disableClickAvatar="true"
-      ></GroupItem>
+
+    <div v-if="showModel === 'info'" class="group-card-info">
+      <div class="group-card-avatar-wrapper">
+        <GroupItem
+          class="group-card-avatar"
+          :groupInfo="groupCardData.groupInfo"
+          :disableClickAvatar="true"
+        ></GroupItem>
+        <el-icon
+          v-if="isManager"
+          class="edit"
+          size="20"
+          title="修改群组名称或头像"
+          @click="onEditGroupAvatarAndName"
+        >
+          <Edit />
+        </el-icon>
+      </div>
       <div class="group-card-members">
         <div class="group-card-members-title">
           <span style="font-size: 14px">群组成员</span>
@@ -267,6 +334,30 @@ const onConfirmSelect = (selected) => {
         </div>
       </div>
     </div>
+    <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
+      <div @click="isShowEditAvatar = true">
+        <el-avatar
+          class="group-card-avatar"
+          v-if="groupCardData.groupInfo.avatarThumb"
+          :src="groupCardData.groupInfo.avatarThumb"
+          :size="100"
+          shape="square"
+        />
+        <groupChatIcon
+          class="group-card-avatar"
+          v-else
+          style="width: 100px; height: 100px"
+        ></groupChatIcon>
+      </div>
+      <el-button
+        class="group-card-avatar-edit-btn"
+        type="info"
+        plain
+        @click="isShowEditAvatar = true"
+      >
+        更换头像
+      </el-button>
+    </div>
   </el-drawer>
   <SelectDialog
     v-model="isShowSelectDialog"
@@ -282,6 +373,12 @@ const onConfirmSelect = (selected) => {
       </div>
     </template>
   </SelectDialog>
+  <EditAvatar
+    v-model="isShowEditAvatar"
+    :model="'group'"
+    :groupInfo="groupCardData.groupInfo"
+    @update:newAvatar="onNewAvatar"
+  ></EditAvatar>
 </template>
 
 <style lang="scss">
@@ -294,12 +391,36 @@ const onConfirmSelect = (selected) => {
   }
 }
 
-.group-card-body {
-  .group-card-avatar {
-    padding: 10px 12px 10px 12px;
-    border-radius: 8px;
-    background-color: #f5f5f5;
-    display: flex;
+.group-card-title {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+}
+
+.group-card-info {
+  .group-card-avatar-wrapper {
+    position: relative;
+
+    .group-card-avatar {
+      padding: 10px 12px 10px 12px;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      display: flex;
+    }
+
+    .edit {
+      padding: 4px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background-color: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #dedfe0;
+      }
+    }
   }
 
   .group-card-members {
@@ -344,6 +465,27 @@ const onConfirmSelect = (selected) => {
         }
       }
     }
+  }
+}
+
+.group-card-editAvatarAndName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .group-card-avatar {
+    border: #e9e9eb solid 2px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      border: #409eff solid 2px;
+    }
+  }
+
+  .group-card-avatar-edit-btn {
+    margin-top: 20px;
   }
 }
 </style>
