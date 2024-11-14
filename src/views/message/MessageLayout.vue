@@ -523,7 +523,7 @@ const onUpdateMarkConfirm = (inputValue) => {
 // TODO
 const onShowGroupCard = () => {
   userCardData.setIsShow(false)
-  groupCardData.setGroupInfo({})
+  groupCardData.setGroupId()
   groupCardData.setIsShow(true)
 }
 

@@ -29,7 +29,7 @@ const myAccount = computed(() => userData.user.account)
 
 // 如果切换群组，重置数据
 watch(
-  () => groupCardData.groupInfo.groupId,
+  () => groupCardData.groupId,
   () => {
     showModel.value = 'info'
     returnModelList.value = []
@@ -41,13 +41,13 @@ const onShowMembers = () => {
   showModel.value = 'members'
 }
 
-const showMembers = computed(() => groupData.groupMembers[groupCardData.groupInfo.groupId])
+const showMembers = computed(() => groupData.groupMembersList[groupCardData.groupId])
 
 /**
  * 按照role倒序排
  */
 const showMembersArrSorted = computed(() => {
-  return Object.values(groupData.groupMembers[groupCardData.groupInfo.groupId]).sort(
+  return Object.values(groupData.groupMembersList[groupCardData.groupId]).sort(
     (a, b) => b.role - a.role
   )
 })
@@ -65,7 +65,7 @@ const isManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupCardData.groupInfo.allInvite || isManager.value) {
+  if (groupData.groupInfoList[groupCardData.groupId].allInvite || isManager.value) {
     return true
   } else {
     return false
@@ -172,13 +172,13 @@ const onConfirmSelect = (selected) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (method.value === 'add') {
     groupAddMembersService({
-      groupId: groupCardData.groupInfo.groupId,
+      groupId: groupCardData.groupId,
       accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
           groupData.setGroupMembers({
-            groupId: groupCardData.groupInfo.groupId,
+            groupId: groupCardData.groupId,
             members: res.data.data.members
           })
           ElMessage.success('添加成功')
@@ -191,13 +191,13 @@ const onConfirmSelect = (selected) => {
       })
   } else if (method.value === 'del') {
     groupDelMembersService({
-      groupId: groupCardData.groupInfo.groupId,
+      groupId: groupCardData.groupId,
       accounts: accounts
     })
       .then((res) => {
         if (res.data.data) {
           groupData.setGroupMembers({
-            groupId: groupCardData.groupInfo.groupId,
+            groupId: groupCardData.groupId,
             members: res.data.data.members
           })
           ElMessage.success('移除成功')
@@ -223,13 +223,13 @@ const onReturnModel = () => {
 const onNewAvatar = ({ avatar, avatarThumb }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   groupUpdateInfoService({
-    groupId: groupCardData.groupInfo.groupId,
+    groupId: groupCardData.groupId,
     avatar: avatar,
     avatarThumb: avatarThumb
   })
     .then(() => {
-      groupCardData.setGroupInfo({
-        ...groupCardData.groupInfo,
+      groupData.setGroupInfo({
+        ...groupData.groupInfoList[groupCardData.groupId],
         avatar: avatar,
         avatarThumb: avatarThumb
       })
@@ -276,7 +276,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       <div class="group-card-avatar-wrapper">
         <GroupItem
           class="group-card-avatar"
-          :groupInfo="groupCardData.groupInfo"
+          :groupInfo="groupData.groupInfoList[groupCardData.groupId]"
           :disableClickAvatar="true"
         ></GroupItem>
         <el-icon
@@ -338,8 +338,8 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       <div @click="isShowEditAvatar = true">
         <el-avatar
           class="group-card-avatar"
-          v-if="groupCardData.groupInfo.avatarThumb"
-          :src="groupCardData.groupInfo.avatarThumb"
+          v-if="groupData.groupInfoList[groupCardData.groupId].avatarThumb"
+          :src="groupData.groupInfoList[groupCardData.groupId].avatarThumb"
           :size="100"
           shape="square"
         />
@@ -376,7 +376,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
   <EditAvatar
     v-model="isShowEditAvatar"
     :model="'group'"
-    :groupInfo="groupCardData.groupInfo"
+    :groupInfo="groupData.groupInfoList[groupCardData.groupId]"
     @update:newAvatar="onNewAvatar"
   ></EditAvatar>
 </template>

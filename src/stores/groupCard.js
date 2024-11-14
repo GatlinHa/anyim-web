@@ -6,21 +6,21 @@ import {} from '@/api/group'
 export const groupCardStore = defineStore('anyim-groupCard', () => {
   const isShow = ref(false)
 
-  const groupInfo = ref({})
+  const groupId = ref({})
 
   const setIsShow = (flag) => {
     isShow.value = flag
   }
 
-  const setGroupInfo = (info) => {
-    groupInfo.value = info
+  const setGroupId = (id) => {
+    groupId.value = id
   }
 
   return {
     isShow,
-    groupInfo,
+    groupId,
 
     setIsShow,
-    setGroupInfo
+    setGroupId
   }
 })

@@ -27,39 +27,42 @@ const initDone = ref(false) //避免还未数据加载完时就显示无数据
 onMounted(async () => {
   await messageData.loadSessionList()
   await messageData.loadPartitions()
-  switch (props.tab) {
-    case undefined:
-    case 'all':
-      await groupData.loadGroupListAll()
-      break
-    case 'created':
-      await groupData.loadGroupListCreated()
-      break
-    case 'managed':
-      await groupData.loadGroupListManaged()
-      break
-    case 'joined':
-      await groupData.loadGroupListJoined()
-      break
-    default:
-      break
-  }
+  await groupData.loadGroupInfoList()
   initDone.value = true
   showData.value = initData.value
 })
 
 const initData = computed(() => {
+  if (!initDone.value) return {}
+
+  let data = {}
+  const values = Object.values(groupData.groupInfoList)
   switch (props.tab) {
     case undefined:
     case 'all':
     default:
-      return groupData.groupListAll
+      return groupData.groupInfoList
     case 'created':
-      return groupData.groupListCreated
+      values.forEach((item) => {
+        if (item.myRole === 2) {
+          data[item.groupId] = item
+        }
+      })
+      return data
     case 'managed':
-      return groupData.groupListManaged
+      values.forEach((item) => {
+        if (item.myRole > 0) {
+          data[item.groupId] = item
+        }
+      })
+      return data
     case 'joined':
-      return groupData.groupListJoined
+      values.forEach((item) => {
+        if (item.myRole === 0) {
+          data[item.groupId] = item
+        }
+      })
+      return data
   }
 })
 
@@ -180,14 +183,14 @@ const onConfirmSelect = async (selected) => {
     groupType: 1, //普通群
     accounts: selected.map((item) => item.account)
   })
-  groupData.addCreatedGroup(res.data.data.groupInfo)
+  groupData.setGroupInfo(res.data.data.groupInfo)
   isShowSelectDialog.value = false
 }
 
 const onShowGroupCard = async (groupInfo) => {
   const res = await groupInfoService({ groupId: groupInfo.groupId })
   groupCardData.setIsShow(true)
-  groupCardData.setGroupInfo(groupInfo)
+  groupCardData.setGroupId(groupInfo.groupId)
   groupData.setGroupMembers({
     groupId: groupInfo.groupId,
     members: res.data.data.members
