@@ -67,10 +67,10 @@ const initData = computed(() => {
 
 const showData = computed(() => {
   if (!searchKey.value) {
-    return initData.value
+    return Object.values(initData.value)
   }
 
-  const data = {}
+  const data = []
   const searchDataGroupIds = new Set(searchData.value?.map((item) => item.groupId))
   Object.values(initData.value).forEach((item) => {
     // 1.放群名称和群ID的匹配结果
@@ -78,12 +78,10 @@ const showData = computed(() => {
       item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
       item.groupId === searchKey.value
     ) {
-      data[item.groupId] = item
-    }
-
-    // 2.放群成员的匹配结果
-    if (searchDataGroupIds?.has(item.groupId)) {
-      data[item.groupId] = item
+      data.push(item)
+    } else if (searchDataGroupIds?.has(item.groupId)) {
+      // 2.放群成员的匹配结果
+      data.push(item)
     }
   })
   return data
@@ -159,7 +157,7 @@ const onSearch = () => {
 }
 
 const totalCount = computed(() => {
-  return Object.keys(showData.value).length
+  return showData.value.length
 })
 
 const onCreateGroup = () => {
@@ -248,9 +246,9 @@ const onShowGroupCard = async (groupInfo) => {
       </div>
     </el-header>
     <el-main class="my-scrollbar" style="padding: 8px">
-      <div v-if="Object.keys(showData).length">
+      <div v-if="showData.length">
         <ContactListGroupItem
-          v-for="item in Object.values(showData)"
+          v-for="item in showData"
           :key="item.groupId"
           :groupInfo="item"
           :keyWords="searchKey"
@@ -274,10 +272,7 @@ const onShowGroupCard = async (groupInfo) => {
           </template>
         </ContactListGroupItem>
       </div>
-      <HashNoData
-        v-else-if="Object.keys(showData).length === 0 && initDone"
-        :size="100"
-      ></HashNoData>
+      <HashNoData v-else-if="showData.length === 0 && initDone" :size="100"></HashNoData>
     </el-main>
   </el-container>
   <SelectDialog
