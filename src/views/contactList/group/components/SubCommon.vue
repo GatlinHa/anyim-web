@@ -78,13 +78,17 @@ const showData = computed(() => {
       item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
       item.groupId === searchKey.value
     ) {
+      item['sortMark'] = '1' // 让群名称和群ID的匹配结果放在前面, 因为群成员的匹配结果会滞后出现,如果不排序在出现的时候页面数据刷新变化很大
       data.push(item)
     } else if (searchDataGroupIds?.has(item.groupId)) {
       // 2.放群成员的匹配结果
+      item['sortMark'] = '2'
       data.push(item)
     }
   })
-  return data
+  return data.sort((a, b) => {
+    return a.sortMark - b.sortMark
+  })
 })
 
 // 需要给符合条件的groupId保存下查询结果高亮的提示
