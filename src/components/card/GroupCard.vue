@@ -595,6 +595,7 @@ const updateAnnouncement = () => {
       white-space: normal;
       user-select: text;
       overflow-y: scroll;
+      white-space: pre-wrap; //给文本中的\n换行
     }
   }
 }
