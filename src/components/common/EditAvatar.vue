@@ -145,9 +145,13 @@ const onRotateRight = () => {
             ></vueCropper>
           </div>
           <div class="action-buttons">
-            <el-button type="info" :icon="Refresh" plain @click="onReset">重置</el-button>
-            <el-button type="info" :icon="RefreshLeft" plain @click="onRotateLeft">90°</el-button>
-            <el-button type="info" :icon="RefreshRight" plain @click="onRotateRight">90°</el-button>
+            <el-button type="primary" :icon="Refresh" plain @click="onReset">重置</el-button>
+            <el-button type="primary" :icon="RefreshLeft" plain @click="onRotateLeft"
+              >90°</el-button
+            >
+            <el-button type="primary" :icon="RefreshRight" plain @click="onRotateRight"
+              >90°</el-button
+            >
           </div>
         </div>
 

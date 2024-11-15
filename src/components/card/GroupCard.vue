@@ -352,7 +352,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       </div>
       <el-button
         class="group-card-avatar-edit-btn"
-        type="info"
+        type="primary"
         plain
         @click="isShowEditAvatar = true"
       >
