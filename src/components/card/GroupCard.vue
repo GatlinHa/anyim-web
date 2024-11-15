@@ -168,12 +168,12 @@ const selectDialogTitle = computed(() => {
 
 const onConfirmSelect = (selected) => {
   isShowSelectDialog.value = false // 这里要先关闭，不然移除的时候会报错
-  const accounts = selected.map((item) => item.account)
   const loadingInstance = ElLoading.service(el_loading_options)
   if (method.value === 'add') {
+    const members = selected.map((item) => ({ account: item.account, nickName: item.nickName }))
     groupAddMembersService({
       groupId: groupCardData.groupId,
-      accounts: accounts
+      members: members
     })
       .then((res) => {
         if (res.data.data) {
@@ -190,6 +190,7 @@ const onConfirmSelect = (selected) => {
         loadingInstance.close()
       })
   } else if (method.value === 'del') {
+    const accounts = selected.map((item) => item.account)
     groupDelMembersService({
       groupId: groupCardData.groupId,
       accounts: accounts
