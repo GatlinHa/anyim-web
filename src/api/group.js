@@ -26,5 +26,5 @@ export const groupDelMembersService = (obj) => {
 }
 
 export const groupUpdateInfoService = (obj) => {
-  return request.post('/groupmng/modifyGroup', getReqBody(obj))
+  return request.post('/groupmng/updateGroupInfo', getReqBody(obj))
 }
