@@ -27,13 +27,16 @@ const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop�
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
+const newAnnouncement = ref('')
 
-// 如果切换群组，重置数据
+// 打开GroupCard时，重置数据
 watch(
-  () => groupCardData.groupId,
-  () => {
-    showModel.value = 'info'
-    returnModelList.value = []
+  () => groupCardData.isShow,
+  (newValue) => {
+    if (newValue) {
+      showModel.value = 'info'
+      returnModelList.value = []
+    }
   }
 )
 
@@ -219,8 +222,14 @@ const onConfirmSelect = (selected) => {
 
 const onEditGroupAvatarAndName = () => {
   returnModelList.value.push(showModel.value)
-  newGroupName.value = groupInfo.value.groupName
   showModel.value = 'editAvatarAndName'
+  newGroupName.value = groupInfo.value.groupName
+}
+
+const onEditAnnouncement = () => {
+  returnModelList.value.push(showModel.value)
+  showModel.value = 'editAnnouncement'
+  newAnnouncement.value = groupInfo.value.announcement
 }
 
 const onReturnModel = () => {
@@ -264,10 +273,36 @@ const updateGroupName = () => {
         ...groupInfo.value,
         groupName: newGroupName.value
       })
+      ElMessage.success('修改成功')
     })
     .finally(() => {
       loadingInstance.close()
       groupNameInputRef.value.blur()
+    })
+}
+
+const updateAnnouncement = () => {
+  const trimValue = newAnnouncement.value.trim()
+  if (trimValue === groupInfo.value.announcement) {
+    ElMessage.warning('内容没有变化')
+    return
+  }
+
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupUpdateInfoService({
+    groupId: groupCardData.groupId,
+    announcement: trimValue
+  })
+    .then(() => {
+      groupData.setGroupInfo({
+        ...groupInfo.value,
+        announcement: trimValue
+      })
+      ElMessage.success('修改成功')
+    })
+    .finally(() => {
+      loadingInstance.close()
+      onReturnModel()
     })
 }
 </script>
@@ -301,6 +336,7 @@ const updateGroupName = () => {
         <span v-if="showModel === 'members'" class="group-card-title">
           群组成员 {{ Object.values(showMembers)?.length }}名
         </span>
+        <span v-if="showModel === 'editAnnouncement'" class="group-card-title"> 修改群公告 </span>
       </div>
     </template>
 
@@ -365,6 +401,21 @@ const updateGroupName = () => {
           </div>
         </div>
       </div>
+      <div class="group-card-announcement">
+        <span style="font-size: 14px">群公告</span>
+        <el-text class="announcement my-scrollbar">
+          {{ groupInfo.announcement || '暂无公告' }}
+        </el-text>
+        <el-icon
+          v-if="isManager"
+          class="edit"
+          size="20"
+          title="修改群公告"
+          @click="onEditAnnouncement"
+        >
+          <Edit />
+        </el-icon>
+      </div>
     </div>
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
       <div @click="isShowEditAvatar = true">
@@ -411,6 +462,20 @@ const updateGroupName = () => {
           show-word-limit
           @change="updateGroupName"
         />
+      </div>
+    </div>
+    <div v-if="showModel === 'editAnnouncement'" class="group-card-editAnnouncement">
+      <el-input
+        v-model="newAnnouncement"
+        placeholder="请输入群公告"
+        maxlength="1000"
+        show-word-limit
+        type="textarea"
+        :rows="10"
+      />
+      <div style="margin-top: 20px; display: flex; justify-content: end">
+        <el-button type="info" @click="onReturnModel" plain>取消</el-button>
+        <el-button type="primary" @click="updateAnnouncement" plain>确认</el-button>
       </div>
     </div>
   </el-drawer>
@@ -462,20 +527,6 @@ const updateGroupName = () => {
       background-color: #f5f5f5;
       display: flex;
     }
-
-    .edit {
-      padding: 4px;
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      background-color: transparent;
-      border-radius: 8px;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #dedfe0;
-      }
-    }
   }
 
   .group-card-members {
@@ -521,6 +572,30 @@ const updateGroupName = () => {
       }
     }
   }
+
+  .group-card-announcement {
+    height: 160px;
+    padding: 5px 10px 0 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .announcement {
+      width: 95%;
+      height: 100px;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      white-space: normal;
+      user-select: text;
+      overflow-y: scroll;
+    }
+  }
 }
 
 .group-card-editAvatarAndName {
@@ -541,6 +616,20 @@ const updateGroupName = () => {
 
   .group-card-avatar-edit-btn {
     margin-top: 5px;
+  }
+}
+
+.edit {
+  padding: 4px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #dedfe0;
   }
 }
 </style>
