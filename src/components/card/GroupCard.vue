@@ -257,7 +257,8 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
 
 const groupNameInputRef = ref()
 const updateGroupName = () => {
-  if (!newGroupName.value) {
+  const trimValue = newGroupName.value.trim()
+  if (!trimValue) {
     newGroupName.value = groupInfo.value.groupName
     groupNameInputRef.value.blur()
     return
@@ -266,12 +267,12 @@ const updateGroupName = () => {
   const loadingInstance = ElLoading.service(el_loading_options)
   groupUpdateInfoService({
     groupId: groupCardData.groupId,
-    groupName: newGroupName.value
+    groupName: trimValue
   })
     .then(() => {
       groupData.setGroupInfo({
         ...groupInfo.value,
-        groupName: newGroupName.value
+        groupName: trimValue
       })
       ElMessage.success('修改成功')
     })
@@ -456,7 +457,7 @@ const updateAnnouncement = () => {
         >
         <el-input
           ref="groupNameInputRef"
-          v-model.trim="newGroupName"
+          v-model="newGroupName"
           placeholder="请输入名称"
           maxlength="50"
           show-word-limit
