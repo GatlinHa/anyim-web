@@ -26,6 +26,7 @@ const showModel = ref('info')
 const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop实现
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
+const newGroupName = ref('')
 
 // 如果切换群组，重置数据
 watch(
@@ -35,6 +36,10 @@ watch(
     returnModelList.value = []
   }
 )
+
+const groupInfo = computed(() => {
+  return groupData.groupInfoList[groupCardData.groupId]
+})
 
 const onShowMembers = () => {
   returnModelList.value.push(showModel.value)
@@ -65,7 +70,7 @@ const isManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupData.groupInfoList[groupCardData.groupId].allInvite || isManager.value) {
+  if (groupInfo.value.allInvite || isManager.value) {
     return true
   } else {
     return false
@@ -214,6 +219,7 @@ const onConfirmSelect = (selected) => {
 
 const onEditGroupAvatarAndName = () => {
   returnModelList.value.push(showModel.value)
+  newGroupName.value = groupInfo.value.groupName
   showModel.value = 'editAvatarAndName'
 }
 
@@ -230,13 +236,38 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
   })
     .then(() => {
       groupData.setGroupInfo({
-        ...groupData.groupInfoList[groupCardData.groupId],
+        ...groupInfo.value,
         avatar: avatar,
         avatarThumb: avatarThumb
       })
     })
     .finally(() => {
       loadingInstance.close()
+    })
+}
+
+const groupNameInputRef = ref()
+const updateGroupName = () => {
+  if (!newGroupName.value) {
+    newGroupName.value = groupInfo.value.groupName
+    groupNameInputRef.value.blur()
+    return
+  }
+
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupUpdateInfoService({
+    groupId: groupCardData.groupId,
+    groupName: newGroupName.value
+  })
+    .then(() => {
+      groupData.setGroupInfo({
+        ...groupInfo.value,
+        groupName: newGroupName.value
+      })
+    })
+    .finally(() => {
+      loadingInstance.close()
+      groupNameInputRef.value.blur()
     })
 }
 </script>
@@ -277,7 +308,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       <div class="group-card-avatar-wrapper">
         <GroupItem
           class="group-card-avatar"
-          :groupInfo="groupData.groupInfoList[groupCardData.groupId]"
+          :groupInfo="groupInfo"
           :disableClickAvatar="true"
         ></GroupItem>
         <el-icon
@@ -339,8 +370,8 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       <div @click="isShowEditAvatar = true">
         <el-avatar
           class="group-card-avatar"
-          v-if="groupData.groupInfoList[groupCardData.groupId].avatarThumb"
-          :src="groupData.groupInfoList[groupCardData.groupId].avatarThumb"
+          v-if="groupInfo.avatarThumb"
+          :src="groupInfo.avatarThumb"
           :size="100"
           shape="square"
         />
@@ -358,6 +389,29 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
       >
         更换头像
       </el-button>
+      <div
+        style="
+          width: 90%;
+          margin-top: 30px;
+          padding: 10px;
+          border-radius: 8px;
+          background-color: #f5f5f5;
+          display: flex;
+          flex-direction: row;
+        "
+      >
+        <span style="width: 80px; font-size: 14px; display: flex; align-items: center"
+          >群组名称</span
+        >
+        <el-input
+          ref="groupNameInputRef"
+          v-model.trim="newGroupName"
+          placeholder="请输入名称"
+          maxlength="50"
+          show-word-limit
+          @change="updateGroupName"
+        />
+      </div>
     </div>
   </el-drawer>
   <SelectDialog
@@ -377,7 +431,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
   <EditAvatar
     v-model="isShowEditAvatar"
     :model="'group'"
-    :groupInfo="groupData.groupInfoList[groupCardData.groupId]"
+    :groupInfo="groupInfo"
     @update:newAvatar="onNewAvatar"
   ></EditAvatar>
 </template>
@@ -486,7 +540,7 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
   }
 
   .group-card-avatar-edit-btn {
-    margin-top: 20px;
+    margin-top: 5px;
   }
 }
 </style>
