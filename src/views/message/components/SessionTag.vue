@@ -6,7 +6,7 @@ const items = {
   organize: { color: '#E6A23C', label: '组' },
   assistant: { color: '#E734F5', label: '助' },
   top: { color: '#F56C6C', label: '顶' },
-  mute: { color: '#73767a', label: '静' }
+  dnd: { color: '#73767a', label: '静' }
 }
 
 const props = defineProps(['tagType'])

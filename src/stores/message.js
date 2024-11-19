@@ -34,8 +34,8 @@ export const messageStore = defineStore('anyim-message', () => {
       params.top = obj.top
       flag = true
     }
-    if ('muted' in obj) {
-      params.muted = obj.muted
+    if ('dnd' in obj) {
+      params.dnd = obj.dnd
       flag = true
     }
     // 注意,这里draft允许为""空串,有实际意义
@@ -69,7 +69,7 @@ export const messageStore = defineStore('anyim-message', () => {
       // 云端更新成功再更新本地，保持数据同步
       if (res.data.code === 0) {
         if ('top' in obj) mySession.top = obj.top
-        if ('muted' in obj) mySession.muted = obj.muted
+        if ('dnd' in obj) mySession.dnd = obj.dnd
         if ('draft' in obj) mySession.draft = obj.draft
         if ('mark' in obj) {
           mySession.mark = obj.mark

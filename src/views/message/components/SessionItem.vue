@@ -28,7 +28,7 @@ const sessionInfo = computed(() => {
 })
 
 const top = ref(sessionInfo.value.top)
-const muted = ref(sessionInfo.value.muted)
+const dnd = ref(sessionInfo.value.dnd)
 
 const hasBeenSelected = computed(() => {
   return props.sessionId === props.selectedSessionId
@@ -101,7 +101,7 @@ const switchTag = (func) => {
   func()
   clearTimeout(timer)
   timer = setTimeout(() => {
-    if (top.value === sessionInfo.value.top && muted.value === sessionInfo.value.muted) {
+    if (top.value === sessionInfo.value.top && dnd.value === sessionInfo.value.dnd) {
       return
     }
 
@@ -109,7 +109,7 @@ const switchTag = (func) => {
     messageData.updateSession({
       sessionId: props.sessionId,
       top: top.value,
-      muted: muted.value
+      dnd: dnd.value
     })
   }, 100) // 这个时间太长会影响置顶按钮的响应时长
 }
@@ -122,9 +122,9 @@ const handleSelectedMenuItem = async () => {
           top.value = !top.value
         })
         break
-      case 'muted':
+      case 'dnd':
         switchTag(() => {
-          muted.value = !muted.value
+          dnd.value = !dnd.value
         })
         break
       case 'delete':
@@ -175,7 +175,7 @@ defineExpose({
             </span>
             <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>
             <SessionTag v-if="top" tagType="top"></SessionTag>
-            <SessionTag v-if="muted" tagType="mute"></SessionTag>
+            <SessionTag v-if="dnd" tagType="dnd"></SessionTag>
           </div>
           <div class="datetime">
             <span>{{ showTime }}</span>
@@ -204,10 +204,10 @@ defineExpose({
             />
             <el-button
               class="action-button"
-              :icon="muted ? Bell : MuteNotification"
+              :icon="dnd ? Bell : MuteNotification"
               @click.stop="
                 switchTag(() => {
-                  muted = !muted
+                  dnd = !dnd
                 })
               "
               circle

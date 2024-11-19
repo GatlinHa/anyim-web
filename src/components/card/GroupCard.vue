@@ -479,9 +479,9 @@ const handleChangeTop = () => {
   console.log(isTop.value)
 }
 
-const isSilentMode = ref(false) //TODO
-const handleChangeSilentMode = () => {
-  console.log(isSilentMode.value)
+const isDnd = ref(false) //TODO
+const handleChangeDnd = () => {
+  console.log(isDnd.value)
 }
 
 // const isAllMuted = ref(false) //TODO
@@ -621,7 +621,7 @@ const handleAllInvite = () => {
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">设置免打扰</span>
-              <el-switch v-model="isSilentMode" @change="handleChangeSilentMode" />
+              <el-switch v-model="isDnd" @change="handleChangeDnd" />
             </div>
             <div
               style="

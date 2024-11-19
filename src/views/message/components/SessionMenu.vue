@@ -12,8 +12,8 @@ const top = computed(() => {
   return messageData.sessionList[props.sessionId].top
 })
 
-const muted = computed(() => {
-  return messageData.sessionList[props.sessionId].muted
+const dnd = computed(() => {
+  return messageData.sessionList[props.sessionId].dnd
 })
 
 const menu = computed(() => {
@@ -24,9 +24,9 @@ const menu = computed(() => {
       icon: top.value ? Bottom : Top
     },
     {
-      label: 'muted',
-      desc: muted.value ? '取消免打扰' : '开启免打扰',
-      icon: muted.value ? Bell : MuteNotification
+      label: 'dnd',
+      desc: dnd.value ? '取消免打扰' : '开启免打扰',
+      icon: dnd.value ? Bell : MuteNotification
     },
     {
       label: 'mark',
