@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
-import { Avatar } from '@element-plus/icons-vue'
+import { Avatar, Search } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
@@ -34,6 +34,7 @@ const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
 const newAnnouncement = ref('')
+const memberSearchKey = ref('')
 
 // 打开GroupCard时，重置数据
 watch(
@@ -61,9 +62,21 @@ const showMembers = computed(() => groupData.groupMembersList[groupCardData.grou
  * 按照role倒序排
  */
 const showMembersArrSorted = computed(() => {
-  return Object.values(groupData.groupMembersList[groupCardData.groupId]).sort(
-    (a, b) => b.role - a.role
-  )
+  const data = []
+  Object.values(groupData.groupMembersList[groupCardData.groupId]).forEach((item) => {
+    if (!memberSearchKey.value) {
+      data.push(item)
+    } else {
+      if (
+        item.nickName.toLowerCase().includes(memberSearchKey.value.toLowerCase()) ||
+        item.account === memberSearchKey.value
+      ) {
+        data.push(item)
+      }
+    }
+  })
+
+  return data.sort((a, b) => b.role - a.role)
 })
 
 const iAmOwner = computed(() => {
@@ -589,8 +602,14 @@ const onCancelManager = (userInfo) => {
       </div>
     </div>
     <div v-if="showModel === 'members'" class="show-all-members">
-      <el-table :data="showMembersArrSorted" style="width: 100%">
-        <el-table-column label="成员">
+      <el-input
+        v-model.trim="memberSearchKey"
+        placeholder="搜索: 群组成员昵称/账号"
+        :prefix-icon="Search"
+        :clearable="true"
+      />
+      <el-table :data="showMembersArrSorted" stripe :show-header="false">
+        <el-table-column>
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <AvatarIcon
@@ -629,11 +648,12 @@ const onCancelManager = (userInfo) => {
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="角色" width="100">
+        <el-table-column width="64">
           <template #default="scope">
             <div
               v-if="scope.row.role === 2"
               style="
+                font-size: 12px;
                 background-color: rgb(250, 181.5, 181.5);
                 text-align: center;
                 border-radius: 4px;
@@ -644,6 +664,7 @@ const onCancelManager = (userInfo) => {
             <div
               v-else-if="scope.row.role === 1"
               style="
+                font-size: 12px;
                 background-color: rgb(179, 224.5, 156.5);
                 text-align: center;
                 border-radius: 4px;
@@ -651,12 +672,20 @@ const onCancelManager = (userInfo) => {
             >
               管理员
             </div>
-            <div v-else style="background-color: #dcdfe6; text-align: center; border-radius: 4px">
-              普通成员
+            <div
+              v-else
+              style="
+                font-size: 12px;
+                background-color: #dcdfe6;
+                text-align: center;
+                border-radius: 4px;
+              "
+            >
+              成员
             </div>
           </template>
         </el-table-column>
-        <el-table-column v-if="iAmManager" prop="操作" label="操作" width="80">
+        <el-table-column v-if="iAmManager" width="80">
           <template #default="scope">
             <div style="display: flex">
               <!-- <el-button
@@ -719,33 +748,50 @@ const onCancelManager = (userInfo) => {
 .group-card-modal {
   background-color: transparent;
 
+  .group-card {
+    .edit {
+      padding: 4px;
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      background-color: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #dedfe0;
+      }
+    }
+
+    .el-input {
+      .el-input__wrapper {
+        border-radius: 25px;
+      }
+    }
+  }
+
   .el-drawer__header {
     margin: 0;
     font-weight: bold;
   }
 
   .el-drawer__body {
-    &::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-      background-color: unset;
-    }
+    display: flex;
+    overflow: hidden;
 
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      background-color: unset;
-    }
+    .show-all-members {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
 
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        background-color: #409eff;
+      .el-table {
+        width: 100%;
+        margin-top: 10px;
       }
-    }
-  }
 
-  .show-all-members {
-    .el-table__cell {
-      padding: 2px 0 2px 0;
+      .el-table__cell {
+        padding: 2px 0 2px 0;
+      }
     }
   }
 }
@@ -859,17 +905,19 @@ const onCancelManager = (userInfo) => {
   }
 }
 
-.edit {
-  padding: 4px;
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  background-color: transparent;
-  border-radius: 8px;
-  cursor: pointer;
+.group-card-editAnnouncement {
+  width: 100%;
 
-  &:hover {
-    background-color: #dedfe0;
+  .el-textarea__inner {
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: #409eff;
+    }
   }
 }
 </style>
