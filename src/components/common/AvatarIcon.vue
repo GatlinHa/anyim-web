@@ -22,7 +22,7 @@ const statusCircleSize = computed(() => {
     case 'large':
       return 16
     case 'small':
-      return 8
+      return 10
     case 'default':
     default:
       return 12

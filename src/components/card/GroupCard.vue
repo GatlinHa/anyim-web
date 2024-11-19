@@ -435,7 +435,7 @@ const onCancelManager = (userInfo) => {
     class="group-card"
     :modelValue="groupCardData.isShow"
     :direction="'rtl'"
-    :size="380"
+    :size="385"
     :z-index="1"
     modal-class="group-card-modal"
     :show-close="false"
@@ -608,7 +608,7 @@ const onCancelManager = (userInfo) => {
         :prefix-icon="Search"
         :clearable="true"
       />
-      <el-table :data="showMembersArrSorted" stripe :show-header="false">
+      <el-table :data="showMembersArrSorted" :show-header="false">
         <el-table-column>
           <template #default="scope">
             <div style="display: flex; align-items: center">
@@ -777,7 +777,23 @@ const onCancelManager = (userInfo) => {
 
   .el-drawer__body {
     display: flex;
-    overflow: hidden;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+      background-color: unset;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: unset;
+    }
+
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        background-color: #409eff;
+      }
+    }
 
     .show-all-members {
       width: 100%;
