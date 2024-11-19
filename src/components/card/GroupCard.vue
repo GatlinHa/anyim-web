@@ -927,8 +927,11 @@ const handleAllInvite = () => {
 <style lang="scss">
 .group-card-modal {
   background-color: transparent;
+  overflow: hidden;
 
   .group-card {
+    min-height: 768px;
+
     .edit {
       padding: 4px;
       position: absolute;
@@ -1098,9 +1101,9 @@ const handleAllInvite = () => {
   }
 
   .group-card-send-msg {
+    padding: 20px 0 20px 0;
     display: flex;
     justify-content: center;
-    margin-top: 50px;
   }
 }
 
