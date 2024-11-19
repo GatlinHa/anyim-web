@@ -19,7 +19,8 @@ import {
   groupDelMembersService,
   groupUpdateInfoService,
   groupChangeRoleService,
-  groupUpdateNickNameService
+  groupUpdateNickNameService,
+  groupLeaveService
 } from '@/api/group'
 
 const groupData = groupStore()
@@ -53,7 +54,7 @@ watch(
 )
 
 const groupInfo = computed(() => {
-  return groupData.groupInfoList[groupCardData.groupId]
+  return groupData.groupInfoList[groupCardData.groupId] || {}
 })
 
 const onShowMembers = () => {
@@ -61,14 +62,14 @@ const onShowMembers = () => {
   showModel.value = 'members'
 }
 
-const showMembers = computed(() => groupData.groupMembersList[groupCardData.groupId])
+const showMembers = computed(() => groupData.groupMembersList[groupCardData.groupId] || {})
 
 /**
  * 按照role倒序排
  */
 const showMembersArrSorted = computed(() => {
   const data = []
-  Object.values(groupData.groupMembersList[groupCardData.groupId]).forEach((item) => {
+  Object.values(showMembers.value).forEach((item) => {
     if (!memberSearchKey.value) {
       data.push(item)
     } else {
@@ -85,11 +86,11 @@ const showMembersArrSorted = computed(() => {
 })
 
 const iAmOwner = computed(() => {
-  return showMembers.value[myAccount.value].role === 2
+  return showMembers.value[myAccount.value]?.role === 2
 })
 
 const iAmManager = computed(() => {
-  return showMembers.value[myAccount.value].role > 0
+  return showMembers.value[myAccount.value]?.role > 0
 })
 
 /**
@@ -97,7 +98,7 @@ const iAmManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupInfo.value.allInvite || iAmManager.value) {
+  if (groupInfo.value?.allInvite || iAmManager.value) {
     return true
   } else {
     return false
@@ -498,6 +499,35 @@ const isAllInvite = ref(false) //TODO
 const handleAllInvite = () => {
   console.log(isAllInvite.value)
 }
+
+const levelGroup = () => {
+  ElMessageBox.confirm(`是否要离开该群组？`, '温馨提示', {
+    type: 'warning',
+    confirmButtonText: '确认',
+    cancelButtonText: '取消'
+  })
+    .then(() => {
+      const loadingInstance = ElLoading.service(el_loading_options)
+      groupLeaveService({
+        groupId: groupCardData.groupId
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            groupData.deleteGroup(groupCardData.groupId)
+            ElMessage.success('退出成功')
+            groupCardData.setIsShow(false)
+            groupCardData.setGroupId('')
+            // TODO 这里要清空群组的聊天记录
+          }
+        })
+        .finally(() => {
+          loadingInstance.close()
+        })
+    })
+    .catch(() => {
+      // do nothing
+    })
+}
 </script>
 
 <template>
@@ -635,6 +665,7 @@ const handleAllInvite = () => {
               <el-button :icon="ArrowRight" size="small" circle />
             </div>
             <div
+              v-if="!iAmOwner"
               style="
                 height: 32px;
                 display: flex;
@@ -642,8 +673,10 @@ const handleAllInvite = () => {
                 align-items: center;
               "
             >
-              <span style="font-size: 14px; color: red">退出群组</span>
-              <el-button :icon="ArrowRight" size="small" circle />
+              <span style="font-size: 14px; color: red; cursor: pointer" @click="levelGroup">
+                退出群组
+              </span>
+              <el-button :icon="ArrowRight" size="small" circle @click="levelGroup" />
             </div>
           </el-tab-pane>
           <el-tab-pane v-if="iAmManager" label="群组设置" name="groupSetting">
