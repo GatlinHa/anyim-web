@@ -20,7 +20,8 @@ import {
   groupUpdateInfoService,
   groupChangeRoleService,
   groupUpdateNickNameService,
-  groupLeaveService
+  groupLeaveService,
+  groupDropService
 } from '@/api/group'
 
 const groupData = groupStore()
@@ -540,6 +541,35 @@ const levelGroup = () => {
       // do nothing
     })
 }
+
+const dropGroup = () => {
+  ElMessageBox.confirm(`是否要解散该群组？`, '温馨提示', {
+    type: 'warning',
+    confirmButtonText: '确认',
+    cancelButtonText: '取消'
+  })
+    .then(() => {
+      const loadingInstance = ElLoading.service(el_loading_options)
+      groupDropService({
+        groupId: groupCardData.groupId
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            groupData.deleteGroup(groupCardData.groupId)
+            ElMessage.success('解散成功')
+            groupCardData.setIsShow(false)
+            groupCardData.setGroupId('')
+            // TODO 这里要清空群组的聊天记录
+          }
+        })
+        .finally(() => {
+          loadingInstance.close()
+        })
+    })
+    .catch(() => {
+      // do nothing
+    })
+}
 </script>
 
 <template>
@@ -734,8 +764,10 @@ const levelGroup = () => {
                 align-items: center;
               "
             >
-              <span style="font-size: 14px; color: red">解散团队</span>
-              <el-button :icon="ArrowRight" size="small" circle />
+              <span style="font-size: 14px; color: red; cursor: pointer" @click="dropGroup">
+                解散团队
+              </span>
+              <el-button :icon="ArrowRight" size="small" circle @click="dropGroup" />
             </div>
           </el-tab-pane>
         </el-tabs>

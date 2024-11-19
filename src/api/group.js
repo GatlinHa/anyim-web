@@ -40,3 +40,7 @@ export const groupUpdateNickNameService = (obj) => {
 export const groupLeaveService = (obj) => {
   return request.post('/groupmng/leaveGroup', getReqBody(obj))
 }
+
+export const groupDropService = (obj) => {
+  return request.post('/groupmng/dropGroup', getReqBody(obj))
+}
