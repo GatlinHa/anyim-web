@@ -32,3 +32,7 @@ export const groupUpdateInfoService = (obj) => {
 export const groupChangeRoleService = (obj) => {
   return request.post('/groupmng/changeRole', getReqBody(obj))
 }
+
+export const groupUpdateNickNameService = (obj) => {
+  return request.post('/groupmng/updateGroupNickName', getReqBody(obj))
+}

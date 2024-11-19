@@ -18,7 +18,8 @@ import {
   groupAddMembersService,
   groupDelMembersService,
   groupUpdateInfoService,
-  groupChangeRoleService
+  groupChangeRoleService,
+  groupUpdateNickNameService
 } from '@/api/group'
 
 const groupData = groupStore()
@@ -36,6 +37,7 @@ const newGroupName = ref('')
 const newGroupMark = ref('') //TODO 待完善
 const newAnnouncement = ref('')
 const memberSearchKey = ref('')
+const newMyGroupNickName = ref('')
 
 // 打开GroupCard时，重置数据
 watch(
@@ -44,6 +46,7 @@ watch(
     if (newValue) {
       showModel.value = 'info'
       returnModelList.value = []
+      newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
     }
   }
 )
@@ -431,6 +434,39 @@ const onCancelManager = (userInfo) => {
       // do nothing
     })
 }
+
+const myGroupNickNameRef = ref()
+const updateMyGroupNickName = () => {
+  const trimValue = newMyGroupNickName.value.trim()
+  if (!trimValue) {
+    newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
+    myGroupNickNameRef.value.blur()
+    return
+  }
+
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupUpdateNickNameService({
+    groupId: groupCardData.groupId,
+    nickName: trimValue
+  })
+    .then((res) => {
+      if (res.data.code === 0) {
+        groupData.setOneOfGroupMembers({
+          groupId: groupCardData.groupId,
+          account: myAccount.value,
+          userInfo: {
+            ...showMembers.value[myAccount.value],
+            nickName: trimValue
+          }
+        })
+        ElMessage.success('修改成功')
+      }
+    })
+    .finally(() => {
+      loadingInstance.close()
+      myGroupNickNameRef.value.blur()
+    })
+}
 </script>
 
 <template>
@@ -456,9 +492,7 @@ const onCancelManager = (userInfo) => {
           <ArrowLeft />
         </el-icon>
         <span v-if="showModel === 'info'" class="group-card-title"> 群信息 </span>
-        <span v-if="showModel === 'editAvatarAndName'" class="group-card-title">
-          修改群组名称或头像
-        </span>
+        <span v-if="showModel === 'editAvatarAndName'" class="group-card-title"> 修改信息 </span>
         <span v-if="showModel === 'members'" class="group-card-title">
           群组成员 {{ Object.values(showMembers)?.length }}名
         </span>
@@ -473,12 +507,7 @@ const onCancelManager = (userInfo) => {
           :groupInfo="groupInfo"
           :disableClickAvatar="true"
         ></GroupItem>
-        <el-icon
-          class="edit"
-          size="20"
-          title="修改群组名称或头像"
-          @click="onEditGroupAvatarAndName"
-        >
+        <el-icon class="edit" size="20" title="修改信息" @click="onEditGroupAvatarAndName">
           <Edit />
         </el-icon>
       </div>
@@ -541,6 +570,17 @@ const onCancelManager = (userInfo) => {
           <Edit />
         </el-icon>
       </div>
+      <div class="group-card-myGroupNickName">
+        <span style="font-size: 14px; width: 110px">我的群昵称</span>
+        <el-input
+          ref="myGroupNickNameRef"
+          v-model="newMyGroupNickName"
+          placeholder="请输入备注"
+          maxlength="10"
+          show-word-limit
+          @change="updateMyGroupNickName"
+        />
+      </div>
     </div>
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
       <div v-if="iAmManager" class="group-card-avatar-wrapper">
@@ -602,7 +642,6 @@ const onCancelManager = (userInfo) => {
             placeholder="请输入备注"
             maxlength="10"
             show-word-limit
-            @change="updateGroupName"
           />
         </div>
       </div>
@@ -917,6 +956,15 @@ const onCancelManager = (userInfo) => {
       overflow-y: scroll;
       white-space: pre-wrap; //给文本中的\n换行
     }
+  }
+
+  .group-card-myGroupNickName {
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
   }
 }
 
