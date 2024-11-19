@@ -33,6 +33,7 @@ const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop�
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
+const newGroupMark = ref('') //TODO 待完善
 const newAnnouncement = ref('')
 const memberSearchKey = ref('')
 
@@ -310,6 +311,8 @@ const updateGroupName = () => {
     })
 }
 
+const groupMarkInputRef = ref()
+
 const updateAnnouncement = () => {
   const trimValue = newAnnouncement.value.trim()
   if (trimValue === groupInfo.value.announcement) {
@@ -471,7 +474,6 @@ const onCancelManager = (userInfo) => {
           :disableClickAvatar="true"
         ></GroupItem>
         <el-icon
-          v-if="iAmManager"
           class="edit"
           size="20"
           title="修改群组名称或头像"
@@ -541,28 +543,31 @@ const onCancelManager = (userInfo) => {
       </div>
     </div>
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
-      <div @click="isShowEditAvatar = true">
-        <el-avatar
-          class="group-card-avatar"
-          v-if="groupInfo.avatarThumb"
-          :src="groupInfo.avatarThumb"
-          :size="100"
-          shape="square"
-        />
-        <groupChatIcon
-          class="group-card-avatar"
-          v-else
-          style="width: 100px; height: 100px"
-        ></groupChatIcon>
+      <div v-if="iAmManager" class="group-card-avatar-wrapper">
+        <div @click="isShowEditAvatar = true">
+          <el-avatar
+            class="group-card-avatar"
+            v-if="groupInfo.avatarThumb"
+            :src="groupInfo.avatarThumb"
+            :size="100"
+            shape="square"
+          />
+          <groupChatIcon
+            class="group-card-avatar"
+            v-else
+            style="width: 100px; height: 100px"
+          ></groupChatIcon>
+        </div>
+        <el-button
+          class="group-card-avatar-edit-btn"
+          type="primary"
+          plain
+          @click="isShowEditAvatar = true"
+        >
+          更换头像
+        </el-button>
       </div>
-      <el-button
-        class="group-card-avatar-edit-btn"
-        type="primary"
-        plain
-        @click="isShowEditAvatar = true"
-      >
-        更换头像
-      </el-button>
+
       <div
         style="
           width: 90%;
@@ -571,20 +576,35 @@ const onCancelManager = (userInfo) => {
           border-radius: 8px;
           background-color: #f5f5f5;
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
         "
       >
-        <span style="width: 80px; font-size: 14px; display: flex; align-items: center"
-          >群组名称</span
-        >
-        <el-input
-          ref="groupNameInputRef"
-          v-model="newGroupName"
-          placeholder="请输入名称"
-          maxlength="50"
-          show-word-limit
-          @change="updateGroupName"
-        />
+        <div v-if="iAmManager" style="display: flex">
+          <span style="width: 80px; font-size: 14px; display: flex; align-items: center">
+            群组名称
+          </span>
+          <el-input
+            ref="groupNameInputRef"
+            v-model="newGroupName"
+            placeholder="请输入名称"
+            maxlength="50"
+            show-word-limit
+            @change="updateGroupName"
+          />
+        </div>
+        <div style="display: flex; margin-top: 10px">
+          <span style="width: 80px; font-size: 14px; display: flex; align-items: center">
+            群组备注
+          </span>
+          <el-input
+            ref="groupMarkInputRef"
+            v-model="newGroupMark"
+            placeholder="请输入备注"
+            maxlength="10"
+            show-word-limit
+            @change="updateGroupName"
+          />
+        </div>
       </div>
     </div>
     <div v-if="showModel === 'editAnnouncement'" class="group-card-editAnnouncement">
@@ -753,19 +773,13 @@ const onCancelManager = (userInfo) => {
       padding: 4px;
       position: absolute;
       right: 5px;
-      top: 5px;
+      bottom: 5px;
       background-color: transparent;
       border-radius: 8px;
       cursor: pointer;
 
       &:hover {
         background-color: #dedfe0;
-      }
-    }
-
-    .el-input {
-      .el-input__wrapper {
-        border-radius: 25px;
       }
     }
   }
@@ -799,6 +813,12 @@ const onCancelManager = (userInfo) => {
       width: 100%;
       display: flex;
       flex-direction: column;
+
+      .el-input {
+        .el-input__wrapper {
+          border-radius: 25px;
+        }
+      }
 
       .el-table {
         width: 100%;
@@ -901,6 +921,7 @@ const onCancelManager = (userInfo) => {
 }
 
 .group-card-editAvatarAndName {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
