@@ -39,6 +39,9 @@ const newGroupMark = ref('') //TODO 待完善
 const newAnnouncement = ref('')
 const memberSearchKey = ref('')
 const newMyGroupNickName = ref('')
+const isAllMuted = ref()
+const isAllInvite = ref()
+const isHistoryBrowse = ref(false)
 
 // 打开GroupCard时，重置数据
 watch(
@@ -49,6 +52,9 @@ watch(
       returnModelList.value = []
       newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
       settingOption.value = 'chatSetting'
+      isAllInvite.value = groupInfo.value.allInvite
+      isAllMuted.value = groupInfo.value.allMuted
+      isHistoryBrowse.value = groupInfo.value.historyBrowse
     }
   }
 )
@@ -485,19 +491,25 @@ const handleChangeDnd = () => {
   console.log(isDnd.value)
 }
 
-// const isAllMuted = ref(false) //TODO
-// const handleAllMuted = () => {
-//   console.log(isAllMuted.value)
-// }
-
-const canReadHistoryMsgForNewMembers = ref(false) //TODO
-const handleReadHistoryMsgForNewMembers = () => {
-  console.log(canReadHistoryMsgForNewMembers.value)
-}
-
-const isAllInvite = ref(false) //TODO
-const handleAllInvite = () => {
-  console.log(isAllInvite.value)
+let timer
+const handleGroupSwitch = (obj) => {
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    const loadingInstance = ElLoading.service(el_loading_options)
+    groupUpdateInfoService({
+      groupId: groupCardData.groupId,
+      ...obj
+    })
+      .then(() => {
+        groupData.setGroupInfo({
+          ...groupInfo.value,
+          ...obj
+        })
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  }, 300)
 }
 
 const levelGroup = () => {
@@ -682,26 +694,24 @@ const levelGroup = () => {
           <el-tab-pane v-if="iAmManager" label="群组设置" name="groupSetting">
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">入群验证</span>
-              <el-switch v-model="isAllInvite" @change="handleAllInvite" />
+              <el-switch
+                v-model="isAllInvite"
+                @change="handleGroupSwitch({ allInvite: isAllInvite })"
+              />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px">全员禁言</span>
+              <el-switch
+                v-model="isAllMuted"
+                @change="handleGroupSwitch({ allMuted: isAllMuted })"
+              />
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">新成员查看历史记录</span>
               <el-switch
-                v-model="canReadHistoryMsgForNewMembers"
-                @change="handleReadHistoryMsgForNewMembers"
+                v-model="isHistoryBrowse"
+                @change="handleGroupSwitch({ historyBrowse: isHistoryBrowse })"
               />
-            </div>
-            <div
-              style="
-                height: 32px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <span style="font-size: 14px">全员禁言</span>
-              <el-button :icon="ArrowRight" size="small" circle />
-              <!-- <el-switch v-model="isAllMuted" @change="handleAllMuted" /> -->
             </div>
             <div
               v-if="iAmOwner"
