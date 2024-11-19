@@ -47,6 +47,7 @@ watch(
       showModel.value = 'info'
       returnModelList.value = []
       newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
+      settingOption.value = 'chatSetting'
     }
   }
 )
@@ -467,6 +468,36 @@ const updateMyGroupNickName = () => {
       myGroupNickNameRef.value.blur()
     })
 }
+
+const settingOption = ref('chatSetting')
+const handleSettingClick = (tab) => {
+  console.log(tab.props.label)
+}
+
+const isTop = ref(false) //TODO
+const handleChangeTop = () => {
+  console.log(isTop.value)
+}
+
+const isSilentMode = ref(false) //TODO
+const handleChangeSilentMode = () => {
+  console.log(isSilentMode.value)
+}
+
+// const isAllMuted = ref(false) //TODO
+// const handleAllMuted = () => {
+//   console.log(isAllMuted.value)
+// }
+
+const canReadHistoryMsgForNewMembers = ref(false) //TODO
+const handleReadHistoryMsgForNewMembers = () => {
+  console.log(canReadHistoryMsgForNewMembers.value)
+}
+
+const isAllInvite = ref(false) //TODO
+const handleAllInvite = () => {
+  console.log(isAllInvite.value)
+}
 </script>
 
 <template>
@@ -571,7 +602,7 @@ const updateMyGroupNickName = () => {
         </el-icon>
       </div>
       <div class="group-card-myGroupNickName">
-        <span style="font-size: 14px; width: 110px">我的群昵称</span>
+        <span style="font-size: 14px; width: 160px">我在本群的昵称</span>
         <el-input
           ref="myGroupNickNameRef"
           v-model="newMyGroupNickName"
@@ -580,6 +611,96 @@ const updateMyGroupNickName = () => {
           show-word-limit
           @change="updateMyGroupNickName"
         />
+      </div>
+      <div class="group-card-chat-setting">
+        <el-tabs v-model="settingOption" @tab-click="handleSettingClick">
+          <el-tab-pane label="聊天设置" name="chatSetting">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px">设为置顶</span>
+              <el-switch v-model="isTop" @change="handleChangeTop" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px">设置免打扰</span>
+              <el-switch v-model="isSilentMode" @change="handleChangeSilentMode" />
+            </div>
+            <div
+              style="
+                height: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <span style="font-size: 14px; color: red">清空聊天记录</span>
+              <el-button :icon="ArrowRight" size="small" circle />
+            </div>
+            <div
+              style="
+                height: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <span style="font-size: 14px; color: red">退出群组</span>
+              <el-button :icon="ArrowRight" size="small" circle />
+            </div>
+          </el-tab-pane>
+          <el-tab-pane v-if="iAmManager" label="群组设置" name="groupSetting">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px">入群验证</span>
+              <el-switch v-model="isAllInvite" @change="handleAllInvite" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px">新成员查看历史记录</span>
+              <el-switch
+                v-model="canReadHistoryMsgForNewMembers"
+                @change="handleReadHistoryMsgForNewMembers"
+              />
+            </div>
+            <div
+              style="
+                height: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <span style="font-size: 14px">全员禁言</span>
+              <el-button :icon="ArrowRight" size="small" circle />
+              <!-- <el-switch v-model="isAllMuted" @change="handleAllMuted" /> -->
+            </div>
+            <div
+              v-if="iAmOwner"
+              style="
+                height: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <span style="font-size: 14px">转移群主</span>
+              <el-button :icon="ArrowRight" size="small" circle />
+            </div>
+            <div
+              v-if="iAmOwner"
+              style="
+                height: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <span style="font-size: 14px; color: red">解散团队</span>
+              <el-button :icon="ArrowRight" size="small" circle />
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+      <div class="group-card-send-msg">
+        <el-button type="primary" size="large" round style="width: 200px; font-size: 16px">
+          发送消息
+        </el-button>
       </div>
     </div>
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
@@ -965,6 +1086,21 @@ const updateMyGroupNickName = () => {
     background-color: #f5f5f5;
     display: flex;
     align-items: center;
+  }
+
+  .group-card-chat-setting {
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .group-card-send-msg {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
   }
 }
 
