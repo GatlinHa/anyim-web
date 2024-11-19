@@ -23,6 +23,10 @@ export const groupStore = defineStore('anyim-group', () => {
     groupMembersList.value[groupId] = members
   }
 
+  const setOneOfGroupMembers = ({ groupId, account, userInfo }) => {
+    groupMembersList.value[groupId][account] = userInfo
+  }
+
   const deleteGroup = (groupId) => {
     delete groupInfoList.value[groupId]
     delete groupMembersList.value[groupId]
@@ -42,6 +46,7 @@ export const groupStore = defineStore('anyim-group', () => {
     groupMembersList,
     setGroupInfo,
     setGroupMembers,
+    setOneOfGroupMembers,
     deleteGroup,
     loadGroupInfoList
   }

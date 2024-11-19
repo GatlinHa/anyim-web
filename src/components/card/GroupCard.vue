@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElLoading, ElMessage } from 'element-plus'
+import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
+import { Avatar } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
@@ -13,7 +14,12 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
-import { groupAddMembersService, groupDelMembersService, groupUpdateInfoService } from '@/api/group'
+import {
+  groupAddMembersService,
+  groupDelMembersService,
+  groupUpdateInfoService,
+  groupChangeRoleService
+} from '@/api/group'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -60,11 +66,11 @@ const showMembersArrSorted = computed(() => {
   )
 })
 
-const isOwner = computed(() => {
+const iAmOwner = computed(() => {
   return showMembers.value[myAccount.value].role === 2
 })
 
-const isManager = computed(() => {
+const iAmManager = computed(() => {
   return showMembers.value[myAccount.value].role > 0
 })
 
@@ -73,7 +79,7 @@ const isManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupInfo.value.allInvite || isManager.value) {
+  if (groupInfo.value.allInvite || iAmManager.value) {
     return true
   } else {
     return false
@@ -85,7 +91,7 @@ const isShowAddButton = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowDelButton = computed(() => {
-  if (isManager.value) {
+  if (iAmManager.value) {
     return true
   } else {
     return false
@@ -148,7 +154,7 @@ const selectDialogDisabledOptions = computed(() => {
     Object.values(showMembers.value).forEach((item) => {
       if (item.account === myAccount.value) data.push(item.account) // 删除时要排除自己
       if (item.role === 2) data.push(item.account) // 群主不能删
-      if (item.role === 1 && !isOwner.value) data.push(item.account) //管理员只有群组能删
+      if (item.role === 1 && !iAmOwner.value) data.push(item.account) //管理员只有群组能删
     })
     return data
   } else {
@@ -174,49 +180,58 @@ const selectDialogTitle = computed(() => {
   return method.value === 'add' ? '添加成员' : '移除成员'
 })
 
+const doAdd = (userArray) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  const members = userArray.map((item) => ({ account: item.account, nickName: item.nickName }))
+  groupAddMembersService({
+    groupId: groupCardData.groupId,
+    members: members
+  })
+    .then((res) => {
+      if (res.data.data) {
+        groupData.setGroupMembers({
+          groupId: groupCardData.groupId,
+          members: res.data.data.members
+        })
+        ElMessage.success('添加成功')
+      } else {
+        ElMessage.error('添加失败')
+      }
+    })
+    .finally(() => {
+      loadingInstance.close()
+    })
+}
+
+const doDelete = (userArray) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  const accounts = userArray.map((item) => item.account)
+  groupDelMembersService({
+    groupId: groupCardData.groupId,
+    accounts: accounts
+  })
+    .then((res) => {
+      if (res.data.data) {
+        groupData.setGroupMembers({
+          groupId: groupCardData.groupId,
+          members: res.data.data.members
+        })
+        ElMessage.success('移除成功')
+      } else {
+        ElMessage.error('移除失败')
+      }
+    })
+    .finally(() => {
+      loadingInstance.close()
+    })
+}
+
 const onConfirmSelect = (selected) => {
   isShowSelectDialog.value = false // 这里要先关闭，不然移除的时候会报错
-  const loadingInstance = ElLoading.service(el_loading_options)
   if (method.value === 'add') {
-    const members = selected.map((item) => ({ account: item.account, nickName: item.nickName }))
-    groupAddMembersService({
-      groupId: groupCardData.groupId,
-      members: members
-    })
-      .then((res) => {
-        if (res.data.data) {
-          groupData.setGroupMembers({
-            groupId: groupCardData.groupId,
-            members: res.data.data.members
-          })
-          ElMessage.success('添加成功')
-        } else {
-          ElMessage.error('添加失败')
-        }
-      })
-      .finally(() => {
-        loadingInstance.close()
-      })
+    doAdd(selected)
   } else if (method.value === 'del') {
-    const accounts = selected.map((item) => item.account)
-    groupDelMembersService({
-      groupId: groupCardData.groupId,
-      accounts: accounts
-    })
-      .then((res) => {
-        if (res.data.data) {
-          groupData.setGroupMembers({
-            groupId: groupCardData.groupId,
-            members: res.data.data.members
-          })
-          ElMessage.success('移除成功')
-        } else {
-          ElMessage.error('移除失败')
-        }
-      })
-      .finally(() => {
-        loadingInstance.close()
-      })
+    doDelete(selected)
   }
 }
 
@@ -306,6 +321,100 @@ const updateAnnouncement = () => {
       onReturnModel()
     })
 }
+
+const isShowSpecifyManagerButton = (role) => {
+  if (iAmOwner.value && role === 0) {
+    return true
+  } else {
+    return false
+  }
+}
+
+const isShowCancelManagerButton = (role) => {
+  if (iAmOwner.value && role === 1) {
+    return true
+  } else {
+    return false
+  }
+}
+
+const onSpecifyManager = (userInfo) => {
+  ElMessageBox.confirm(
+    `是否要将${userInfo.nickName}(${userInfo.account})设置为管理员？`,
+    '温馨提示',
+    {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消'
+    }
+  )
+    .then(() => {
+      const loadingInstance = ElLoading.service(el_loading_options)
+      groupChangeRoleService({
+        groupId: groupCardData.groupId,
+        account: userInfo.account,
+        role: 1
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            groupData.setOneOfGroupMembers({
+              groupId: groupCardData.groupId,
+              account: userInfo.account,
+              userInfo: {
+                ...userInfo,
+                role: 1
+              }
+            })
+            ElMessage.success('设置成功')
+          }
+        })
+        .finally(() => {
+          loadingInstance.close()
+        })
+    })
+    .catch(() => {
+      // do nothing
+    })
+}
+
+const onCancelManager = (userInfo) => {
+  ElMessageBox.confirm(
+    `是否要取消${userInfo.nickName}(${userInfo.account})的管理员权限？`,
+    '温馨提示',
+    {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消'
+    }
+  )
+    .then(() => {
+      const loadingInstance = ElLoading.service(el_loading_options)
+      groupChangeRoleService({
+        groupId: groupCardData.groupId,
+        account: userInfo.account,
+        role: 0
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            groupData.setOneOfGroupMembers({
+              groupId: groupCardData.groupId,
+              account: userInfo.account,
+              userInfo: {
+                ...userInfo,
+                role: 0
+              }
+            })
+            ElMessage.success('取消成功')
+          }
+        })
+        .finally(() => {
+          loadingInstance.close()
+        })
+    })
+    .catch(() => {
+      // do nothing
+    })
+}
 </script>
 
 <template>
@@ -349,7 +458,7 @@ const updateAnnouncement = () => {
           :disableClickAvatar="true"
         ></GroupItem>
         <el-icon
-          v-if="isManager"
+          v-if="iAmManager"
           class="edit"
           size="20"
           title="修改群组名称或头像"
@@ -408,7 +517,7 @@ const updateAnnouncement = () => {
           {{ groupInfo.announcement || '暂无公告' }}
         </el-text>
         <el-icon
-          v-if="isManager"
+          v-if="iAmManager"
           class="edit"
           size="20"
           title="修改群公告"
@@ -479,6 +588,110 @@ const updateAnnouncement = () => {
         <el-button type="primary" @click="updateAnnouncement" plain>确认</el-button>
       </div>
     </div>
+    <div v-if="showModel === 'members'" class="show-all-members">
+      <el-table :data="showMembersArrSorted" style="width: 100%">
+        <el-table-column label="成员">
+          <template #default="scope">
+            <div style="display: flex; align-items: center">
+              <AvatarIcon
+                :showName="scope.row.nickName"
+                :showId="scope.row.account"
+                :showAvatarThumb="scope.row.avatarThumb"
+                :userStatus="scope.row.status"
+                :size="'small'"
+                @click="onShowUserCard(scope.row.account)"
+              ></AvatarIcon>
+              <div
+                style="
+                  margin-left: 5px;
+                  display: flex;
+                  flex-direction: column;
+                  flex: 1;
+                  width: 0;
+                  user-select: text;
+                "
+              >
+                <span
+                  class="text-ellipsis"
+                  :title="scope.row.nickName"
+                  style="height: 20px; font-size: 14px"
+                >
+                  {{ scope.row.nickName }}
+                </span>
+                <span
+                  class="text-ellipsis"
+                  :title="scope.row.account"
+                  style="height: 20px; font-size: 12px"
+                >
+                  {{ scope.row.account }}
+                </span>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="角色" width="100">
+          <template #default="scope">
+            <div
+              v-if="scope.row.role === 2"
+              style="
+                background-color: rgb(250, 181.5, 181.5);
+                text-align: center;
+                border-radius: 4px;
+              "
+            >
+              群主
+            </div>
+            <div
+              v-else-if="scope.row.role === 1"
+              style="
+                background-color: rgb(179, 224.5, 156.5);
+                text-align: center;
+                border-radius: 4px;
+              "
+            >
+              管理员
+            </div>
+            <div v-else style="background-color: #dcdfe6; text-align: center; border-radius: 4px">
+              普通成员
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="iAmManager" prop="操作" label="操作" width="80">
+          <template #default="scope">
+            <div style="display: flex">
+              <!-- <el-button
+                v-if="scope.row.account !== myAccount"
+                type="info"
+                :icon="Mute"
+                size="small"
+                circle
+                title="禁言"
+              /> -->
+              <el-button
+                v-if="isShowSpecifyManagerButton(scope.row.role)"
+                type="primary"
+                :icon="Avatar"
+                size="small"
+                circle
+                title="设置为管理员"
+                style="margin-left: 2px"
+                @click="onSpecifyManager(scope.row)"
+              />
+              <el-button
+                v-if="isShowCancelManagerButton(scope.row.role)"
+                type="info"
+                :icon="Avatar"
+                size="small"
+                circle
+                title="取消管理员"
+                style="margin-left: 2px"
+                @click="onCancelManager(scope.row)"
+              />
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </el-drawer>
   <SelectDialog
     v-model="isShowSelectDialog"
@@ -509,6 +722,31 @@ const updateAnnouncement = () => {
   .el-drawer__header {
     margin: 0;
     font-weight: bold;
+  }
+
+  .el-drawer__body {
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+      background-color: unset;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: unset;
+    }
+
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        background-color: #409eff;
+      }
+    }
+  }
+
+  .show-all-members {
+    .el-table__cell {
+      padding: 2px 0 2px 0;
+    }
   }
 }
 
@@ -575,7 +813,7 @@ const updateAnnouncement = () => {
   }
 
   .group-card-announcement {
-    height: 160px;
+    height: 200px;
     padding: 5px 10px 0 10px;
     margin-top: 20px;
     border-radius: 8px;
@@ -586,7 +824,7 @@ const updateAnnouncement = () => {
 
     .announcement {
       width: 95%;
-      height: 100px;
+      height: 140px;
       padding: 10px;
       margin-top: 10px;
       border-radius: 8px;
