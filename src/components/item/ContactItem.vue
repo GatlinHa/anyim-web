@@ -111,7 +111,6 @@ const onOpenSession = () => {
       align-items: center;
 
       .organization {
-        color: gray;
         font-size: 12px;
       }
     }
