@@ -45,7 +45,7 @@ const newAnnouncement = ref('')
 const memberSearchKey = ref('')
 const newMyGroupNickName = ref('')
 const isAllMuted = ref()
-const isAllInvite = ref()
+const isJoinGroupApproval = ref()
 const isHistoryBrowse = ref(false)
 const settingOption = ref('chatSetting')
 
@@ -58,7 +58,7 @@ watch(
       returnModelList.value = []
       newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
       settingOption.value = 'chatSetting'
-      isAllInvite.value = groupInfo.value.allInvite
+      isJoinGroupApproval.value = groupInfo.value.joinGroupApproval
       isAllMuted.value = groupInfo.value.allMuted
       isHistoryBrowse.value = groupInfo.value.historyBrowse
     }
@@ -110,7 +110,7 @@ const iAmManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupInfo.value?.allInvite || iAmManager.value) {
+  if (groupInfo.value?.joinGroupApproval || iAmManager.value) {
     return true
   } else {
     return false
@@ -809,8 +809,8 @@ const onConfirmSingleSelect = (selected) => {
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">入群验证</span>
               <el-switch
-                v-model="isAllInvite"
-                @change="handleGroupSwitch({ allInvite: isAllInvite })"
+                v-model="isJoinGroupApproval"
+                @change="handleGroupSwitch({ joinGroupApproval: isJoinGroupApproval })"
               />
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center">
@@ -858,7 +858,7 @@ const onConfirmSingleSelect = (selected) => {
               "
             >
               <span style="font-size: 14px; color: red; cursor: pointer" @click="dropGroup">
-                解散团队
+                解散群组
               </span>
               <el-button :icon="ArrowRight" size="small" circle @click="dropGroup" />
             </div>
