@@ -44,3 +44,7 @@ export const groupLeaveService = (obj) => {
 export const groupDropService = (obj) => {
   return request.post('/groupmng/dropGroup', getReqBody(obj))
 }
+
+export const groupOwnerTransferService = (obj) => {
+  return request.post('/groupmng/ownerTransfer', getReqBody(obj))
+}

@@ -14,6 +14,7 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import SelectDialog from '../common/SelectDialog.vue'
+import SingleSelectDialog from '../common/SingleSelectDialog.vue'
 import {
   groupAddMembersService,
   groupDelMembersService,
@@ -21,7 +22,8 @@ import {
   groupChangeRoleService,
   groupUpdateNickNameService,
   groupLeaveService,
-  groupDropService
+  groupDropService,
+  groupOwnerTransferService
 } from '@/api/group'
 
 const groupData = groupStore()
@@ -30,6 +32,7 @@ const messageData = messageStore()
 const userCardData = userCardStore()
 const groupCardData = groupCardStore()
 const isShowSelectDialog = ref(false)
+const isShowSingleSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
 const showModel = ref('info')
 const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop实现
@@ -570,6 +573,44 @@ const dropGroup = () => {
       // do nothing
     })
 }
+
+const onConfirmSingleSelect = (selected) => {
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupOwnerTransferService({
+    groupId: groupCardData.groupId,
+    account: selected
+  })
+    .then((res) => {
+      if (res.data.code === 0) {
+        groupData.setOneOfGroupMembers({
+          groupId: groupCardData.groupId,
+          account: myAccount.value,
+          userInfo: {
+            ...showMembers.value[myAccount.value],
+            role: 1
+          }
+        })
+        groupData.setOneOfGroupMembers({
+          groupId: groupCardData.groupId,
+          account: selected,
+          userInfo: {
+            ...showMembers.value[selected],
+            role: 2
+          }
+        })
+        groupData.setGroupInfo({
+          ...groupInfo.value,
+          myRole: 1
+        })
+
+        ElMessage.success('转移成功')
+      }
+    })
+    .finally(() => {
+      isShowSingleSelectDialog.value = false
+      loadingInstance.close()
+    })
+}
 </script>
 
 <template>
@@ -752,8 +793,17 @@ const dropGroup = () => {
                 align-items: center;
               "
             >
-              <span style="font-size: 14px">转移群主</span>
-              <el-button :icon="ArrowRight" size="small" circle />
+              <span
+                style="font-size: 14px; cursor: pointer"
+                @click="isShowSingleSelectDialog = true"
+                >转移群主</span
+              >
+              <el-button
+                :icon="ArrowRight"
+                size="small"
+                circle
+                @click="isShowSingleSelectDialog = true"
+              />
             </div>
             <div
               v-if="iAmOwner"
@@ -991,6 +1041,17 @@ const dropGroup = () => {
       </div>
     </template>
   </SelectDialog>
+  <SingleSelectDialog
+    v-model="isShowSingleSelectDialog"
+    :options="showMembersArrSorted"
+    :disabledOptionIds="new Array(myAccount)"
+    @showUserCard="onShowUserCard"
+    @confirm="onConfirmSingleSelect"
+  >
+    <template #title>
+      <div style="font-size: 16px; font-weight: bold; white-space: nowrap">转移群主</div>
+    </template>
+  </SingleSelectDialog>
   <EditAvatar
     v-model="isShowEditAvatar"
     :model="'group'"
