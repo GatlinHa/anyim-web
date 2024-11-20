@@ -48,3 +48,7 @@ export const groupDropService = (obj) => {
 export const groupOwnerTransferService = (obj) => {
   return request.post('/groupmng/ownerTransfer', getReqBody(obj))
 }
+
+export const groupUpdateMuteService = (obj) => {
+  return request.post('/groupmng/updateMute', getReqBody(obj))
+}

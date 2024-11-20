@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
-import { Avatar, Search } from '@element-plus/icons-vue'
+import { Avatar, Search, Mute } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
@@ -23,7 +23,8 @@ import {
   groupUpdateNickNameService,
   groupLeaveService,
   groupDropService,
-  groupOwnerTransferService
+  groupOwnerTransferService,
+  groupUpdateMuteService
 } from '@/api/group'
 
 const groupData = groupStore()
@@ -46,6 +47,7 @@ const newMyGroupNickName = ref('')
 const isAllMuted = ref()
 const isAllInvite = ref()
 const isHistoryBrowse = ref(false)
+const settingOption = ref('chatSetting')
 
 // 打开GroupCard时，重置数据
 watch(
@@ -369,6 +371,52 @@ const isShowCancelManagerButton = (role) => {
   }
 }
 
+const isShowMute = (mutedMode) => {
+  if (mutedMode === 1 || (groupInfo.value.allMuted && mutedMode !== 2)) {
+    return true
+  } else {
+    return false
+  }
+}
+
+let setMuteTimer
+const setMute = (account, mode) => {
+  let mutedMode
+  if (groupInfo.value.allMuted) {
+    // 全员禁言模式下对某个成员取消禁言就是把mutedMode置为2(白名单), 设置禁言就是把mutedMode置为0(从白名单剔除)
+    mutedMode = mode === 'cancle' ? 2 : 0
+  } else {
+    // 非全员禁言模式下对某个成员设置禁言就是把mutedMode置为1(黑名单), 取消禁言就是把mutedMode置为0(从黑名单剔除)
+    mutedMode = mode === 'set' ? 1 : 0
+  }
+
+  clearTimeout(setMuteTimer)
+  setMuteTimer = setTimeout(() => {
+    const loadingInstance = ElLoading.service(el_loading_options)
+    groupUpdateMuteService({
+      groupId: groupCardData.groupId,
+      account: account,
+      mutedMode: mutedMode
+    })
+      .then((res) => {
+        if (res.data.code === 0) {
+          groupData.setOneOfGroupMembers({
+            groupId: groupCardData.groupId,
+            account: account,
+            userInfo: {
+              ...showMembers.value[account],
+              mutedMode: mutedMode
+            }
+          })
+          ElMessage.success('设置成功')
+        }
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  }, 300)
+}
+
 const onSpecifyManager = (userInfo) => {
   ElMessageBox.confirm(
     `是否要将${userInfo.nickName}(${userInfo.account})设置为管理员？`,
@@ -480,11 +528,6 @@ const updateMyGroupNickName = () => {
     })
 }
 
-const settingOption = ref('chatSetting')
-const handleSettingClick = (tab) => {
-  console.log(tab.props.label)
-}
-
 const isTop = ref(false) //TODO
 const handleChangeTop = () => {
   console.log(isTop.value)
@@ -495,10 +538,10 @@ const handleChangeDnd = () => {
   console.log(isDnd.value)
 }
 
-let timer
+let handleGroupSwitchTimer
 const handleGroupSwitch = (obj) => {
-  clearTimeout(timer)
-  timer = setTimeout(() => {
+  clearTimeout(handleGroupSwitchTimer)
+  handleGroupSwitchTimer = setTimeout(() => {
     const loadingInstance = ElLoading.service(el_loading_options)
     groupUpdateInfoService({
       groupId: groupCardData.groupId,
@@ -726,7 +769,7 @@ const onConfirmSingleSelect = (selected) => {
         />
       </div>
       <div class="group-card-chat-setting">
-        <el-tabs v-model="settingOption" @tab-click="handleSettingClick">
+        <el-tabs v-model="settingOption">
           <el-tab-pane label="聊天设置" name="chatSetting">
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">设为置顶</span>
@@ -993,14 +1036,24 @@ const onConfirmSingleSelect = (selected) => {
         <el-table-column v-if="iAmManager" width="80">
           <template #default="scope">
             <div style="display: flex">
-              <!-- <el-button
-                v-if="scope.row.account !== myAccount"
+              <el-button
+                v-if="isShowMute(scope.row.mutedMode)"
                 type="info"
                 :icon="Mute"
                 size="small"
                 circle
-                title="禁言"
-              /> -->
+                title="取消禁言"
+                @click="setMute(scope.row.account, 'cancle')"
+              />
+              <el-button
+                v-else
+                class="set-mute-btn"
+                :icon="Mute"
+                size="small"
+                circle
+                title="设置禁言"
+                @click="setMute(scope.row.account, 'set')"
+              />
               <el-button
                 v-if="isShowSpecifyManagerButton(scope.row.role)"
                 type="primary"
@@ -1126,6 +1179,20 @@ const onConfirmSingleSelect = (selected) => {
 
       .el-table__cell {
         padding: 2px 0 2px 0;
+      }
+
+      .el-table__row {
+        :hover {
+          --mute-button-color: rgb(255, 255, 255);
+          --mute-button-bgc: rgb(144, 147, 153);
+          --mute-button-border: unset;
+        }
+      }
+
+      .set-mute-btn {
+        color: var(--mute-button-color, transparent);
+        background-color: var(--mute-button-bgc, transparent);
+        border: var(--mute-button-border, unset);
       }
     }
   }
