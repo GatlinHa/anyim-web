@@ -70,6 +70,11 @@ const groupInfo = computed(() => {
   return groupData.groupInfoList[groupCardData.groupId] || {}
 })
 
+const sessionInfo = computed(() => {
+  const sessionId = groupCardData.groupId
+  return messageData.sessionList[sessionId] || {}
+})
+
 const onShowMembers = () => {
   returnModelList.value.push(showModel.value)
   showModel.value = 'members'
@@ -273,6 +278,7 @@ const onEditGroupAvatarAndName = () => {
   returnModelList.value.push(showModel.value)
   showModel.value = 'editAvatarAndName'
   newGroupName.value = groupInfo.value.groupName
+  newGroupMark.value = sessionInfo.value.mark
 }
 
 const onEditAnnouncement = () => {
@@ -328,6 +334,26 @@ const updateGroupName = () => {
     .finally(() => {
       loadingInstance.close()
       groupNameInputRef.value.blur()
+    })
+}
+
+const updateGroupMark = () => {
+  const trimValue = newGroupMark.value.trim()
+  if (!trimValue) {
+    newGroupMark.value = sessionInfo.value.mark
+    groupMarkInputRef.value.blur()
+    return
+  }
+
+  const loadingInstance = ElLoading.service(el_loading_options)
+  messageData
+    .updateSession({
+      sessionId: sessionInfo.value.sessionId,
+      mark: trimValue
+    })
+    .finally(() => {
+      loadingInstance.close()
+      groupMarkInputRef.value.blur()
     })
 }
 
@@ -932,6 +958,7 @@ const onConfirmSingleSelect = (selected) => {
             placeholder="请输入备注"
             maxlength="10"
             show-word-limit
+            @change="updateGroupMark"
           />
         </div>
       </div>

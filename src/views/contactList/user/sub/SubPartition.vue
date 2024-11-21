@@ -59,15 +59,17 @@ const onSelectPartitionItem = (key) => {
 const detailData = computed(() => {
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
-    if (item.partitionId.toString() === selectedIndex.value) {
-      if (!userSearchKey.value) {
-        data.push(item)
-      } else {
-        if (
-          item.objectInfo.nickName.toLowerCase().includes(userSearchKey.value.toLowerCase()) ||
-          item.objectInfo.account === userSearchKey.value
-        )
+    if (item.sessionType === MsgType.CHAT) {
+      if (item.partitionId.toString() === selectedIndex.value) {
+        if (!userSearchKey.value) {
           data.push(item)
+        } else {
+          if (
+            item.objectInfo.nickName.toLowerCase().includes(userSearchKey.value.toLowerCase()) ||
+            item.objectInfo.account === userSearchKey.value
+          )
+            data.push(item)
+        }
       }
     }
   })

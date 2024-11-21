@@ -508,20 +508,22 @@ const showMenuSessionId = ref('') //当前被点击右键的sessionId（它可�
 const selectedMenuItem = ref('') //菜单组件反馈用户点击的某个菜单项
 
 const isShowUpdateMarkDialog = ref(false)
-const accountForUpdateMark = ref('')
-const nickForUpdateMark = ref('')
+const titleForUpdateMark = ref('')
 const onShowUpdateMarkDialog = () => {
   isShowUpdateMarkDialog.value = true
-  accountForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].objectInfo.account
-  nickForUpdateMark.value = messageData.sessionList[showMenuSessionId.value].objectInfo.nickName
+  const objectInfo = messageData.sessionList[showMenuSessionId.value].objectInfo
+  if (messageData.sessionList[showMenuSessionId.value].sessionType === MsgType.CHAT) {
+    titleForUpdateMark.value = `${objectInfo.nickName} ${objectInfo.account}`
+  } else if (messageData.sessionList[showMenuSessionId.value].sessionType === MsgType.GROUP_CHAT) {
+    titleForUpdateMark.value = `${objectInfo.groupName} ${objectInfo.groupId}`
+  }
 }
 
 const onUpdateMarkConfirm = (inputValue) => {
   // 如果没有更改，不需要执行保存
   if (inputValue !== messageData.sessionList[showMenuSessionId.value].mark) {
-    const sessionId = combineId(userData.user.account, accountForUpdateMark.value)
     messageData.updateSession({
-      sessionId: sessionId,
+      sessionId: showMenuSessionId.value,
       mark: inputValue
     })
   }
@@ -529,14 +531,20 @@ const onUpdateMarkConfirm = (inputValue) => {
 }
 
 const onShowGroupCard = async ({ groupId }) => {
-  const res = await groupInfoService({ groupId: groupId })
-  groupCardData.setGroupId(groupId)
-  groupCardData.setIsShow(true)
-  groupData.setGroupInfo(res.data.data.groupInfo)
-  groupData.setGroupMembers({
-    groupId: groupId,
-    members: res.data.data.members
-  })
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupInfoService({ groupId: groupId })
+    .then((res) => {
+      groupCardData.setGroupId(groupId)
+      groupCardData.setIsShow(true)
+      groupData.setGroupInfo(res.data.data.groupInfo)
+      groupData.setGroupMembers({
+        groupId: groupId,
+        members: res.data.data.members
+      })
+    })
+    .finally(() => {
+      loadingInstance.close()
+    })
 }
 
 const onShowContactCard = (contactInfo) => {
@@ -807,7 +815,7 @@ const onNoneSelected = () => {
   <EditDialog
     :isShow="isShowUpdateMarkDialog"
     :title="'修改备注：'"
-    :titleExt="`${nickForUpdateMark} ${accountForUpdateMark}`"
+    :titleExt="titleForUpdateMark"
     :placeholder="'请输入备注'"
     :defaultInput="messageData.sessionList[showMenuSessionId]?.mark || ''"
     @close="isShowUpdateMarkDialog = false"

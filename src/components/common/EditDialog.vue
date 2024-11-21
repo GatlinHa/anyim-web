@@ -38,6 +38,7 @@ watch([() => props.isShow, () => props.defaultInput], ([newIsShow, newDefaultInp
         <div
           v-if="props.titleExt"
           class="text-ellipsis"
+          :title="props.titleExt"
           style="padding: 2px 8px 2px 8px; font-size: 14px; border-radius: 4px; background: #ebedf0"
         >
           {{ props.titleExt }}

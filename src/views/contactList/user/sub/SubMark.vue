@@ -7,6 +7,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { Search } from '@element-plus/icons-vue'
 import HashNoData from '@/components/common/HasNoData.vue'
+import { MsgType } from '@/proto/msg'
 
 const messageData = messageStore()
 const userCardData = userCardStore()
@@ -24,16 +25,18 @@ const markData = computed(() => {
   if (Object.values(messageData.sessionList).length === 0) return []
   const data = []
   Object.values(messageData.sessionList).forEach((item) => {
-    if (item.mark) {
-      if (!markSearchKey.value) {
-        data.push(item)
-      } else {
-        if (
-          item.objectInfo.nickName.toLowerCase().includes(markSearchKey.value.toLowerCase()) ||
-          item.objectInfo.account === markSearchKey.value ||
-          item.mark.toLowerCase().includes(markSearchKey.value.toLowerCase())
-        ) {
+    if (item.sessionType === MsgType.CHAT) {
+      if (item.mark) {
+        if (!markSearchKey.value) {
           data.push(item)
+        } else {
+          if (
+            item.objectInfo.nickName.toLowerCase().includes(markSearchKey.value.toLowerCase()) ||
+            item.objectInfo.account === markSearchKey.value ||
+            item.mark.toLowerCase().includes(markSearchKey.value.toLowerCase())
+          ) {
+            data.push(item)
+          }
         }
       }
     }
