@@ -23,6 +23,7 @@ import SessionItem from '@/views/message/components/SessionItem.vue'
 import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
+import SessionTag from '@/views/message/components/SessionTag.vue'
 import { userStore, settingStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
@@ -654,12 +655,17 @@ const onNoneSelected = () => {
       <el-container v-else class="container">
         <el-header class="header bdr-b">
           <div class="show-name-id">
-            <span class="show-name">{{
-              selectedSession.mark ? `${selectedSession.mark}(${showName})` : showName
-            }}</span>
-            <span v-if="selectedSession?.sessionType === MsgType.CHAT" class="show-id">{{
-              showId
-            }}</span>
+            <SessionTag
+              v-if="selectedSession?.sessionType === MsgType.GROUP_CHAT"
+              tagType="groupchat"
+            ></SessionTag>
+            <span
+              class="show-name text-ellipsis"
+              :title="selectedSession.mark ? `${selectedSession.mark}(${showName})` : showName"
+            >
+              {{ selectedSession.mark ? `${selectedSession.mark}(${showName})` : showName }}
+            </span>
+            <span class="show-id" :title="showId">{{ showId }}</span>
           </div>
 
           <div class="action-set">
@@ -858,10 +864,12 @@ const onNoneSelected = () => {
 
         .show-name-id {
           display: flex;
+          justify-content: center;
           align-items: center;
           user-select: text;
 
           .show-name {
+            max-width: 300px;
             font-size: 16px;
             font-weight: bold;
           }
