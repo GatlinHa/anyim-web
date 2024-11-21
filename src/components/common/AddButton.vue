@@ -17,8 +17,10 @@ const actualSize = computed(() => {
 
 <style lang="scss" scoped>
 .circle {
-  width: v-bind('actualSize');
-  height: v-bind('actualSize');
+  width: v-bind('actualSize'); //CSS中使用script的变量
+  height: v-bind('actualSize'); //CSS中使用script的变量
+  min-width: v-bind('actualSize');
+  min-height: v-bind('actualSize');
   border: solid 1px;
   border-radius: 50%;
   display: flex;
