@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
-import groupChatIcon from '@/assets/svg/groupchat.svg'
 import { highLightedText } from '@/js/utils/common'
+import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 
 /**
  * groupInfo: 群组详情
@@ -22,30 +22,6 @@ const itemHeight = computed(() => {
     case 'default':
     default:
       return 48
-  }
-})
-
-const avatarSize = computed(() => {
-  switch (props.size) {
-    case 'large':
-      return 50
-    case 'small':
-      return 30
-    case 'default':
-    default:
-      return 40
-  }
-})
-
-const svgSize = computed(() => {
-  switch (props.size) {
-    case 'large':
-      return 30
-    case 'small':
-      return 18
-    case 'default':
-    default:
-      return 24
   }
 })
 
@@ -71,25 +47,13 @@ const onOpenSession = () => {
 
 <template>
   <div class="group-item" :style="{ height: itemHeight + 'px' }">
-    <div
-      class="avatar"
+    <GroupAvatarIcon
+      :avatarThumb="props.groupInfo.avatarThumb"
+      :size="props.size"
       @click="onShowCard"
       :style="{ cursor: !props.disableClickAvatar ? 'pointer' : 'auto' }"
     >
-      <el-avatar
-        v-if="props.groupInfo.avatarThumb"
-        :src="props.groupInfo.avatarThumb"
-        :size="avatarSize"
-        shape="square"
-      />
-      <div
-        v-else
-        class="svg-avatar"
-        :style="{ width: avatarSize + 'px', height: avatarSize + 'px' }"
-      >
-        <groupChatIcon :style="{ width: svgSize + 'px', height: svgSize + 'px' }"></groupChatIcon>
-      </div>
-    </div>
+    </GroupAvatarIcon>
 
     <div class="info" @click="onOpenSession">
       <span
@@ -112,22 +76,6 @@ const onOpenSession = () => {
   display: flex;
   align-items: center;
   user-select: none;
-
-  .avatar {
-    cursor: pointer;
-
-    .svg-avatar {
-      border-radius: 4px;
-      background-color: #c0c4cc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .svg-icon {
-        fill: #fff;
-      }
-    }
-  }
 
   .info {
     margin-left: 5px;

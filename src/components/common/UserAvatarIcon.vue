@@ -56,7 +56,7 @@ const statusCircleColor = computed(() => {
 </script>
 
 <template>
-  <div class="avatar-box" :style="{ width: avatarSize + 'px', height: avatarSize + 'px' }">
+  <div class="user-avatar-box" :style="{ width: avatarSize + 'px', height: avatarSize + 'px' }">
     <el-avatar v-if="isShowImg" :src="props.showAvatarThumb" :size="avatarSize" />
     <span class="first-char-box" v-else :style="{ backgroundColor: randomColor, color: fontColor }">
       {{ firstChar }}
@@ -74,7 +74,7 @@ const statusCircleColor = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.avatar-box {
+.user-avatar-box {
   flex-shrink: 0;
   cursor: pointer;
   overflow: hidden;

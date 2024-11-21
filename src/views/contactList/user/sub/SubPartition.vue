@@ -19,6 +19,7 @@ import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import SelectDialog from '@/components/common/SelectDialog.vue'
 import { combineId, highLightedText } from '@/js/utils/common'
+import { MsgType } from '@/proto/msg'
 
 const messageData = messageStore()
 const userData = userStore()
@@ -76,7 +77,7 @@ const detailData = computed(() => {
 const hasNoParitionSessions = computed(() => {
   const data = {}
   Object.values(messageData.sessionList).forEach((item) => {
-    if (item.partitionId === 0) {
+    if (item.partitionId === 0 && item.sessionType === MsgType.CHAT) {
       data[item.objectInfo.account] = item.objectInfo
     }
   })

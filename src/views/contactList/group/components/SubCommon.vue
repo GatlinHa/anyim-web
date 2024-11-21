@@ -11,6 +11,7 @@ import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService, groupSearchByMemberService, groupInfoService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
+import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['tab'])
 
@@ -201,7 +202,9 @@ const onShowUserCard = (account) => {
 const selectDialogOptions = computed(() => {
   const data = {}
   Object.values(messageData.sessionList).forEach((item) => {
-    data[item.objectInfo.account] = item.objectInfo
+    if (item.sessionType === MsgType.CHAT) {
+      data[item.objectInfo.account] = item.objectInfo
+    }
   })
   return data
 })

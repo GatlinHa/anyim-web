@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
+import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
@@ -156,21 +157,34 @@ defineExpose({
       class="session-item"
       :class="{ 'bgc-for-active': hasBeenSelected, 'bgc-for-top': top && !hasBeenSelected }"
     >
-      <AvatarIcon
+      <UserAvatarIcon
+        v-if="sessionInfo.sessionType === MsgType.CHAT"
         class="avatar-session-item"
         :showName="showName"
         :showId="showId"
         :showAvatarThumb="showAvatarThumb"
         :userStatus="sessionInfo.objectInfo.status"
         @click="onShowCard"
-      ></AvatarIcon>
+      ></UserAvatarIcon>
+      <GroupAvatarIcon
+        v-else-if="sessionInfo.sessionType === MsgType.GROUP_CHAT"
+        :avatarThumb="showAvatarThumb"
+        style="cursor: pointer"
+      ></GroupAvatarIcon>
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">
           <div class="title">
-            <span class="showName text-ellipsis">{{
-              sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName
-            }}</span>
-            <span v-if="sessionInfo.objectInfo.account" class="showAccount">
+            <span
+              class="showName text-ellipsis"
+              :title="sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName"
+            >
+              {{ sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName }}
+            </span>
+            <span
+              v-if="sessionInfo.objectInfo.account"
+              class="showAccount"
+              :title="sessionInfo.objectInfo.account"
+            >
               {{ sessionInfo.objectInfo.account }}
             </span>
             <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>

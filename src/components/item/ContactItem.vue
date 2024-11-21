@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import { MsgType } from '@/proto/msg'
 import { highLightedText } from '@/js/utils/common'
 
@@ -44,7 +44,7 @@ const onOpenSession = () => {
 
 <template>
   <div class="contact-item" :style="{ height: contactItemHeight + 'px' }">
-    <AvatarIcon
+    <UserAvatarIcon
       class="avatar-contact-item"
       :showName="props.contactInfo.nickName"
       :showId="props.contactInfo.account"
@@ -52,7 +52,7 @@ const onOpenSession = () => {
       :userStatus="props.contactInfo.status"
       :size="props.size"
       @click="onShowCard"
-    ></AvatarIcon>
+    ></UserAvatarIcon>
     <div class="body" @click="onOpenSession">
       <div class="title">
         <span

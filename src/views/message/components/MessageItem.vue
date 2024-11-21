@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import { userStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/js/utils/common'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
 const props = defineProps([
   'sessionId',
@@ -130,25 +130,25 @@ const onShowUserCard = () => {
           </el-container>
         </el-main>
         <el-aside class="el-aside-right">
-          <AvatarIcon
+          <UserAvatarIcon
             class="avatar-message-item"
             :showId="account"
             :showName="nickName"
             :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
-          ></AvatarIcon>
+          ></UserAvatarIcon>
         </el-aside>
       </el-container>
 
       <el-container class="el-container-left" v-else>
         <el-aside class="el-aside-left">
-          <AvatarIcon
+          <UserAvatarIcon
             class="avatar-message-item"
             :showId="account"
             :showName="nickName"
             :showAvatarThumb="avatarThumb"
             @click="onShowUserCard"
-          ></AvatarIcon>
+          ></UserAvatarIcon>
         </el-aside>
         <el-main class="el-main-left">
           <el-container class="message-content-wrapper">

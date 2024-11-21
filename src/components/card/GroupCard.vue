@@ -5,8 +5,8 @@ import { Avatar, Search, Mute } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
-import groupChatIcon from '@/assets/svg/groupchat.svg'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
+import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import AddButton from '@/components/common/AddButton.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
 import EditAvatar from '@/components/common/EditAvatar.vue'
@@ -26,6 +26,7 @@ import {
   groupOwnerTransferService,
   groupUpdateMuteService
 } from '@/api/group'
+import { MsgType } from '@/proto/msg'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -167,7 +168,9 @@ const selectDialogOptions = computed(() => {
   if (method.value === 'add') {
     const data = {}
     Object.values(messageData.sessionList).forEach((item) => {
-      data[item.objectInfo.account] = item.objectInfo
+      if (item.sessionType === MsgType.CHAT) {
+        data[item.objectInfo.account] = item.objectInfo
+      }
     })
     return data
   } else if (method.value === 'del') {
@@ -688,11 +691,16 @@ const onConfirmSingleSelect = (selected) => {
     </template>
 
     <div v-if="showModel === 'info'" class="group-card-info">
-      <div class="group-card-avatar-wrapper">
+      <div style="position: relative">
         <GroupItem
-          class="group-card-avatar"
           :groupInfo="groupInfo"
           :disableClickAvatar="true"
+          style="
+            padding: 10px 12px 10px 12px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            display: flex;
+          "
         ></GroupItem>
         <el-icon class="edit" size="20" title="修改信息" @click="onEditGroupAvatarAndName">
           <Edit />
@@ -721,13 +729,13 @@ const onConfirmSingleSelect = (selected) => {
             v-for="item in showMembersArrSorted?.slice(0, showMembersCount)"
             :key="item.account"
           >
-            <AvatarIcon
+            <UserAvatarIcon
               :showName="item.nickName"
               :showId="item.account"
               :showAvatarThumb="item.avatarThumb"
               :userStatus="item.status"
               @click="onShowUserCard(item.account)"
-            ></AvatarIcon>
+            ></UserAvatarIcon>
             <div class="text text-ellipsis" :title="item.nickName">
               {{ item.nickName }}
             </div>
@@ -874,18 +882,11 @@ const onConfirmSingleSelect = (selected) => {
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
       <div v-if="iAmManager" class="group-card-avatar-wrapper">
         <div @click="isShowEditAvatar = true">
-          <el-avatar
+          <GroupAvatarIcon
             class="group-card-avatar"
-            v-if="groupInfo.avatarThumb"
-            :src="groupInfo.avatarThumb"
-            :size="100"
-            shape="square"
-          />
-          <groupChatIcon
-            class="group-card-avatar"
-            v-else
-            style="width: 100px; height: 100px"
-          ></groupChatIcon>
+            :avatarThumb="groupInfo.avatarThumb"
+            :size="'huge'"
+          ></GroupAvatarIcon>
         </div>
         <el-button
           class="group-card-avatar-edit-btn"
@@ -960,14 +961,14 @@ const onConfirmSingleSelect = (selected) => {
         <el-table-column>
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <AvatarIcon
+              <UserAvatarIcon
                 :showName="scope.row.nickName"
                 :showId="scope.row.account"
                 :showAvatarThumb="scope.row.avatarThumb"
                 :userStatus="scope.row.status"
                 :size="'small'"
                 @click="onShowUserCard(scope.row.account)"
-              ></AvatarIcon>
+              ></UserAvatarIcon>
               <div
                 style="
                   margin-left: 5px;
@@ -1205,17 +1206,6 @@ const onConfirmSingleSelect = (selected) => {
 }
 
 .group-card-info {
-  .group-card-avatar-wrapper {
-    position: relative;
-
-    .group-card-avatar {
-      padding: 10px 12px 10px 12px;
-      border-radius: 8px;
-      background-color: #f5f5f5;
-      display: flex;
-    }
-  }
-
   .group-card-members {
     height: 160px;
     padding: 10px;
@@ -1316,19 +1306,27 @@ const onConfirmSingleSelect = (selected) => {
   flex-direction: column;
   align-items: center;
 
-  .group-card-avatar {
-    border: #e9e9eb solid 2px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    cursor: pointer;
+  .group-card-avatar-wrapper {
+    display: flex;
+    flex-direction: column;
 
-    &:hover {
-      border: #409eff solid 2px;
+    .group-card-avatar {
+      border: #e9e9eb solid 2px;
+      background-color: #f5f5f5;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+
+      &:hover {
+        border: #409eff solid 2px;
+      }
     }
-  }
 
-  .group-card-avatar-edit-btn {
-    margin-top: 5px;
+    .group-card-avatar-edit-btn {
+      margin-top: 5px;
+    }
   }
 }
 

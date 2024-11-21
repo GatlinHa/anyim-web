@@ -16,7 +16,7 @@ import wsConnect from '@/js/websocket/wsConnect'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import {
   STATUS,
   LEAVING_AFTER_DURATION,
@@ -172,14 +172,14 @@ const onExit = async () => {
   <el-container class="layout-container" @mousemove="onMouseMove">
     <el-aside width="100px">
       <span class="avatar">
-        <AvatarIcon
+        <UserAvatarIcon
           ref="myAvatar"
           :showName="userData.user.nickName"
           :showId="userData.user.account"
           :showAvatarThumb="userData.user.avatarThumb"
           @click="openMyCardDialog"
         >
-        </AvatarIcon>
+        </UserAvatarIcon>
         <div class="user-status">
           <div class="status-circle" :style="{ backgroundColor: statusCircleColor }"></div>
           <span class="status-desc">{{ userStatusDesc }}</span>

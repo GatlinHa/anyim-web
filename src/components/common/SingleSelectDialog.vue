@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import AvatarIcon from '@/components/common/AvatarIcon.vue'
+import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
 const props = defineProps(['modelValue', 'options', 'disabledOptionIds'])
 const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
@@ -95,14 +95,14 @@ const onConfirm = () => {
           :disabled="props.disabledOptionIds.includes(item.account)"
         >
           <div style="display: flex; align-items: center">
-            <AvatarIcon
+            <UserAvatarIcon
               :showName="item.nickName"
               :showId="item.account"
               :showAvatarThumb="item.avatarThumb"
               :userStatus="item.status"
               :size="'small'"
               @click="onShowUserCard(item.account)"
-            ></AvatarIcon>
+            ></UserAvatarIcon>
             <div
               style="
                 margin-left: 5px;
