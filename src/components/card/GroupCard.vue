@@ -27,6 +27,7 @@ import {
   groupUpdateMuteService
 } from '@/api/group'
 import { MsgType } from '@/proto/msg'
+import router from '@/router'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -69,6 +70,17 @@ watch(
     }
   }
 )
+
+const goToSessionTab = () => {
+  router.push({
+    path: '/message',
+    query: {
+      sessionId: sessionInfo.value.sessionId
+    }
+  })
+  groupCardData.setIsShow(false)
+  groupCardData.setGroupId('')
+}
 
 const groupInfo = computed(() => {
   return groupData.groupInfoList[groupCardData.groupId] || {}
@@ -910,7 +922,13 @@ const onConfirmSingleSelect = (selected) => {
         </el-tabs>
       </div>
       <div class="group-card-send-msg">
-        <el-button type="primary" size="large" round style="width: 200px; font-size: 16px">
+        <el-button
+          type="primary"
+          size="large"
+          round
+          style="width: 200px; font-size: 16px"
+          @click="goToSessionTab"
+        >
           发送消息
         </el-button>
       </div>

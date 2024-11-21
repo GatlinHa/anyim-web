@@ -1,10 +1,7 @@
 <script setup>
-// import { ref } from 'vue'
 import { ChatRound, Phone, VideoCamera } from '@element-plus/icons-vue'
 import GroupItem from '@/components/item/GroupItem.vue'
-// import { sessionShowTime } from '@/js/utils/common'
-// import router from '@/router'
-// import { messageStore } from '@/stores'
+import router from '@/router'
 
 const props = defineProps(['groupInfo', 'keyWords'])
 const emit = defineEmits(['showGroupCard'])
@@ -14,13 +11,12 @@ const onShowGroupCard = () => {
 }
 
 const goToSessionTab = () => {
-  console.log('goToSessionTab')
-  // router.push({
-  //   path: '/message',
-  //   query: {
-  //     sessionId: props.session.sessionId
-  //   }
-  // })
+  router.push({
+    path: '/message',
+    query: {
+      sessionId: props.groupInfo.groupId
+    }
+  })
 }
 </script>
 

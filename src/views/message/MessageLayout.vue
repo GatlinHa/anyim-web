@@ -356,6 +356,12 @@ const pullMsg = async (mode = 0, ref = -1) => {
 const handleSelectedSession = async (sessionId) => {
   if (selectedSessionId.value !== sessionId) {
     selectedSessionId.value = sessionId
+    router.push({
+      path: '/message',
+      query: {
+        sessionId: sessionId
+      }
+    })
     initSession(sessionId)
     locateSession(sessionId)
 
@@ -597,6 +603,15 @@ watch(
         }
       })
     })
+  }
+)
+
+watch(
+  () => router.currentRoute.value.query.sessionId,
+  (newValue) => {
+    if (newValue) {
+      handleSelectedSession(newValue)
+    }
   }
 )
 
