@@ -4,9 +4,7 @@ const items = {
   groupchat: { color: '#409EFF', label: '群' },
   team: { color: '#67C23A', label: '团' },
   organize: { color: '#E6A23C', label: '组' },
-  assistant: { color: '#E734F5', label: '助' },
-  top: { color: '#F56C6C', label: '顶' },
-  dnd: { color: '#73767a', label: '静' }
+  assistant: { color: '#E734F5', label: '助' }
 }
 
 const props = defineProps(['tagType'])

@@ -4,7 +4,7 @@ import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/js/utils/common'
-import { Top, Bottom, MuteNotification, Bell } from '@element-plus/icons-vue'
+import { Top, MuteNotification } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore } from '@/stores'
 import { msgChatDeleteSessionService } from '@/api/message'
@@ -174,6 +174,10 @@ defineExpose({
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">
           <div class="title">
+            <SessionTag
+              v-if="sessionInfo.sessionType === MsgType.GROUP_CHAT"
+              tagType="groupchat"
+            ></SessionTag>
             <span
               class="showName text-ellipsis"
               :title="sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName"
@@ -187,9 +191,6 @@ defineExpose({
             >
               {{ sessionInfo.objectInfo.account }}
             </span>
-            <SessionTag :tagType="sessionInfo.sessionType"></SessionTag>
-            <SessionTag v-if="top" tagType="top"></SessionTag>
-            <SessionTag v-if="dnd" tagType="dnd"></SessionTag>
           </div>
           <div class="datetime">
             <span>{{ showTime }}</span>
@@ -207,8 +208,9 @@ defineExpose({
           </div>
           <div class="action">
             <el-button
-              class="action-button"
-              :icon="top ? Bottom : Top"
+              class="action-button-top"
+              :icon="Top"
+              :title="top ? '取消置顶' : '置顶'"
               @click.stop="
                 switchTag(() => {
                   top = !top
@@ -217,8 +219,9 @@ defineExpose({
               circle
             />
             <el-button
-              class="action-button"
-              :icon="dnd ? Bell : MuteNotification"
+              class="action-button-dnd"
+              :icon="MuteNotification"
+              :title="dnd ? '取消免打扰' : '设置免打扰'"
               @click.stop="
                 switchTag(() => {
                   dnd = !dnd
@@ -336,11 +339,24 @@ defineExpose({
         margin-right: 10px;
         display: flex;
 
-        .action-button {
+        .action-button-top {
           width: 20px;
           height: 20px;
           margin-left: 2px;
-          opacity: 0;
+          opacity: v-bind('top ? 1: 0');
+
+          &:hover {
+            opacity: 1;
+            background-color: #409eff;
+            color: #fff;
+          }
+        }
+
+        .action-button-dnd {
+          width: 20px;
+          height: 20px;
+          margin-left: 2px;
+          opacity: v-bind('dnd ? 1: 0');
 
           &:hover {
             opacity: 1;

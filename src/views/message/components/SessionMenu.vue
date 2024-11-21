@@ -25,7 +25,7 @@ const menu = computed(() => {
     },
     {
       label: 'dnd',
-      desc: dnd.value ? '取消免打扰' : '开启免打扰',
+      desc: dnd.value ? '取消免打扰' : '设置免打扰',
       icon: dnd.value ? Bell : MuteNotification
     },
     {
