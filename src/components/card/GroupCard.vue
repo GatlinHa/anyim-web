@@ -41,7 +41,9 @@ const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop�
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
-const newGroupMark = ref('') //TODO 待完善
+const newGroupMark = ref('')
+const isTop = ref()
+const isDnd = ref()
 const newAnnouncement = ref('')
 const memberSearchKey = ref('')
 const newMyGroupNickName = ref('')
@@ -62,6 +64,8 @@ watch(
       isJoinGroupApproval.value = groupInfo.value.joinGroupApproval
       isAllMuted.value = groupInfo.value.allMuted
       isHistoryBrowse.value = groupInfo.value.historyBrowse
+      isTop.value = sessionInfo.value.top
+      isDnd.value = sessionInfo.value.dnd
     }
   }
 )
@@ -557,14 +561,20 @@ const updateMyGroupNickName = () => {
     })
 }
 
-const isTop = ref(false) //TODO
-const handleChangeTop = () => {
-  console.log(isTop.value)
-}
-
-const isDnd = ref(false) //TODO
-const handleChangeDnd = () => {
-  console.log(isDnd.value)
+let handleChatSwitchTimer
+const handleChatSwitch = (obj) => {
+  clearTimeout(handleChatSwitchTimer)
+  handleChatSwitchTimer = setTimeout(() => {
+    const loadingInstance = ElLoading.service(el_loading_options)
+    messageData
+      .updateSession({
+        sessionId: sessionInfo.value.sessionId,
+        ...obj
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  }, 300)
 }
 
 let handleGroupSwitchTimer
@@ -807,11 +817,11 @@ const onConfirmSingleSelect = (selected) => {
           <el-tab-pane label="聊天设置" name="chatSetting">
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">设为置顶</span>
-              <el-switch v-model="isTop" @change="handleChangeTop" />
+              <el-switch v-model="isTop" @change="handleChatSwitch({ top: isTop })" />
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">设置免打扰</span>
-              <el-switch v-model="isDnd" @change="handleChangeDnd" />
+              <el-switch v-model="isDnd" @change="handleChatSwitch({ dnd: isDnd })" />
             </div>
             <div
               style="

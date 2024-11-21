@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
@@ -30,6 +30,10 @@ const sessionInfo = computed(() => {
 
 const top = ref(sessionInfo.value.top)
 const dnd = ref(sessionInfo.value.dnd)
+
+watch([() => sessionInfo.value.top, () => sessionInfo.value.dnd], ([newTop, newDnd]) => {
+  ;(top.value = newTop), (dnd.value = newDnd)
+})
 
 const hasBeenSelected = computed(() => {
   return props.sessionId === props.selectedSessionId
@@ -107,7 +111,7 @@ const switchTag = (func) => {
       top: top.value,
       dnd: dnd.value
     })
-  }, 100) // 这个时间太长会影响置顶按钮的响应时长
+  }, 300) // 这个时间太长会影响置顶按钮的响应时长
 }
 
 const handleSelectedMenuItem = async () => {
