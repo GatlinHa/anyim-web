@@ -2,11 +2,10 @@ eslint-disable prettier/prettier
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import {
-  Phone,
+  Microphone,
   VideoCamera,
-  Position,
+  MoreFilled,
   CirclePlus,
-  Setting,
   LocationInformation,
   Clock,
   Picture,
@@ -39,7 +38,7 @@ import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
 import { userQueryService } from '@/api/user'
-import { ElLoading } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { combineId, sessionIdConvert } from '@/js/utils/common'
 import SessionMenu from '@/views/message/components/SessionMenu.vue'
@@ -635,6 +634,29 @@ const onOpenSessionMenu = (sessionId) => {
 const onNoneSelected = () => {
   selectedSessionId.value = ''
 }
+
+const onVoiceCall = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onVideoCall = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onInviteIntoGroup = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onMoreSetting = () => {
+  if (selectedSession.value.sessionType === MsgType.CHAT) {
+    onShowUserCard({
+      sessionId: selectedSession.value.sessionId,
+      account: selectedSession.value.objectInfo.account
+    })
+  } else if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+    onShowGroupCard({ groupId: selectedSession.value.objectInfo.groupId })
+  }
+}
 </script>
 
 <template>
@@ -702,11 +724,34 @@ const onNoneSelected = () => {
           </div>
 
           <div class="action-set">
-            <el-button class="action-button" :icon="Phone" circle />
-            <el-button class="action-button" :icon="VideoCamera" circle />
-            <el-button class="action-button" :icon="Position" circle />
-            <el-button class="action-button" :icon="CirclePlus" circle />
-            <el-button class="action-button" :icon="Setting" circle />
+            <el-icon
+              class="action-button"
+              size="20"
+              :title="selectedSession.sessionType === MsgType.GROUP_CHAT ? '多人通话' : '语音通话'"
+              @click="onVoiceCall"
+            >
+              <Microphone />
+            </el-icon>
+            <el-icon
+              class="action-button"
+              size="20"
+              :title="selectedSession.sessionType === MsgType.GROUP_CHAT ? '视频会议' : '视频通话'"
+              @click="onVideoCall"
+            >
+              <VideoCamera />
+            </el-icon>
+            <el-icon
+              v-if="selectedSession.sessionType === MsgType.GROUP_CHAT"
+              class="action-button"
+              size="20"
+              title="邀请进群"
+              @click="onInviteIntoGroup"
+            >
+              <CirclePlus />
+            </el-icon>
+            <el-icon class="action-button" size="20" title="更多设置" @click="onMoreSetting">
+              <MoreFilled />
+            </el-icon>
           </div>
         </el-header>
         <el-main class="body">
@@ -915,10 +960,18 @@ const onNoneSelected = () => {
         }
 
         .action-set {
-          margin-right: 20px;
-
           .action-button {
-            border: 0;
+            padding: 8px;
+            margin-left: 10px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: transparent solid 1px;
+            cursor: pointer;
+
+            &:hover {
+              border: #409eff solid 1px;
+              color: #409eff;
+            }
           }
         }
       }
