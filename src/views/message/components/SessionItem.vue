@@ -83,17 +83,12 @@ const isShowUnreadCount = computed(() => {
   return sessionInfo.value.unreadCount > 0
 })
 
-const onShowCard = () => {
-  switch (sessionInfo.value.sessionType) {
-    case MsgType.CHAT:
-      emit('showUserCard', { sessionId: props.sessionId, account: showId.value })
-      break
-    case MsgType.GROUP_CHAT:
-      emit('showGroupCard', { sessionId: props.sessionId, groupId: showId.value })
-      break
-    default:
-      break
-  }
+const onShowUserCard = () => {
+  emit('showUserCard', { sessionId: props.sessionId, account: showId.value })
+}
+
+const onShowGroupCard = () => {
+  emit('showGroupCard', { sessionId: props.sessionId, groupId: showId.value })
 }
 
 // 这里有防抖动效果
@@ -164,12 +159,13 @@ defineExpose({
         :showId="showId"
         :showAvatarThumb="showAvatarThumb"
         :userStatus="sessionInfo.objectInfo.status"
-        @click="onShowCard"
+        @click="onShowUserCard"
       ></UserAvatarIcon>
       <GroupAvatarIcon
         v-else-if="sessionInfo.sessionType === MsgType.GROUP_CHAT"
         :avatarThumb="showAvatarThumb"
         style="cursor: pointer"
+        @click="onShowGroupCard"
       ></GroupAvatarIcon>
       <div class="content-box" @click="emit('isSelected', props.sessionId)">
         <div class="header">

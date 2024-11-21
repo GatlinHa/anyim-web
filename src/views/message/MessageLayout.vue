@@ -24,9 +24,17 @@ import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
 import SessionTag from '@/views/message/components/SessionTag.vue'
-import { userStore, settingStore, messageStore, userCardStore, groupCardStore } from '@/stores'
+import {
+  userStore,
+  settingStore,
+  messageStore,
+  userCardStore,
+  groupCardStore,
+  groupStore
+} from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
 import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
+import { groupInfoService } from '@/api/group'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
@@ -44,6 +52,7 @@ const settingData = settingStore()
 const messageData = messageStore()
 const userCardData = userCardStore()
 const groupCardData = groupCardStore()
+const groupData = groupStore()
 const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
 
@@ -463,7 +472,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
     userData
       .updateUser()
       .then(() => {
-        groupCardData.setIsShow(false)
         userCardData.setUserInfo(userData.user)
         userCardData.setIsShow(true)
       })
@@ -486,7 +494,6 @@ const onShowUserCard = async ({ sessionId, account }) => {
             email: res.data.data.email
           }
         })
-        groupCardData.setIsShow(false)
         userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
         userCardData.setIsShow(true)
       })
@@ -521,15 +528,18 @@ const onUpdateMarkConfirm = (inputValue) => {
   isShowUpdateMarkDialog.value = false
 }
 
-// TODO
-const onShowGroupCard = () => {
-  userCardData.setIsShow(false)
-  groupCardData.setGroupId()
+const onShowGroupCard = async ({ groupId }) => {
+  const res = await groupInfoService({ groupId: groupId })
+  groupCardData.setGroupId(groupId)
   groupCardData.setIsShow(true)
+  groupData.setGroupInfo(res.data.data.groupInfo)
+  groupData.setGroupMembers({
+    groupId: groupId,
+    members: res.data.data.members
+  })
 }
 
 const onShowContactCard = (contactInfo) => {
-  groupCardData.setIsShow(false)
   userCardData.setUserInfo(contactInfo)
   userCardData.setIsShow(true)
 }
