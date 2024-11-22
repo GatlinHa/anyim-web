@@ -8,7 +8,8 @@ import {
   helloConstructor,
   chatReadConstructor,
   statusReqConstructor,
-  statusSyncConstructor
+  statusSyncConstructor,
+  groupChatConstructor
 } from './constructor'
 import { onReceiveStatusResMsg } from '@/js/event'
 
@@ -113,6 +114,7 @@ class WsConnect {
     [MsgType.HEART_BEAT]: heartBeatConstructor,
     [MsgType.CHAT]: chatConstructor,
     [MsgType.CHAT_READ]: chatReadConstructor,
+    [MsgType.GROUP_CHAT]: groupChatConstructor,
     [MsgType.STATUS_REQ]: statusReqConstructor,
     [MsgType.STATUS_SYNC]: statusSyncConstructor
   }

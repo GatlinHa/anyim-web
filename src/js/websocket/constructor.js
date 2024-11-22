@@ -26,6 +26,29 @@ export const chatConstructor = (toId, content, tempMsgId) => {
   return data
 }
 
+export const groupChatConstructor = (groupId, content, tempMsgId) => {
+  const header = Header.create({
+    magic: proto.magic,
+    version: proto.version,
+    msgType: MsgType.GROUP_CHAT,
+    isExtension: false
+  })
+
+  const userData = userStore()
+  const body = Body.create({
+    fromId: userData.user.account,
+    fromClient: userData.clientId,
+    groupId: groupId,
+    content: content,
+    tempMsgId: tempMsgId
+  })
+  const msg = Msg.create({ header: header, body: body })
+  const payload = Msg.encode(msg).finish()
+  const data = encodePayload(payload)
+
+  return data
+}
+
 export const heartBeatConstructor = () => {
   const header = Header.create({
     magic: proto.magic,

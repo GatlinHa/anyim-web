@@ -266,6 +266,18 @@ const getPreMsgTime = (index) => {
   }
 }
 
+const getMsgSenderObj = (item) => {
+  if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+    return groupData.groupMembersList[selectedSession.value.objectInfo.groupId][item.fromId]
+  } else {
+    if (userData.user.account === item.fromId) {
+      return userData.user
+    } else {
+      return selectedSession.value.objectInfo
+    }
+  }
+}
+
 const lastReadMsgId = ref()
 /**
  * 判断是否是打开session后的第一条未读消息
@@ -363,6 +375,19 @@ const handleSelectedSession = async (sessionId) => {
     })
     initSession(sessionId)
     locateSession(sessionId)
+
+    // 如果是群组，要加载成员列表（显示消息需要account，nickName，avatar信息）
+    if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+      const groupId = selectedSession.value.objectInfo.groupId
+      // 没有members数据才需要加载成员列表，加载过了就不重复加载了
+      if (!groupData.groupMembersList[groupId]) {
+        const res = await groupInfoService({ groupId: groupId })
+        groupData.setGroupMembers({
+          groupId: groupId,
+          members: res.data.data.members
+        })
+      }
+    }
 
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
     if (!msgRecords.value && selectedSession.value.lastMsgId) {
@@ -771,7 +796,7 @@ const onMoreSetting = () => {
                 :key="index"
                 :sessionId="selectedSessionId"
                 :msg="item"
-                :obj="selectedSession.objectInfo"
+                :obj="getMsgSenderObj(item)"
                 :readMsgId="selectedSession.readMsgId"
                 :remoteRead="selectedSession.remoteRead"
                 :preMsgTime="getPreMsgTime(index)"

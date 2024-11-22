@@ -20,6 +20,11 @@ const props = defineProps([
 const emit = defineEmits(['loadMore', 'showUserCard'])
 
 const userData = userStore()
+
+const isChatMsgType = computed(() => {
+  return props.msg.msgType === MsgType.CHAT
+})
+
 const loadMoreTips = computed(() => {
   return props.isLoadMoreLoading ? '' : '查看更多消息'
 })
@@ -55,15 +60,15 @@ const isSelf = computed(() => {
 })
 
 const account = computed(() => {
-  return isSelf.value ? userData.user.account : props.obj.account
+  return props.obj.account
 })
 
 const nickName = computed(() => {
-  return isSelf.value ? userData.user.nickName : props.obj.nickName
+  return props.obj.nickName
 })
 
 const avatarThumb = computed(() => {
-  return isSelf.value ? userData.user.avatarThumb : props.obj.avatarThumb
+  return props.obj.avatarThumb
 })
 
 const sysShowTime = computed(() => {
@@ -98,11 +103,7 @@ const onShowUserCard = () => {
 </script>
 
 <template>
-  <div
-    v-if="props.msg.msgType === MsgType.CHAT"
-    class="message-item"
-    :class="{ unreadMsg: isUnreadMsg }"
-  >
+  <div class="message-item" :class="{ unreadMsg: isUnreadMsg }">
     <span v-if="isShowNoMoreMsg" class="no-more-message">当前无更多消息</span>
     <div v-if="isShowLoadMore" class="load-more-wrapper">
       <div
@@ -124,7 +125,10 @@ const onShowUserCard = () => {
           <el-container class="message-content-wrapper">
             <el-header class="message-time">{{ msgTime }}</el-header>
             <el-main class="message-content">
-              <div :class="{ remote_read: myMsgIsRead, remote_unread: !myMsgIsRead }"></div>
+              <div
+                v-if="isChatMsgType"
+                :class="{ remote_read: myMsgIsRead, remote_unread: !myMsgIsRead }"
+              ></div>
               <div class="div-content">{{ props.msg.content }}</div>
             </el-main>
           </el-container>
