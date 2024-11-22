@@ -51,7 +51,7 @@ export const onReceiveChatMsg = (curSessionId, msgListDiv, capacity) => {
     ])
 
     // 如果是当前正打开的会话
-    if (curSessionId === sessionId) {
+    if (curSessionId.value === sessionId) {
       const scrollHeight = msgListDiv.value?.scrollHeight
       const clientHeight = document.querySelector('.show-box')?.clientHeight
       capacity.value += 1 //接收一条消息,展示列表的容量就+1
