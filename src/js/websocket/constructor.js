@@ -3,7 +3,7 @@ import { proto } from '@/const/msgConst'
 import { userStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 
-export const chatConstructor = (toId, content, tempMsgId) => {
+export const chatConstructor = (sessionId, toId, content, tempMsgId) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -16,6 +16,7 @@ export const chatConstructor = (toId, content, tempMsgId) => {
     fromId: userData.user.account,
     fromClient: userData.clientId,
     toId: toId,
+    sessionId: sessionId,
     content: content,
     tempMsgId: tempMsgId
   })
@@ -26,7 +27,7 @@ export const chatConstructor = (toId, content, tempMsgId) => {
   return data
 }
 
-export const groupChatConstructor = (groupId, content, tempMsgId) => {
+export const groupChatConstructor = (sessionId, groupId, content, tempMsgId) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -38,6 +39,7 @@ export const groupChatConstructor = (groupId, content, tempMsgId) => {
   const body = Body.create({
     fromId: userData.user.account,
     fromClient: userData.clientId,
+    sessionId: sessionId,
     groupId: groupId,
     content: content,
     tempMsgId: tempMsgId
@@ -77,7 +79,7 @@ export const helloConstructor = () => {
   return data
 }
 
-export const chatReadConstructor = (toId, content) => {
+export const chatReadConstructor = (sessionId, toId, content) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -90,6 +92,31 @@ export const chatReadConstructor = (toId, content) => {
     fromId: userData.user.account,
     fromClient: userData.clientId,
     toId: toId,
+    sessionId: sessionId,
+    content: content,
+    tempMsgId: uuidv4()
+  })
+  const chatMsg = Msg.create({ header: header, body: body })
+  const payload = Msg.encode(chatMsg).finish()
+  const data = encodePayload(payload)
+
+  return data
+}
+
+export const groupChatReadConstructor = (sessionId, groupId, content) => {
+  const header = Header.create({
+    magic: proto.magic,
+    version: proto.version,
+    msgType: MsgType.GROUP_CHAT_READ,
+    isExtension: false
+  })
+
+  const userData = userStore()
+  const body = Body.create({
+    fromId: userData.user.account,
+    fromClient: userData.clientId,
+    toId: groupId,
+    sessionId: sessionId,
     content: content,
     tempMsgId: uuidv4()
   })

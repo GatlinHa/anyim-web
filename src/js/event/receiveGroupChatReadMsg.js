@@ -1,14 +1,9 @@
 import { messageStore } from '@/stores'
 
-export const onReceiveChatReadMsg = () => {
+export const onReceiveGroupChatReadMsg = () => {
   return async (msg) => {
-    const messageData = messageStore()
-    messageData.updateSession({
-      sessionId: msg.body.sessionId,
-      remoteRead: msg.body.content
-    })
-
     if (msg.body.fromId === msg.body.toId) {
+      const messageData = messageStore()
       const now = new Date()
       messageData.updateSession({
         sessionId: msg.body.sessionId,

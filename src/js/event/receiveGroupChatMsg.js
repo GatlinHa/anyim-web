@@ -1,24 +1,12 @@
 import { nextTick } from 'vue'
 import { messageStore } from '@/stores'
-import { msgChatCreateSessionService } from '@/api/message'
 import { MsgType } from '@/proto/msg'
 
-export const onReceiveChatMsg = (msgListDiv, capacity) => {
+export const onReceiveGroupChatMsg = (msgListDiv, capacity) => {
   return async (msg) => {
     const messageData = messageStore()
     const sessionId = msg.body.sessionId
     const now = new Date()
-
-    // 如果sessionList中没有,需要先创建session
-    if (!messageData.sessionList[sessionId]) {
-      const res = await msgChatCreateSessionService({
-        sessionId: sessionId,
-        account: msg.body.toId,
-        remoteId: msg.body.fromId,
-        sessionType: MsgType.CHAT
-      })
-      messageData.addSession(res.data.data)
-    }
 
     // 是不是发送端的消息同步
     const readParams =
@@ -44,7 +32,7 @@ export const onReceiveChatMsg = (msgListDiv, capacity) => {
         sessionId: sessionId,
         msgId: msg.body.msgId,
         fromId: msg.body.fromId,
-        msgType: MsgType.CHAT,
+        msgType: MsgType.GROUP_CHAT,
         content: msg.body.content,
         msgTime: now
       }

@@ -1,3 +1,5 @@
 export * from './receiveChatMsg'
 export * from './receiveChatReadMsg'
 export * from './receiveStatusRes'
+export * from './receiveGroupChatMsg'
+export * from './receiveGroupChatReadMsg'

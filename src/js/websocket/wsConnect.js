@@ -9,7 +9,8 @@ import {
   chatReadConstructor,
   statusReqConstructor,
   statusSyncConstructor,
-  groupChatConstructor
+  groupChatConstructor,
+  groupChatReadConstructor
 } from './constructor'
 import { onReceiveStatusResMsg } from '@/js/event'
 
@@ -88,7 +89,7 @@ class WsConnect {
   msgIdRefillCallback = {}
 
   /**
-   * 绑定事件
+   * onMessage消息不同类型绑定的处理事件
    */
   events = {
     [MsgType.HELLO]: () => {
@@ -115,6 +116,7 @@ class WsConnect {
     [MsgType.CHAT]: chatConstructor,
     [MsgType.CHAT_READ]: chatReadConstructor,
     [MsgType.GROUP_CHAT]: groupChatConstructor,
+    [MsgType.GROUP_CHAT_READ]: groupChatReadConstructor,
     [MsgType.STATUS_REQ]: statusReqConstructor,
     [MsgType.STATUS_SYNC]: statusSyncConstructor
   }
@@ -269,14 +271,15 @@ class WsConnect {
 
   /**
    * 发送msg，封装了重发机制
+   * @param {*} sessionId 会话id
    * @param {*} remoteId 对方id或者群id
    * @param {*} msgType
    * @param {*} content
    * @param {*} callback
    */
-  sendMsg(remoteId, msgType, content, callback) {
+  sendMsg(sessionId, remoteId, msgType, content, callback) {
     const tempMsgId = uuidv4()
-    const data = this.dataConstructor[msgType](remoteId, content, tempMsgId)
+    const data = this.dataConstructor[msgType](sessionId, remoteId, content, tempMsgId)
     this.msgIdRefillCallback[tempMsgId] = callback
     this.sendAgent(data)
   }

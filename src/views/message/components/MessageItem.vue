@@ -25,6 +25,10 @@ const isChatMsgType = computed(() => {
   return props.msg.msgType === MsgType.CHAT
 })
 
+const isGroupChatMsgType = computed(() => {
+  return props.msg.msgType === MsgType.GROUP_CHAT
+})
+
 const loadMoreTips = computed(() => {
   return props.isLoadMoreLoading ? '' : '查看更多消息'
 })
@@ -123,7 +127,10 @@ const onShowUserCard = () => {
       <el-container class="el-container-right" v-if="isSelf">
         <el-main class="el-main-right">
           <el-container class="message-content-wrapper">
-            <el-header class="message-time">{{ msgTime }}</el-header>
+            <el-header class="message-time">
+              <span>{{ msgTime }}</span>
+              <span v-if="isGroupChatMsgType" style="margin-left: 5px">{{ nickName }}</span>
+            </el-header>
             <el-main class="message-content">
               <div
                 v-if="isChatMsgType"
@@ -156,7 +163,10 @@ const onShowUserCard = () => {
         </el-aside>
         <el-main class="el-main-left">
           <el-container class="message-content-wrapper">
-            <el-header class="message-time">{{ msgTime }}</el-header>
+            <el-header class="message-time">
+              <span v-if="isGroupChatMsgType" style="margin-right: 5px">{{ nickName }}</span>
+              <span>{{ msgTime }}</span>
+            </el-header>
             <el-main class="message-content">
               <div class="div-content">{{ props.msg.content }}</div>
             </el-main>

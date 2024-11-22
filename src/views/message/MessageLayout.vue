@@ -36,7 +36,12 @@ import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/messag
 import { groupInfoService } from '@/api/group'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
-import { onReceiveChatMsg, onReceiveChatReadMsg } from '@/js/event'
+import {
+  onReceiveChatMsg,
+  onReceiveChatReadMsg,
+  onReceiveGroupChatMsg,
+  onReceiveGroupChatReadMsg
+} from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
@@ -162,6 +167,8 @@ onMounted(async () => {
 
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
+  wsConnect.bindEvent(MsgType.GROUP_CHAT, onReceiveGroupChatMsg(msgListDiv, capacity)) //绑定接收GroupChat消息的事件
+  wsConnect.bindEvent(MsgType.GROUP_CHAT_READ, onReceiveGroupChatReadMsg()) //绑定接收GroupChat已读消息的事件
 
   // 定时更新单聊对象的状态
   const accounts = []
@@ -405,7 +412,11 @@ const handleRead = () => {
     selectedSession.value.readMsgId < selectedSession.value.lastMsgId
   ) {
     const content = selectedSession.value.lastMsgId.toString()
-    wsConnect.sendMsg(showId.value, MsgType.CHAT_READ, content + '', () => {})
+    const msgType =
+      selectedSession.value.sessionType === MsgType.CHAT
+        ? MsgType.CHAT_READ
+        : MsgType.GROUP_CHAT_READ
+    wsConnect.sendMsg(selectedSessionId.value, showId.value, msgType, content + '', () => {})
     // 更新本地缓存的已读位置
     messageData.updateSession({
       sessionId: selectedSessionId.value,
@@ -418,32 +429,38 @@ const handleRead = () => {
 
 const handleSendMessage = (content) => {
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
-  wsConnect.sendMsg(showId.value, selectedSession.value.sessionType, content, (msgId) => {
-    const now = new Date()
-    messageData.updateSession({
-      sessionId: selectedSessionId.value,
-      lastMsgId: msgId, // 最后一条消息（自己发的）
-      lastMsgContent: content,
-      lastMsgTime: now,
-      readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到最大（刚发的这条消息的msgId）
-      readTime: now,
-      unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
-      draft: '' //草稿意味着要清空
-    })
-
-    messageData.addMsgRecords(selectedSessionId.value, [
-      {
+  wsConnect.sendMsg(
+    selectedSessionId.value,
+    showId.value,
+    selectedSession.value.sessionType,
+    content,
+    (msgId) => {
+      const now = new Date()
+      messageData.updateSession({
         sessionId: selectedSessionId.value,
-        msgId: msgId,
-        fromId: userData.user.account,
-        msgType: selectedSession.value.sessionType,
-        content: content,
-        msgTime: now
-      }
-    ])
+        lastMsgId: msgId, // 最后一条消息（自己发的）
+        lastMsgContent: content,
+        lastMsgTime: now,
+        readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到刚发的这条消息的msgId
+        readTime: now,
+        unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
+        draft: '' //草稿意味着要清空
+      })
 
-    msgListReachBottom(false) // 发送消息之后,msgList要触底
-  })
+      messageData.addMsgRecords(selectedSessionId.value, [
+        {
+          sessionId: selectedSessionId.value,
+          msgId: msgId,
+          fromId: userData.user.account,
+          msgType: selectedSession.value.sessionType,
+          content: content,
+          msgTime: now
+        }
+      ])
+
+      msgListReachBottom(false) // 发送消息之后,msgList要触底
+    }
+  )
 }
 
 const onLoadMore = async () => {
@@ -512,20 +529,23 @@ const onShowUserCard = async ({ sessionId, account }) => {
   } else {
     userQueryService({ account: account })
       .then((res) => {
-        messageData.updateSession({
-          sessionId: sessionId,
-          objectInfo: {
-            ...messageData.sessionList[sessionId].objectInfo,
-            nickName: res.data.data.nickName,
-            signature: res.data.data.signature,
-            avatarThumb: res.data.data.avatarThumb,
-            gender: res.data.data.gender,
-            phoneNum: res.data.data.phoneNum,
-            email: res.data.data.email
-          }
-        })
-        userCardData.setUserInfo(messageData.sessionList[sessionId].objectInfo)
+        userCardData.setUserInfo(res.data.data)
         userCardData.setIsShow(true)
+        // 如果是单聊，需要更新session中的objectInfo. 因为群成员有可能不在sessionList中，所以不更新
+        if (messageData.sessionList[sessionId].sessionType === MsgType.CHAT) {
+          messageData.updateSession({
+            sessionId: sessionId,
+            objectInfo: {
+              ...messageData.sessionList[sessionId].objectInfo,
+              nickName: res.data.data.nickName,
+              signature: res.data.data.signature,
+              avatarThumb: res.data.data.avatarThumb,
+              gender: res.data.data.gender,
+              phoneNum: res.data.data.phoneNum,
+              email: res.data.data.email
+            }
+          })
+        }
       })
       .finally(() => {
         //防止请求异常，导致loading关不掉
