@@ -204,6 +204,7 @@ const handleMsgListWheel = async () => {
 
   const clientHeight = document.querySelector('.message-main').clientHeight
   const diffToBottom = msgListDiv.value.scrollHeight - msgListDiv.value.scrollTop - clientHeight
+  // diffToBottom接近50个像素的时候，关闭底部未读tips控件
   newMsgTips.value.isShowBottomTips = diffToBottom < 50 ? false : newMsgTips.value.isShowBottomTips
   // isShowReturnBottom.value = diffToBottom > 300  // 控制是否显示"回到底部"的按钮。暂时取消这个提示功能，与消息提示的按钮显得有点重复
 
@@ -837,7 +838,8 @@ const onMoreSetting = () => {
               :class="{ showIt: isShowReturnBottom }"
               @click="onReturnBottom"
             >
-              返回底部<el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
+              返回底部
+              <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
             </el-button>
             <el-button
               type="primary"
@@ -845,9 +847,8 @@ const onMoreSetting = () => {
               :class="{ showIt: newMsgTips.isShowBottomTips }"
               @click="onReturnBottom"
             >
-              {{ newMsgTips.unreadCount }}条未读消息<el-icon class="el-icon--right"
-                ><ArrowDownBold
-              /></el-icon>
+              {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
+              <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
             </el-button>
             <el-button
               type="primary"
@@ -855,9 +856,8 @@ const onMoreSetting = () => {
               :class="{ showIt: newMsgTips.isShowTopTips }"
               @click="onReachFirstUnReadMsg"
             >
-              {{ newMsgTips.unreadCount }}条未读消息<el-icon class="el-icon--right"
-                ><ArrowUp
-              /></el-icon>
+              {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
+              <el-icon class="el-icon--right"><ArrowUp /></el-icon>
             </el-button>
           </div>
           <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
@@ -1082,7 +1082,7 @@ const onMoreSetting = () => {
 
           .bottom-tips {
             position: absolute;
-            right: 60px;
+            right: 40%;
             bottom: -40px;
             transition: bottom 1s ease-in-out;
 
@@ -1093,7 +1093,7 @@ const onMoreSetting = () => {
 
           .top-tips {
             position: absolute;
-            right: 60px;
+            right: 40%;
             top: -40px;
             transition: top 1s ease-in-out;
 
