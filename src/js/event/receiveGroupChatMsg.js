@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { messageStore } from '@/stores'
 import { MsgType } from '@/proto/msg'
 
-export const onReceiveGroupChatMsg = (msgListDiv, capacity) => {
+export const onReceiveGroupChatMsg = (curSessionId, msgListDiv, capacity) => {
   return async (msg) => {
     const messageData = messageStore()
     const sessionId = msg.body.sessionId
@@ -38,14 +38,17 @@ export const onReceiveGroupChatMsg = (msgListDiv, capacity) => {
       }
     ])
 
-    const scrollHeight = msgListDiv.value?.scrollHeight
-    const clientHeight = document.querySelector('.show-box')?.clientHeight
-    capacity.value += 1 //接收一条消息,展示列表的容量就+1
-    nextTick(() => {
-      // 如果滚动条触底,接收到新消息时继续保持触底
-      if (scrollHeight - msgListDiv.value?.scrollTop - clientHeight < 1) {
-        msgListDiv.value.scrollTop = msgListDiv.value?.scrollHeight
-      }
-    })
+    // 如果是当前正打开的会话
+    if (curSessionId === sessionId) {
+      const scrollHeight = msgListDiv.value?.scrollHeight
+      const clientHeight = document.querySelector('.show-box')?.clientHeight
+      capacity.value += 1 //接收一条消息,展示列表的容量就+1
+      nextTick(() => {
+        // 如果滚动条触底,接收到新消息时继续保持触底
+        if (scrollHeight - msgListDiv.value?.scrollTop - clientHeight < 1) {
+          msgListDiv.value.scrollTop = msgListDiv.value?.scrollHeight
+        }
+      })
+    }
   }
 }
