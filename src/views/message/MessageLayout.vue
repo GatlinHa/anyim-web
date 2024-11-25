@@ -279,7 +279,9 @@ const getPreMsgTime = (index) => {
 
 const getMsgSenderObj = (item) => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
-    return groupData.groupMembersList[selectedSession.value.objectInfo.groupId][item.fromId]
+    // 如果此时memberList还没有加载完成，先return account给MessageItem子组件
+    const memberList = groupData.groupMembersList[selectedSession.value.objectInfo.groupId]
+    return memberList ? memberList[item.fromId] : { account: item.fromId }
   } else {
     if (userData.user.account === item.fromId) {
       return userData.user
