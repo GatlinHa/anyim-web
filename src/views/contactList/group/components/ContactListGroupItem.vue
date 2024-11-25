@@ -1,7 +1,8 @@
 <script setup>
-import { ChatRound, Phone, VideoCamera } from '@element-plus/icons-vue'
+import { ChatRound, Microphone, VideoCamera } from '@element-plus/icons-vue'
 import GroupItem from '@/components/item/GroupItem.vue'
 import router from '@/router'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps(['groupInfo', 'keyWords'])
 const emit = defineEmits(['showGroupCard'])
@@ -18,6 +19,14 @@ const goToSessionTab = () => {
     }
   })
 }
+
+const onVoiceCall = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onVideoCall = () => {
+  ElMessage.warning('功能开发中')
+}
 </script>
 
 <template>
@@ -32,9 +41,15 @@ const goToSessionTab = () => {
       <slot name="showMore_1"></slot>
       <slot name="showMore_2"></slot>
       <div class="action">
-        <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
-        <el-button size="large" :icon="Phone" circle />
-        <el-button size="large" :icon="VideoCamera" circle />
+        <el-icon class="action-button" size="20" title="发送消息" @click="goToSessionTab">
+          <ChatRound />
+        </el-icon>
+        <el-icon class="action-button" size="20" title="多人语音" @click="onVoiceCall">
+          <Microphone />
+        </el-icon>
+        <el-icon class="action-button" size="20" title="视频会议" @click="onVideoCall">
+          <VideoCamera />
+        </el-icon>
       </div>
     </div>
   </div>
@@ -68,6 +83,20 @@ const goToSessionTab = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .action-button {
+      padding: 8px;
+      margin-left: 10px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: transparent solid 1px;
+      cursor: pointer;
+
+      &:hover {
+        border: #409eff solid 1px;
+        color: #409eff;
+      }
+    }
   }
 }
 </style>

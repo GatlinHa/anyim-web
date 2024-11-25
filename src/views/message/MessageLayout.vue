@@ -790,7 +790,7 @@ const onMoreSetting = () => {
             <el-icon
               class="action-button"
               size="20"
-              :title="selectedSession.sessionType === MsgType.GROUP_CHAT ? '多人通话' : '语音通话'"
+              :title="selectedSession.sessionType === MsgType.GROUP_CHAT ? '多人语音' : '语音通话'"
               @click="onVoiceCall"
             >
               <Microphone />

@@ -1,10 +1,19 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import { ChatRound, Phone, VideoCamera, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
+import {
+  ChatRound,
+  Microphone,
+  VideoCamera,
+  Edit,
+  Delete,
+  Check,
+  Close
+} from '@element-plus/icons-vue'
 import ContactItem from '@/components/item/ContactItem.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import router from '@/router'
 import { messageStore } from '@/stores'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps(['type', 'session', 'partitions', 'keyWords'])
 const emit = defineEmits(['showUserCard'])
@@ -91,6 +100,14 @@ const goToSessionTab = () => {
       sessionId: props.session.sessionId
     }
   })
+}
+
+const onVoiceCall = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onVideoCall = () => {
+  ElMessage.warning('功能开发中')
 }
 </script>
 
@@ -240,9 +257,15 @@ const goToSessionTab = () => {
         </div>
       </div>
       <div class="action">
-        <el-button size="large" :icon="ChatRound" circle @click="goToSessionTab" />
-        <el-button size="large" :icon="Phone" circle />
-        <el-button size="large" :icon="VideoCamera" circle />
+        <el-icon class="action-button" size="20" title="发送消息" @click="goToSessionTab">
+          <ChatRound />
+        </el-icon>
+        <el-icon class="action-button" size="20" title="语音通话" @click="onVoiceCall">
+          <Microphone />
+        </el-icon>
+        <el-icon class="action-button" size="20" title="视频通话" @click="onVideoCall">
+          <VideoCamera />
+        </el-icon>
       </div>
     </div>
   </div>
@@ -362,6 +385,20 @@ const goToSessionTab = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .action-button {
+      padding: 8px;
+      margin-left: 10px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: transparent solid 1px;
+      cursor: pointer;
+
+      &:hover {
+        border: #409eff solid 1px;
+        color: #409eff;
+      }
+    }
   }
 }
 </style>
