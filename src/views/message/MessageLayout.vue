@@ -612,7 +612,16 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
     console.log('暂不支持自己给自己发消息') //TODO
     return
   }
-  const sessionId = combineId(myAccount.value, objectInfo.account)
+
+  let sessionId
+  if (msgType === MsgType.CHAT) {
+    sessionId = combineId(myAccount.value, objectInfo.account)
+  } else if (msgType === MsgType.GROUP_CHAT) {
+    sessionId = objectInfo.groupId
+  } else {
+    return
+  }
+
   if (messageData.sessionList[sessionId]) {
     handleSelectedSession(sessionId)
   } else {
@@ -714,7 +723,11 @@ const onMoreSetting = () => {
     <el-aside class="msg-aside bdr-r" :style="{ width: asideWidth + 'px' }">
       <div class="msg-aside-main">
         <div class="header">
-          <SearchBox @showContactCard="onShowContactCard" @openSession="onOpenSession"></SearchBox>
+          <SearchBox
+            @showContactCard="onShowContactCard"
+            @showGroupCard="onShowGroupCard"
+            @openSession="onOpenSession"
+          ></SearchBox>
           <AddButton :size="30"></AddButton>
         </div>
 

@@ -19,7 +19,7 @@ export const searchStore = defineStore('anyim-search', () => {
     contactResult.value[keywords.value] = result
   }
 
-  const getContactResult = computed(() => {
+  const curContactResult = computed(() => {
     return contactResult.value[keywords.value] || []
   })
 
@@ -27,7 +27,7 @@ export const searchStore = defineStore('anyim-search', () => {
     groupResult.value[keywords.value] = result
   }
 
-  const getGroupResult = computed(() => {
+  const curGroupResult = computed(() => {
     return groupResult.value[keywords.value] || []
   })
 
@@ -35,7 +35,7 @@ export const searchStore = defineStore('anyim-search', () => {
     organizationResult.value[keywords.value] = result
   }
 
-  const getOrganizationResult = computed(() => {
+  const curOrganizationResult = computed(() => {
     return organizationResult.value[keywords.value] || []
   })
 
@@ -43,7 +43,7 @@ export const searchStore = defineStore('anyim-search', () => {
     hisotryResult.value[keywords.value] = result
   }
 
-  const getHisotryResult = computed(() => {
+  const curHisotryResult = computed(() => {
     return hisotryResult.value[keywords.value] || []
   })
 
@@ -51,7 +51,7 @@ export const searchStore = defineStore('anyim-search', () => {
     todoResult.value[keywords.value] = result
   }
 
-  const getTodoResult = computed(() => {
+  const curTodoResult = computed(() => {
     return todoResult.value[keywords.value] || []
   })
 
@@ -75,15 +75,15 @@ export const searchStore = defineStore('anyim-search', () => {
     todoResult,
 
     addContactResult,
-    getContactResult,
+    curContactResult,
     addGroupResult,
-    getGroupResult,
+    curGroupResult,
     addOrganizationResult,
-    getOrganizationResult,
+    curOrganizationResult,
     addHisotryResult,
-    getHisotryResult,
+    curHisotryResult,
     addTodoResult,
-    getTodoResult,
+    curTodoResult,
 
     clear
   }

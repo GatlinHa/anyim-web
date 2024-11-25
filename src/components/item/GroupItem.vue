@@ -64,7 +64,7 @@ const onOpenSession = () => {
       >
       </span>
       <span class="group-id" style="color: gray; font-size: 12px">
-        <div v-html="showId"></div>
+        <div :title="props.groupInfo.groupId" v-html="showId"></div>
       </span>
     </div>
   </div>
@@ -72,6 +72,7 @@ const onOpenSession = () => {
 
 <style lang="scss" scoped>
 .group-item {
+  padding: 2px 0 2px 5px;
   border-radius: 6px;
   display: flex;
   align-items: center;

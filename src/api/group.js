@@ -9,8 +9,8 @@ export const groupInfoListService = () => {
   return request.post('/groupmng/queryGroupList', getReqBody())
 }
 
-export const groupSearchByMemberService = (obj) => {
-  return request.post('/groupmng/searchGroupByMember', getReqBody(obj))
+export const groupSearchMemberService = (obj) => {
+  return request.post('/groupmng/searchGroupMember', getReqBody(obj))
 }
 
 export const groupInfoService = (obj) => {
@@ -51,4 +51,8 @@ export const groupOwnerTransferService = (obj) => {
 
 export const groupUpdateMuteService = (obj) => {
   return request.post('/groupmng/updateMute', getReqBody(obj))
+}
+
+export const groupSearchGroupInfoService = (obj) => {
+  return request.post('/groupmng/searchGroupInfo', getReqBody(obj))
 }

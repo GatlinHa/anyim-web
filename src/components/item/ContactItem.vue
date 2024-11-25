@@ -74,10 +74,8 @@ const onOpenSession = () => {
 <style lang="scss" scoped>
 .contact-item {
   min-width: 160px;
-  padding: 2px;
-  padding-left: 5px;
+  padding: 2px 0 2px 5px;
   border-radius: 6px;
-  padding-right: 0;
   display: flex;
   align-items: center;
   user-select: none;

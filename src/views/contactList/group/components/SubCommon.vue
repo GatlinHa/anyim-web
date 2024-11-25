@@ -9,7 +9,7 @@ import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import { groupCreateService, groupSearchByMemberService, groupInfoService } from '@/api/group'
+import { groupCreateService, groupSearchMemberService, groupInfoService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import { MsgType } from '@/proto/msg'
 
@@ -155,7 +155,7 @@ const onSearch = () => {
   clearTimeout(timer)
   const key = searchKey.value
   timer = setTimeout(() => {
-    groupSearchByMemberService({ searchKey: key }).then((res) => {
+    groupSearchMemberService({ searchKey: key }).then((res) => {
       searchData.value = res.data.data
     })
   }, 300)

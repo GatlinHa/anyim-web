@@ -2,10 +2,12 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { userQueryService, userQueryByNickService } from '@/api/user'
+import { groupSearchGroupInfoService } from '@/api/group'
 import { searchStore } from '@/stores'
 import ResultBox from './ResultBox.vue'
+import { ElMessage } from 'element-plus'
 
-const emit = defineEmits(['showContactCard', 'openSession'])
+const emit = defineEmits(['showContactCard', 'showGroupCard', 'openSession'])
 
 const searchData = searchStore()
 const inputRef = ref()
@@ -39,6 +41,10 @@ const onShowContactCard = (contactInfo) => {
   emit('showContactCard', contactInfo)
 }
 
+const onShowGroupCard = (groupInfo) => {
+  emit('showGroupCard', groupInfo)
+}
+
 const onOpenSession = (obj) => {
   isShowSearchDialog.value = false
   emit('openSession', obj)
@@ -48,7 +54,10 @@ const onOpenSession = (obj) => {
 // 2.延时+防抖查询
 let timer
 const onQuery = () => {
-  if (!keyWords.value) return
+  if (!keyWords.value) {
+    searchData.clear()
+    return
+  }
   clearTimeout(timer)
   const key = keyWords.value //在异步执行中，变量禁止使用响应式，因为在将来执行的时候响应式数据随时会发生改变
   timer = setTimeout(async () => {
@@ -63,19 +72,20 @@ const onQuery = () => {
         })
         response = await userQueryService({ account: key }) // 账号是精确匹配，只查一个结果
         if (response.data.data) result[response.data.data.account] = response.data.data
-        searchData.addContactResult(result)
+        searchData.addContactResult(Object.values(result))
         break
       case 'group':
-        console.log('group 待完成，搜索关键字：', key)
+        response = await groupSearchGroupInfoService({ searchKey: key })
+        searchData.addGroupResult(response.data.data)
         break
       case 'organization':
-        console.log('organization 待完成，搜索关键字：', key)
+        ElMessage.warning('功能开发中')
         break
       case 'hisotry':
-        console.log('hisotry 待完成，搜索关键字：', key)
+        ElMessage.warning('功能开发中')
         break
       case 'todo':
-        console.log('todo 待完成，搜索关键字：', key)
+        ElMessage.warning('功能开发中')
         break
       default:
         break
@@ -131,6 +141,7 @@ watch(searchTab, () => {
         :searchTab="searchTab"
         :keyWords="keyWords"
         @showContactCard="onShowContactCard"
+        @showGroupCard="onShowGroupCard"
         @openSession="onOpenSession"
       >
       </ResultBox>
