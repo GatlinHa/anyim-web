@@ -614,10 +614,13 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
   }
 
   let sessionId
+  let remoteId
   if (msgType === MsgType.CHAT) {
     sessionId = combineId(myAccount.value, objectInfo.account)
+    remoteId = objectInfo.account
   } else if (msgType === MsgType.GROUP_CHAT) {
     sessionId = objectInfo.groupId
+    remoteId = objectInfo.groupId
   } else {
     return
   }
@@ -627,8 +630,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
   } else {
     const res = await msgChatCreateSessionService({
       sessionId: sessionId,
-      account: myAccount.value,
-      remoteId: objectInfo.account,
+      remoteId: remoteId,
       sessionType: msgType
     })
     messageData.addSession(res.data.data)
