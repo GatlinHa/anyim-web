@@ -6,7 +6,7 @@ import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import { Top, MuteNotification } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
-import { messageStore } from '@/stores'
+import { messageStore, groupStore } from '@/stores'
 import { msgChatDeleteSessionService } from '@/api/message'
 
 const props = defineProps([
@@ -24,6 +24,7 @@ const emit = defineEmits([
   'showUpdateMarkDialog'
 ])
 const messageData = messageStore()
+const groupData = groupStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
 })
@@ -55,14 +56,7 @@ const showName = computed(() => {
 })
 
 const showId = computed(() => {
-  switch (sessionInfo.value.sessionType) {
-    case MsgType.CHAT:
-      return sessionInfo.value.objectInfo.account
-    case MsgType.GROUP_CHAT:
-      return sessionInfo.value.objectInfo.groupId
-    default:
-      return ''
-  }
+  return sessionInfo.value.remoteId
 })
 
 const showAvatarThumb = computed(() => {
@@ -77,6 +71,26 @@ const showAvatarThumb = computed(() => {
 
 const showTime = computed(() => {
   return sessionShowTime(sessionInfo.value.lastMsgTime)
+})
+
+const showDetailContent = computed(() => {
+  if (isShowDraft.value) {
+    return sessionInfo.value.draft
+  } else {
+    if (sessionInfo.value.lastMsgContent) {
+      if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
+        const memberList = groupData.groupMembersList[sessionInfo.value.remoteId]
+        const nickName = memberList
+          ? memberList[sessionInfo.value.lastMsgAccount].nickName
+          : sessionInfo.value.lastMsgAccount
+        return nickName + '：' + sessionInfo.value.lastMsgContent
+      } else {
+        return sessionInfo.value.lastMsgContent
+      }
+    } else {
+      return ''
+    }
+  }
 })
 
 const isShowDraft = computed(() => {
@@ -202,9 +216,7 @@ defineExpose({
               >[{{ sessionInfo.unreadCount }}条]</span
             >
             <span v-if="isShowDraft" class="draft">[草稿]</span>
-            <span class="detail text-ellipsis">{{
-              isShowDraft ? sessionInfo.draft : sessionInfo.lastMsgContent
-            }}</span>
+            <span class="detail text-ellipsis"> {{ showDetailContent }}</span>
           </div>
           <div class="action">
             <el-button

@@ -55,6 +55,7 @@ export const messageStore = defineStore('anyim-message', () => {
     const mySession = sessionList.value[obj.sessionId]
     if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
     if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
+    if ('lastMsgAccount' in obj) mySession.lastMsgAccount = obj.lastMsgAccount
     if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
     if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
     if ('remoteRead' in obj) mySession.remoteRead = obj.remoteRead

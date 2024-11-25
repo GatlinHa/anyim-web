@@ -76,6 +76,10 @@ const newMsgTips = ref({
   firstElement: null
 })
 
+const myAccount = computed(() => {
+  return userData.user.account
+})
+
 // 消息拉取是否结束
 const pullMsgDone = computed(() => {
   return selectedSession.value.pullMsgDone || false
@@ -162,8 +166,8 @@ onMounted(async () => {
   await messageData.loadSessionList()
   await messageData.loadPartitions()
 
-  asideWidth.value = settingData.sessionListDrag[userData.user.account] || 300
-  inputBoxHeight.value = settingData.inputBoxDrag[userData.user.account] || 300
+  asideWidth.value = settingData.sessionListDrag[myAccount.value] || 300
+  inputBoxHeight.value = settingData.inputBoxDrag[myAccount.value] || 300
 
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(selectedSessionId, msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
@@ -259,14 +263,7 @@ const showName = computed(() => {
 })
 
 const showId = computed(() => {
-  switch (selectedSession.value.sessionType) {
-    case MsgType.CHAT:
-      return selectedSession.value.objectInfo.account
-    case MsgType.GROUP_CHAT:
-      return selectedSession.value.objectInfo.groupId
-    default:
-      return ''
-  }
+  return selectedSession.value.remoteId
 })
 
 const getPreMsgTime = (index) => {
@@ -280,10 +277,10 @@ const getPreMsgTime = (index) => {
 const getMsgSenderObj = (item) => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     // 如果此时memberList还没有加载完成，先return account给MessageItem子组件
-    const memberList = groupData.groupMembersList[selectedSession.value.objectInfo.groupId]
+    const memberList = groupData.groupMembersList[selectedSession.value.remoteId]
     return memberList ? memberList[item.fromId] : { account: item.fromId }
   } else {
-    if (userData.user.account === item.fromId) {
+    if (myAccount.value === item.fromId) {
       return userData.user
     } else {
       return selectedSession.value.objectInfo
@@ -307,7 +304,7 @@ const onAsideDragUpdate = ({ width }) => {
   asideWidth.value = width
   settingData.setSessionListDrag({
     ...settingData.sessionListDrag,
-    [userData.user.account]: width
+    [myAccount.value]: width
   })
 }
 
@@ -316,7 +313,7 @@ const onInputBoxDragUpdate = ({ height }) => {
   msgListReachBottom()
   settingData.setInputBoxDrag({
     ...settingData.inputBoxDrag,
-    [userData.user.account]: height
+    [myAccount.value]: height
   })
 }
 
@@ -359,6 +356,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
           sessionId: sessionId,
           lastMsgId: res.data.data.lastMsgId,
           lastMsgContent: res.data.data.msgList[msgCount - 1].content,
+          lastMsgAccount: res.data.data.msgList[msgCount - 1].fromId,
           lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
         })
       }
@@ -391,7 +389,7 @@ const handleSelectedSession = async (sessionId) => {
 
     // 如果是群组，要加载成员列表（显示消息需要account，nickName，avatar信息）
     if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
-      const groupId = selectedSession.value.objectInfo.groupId
+      const groupId = selectedSession.value.remoteId
       // 没有members数据才需要加载成员列表，加载过了就不重复加载了
       if (!groupData.groupMembersList[groupId]) {
         const res = await groupInfoService({ groupId: groupId })
@@ -446,6 +444,7 @@ const handleSendMessage = (content) => {
         sessionId: selectedSessionId.value,
         lastMsgId: msgId, // 最后一条消息（自己发的）
         lastMsgContent: content,
+        lastMsgAccount: myAccount.value,
         lastMsgTime: now,
         readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到刚发的这条消息的msgId
         readTime: now,
@@ -457,7 +456,7 @@ const handleSendMessage = (content) => {
         {
           sessionId: selectedSessionId.value,
           msgId: msgId,
-          fromId: userData.user.account,
+          fromId: myAccount.value,
           msgType: selectedSession.value.sessionType,
           content: content,
           msgTime: now
@@ -521,7 +520,7 @@ const onClickMsgContainer = () => {
 
 const onShowUserCard = async ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
-  if (userData.user.account === account) {
+  if (myAccount.value === account) {
     userData
       .updateUser()
       .then(() => {
@@ -609,17 +608,17 @@ const onShowContactCard = (contactInfo) => {
 }
 
 const onOpenSession = async ({ msgType, objectInfo }) => {
-  if (userData.user.account === objectInfo.account) {
+  if (myAccount.value === objectInfo.account) {
     console.log('暂不支持自己给自己发消息') //TODO
     return
   }
-  const sessionId = combineId(userData.user.account, objectInfo.account)
+  const sessionId = combineId(myAccount.value, objectInfo.account)
   if (messageData.sessionList[sessionId]) {
     handleSelectedSession(sessionId)
   } else {
     const res = await msgChatCreateSessionService({
       sessionId: sessionId,
-      account: userData.user.account,
+      account: myAccount.value,
       remoteId: objectInfo.account,
       sessionType: msgType
     })
@@ -705,7 +704,7 @@ const onMoreSetting = () => {
       account: selectedSession.value.objectInfo.account
     })
   } else if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
-    onShowGroupCard({ groupId: selectedSession.value.objectInfo.groupId })
+    onShowGroupCard({ groupId: selectedSession.value.remoteId })
   }
 }
 </script>

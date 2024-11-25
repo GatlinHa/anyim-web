@@ -34,6 +34,7 @@ export const onReceiveChatMsg = (curSessionId, msgListDiv, capacity) => {
       sessionId: sessionId,
       lastMsgId: msg.body.msgId,
       lastMsgContent: msg.body.content,
+      lastMsgAccount: msg.body.fromId,
       lastMsgTime: now,
       unreadCount: messageData.sessionList[sessionId].unreadCount + 1,
       ...readParams
