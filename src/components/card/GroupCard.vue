@@ -416,7 +416,7 @@ const isShowCancelManagerButton = (role) => {
   }
 }
 
-const isShowMute = (mutedMode) => {
+const isMute = (mutedMode) => {
   if (mutedMode === 1 || (groupInfo.value.allMuted && mutedMode !== 2)) {
     return true
   } else {
@@ -1093,7 +1093,8 @@ const onConfirmSingleSelect = (selected) => {
           <template #default="scope">
             <div style="display: flex">
               <el-button
-                v-if="isShowMute(scope.row.mutedMode)"
+                v-if="isMute(scope.row.mutedMode)"
+                class="cancle-mute-btn"
                 type="info"
                 :icon="Mute"
                 size="small"
@@ -1243,6 +1244,11 @@ const onConfirmSingleSelect = (selected) => {
           --mute-button-bgc: rgb(144, 147, 153);
           --mute-button-border: unset;
         }
+      }
+
+      .cancle-mute-btn {
+        color: var(--mute-button-color);
+        background-color: var(--mute-button-bgc);
       }
 
       .set-mute-btn {
