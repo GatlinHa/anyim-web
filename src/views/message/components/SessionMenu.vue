@@ -68,9 +68,9 @@ const handleSessionMenu = (e) => {
   x.value = e.clientX
   y.value = e.clientY
 
-  // 如果发现菜单超出containerRef的底部了，y要修正一下，往上面弹出菜单
+  // 如果发现菜单超出window.innerHeight屏幕高度，y要修正一下，往上面弹出菜单
   nextTick(() => {
-    if (e.clientY + menuRef.value.clientHeight > containerRef.value.clientHeight) {
+    if (e.clientY + menuRef.value.clientHeight > window.innerHeight) {
       y.value = e.clientY - menuRef.value.clientHeight
     } else {
       y.value = e.clientY
