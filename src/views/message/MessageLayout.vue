@@ -23,6 +23,7 @@ import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
 import SessionTag from '@/views/message/components/SessionTag.vue'
+import SelectDialog from '@/components/common/SelectDialog.vue'
 import {
   userStore,
   settingStore,
@@ -32,8 +33,12 @@ import {
   groupStore
 } from '@/stores'
 import backgroupImage from '@/assets/messagebx_bg.webp'
-import { msgChatPullMsgService, msgChatCreateSessionService } from '@/api/message'
-import { groupInfoService } from '@/api/group'
+import {
+  msgChatPullMsgService,
+  msgChatCreateSessionService,
+  msgChatQuerySessionService
+} from '@/api/message'
+import { groupInfoService, groupCreateService } from '@/api/group'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
 import {
@@ -50,6 +55,7 @@ import SessionMenu from '@/views/message/components/SessionMenu.vue'
 import router from '@/router'
 import { BEGIN_MSG_ID } from '@/const/msgConst'
 import EditDialog from '@/components/common/EditDialog.vue'
+import AddOprMenu from './components/AddOprMenu.vue'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -716,6 +722,65 @@ const onMoreSetting = () => {
     onShowGroupCard({ groupId: selectedSession.value.remoteId })
   }
 }
+
+const isShowSelectDialog = ref(false)
+const addOprMenuRef = ref()
+const onSelectOprMenu = (label) => {
+  switch (label) {
+    case 'createGroup':
+      isShowSelectDialog.value = true
+      break
+    case 'createVoiceMeeting':
+      ElMessage.warning('功能开发中')
+      break
+    case 'createVideoMeeting':
+      ElMessage.warning('功能开发中')
+      break
+    default:
+      break
+  }
+}
+
+const showAddOprMenu = (e) => {
+  addOprMenuRef.value.handleSessionMenu(e)
+}
+
+/**
+ * 用于显示创建群组弹窗中的候选成员名单
+ */
+const selectDialogOptions = computed(() => {
+  const data = {}
+  Object.values(messageData.sessionList).forEach((item) => {
+    if (item.sessionType === MsgType.CHAT) {
+      data[item.objectInfo.account] = item.objectInfo
+    }
+  })
+  return data
+})
+
+const onConfirmSelect = async (selected) => {
+  if (selected.length < 2) {
+    ElMessage.warning('请至少选择两位群成员')
+    return
+  }
+
+  const members = selected.map((item) => ({ account: item.account, nickName: item.nickName }))
+  members.push({ account: userData.user.account, nickName: userData.user.nickName })
+  const res = await groupCreateService({
+    groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群组`,
+    groupType: 1, //普通群
+    members: members
+  })
+  groupData.setGroupInfo(res.data.data.groupInfo)
+  isShowSelectDialog.value = false
+
+  // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询
+  msgChatQuerySessionService({
+    sessionId: res.data.data.groupInfo.groupId
+  }).then((res) => {
+    messageData.addSession(res.data.data)
+  })
+}
 </script>
 
 <template>
@@ -728,7 +793,9 @@ const onMoreSetting = () => {
             @showGroupCard="onShowGroupCard"
             @openSession="onOpenSession"
           ></SearchBox>
-          <AddButton :size="30"></AddButton>
+          <AddOprMenu ref="addOprMenuRef" @selectMenu="onSelectOprMenu">
+            <AddButton :size="30" @click="showAddOprMenu($event)"></AddButton>
+          </AddOprMenu>
         </div>
 
         <SessionMenu :sessionId="showMenuSessionId" @selectMenu="onSelectMenu">
@@ -943,6 +1010,17 @@ const onMoreSetting = () => {
     @close="isShowUpdateMarkDialog = false"
     @confirm="onUpdateMarkConfirm"
   ></EditDialog>
+  <SelectDialog
+    v-model="isShowSelectDialog"
+    :options="selectDialogOptions"
+    :searchModel="'server'"
+    @showUserCard="onShowUserCard"
+    @confirm="onConfirmSelect"
+  >
+    <template #title>
+      <div style="font-size: 16px; font-weight: bold; white-space: nowrap">创建群组</div>
+    </template>
+  </SelectDialog>
 </template>
 
 <style lang="scss" scoped>
