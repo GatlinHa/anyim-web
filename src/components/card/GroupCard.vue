@@ -416,7 +416,7 @@ const isShowCancelManagerButton = (role) => {
   }
 }
 
-const isMute = (mutedMode) => {
+const isMuted = (mutedMode) => {
   if (mutedMode === 1 || (groupInfo.value.allMuted && mutedMode !== 2)) {
     return true
   } else {
@@ -1093,7 +1093,7 @@ const onConfirmSingleSelect = (selected) => {
           <template #default="scope">
             <div style="display: flex">
               <el-button
-                v-if="isMute(scope.row.mutedMode)"
+                v-if="isMuted(scope.row.mutedMode)"
                 class="cancle-mute-btn"
                 type="info"
                 :icon="Mute"

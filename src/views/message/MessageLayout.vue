@@ -110,6 +110,21 @@ const hasNoMoreMsg = computed(() => {
   return pullMsgDone.value || firstMsgId.value === BEGIN_MSG_ID
 })
 
+const isMutedInGroup = computed(() => {
+  if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+    const groupInfo = groupData.groupInfoList[selectedSession.value.objectInfo.groupId]
+    const members = groupData.groupMembersList[selectedSession.value.objectInfo.groupId]
+    const me = members[myAccount.value]
+    if (me.mutedMode === 1 || (groupInfo.allMuted && me.mutedMode !== 2)) {
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return false
+  }
+})
+
 const isShowReturnBottom = ref(false)
 
 // 留在该页面上的session状态缓存，例如：
@@ -405,6 +420,7 @@ const handleSelectedSession = async (sessionId) => {
       // 没有members数据才需要加载成员列表，加载过了就不重复加载了
       if (!groupData.groupMembersList[groupId]) {
         const res = await groupInfoService({ groupId: groupId })
+        groupData.setGroupInfo(res.data.data.groupInfo)
         groupData.setGroupMembers({
           groupId: groupId,
           members: res.data.data.members
@@ -444,6 +460,11 @@ const handleRead = () => {
 }
 
 const handleSendMessage = (content) => {
+  if (isMutedInGroup.value) {
+    ElMessage.warning('您已被禁言，请联系管理员')
+    return
+  }
+
   // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
   wsConnect.sendMsg(
     selectedSessionId.value,
