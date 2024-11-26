@@ -241,9 +241,6 @@ const sessionListSorted = computed(() => {
           const aTIme = new Date(a.lastMsgTime).getTime()
           if (bTime !== aTIme) {
             return bTime - aTIme
-          } else {
-            // 排序第四优先级：昵称字典序
-            return a.objectInfo.nickName > b.objectInfo.nickName ? 1 : -1
           }
         }
       }
