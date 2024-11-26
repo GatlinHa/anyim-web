@@ -200,8 +200,16 @@ onMounted(async () => {
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
   const routerSessionId = router.currentRoute.value.query.sessionId
-  if (routerSessionId && routerSessionId in messageData.sessionList) {
-    handleSelectedSession(routerSessionId)
+  if (routerSessionId) {
+    if (routerSessionId in messageData.sessionList) {
+      handleSelectedSession(routerSessionId)
+    } else {
+      const res = await msgChatQuerySessionService({ sessionId: routerSessionId })
+      if (res.data.data) {
+        messageData.addSession(res.data.data)
+        handleSelectedSession(routerSessionId)
+      }
+    }
   }
 })
 

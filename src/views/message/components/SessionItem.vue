@@ -8,6 +8,7 @@ import { Top, MuteNotification } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore, groupStore } from '@/stores'
 import { msgChatDeleteSessionService } from '@/api/message'
+import router from '@/router'
 
 const props = defineProps([
   'sessionId',
@@ -145,6 +146,10 @@ const handleSelectedMenuItem = async () => {
         await msgChatDeleteSessionService({ sessionId: props.sessionId })
         if (hasBeenSelected.value) emit('noneSelected') // 如果删除的session是这个选中的session，需要通知父组件处理
         messageData.deleteSession(props.sessionId)
+        router.push({
+          path: '/message',
+          query: {}
+        })
         break
       case 'mark':
         emit('showUpdateMarkDialog') //返回父组件处理：弹窗 + 保存修改
