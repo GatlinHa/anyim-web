@@ -10,6 +10,7 @@ import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService, groupSearchMemberService, groupInfoService } from '@/api/group'
+import { msgChatQuerySessionService } from '@/api/message'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import { MsgType } from '@/proto/msg'
 
@@ -224,6 +225,13 @@ const onConfirmSelect = async (selected) => {
   })
   groupData.setGroupInfo(res.data.data.groupInfo)
   isShowSelectDialog.value = false
+
+  // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询
+  msgChatQuerySessionService({
+    sessionId: res.data.data.groupInfo.groupId
+  }).then((res) => {
+    messageData.addSession(res.data.data)
+  })
 }
 
 const onShowGroupCard = async (groupInfo) => {
