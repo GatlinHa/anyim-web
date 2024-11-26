@@ -193,8 +193,9 @@ onMounted(async () => {
   }, 5000)
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
-  if (router.currentRoute.value.query.sessionId) {
-    handleSelectedSession(router.currentRoute.value.query.sessionId)
+  const routerSessionId = router.currentRoute.value.query.sessionId
+  if (routerSessionId && routerSessionId in messageData.sessionList) {
+    handleSelectedSession(routerSessionId)
   }
 })
 
