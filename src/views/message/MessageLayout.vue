@@ -382,6 +382,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
         messageData.updateSession({
           sessionId: sessionId,
           lastMsgId: res.data.data.lastMsgId,
+          lastMsgType: res.data.data.msgList[msgCount - 1].msgType,
           lastMsgContent: res.data.data.msgList[msgCount - 1].content,
           lastMsgAccount: res.data.data.msgList[msgCount - 1].fromId,
           lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
@@ -476,6 +477,7 @@ const handleSendMessage = (content) => {
       messageData.updateSession({
         sessionId: selectedSessionId.value,
         lastMsgId: msgId, // 最后一条消息（自己发的）
+        lastMsgType: selectedSession.value.sessionType,
         lastMsgContent: content,
         lastMsgAccount: myAccount.value,
         lastMsgTime: now,

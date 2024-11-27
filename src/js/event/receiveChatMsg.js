@@ -33,6 +33,7 @@ export const onReceiveChatMsg = (curSessionId, msgListDiv, capacity) => {
     messageData.updateSession({
       sessionId: sessionId,
       lastMsgId: msg.body.msgId,
+      lastMsgType: msg.header.msgType,
       lastMsgContent: msg.body.content,
       lastMsgAccount: msg.body.fromId,
       lastMsgTime: now,

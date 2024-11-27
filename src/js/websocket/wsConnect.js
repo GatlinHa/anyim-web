@@ -12,7 +12,7 @@ import {
   groupChatConstructor,
   groupChatReadConstructor
 } from './constructor'
-import { onReceiveStatusResMsg } from '@/js/event'
+import { onReceiveStatusResMsg, onReceiveSystemGroupCreateMsg } from '@/js/event'
 
 class WsConnect {
   /**
@@ -104,7 +104,8 @@ class WsConnect {
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
     },
-    [MsgType.STATUS_RES]: onReceiveStatusResMsg()
+    [MsgType.STATUS_RES]: onReceiveStatusResMsg(),
+    [MsgType.SYS_GROUP_CREATE]: onReceiveSystemGroupCreateMsg()
   }
 
   /**

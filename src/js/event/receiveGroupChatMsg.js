@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { messageStore } from '@/stores'
 import { MsgType } from '@/proto/msg'
+import { msgChatQuerySessionService } from '@/api/message'
 
 export const onReceiveGroupChatMsg = (curSessionId, msgListDiv, capacity) => {
   return async (msg) => {
@@ -8,7 +9,16 @@ export const onReceiveGroupChatMsg = (curSessionId, msgListDiv, capacity) => {
     const sessionId = msg.body.sessionId
     const now = new Date()
 
-    // 是不是发送端的消息同步
+    // 如果sessionList中没有,需要加载这个session
+    if (!messageData.sessionList[sessionId]) {
+      msgChatQuerySessionService({
+        sessionId: sessionId
+      }).then((res) => {
+        messageData.addSession(res.data.data)
+      })
+    }
+
+    // 是不是自己的其他客户端发送过来的已读同步消息
     const readParams =
       msg.body.fromId === msg.body.toId
         ? {
@@ -21,6 +31,7 @@ export const onReceiveGroupChatMsg = (curSessionId, msgListDiv, capacity) => {
     messageData.updateSession({
       sessionId: sessionId,
       lastMsgId: msg.body.msgId,
+      lastMsgType: msg.header.msgType,
       lastMsgContent: msg.body.content,
       lastMsgAccount: msg.body.fromId,
       lastMsgTime: now,

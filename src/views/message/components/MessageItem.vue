@@ -21,6 +21,28 @@ const emit = defineEmits(['loadMore', 'showUserCard'])
 
 const userData = userStore()
 
+const isSystemMsg = computed(() => {
+  if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
+    return true
+  } else {
+    return false
+  }
+})
+
+const systemMsgContent = computed(() => {
+  if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
+    const content = JSON.parse(props.msg.content)
+    const creator = content['creator']
+    if (userData.user.account === creator) {
+      return '您创建了群聊'
+    } else {
+      return '您被邀请至群聊'
+    }
+  } else {
+    return ''
+  }
+})
+
 const isChatMsgType = computed(() => {
   return props.msg.msgType === MsgType.CHAT
 })
@@ -123,7 +145,8 @@ const onShowUserCard = () => {
       >以下是新消息</el-divider
     >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
-    <div class="message-container-wrapper">
+    <span v-if="isSystemMsg" class="system-message">{{ systemMsgContent }}</span>
+    <div v-else class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
         <el-main class="el-main-right">
           <el-container class="message-content-wrapper">
@@ -238,6 +261,18 @@ const onShowUserCard = () => {
     font-size: 12px;
     background-color: #c8c9cc;
     color: white;
+    user-select: text;
+  }
+
+  .system-message {
+    width: 100%;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: gray;
     user-select: text;
   }
 
