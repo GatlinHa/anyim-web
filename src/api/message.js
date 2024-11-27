@@ -21,8 +21,8 @@ export const msgChatQuerySessionService = (obj) => {
   return request.post('/chat/querySession', getReqBody(obj))
 }
 
-export const msgChatDeleteSessionService = (obj) => {
-  return request.post('/chat/deleteSession', getReqBody(obj))
+export const msgChatCloseSessionService = (obj) => {
+  return request.post('/chat/closeSession', getReqBody(obj))
 }
 
 export const msgCreatePartitionService = (obj) => {

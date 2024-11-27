@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { Top, Bottom, MuteNotification, Bell, Delete, Edit } from '@element-plus/icons-vue'
+import { Top, Bottom, MuteNotification, Bell, CircleClose, Edit } from '@element-plus/icons-vue'
 import { messageStore } from '@/stores'
 
 const props = defineProps(['sessionId'])
@@ -34,9 +34,9 @@ const menu = computed(() => {
       icon: Edit
     },
     {
-      label: 'delete',
-      desc: '删除会话',
-      icon: Delete
+      label: 'close',
+      desc: '关闭会话',
+      icon: CircleClose
     }
   ]
 })
