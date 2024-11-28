@@ -112,8 +112,8 @@ const hasNoMoreMsg = computed(() => {
 
 const isMutedInGroup = computed(() => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
-    const groupInfo = groupData.groupInfoList[selectedSession.value.objectInfo.groupId]
-    const members = groupData.groupMembersList[selectedSession.value.objectInfo.groupId]
+    const groupInfo = groupData.groupInfoList[selectedSession.value.remoteId]
+    const members = groupData.groupMembersList[selectedSession.value.remoteId]
     const me = members[myAccount.value]
     if (me.mutedMode === 1 || (groupInfo.allMuted && me.mutedMode !== 2)) {
       return true
@@ -283,7 +283,7 @@ const showName = computed(() => {
     case MsgType.CHAT:
       return selectedSession.value.objectInfo.nickName
     case MsgType.GROUP_CHAT:
-      return selectedSession.value.objectInfo.groupName
+      return groupData.groupInfoList[selectedSession.value.remoteId]?.groupName
     default:
       return ''
   }
