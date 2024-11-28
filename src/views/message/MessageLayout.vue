@@ -678,8 +678,8 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
  */
 watch(
   () => msgRecords.value,
-  (oldValue) => {
-    if (!oldValue || selectedSession.value.unreadCount === 0) return
+  (newValue) => {
+    if (!newValue || selectedSession.value.unreadCount === 0) return
     nextTick(() => {
       const unreadMsgEls = document.querySelectorAll('.unreadMsg')
       if (unreadMsgEls.length === 0) return
