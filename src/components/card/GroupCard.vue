@@ -20,7 +20,7 @@ import {
   groupDelMembersService,
   groupUpdateInfoService,
   groupChangeRoleService,
-  groupUpdateNickNameService,
+  groupUpdateNickNameInGroupService,
   groupLeaveService,
   groupDropService,
   groupOwnerTransferService,
@@ -564,7 +564,7 @@ const updateMyGroupNickName = () => {
   }
 
   const loadingInstance = ElLoading.service(el_loading_options)
-  groupUpdateNickNameService({
+  groupUpdateNickNameInGroupService({
     groupId: groupCardData.groupId,
     nickName: trimValue
   })
