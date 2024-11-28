@@ -37,8 +37,6 @@ const groupCardData = groupCardStore()
 const isShowSelectDialog = ref(false)
 const isShowSingleSelectDialog = ref(false)
 const method = ref('') //有加人，减人两中method
-const showModel = ref('info')
-const returnModelList = ref([]) //showModel的返回栈,用数组的push和pop实现
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
@@ -47,7 +45,7 @@ const isTop = ref()
 const isDnd = ref()
 const newAnnouncement = ref('')
 const memberSearchKey = ref('')
-const newMyGroupNickName = ref('')
+const newMyNickNameInGroup = ref('')
 const isAllMuted = ref()
 const isJoinGroupApproval = ref()
 const isHistoryBrowse = ref(false)
@@ -58,15 +56,33 @@ watch(
   () => groupCardData.isShow,
   (newValue) => {
     if (newValue) {
-      showModel.value = 'info'
-      returnModelList.value = []
-      newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
+      groupCardData.setShowModel('info')
+      newMyNickNameInGroup.value = showMembers.value[myAccount.value].nickName
       settingOption.value = 'chatSetting'
       isJoinGroupApproval.value = groupInfo.value.joinGroupApproval
       isAllMuted.value = groupInfo.value.allMuted
       isHistoryBrowse.value = groupInfo.value.historyBrowse
       isTop.value = sessionInfo.value.top
       isDnd.value = sessionInfo.value.dnd
+    }
+  }
+)
+
+watch(
+  () => groupCardData.showModel,
+  (newValue) => {
+    switch (newValue) {
+      case 'editAvatarAndName':
+        newGroupName.value = groupInfo.value.groupName
+        newGroupMark.value = sessionInfo.value.mark
+        break
+      case 'editAnnouncement':
+        newAnnouncement.value = groupInfo.value.announcement
+        break
+      case 'info':
+      case 'members':
+      default:
+        break
     }
   }
 )
@@ -90,11 +106,6 @@ const sessionInfo = computed(() => {
   const sessionId = groupCardData.groupId
   return messageData.sessionList[sessionId] || {}
 })
-
-const onShowMembers = () => {
-  returnModelList.value.push(showModel.value)
-  showModel.value = 'members'
-}
 
 const showMembers = computed(() => groupData.groupMembersList[groupCardData.groupId] || {})
 
@@ -290,21 +301,24 @@ const onConfirmSelect = (selected) => {
   }
 }
 
+const showModel = computed(() => {
+  return groupCardData.showModel
+})
+
+const onShowMembers = () => {
+  groupCardData.setShowModel('members')
+}
+
 const onEditGroupAvatarAndName = () => {
-  returnModelList.value.push(showModel.value)
-  showModel.value = 'editAvatarAndName'
-  newGroupName.value = groupInfo.value.groupName
-  newGroupMark.value = sessionInfo.value.mark
+  groupCardData.setShowModel('editAvatarAndName')
 }
 
 const onEditAnnouncement = () => {
-  returnModelList.value.push(showModel.value)
-  showModel.value = 'editAnnouncement'
-  newAnnouncement.value = groupInfo.value.announcement
+  groupCardData.setShowModel('editAnnouncement')
 }
 
-const onReturnModel = () => {
-  showModel.value = returnModelList.value.pop()
+const onReturnInfo = () => {
+  groupCardData.setShowModel('info')
 }
 
 const onNewAvatar = ({ avatar, avatarThumb }) => {
@@ -396,7 +410,7 @@ const updateAnnouncement = () => {
     })
     .finally(() => {
       loadingInstance.close()
-      onReturnModel()
+      onReturnInfo()
     })
 }
 
@@ -542,9 +556,9 @@ const onCancelManager = (userInfo) => {
 
 const myGroupNickNameRef = ref()
 const updateMyGroupNickName = () => {
-  const trimValue = newMyGroupNickName.value.trim()
+  const trimValue = newMyNickNameInGroup.value.trim()
   if (!trimValue) {
-    newMyGroupNickName.value = showMembers.value[myAccount.value].nickName
+    newMyNickNameInGroup.value = showMembers.value[myAccount.value].nickName
     myGroupNickNameRef.value.blur()
     return
   }
@@ -721,11 +735,11 @@ const onConfirmSingleSelect = (selected) => {
     <template #header>
       <div style="height: 24px; display: flex">
         <el-icon
-          v-if="returnModelList.length > 0"
+          v-if="showModel !== 'info'"
           size="24"
           title="返回"
           style="cursor: pointer"
-          @click="onReturnModel"
+          @click="onReturnInfo"
         >
           <ArrowLeft />
         </el-icon>
@@ -817,7 +831,7 @@ const onConfirmSingleSelect = (selected) => {
         <span style="font-size: 14px; width: 160px">我在本群的昵称</span>
         <el-input
           ref="myGroupNickNameRef"
-          v-model="newMyGroupNickName"
+          v-model="newMyNickNameInGroup"
           placeholder="请输入备注"
           maxlength="10"
           show-word-limit
@@ -1001,7 +1015,7 @@ const onConfirmSingleSelect = (selected) => {
         :rows="10"
       />
       <div style="margin-top: 20px; display: flex; justify-content: end">
-        <el-button type="info" @click="onReturnModel" plain>取消</el-button>
+        <el-button type="info" @click="onReturnInfo" plain>取消</el-button>
         <el-button type="primary" @click="updateAnnouncement" plain>确认</el-button>
       </div>
     </div>

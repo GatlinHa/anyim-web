@@ -942,6 +942,7 @@ const onConfirmSelect = async (selected) => {
                 :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
                 @loadMore="onLoadMore"
                 @showUserCard="onShowUserCard"
+                @showGroupCard="onShowGroupCard"
               ></MessageItem>
             </div>
             <el-button

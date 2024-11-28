@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
-import { userStore } from '@/stores'
+import { userStore, messageStore, groupCardStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/js/utils/common'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
@@ -17,9 +17,11 @@ const props = defineProps([
   'hasNoMoreMsg',
   'isLoadMoreLoading'
 ])
-const emit = defineEmits(['loadMore', 'showUserCard'])
+const emit = defineEmits(['loadMore', 'showUserCard', 'showGroupCard'])
 
 const userData = userStore()
+const messageData = messageStore()
+const groupCardData = groupCardStore()
 
 const isSystemMsg = computed(() => {
   if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
@@ -45,7 +47,8 @@ const systemMsgContent = computed(() => {
     return (
       `<span id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
       '创建了群聊，并邀请了' +
-      str.slice(0, -1)
+      str.slice(0, -1) +
+      `。<span id="id-update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
     )
   } else {
     return ''
@@ -136,8 +139,16 @@ const onShowUserCard = () => {
   emit('showUserCard', { sessionId: props.sessionId, account: account.value })
 }
 
-const onShowUserCardInSystemMsg = (e) => {
-  emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
+const onClickSystemMsg = (e) => {
+  if (e.target.id === 'id-update-group-name') {
+    emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId]['remoteId'] })
+    setTimeout(() => {
+      // 这里要延迟打开，否则会与GroupCard的初始化ShowModel冲突
+      groupCardData.setShowModel('editAvatarAndName')
+    }, 100)
+  } else {
+    emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
+  }
 }
 </script>
 
@@ -162,7 +173,7 @@ const onShowUserCardInSystemMsg = (e) => {
       v-if="isSystemMsg"
       class="system-message"
       v-html="systemMsgContent"
-      @click="onShowUserCardInSystemMsg"
+      @click="onClickSystemMsg"
     ></span>
     <div v-else class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
