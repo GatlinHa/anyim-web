@@ -151,8 +151,8 @@ const onShowUserCard = () => {
         <el-main class="el-main-right">
           <el-container class="message-content-wrapper">
             <el-header class="message-time">
-              <span>{{ msgTime }}</span>
-              <span v-if="isGroupChatMsgType" style="margin-left: 5px">{{ nickName }}</span>
+              <span v-if="isGroupChatMsgType">{{ nickName }}</span>
+              <span style="margin-left: 5px">{{ msgTime }}</span>
             </el-header>
             <el-main class="message-content">
               <div
