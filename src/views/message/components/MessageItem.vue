@@ -41,14 +41,15 @@ const systemMsgContent = computed(() => {
     let str = ''
     for (let key in members) {
       str =
-        str + `<span id="${key}" style="color: #409eff; cursor: pointer;">${members[key]}</span>，`
+        str +
+        `<span class="member-nickName" id="${key}" style="color: #409eff; cursor: pointer;">${members[key]}</span>，`
     }
 
     return (
-      `<span id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
+      `<span class="member-nickName" id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
       '创建了群聊，并邀请了' +
       str.slice(0, -1) +
-      `。<span id="id-update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
+      `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
     )
   } else {
     return ''
@@ -140,13 +141,13 @@ const onShowUserCard = () => {
 }
 
 const onClickSystemMsg = (e) => {
-  if (e.target.id === 'id-update-group-name') {
+  if (e.target.className === 'update-group-name') {
     emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId]['remoteId'] })
     setTimeout(() => {
       // 这里要延迟打开，否则会与GroupCard的初始化ShowModel冲突
       groupCardData.setShowModel('editAvatarAndName')
     }, 100)
-  } else {
+  } else if (e.target.className === 'member-nickName') {
     emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
   }
 }
