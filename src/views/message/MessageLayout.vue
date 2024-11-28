@@ -186,6 +186,7 @@ const selectedSession = computed(() => {
 onMounted(async () => {
   await messageData.loadSessionList()
   await messageData.loadPartitions()
+  await groupData.loadGroupInfoList()
 
   asideWidth.value = settingData.sessionListDrag[myAccount.value] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[myAccount.value] || 300
