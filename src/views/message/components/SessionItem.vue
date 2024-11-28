@@ -6,7 +6,7 @@ import SessionTag from './SessionTag.vue'
 import { sessionShowTime } from '@/js/utils/common'
 import { Top, MuteNotification } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
-import { userStore, messageStore, groupStore } from '@/stores'
+import { messageStore, groupStore } from '@/stores'
 import { msgChatCloseSessionService } from '@/api/message'
 import router from '@/router'
 
@@ -26,7 +26,6 @@ const emit = defineEmits([
 ])
 const messageData = messageStore()
 const groupData = groupStore()
-const userData = userStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
 })
@@ -83,12 +82,15 @@ const showDetailContent = computed(() => {
       if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
         if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_CREATE) {
           const content = JSON.parse(sessionInfo.value.lastMsgContent)
-          const creator = content['creator']
-          if (userData.user.account === creator) {
-            return '系统消息：您创建了群聊'
-          } else {
-            return '系统消息：您被邀请至群聊'
+          const creatorId = content['creatorId']
+          const members = content['members']
+          const creatorNickName = members[creatorId]
+          delete members[creatorId]
+          let str = ''
+          for (let key in members) {
+            str = str + members[key] + '，'
           }
+          return creatorNickName + '创建了群聊，并邀请了' + str.slice(0, -1)
         } else {
           const memberList = groupData.groupMembersList[showId.value]
           const nickName = memberList

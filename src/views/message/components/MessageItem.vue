@@ -32,12 +32,21 @@ const isSystemMsg = computed(() => {
 const systemMsgContent = computed(() => {
   if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
     const content = JSON.parse(props.msg.content)
-    const creator = content['creator']
-    if (userData.user.account === creator) {
-      return '您创建了群聊'
-    } else {
-      return '您被邀请至群聊'
+    const creatorId = content['creatorId']
+    const members = content['members']
+    const creatorNickName = members[creatorId]
+    delete members[creatorId]
+    let str = ''
+    for (let key in members) {
+      str =
+        str + `<span id="${key}" style="color: #409eff; cursor: pointer;">${members[key]}</span>，`
     }
+
+    return (
+      `<span id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
+      '创建了群聊，并邀请了' +
+      str.slice(0, -1)
+    )
   } else {
     return ''
   }
@@ -126,6 +135,10 @@ const onLoadMore = () => {
 const onShowUserCard = () => {
   emit('showUserCard', { sessionId: props.sessionId, account: account.value })
 }
+
+const onShowUserCardInSystemMsg = (e) => {
+  emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
+}
 </script>
 
 <template>
@@ -145,7 +158,12 @@ const onShowUserCard = () => {
       >以下是新消息</el-divider
     >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
-    <span v-if="isSystemMsg" class="system-message">{{ systemMsgContent }}</span>
+    <span
+      v-if="isSystemMsg"
+      class="system-message"
+      v-html="systemMsgContent"
+      @click="onShowUserCardInSystemMsg"
+    ></span>
     <div v-else class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
         <el-main class="el-main-right">
@@ -265,12 +283,9 @@ const onShowUserCard = () => {
   }
 
   .system-message {
-    width: 100%;
-    height: 30px;
+    width: 60%;
     padding: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
     font-size: 14px;
     color: gray;
     user-select: text;
