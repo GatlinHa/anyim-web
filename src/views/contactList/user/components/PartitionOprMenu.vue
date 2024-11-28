@@ -106,7 +106,7 @@ defineExpose({
   padding: 5px;
   border-radius: 6px;
   background-color: #fff;
-  position: absolute;
+  position: fixed;
 
   .menu-item {
     padding: 5px;
