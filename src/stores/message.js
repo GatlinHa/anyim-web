@@ -118,17 +118,39 @@ export const messageStore = defineStore('anyim-message', () => {
   const msgRecordsList = ref({})
 
   /**
-   * 对话列表中加入新的消息
+   * 对话列表中加入新的消息数组，加入后要进行去重和排序
    * @param {*} sessionId 会话id
    * @param {*} msgRecords 新的消息数组
    */
   const addMsgRecords = (sessionId, msgRecords) => {
     if (!msgRecordsList.value[sessionId]) {
-      msgRecordsList.value[sessionId] = msgRecords.sort((a, b) => a.msgId - b.msgId)
+      // 去重
+      let uniqueSet = new Set()
+      const uniqueRecords = msgRecords.filter((item) => {
+        if (!uniqueSet.has(item.msgId)) {
+          uniqueSet.add(item.msgId)
+          return true
+        } else {
+          return false
+        }
+      })
+      // 排序
+      msgRecordsList.value[sessionId] = uniqueRecords.sort((a, b) => a.msgId - b.msgId)
     } else {
-      msgRecordsList.value[sessionId] = [...msgRecordsList.value[sessionId], ...msgRecords].sort(
-        (a, b) => a.msgId - b.msgId
-      )
+      // 合并
+      const combinedRecords = [...msgRecordsList.value[sessionId], ...msgRecords]
+      // 去重
+      let uniqueSet = new Set()
+      const uniqueRecords = combinedRecords.filter((item) => {
+        if (!uniqueSet.has(item.msgId)) {
+          uniqueSet.add(item.msgId)
+          return true
+        } else {
+          return false
+        }
+      })
+      // 排序
+      msgRecordsList.value[sessionId] = uniqueRecords.sort((a, b) => a.msgId - b.msgId)
     }
   }
 

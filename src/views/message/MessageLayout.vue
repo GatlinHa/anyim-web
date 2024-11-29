@@ -811,10 +811,7 @@ const onConfirmSelect = async (selected) => {
     sessionId: res.data.data.groupInfo.groupId
   }).then((res) => {
     messageData.addSession(res.data.data)
-    setTimeout(() => {
-      // 这里用延迟的方式，防止ws接收的系统消息和handleSelectedSession里面的pullMsg重复
-      handleSelectedSession(res.data.data.sessionId)
-    }, 300)
+    handleSelectedSession(res.data.data.sessionId)
   })
 }
 </script>
