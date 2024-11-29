@@ -10,6 +10,8 @@ export const groupCardStore = defineStore('anyim-groupCard', () => {
 
   const showModel = ref('')
 
+  const changeMemberModel = ref('')
+
   const setIsShow = (flag) => {
     isShow.value = flag
   }
@@ -22,13 +24,19 @@ export const groupCardStore = defineStore('anyim-groupCard', () => {
     showModel.value = model
   }
 
+  const setChangeMemberModel = (model) => {
+    changeMemberModel.value = model
+  }
+
   return {
     isShow,
     groupId,
     showModel,
+    changeMemberModel,
 
     setIsShow,
     setGroupId,
-    setShowModel
+    setShowModel,
+    setChangeMemberModel
   }
 })

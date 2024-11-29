@@ -744,9 +744,33 @@ const onVideoCall = () => {
   ElMessage.warning('功能开发中')
 }
 
-const onInviteIntoGroup = () => {
-  ElMessage.warning('功能开发中')
+const onInviteToGroup = () => {
+  if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+    const groupId = selectedSession.value.remoteId
+    const joinGroupApproval = groupData.groupInfoList[groupId].joinGroupApproval
+    if (joinGroupApproval || iAmManager.value) {
+      onShowGroupCard({ groupId: selectedSession.value.remoteId })
+      setTimeout(() => {
+        groupCardData.setChangeMemberModel('addMember')
+      }, 300)
+    } else {
+      ElMessage.warning('没有权限，请联系群组管理员')
+    }
+  } else if (selectedSession.value.sessionType === MsgType.CHAT) {
+    defaultSelectedOptionIds.value = [selectedSession.value.remoteId]
+    isShowSelectDialog.value = true
+  }
 }
+
+const iAmManager = computed(() => {
+  if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
+    const groupId = selectedSession.value.remoteId
+    const members = groupData.groupMembersList[groupId]
+    return members[myAccount.value].role > 0
+  } else {
+    return false
+  }
+})
 
 const onMoreSetting = () => {
   if (selectedSession.value.sessionType === MsgType.CHAT) {
@@ -764,6 +788,7 @@ const addOprMenuRef = ref()
 const onSelectOprMenu = (label) => {
   switch (label) {
     case 'createGroup':
+      defaultSelectedOptionIds.value = []
       isShowSelectDialog.value = true
       break
     case 'createVoiceMeeting':
@@ -793,6 +818,11 @@ const selectDialogOptions = computed(() => {
   })
   return data
 })
+
+/**
+ * 用于显示创建群组弹窗中的默认选中的名单id（account）
+ */
+const defaultSelectedOptionIds = ref([])
 
 const onConfirmSelect = async (selected) => {
   if (selected.length < 2) {
@@ -908,11 +938,10 @@ const onConfirmSelect = async (selected) => {
               <VideoCamera />
             </el-icon>
             <el-icon
-              v-if="selectedSession.sessionType === MsgType.GROUP_CHAT"
               class="action-button"
               size="20"
-              title="邀请进群"
-              @click="onInviteIntoGroup"
+              :title="selectedSession.sessionType === MsgType.GROUP_CHAT ? '邀请进群' : '创建群组'"
+              @click="onInviteToGroup"
             >
               <CirclePlus />
             </el-icon>
@@ -1051,6 +1080,7 @@ const onConfirmSelect = async (selected) => {
   <SelectDialog
     v-model="isShowSelectDialog"
     :options="selectDialogOptions"
+    :defaultSelected="defaultSelectedOptionIds"
     :searchModel="'server'"
     @showUserCard="onShowUserCard"
     @confirm="onConfirmSelect"

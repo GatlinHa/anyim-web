@@ -36,7 +36,6 @@ const userCardData = userCardStore()
 const groupCardData = groupCardStore()
 const isShowSelectDialog = ref(false)
 const isShowSingleSelectDialog = ref(false)
-const method = ref('') //有加人，减人两中method
 const isShowEditAvatar = ref(false)
 const myAccount = computed(() => userData.user.account)
 const newGroupName = ref('')
@@ -64,6 +63,9 @@ watch(
       isHistoryBrowse.value = groupInfo.value.historyBrowse
       isTop.value = sessionInfo.value.top
       isDnd.value = sessionInfo.value.dnd
+    } else {
+      groupCardData.setShowModel('')
+      groupCardData.setChangeMemberModel('')
     }
   }
 )
@@ -81,6 +83,22 @@ watch(
         break
       case 'info':
       case 'members':
+      default:
+        break
+    }
+  }
+)
+
+watch(
+  () => groupCardData.changeMemberModel,
+  (newValue) => {
+    switch (newValue) {
+      case 'addMember':
+        isShowSelectDialog.value = true
+        break
+      case 'delMember':
+        isShowSelectDialog.value = true
+        break
       default:
         break
     }
@@ -197,7 +215,7 @@ const onShowUserCard = (account) => {
 }
 
 const selectDialogOptions = computed(() => {
-  if (method.value === 'add') {
+  if (changeMemberModel.value === 'addMember') {
     const data = {}
     Object.values(messageData.sessionList).forEach((item) => {
       if (item.sessionType === MsgType.CHAT) {
@@ -205,7 +223,7 @@ const selectDialogOptions = computed(() => {
       }
     })
     return data
-  } else if (method.value === 'del') {
+  } else if (changeMemberModel.value === 'delMember') {
     return showMembers.value
   } else {
     return {}
@@ -213,9 +231,9 @@ const selectDialogOptions = computed(() => {
 })
 
 const selectDialogDisabledOptions = computed(() => {
-  if (method.value === 'add') {
+  if (changeMemberModel.value === 'addMember') {
     return Object.keys(showMembers.value)
-  } else if (method.value === 'del') {
+  } else if (changeMemberModel.value === 'delMember') {
     const data = []
     Object.values(showMembers.value).forEach((item) => {
       if (item.account === myAccount.value) data.push(item.account) // 删除时要排除自己
@@ -229,21 +247,21 @@ const selectDialogDisabledOptions = computed(() => {
 })
 
 const searchModel = computed(() => {
-  return method.value === 'add' ? 'server' : 'default'
+  return changeMemberModel.value === 'addMember' ? 'server' : 'default'
 })
 
 const onAddmember = () => {
   isShowSelectDialog.value = true
-  method.value = 'add'
+  groupCardData.setChangeMemberModel('addMember')
 }
 
 const delAddmember = () => {
   isShowSelectDialog.value = true
-  method.value = 'del'
+  groupCardData.setChangeMemberModel('delMember')
 }
 
 const selectDialogTitle = computed(() => {
-  return method.value === 'add' ? '添加成员' : '移除成员'
+  return changeMemberModel.value === 'addMember' ? '添加成员' : '移除成员'
 })
 
 const doAdd = (userArray) => {
@@ -294,15 +312,19 @@ const doDelete = (userArray) => {
 
 const onConfirmSelect = (selected) => {
   isShowSelectDialog.value = false // 这里要先关闭，不然移除的时候会报错
-  if (method.value === 'add') {
+  if (changeMemberModel.value === 'addMember') {
     doAdd(selected)
-  } else if (method.value === 'del') {
+  } else if (changeMemberModel.value === 'delMember') {
     doDelete(selected)
   }
 }
 
 const showModel = computed(() => {
   return groupCardData.showModel
+})
+
+const changeMemberModel = computed(() => {
+  return groupCardData.changeMemberModel
 })
 
 const onShowMembers = () => {

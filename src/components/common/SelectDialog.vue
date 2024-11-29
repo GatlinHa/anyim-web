@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Search, Close } from '@element-plus/icons-vue'
 import ContactItem from '@/components/item/ContactItem.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
@@ -18,7 +18,14 @@ const props = defineProps([
 ])
 const emit = defineEmits(['update:modelValue', 'showUserCard', 'confirm'])
 
-const selected = ref(props.defaultSelected || [])
+const selected = ref([])
+watch(
+  () => props.defaultSelected,
+  (newValue) => {
+    selected.value = newValue
+  }
+)
+
 const searchKey = ref('')
 const optionsFromServer = ref({})
 
