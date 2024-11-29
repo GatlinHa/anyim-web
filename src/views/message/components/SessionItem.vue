@@ -50,7 +50,11 @@ const showName = computed(() => {
     case MsgType.CHAT:
       return sessionInfo.value.objectInfo.nickName || '没有昵称'
     case MsgType.GROUP_CHAT:
-      return groupData.groupInfoList[sessionInfo.value.remoteId]?.groupName || '没有群名称'
+      return (
+        groupData.groupInfoList[sessionInfo.value.remoteId]?.groupName ||
+        sessionInfo.value.objectInfo.groupName ||
+        '没有群名称'
+      )
     default:
       return ''
   }
