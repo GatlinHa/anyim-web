@@ -289,10 +289,10 @@ const doAdd = (userArray) => {
 
 const doDelete = (userArray) => {
   const loadingInstance = ElLoading.service(el_loading_options)
-  const accounts = userArray.map((item) => item.account)
+  const members = userArray.map((item) => ({ account: item.account, nickName: item.nickName }))
   groupDelMembersService({
     groupId: groupCardData.groupId,
-    accounts: accounts
+    members: members
   })
     .then((res) => {
       if (res.data.data) {

@@ -106,7 +106,8 @@ class WsConnect {
     },
     [MsgType.STATUS_RES]: onReceiveStatusResMsg(),
     [MsgType.SYS_GROUP_CREATE]: onReceiveSystemMsg(),
-    [MsgType.SYS_GROUP_ADD_MEMBER]: onReceiveSystemMsg()
+    [MsgType.SYS_GROUP_ADD_MEMBER]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_DEL_MEMBER]: onReceiveSystemMsg()
   }
 
   /**

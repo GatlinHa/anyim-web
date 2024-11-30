@@ -26,7 +26,8 @@ const groupCardData = groupCardStore()
 const isSystemMsg = computed(() => {
   if (
     props.msg.msgType === MsgType.SYS_GROUP_CREATE ||
-    props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER
+    props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
+    props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER
   ) {
     return true
   } else {
@@ -70,6 +71,21 @@ const systemMsgContent = computed(() => {
       '邀请' +
       str.slice(0, -1) +
       '加入了群聊'
+    )
+  } else if (props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER) {
+    const content = JSON.parse(props.msg.content)
+    const manager = content['manager']
+    const delMembers = content['delMembers']
+    let str = ''
+    delMembers.forEach((item) => {
+      str =
+        str +
+        `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
+    })
+    return (
+      `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+      '移除了' +
+      str.slice(0, -1)
     )
   } else {
     return ''

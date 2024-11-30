@@ -104,6 +104,15 @@ const showDetailContent = computed(() => {
             str = str + newMembers[key] + '，'
           }
           return manager.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
+        } else if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_DEL_MEMBER) {
+          const content = JSON.parse(sessionInfo.value.lastMsgContent)
+          const manager = content['manager']
+          const delMembers = content['delMembers']
+          let str = ''
+          delMembers.forEach((item) => {
+            str = str + item.nickName + '，'
+          })
+          return manager.nickName + '移除了' + str.slice(0, -1)
         } else {
           const memberList = groupData.groupMembersList[showId.value]
           const nickName = memberList
