@@ -1,7 +1,7 @@
 import { messageStore } from '@/stores'
 import { msgChatQuerySessionService } from '@/api/message'
 
-export const onReceiveSystemGroupCreateMsg = () => {
+export const onReceiveSystemGroupAddMemberMsg = () => {
   return async (msg) => {
     const messageData = messageStore()
     const sessionId = msg.body.sessionId

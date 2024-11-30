@@ -95,6 +95,15 @@ const showDetailContent = computed(() => {
             str = str + members[key] + '，'
           }
           return creatorNickName + '创建了群聊，并邀请了' + str.slice(0, -1)
+        } else if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_ADD_MEMBER) {
+          const content = JSON.parse(sessionInfo.value.lastMsgContent)
+          const manager = content['manager']
+          const newMembers = content['newMembers']
+          let str = ''
+          for (let key in newMembers) {
+            str = str + newMembers[key] + '，'
+          }
+          return manager.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
         } else {
           const memberList = groupData.groupMembersList[showId.value]
           const nickName = memberList

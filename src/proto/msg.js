@@ -294,6 +294,8 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} STATUS_RES=9 STATUS_RES value
  * @property {number} STATUS_SYNC=10 STATUS_SYNC value
  * @property {number} SYS_GROUP_CREATE=21 SYS_GROUP_CREATE value
+ * @property {number} SYS_GROUP_ADD_MEMBER=22 SYS_GROUP_ADD_MEMBER value
+ * @property {number} SYS_GROUP_DEL_MEMBER=23 SYS_GROUP_DEL_MEMBER value
  * @property {number} CLOSE_BY_READ_IDLE=50 CLOSE_BY_READ_IDLE value
  * @property {number} CLOSE_BY_ERROR_MAGIC=51 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
@@ -313,6 +315,8 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[9] = 'STATUS_RES')] = 9
   values[(valuesById[10] = 'STATUS_SYNC')] = 10
   values[(valuesById[21] = 'SYS_GROUP_CREATE')] = 21
+  values[(valuesById[22] = 'SYS_GROUP_ADD_MEMBER')] = 22
+  values[(valuesById[23] = 'SYS_GROUP_DEL_MEMBER')] = 23
   values[(valuesById[50] = 'CLOSE_BY_READ_IDLE')] = 50
   values[(valuesById[51] = 'CLOSE_BY_ERROR_MAGIC')] = 51
   values[(valuesById[99] = 'DEFAULT')] = 99
@@ -510,6 +514,8 @@ export const Header = ($root.Header = (() => {
         case 9:
         case 10:
         case 21:
+        case 22:
+        case 23:
         case 50:
         case 51:
         case 99:
@@ -587,6 +593,14 @@ export const Header = ($root.Header = (() => {
       case 'SYS_GROUP_CREATE':
       case 21:
         message.msgType = 21
+        break
+      case 'SYS_GROUP_ADD_MEMBER':
+      case 22:
+        message.msgType = 22
+        break
+      case 'SYS_GROUP_DEL_MEMBER':
+      case 23:
+        message.msgType = 23
         break
       case 'CLOSE_BY_READ_IDLE':
       case 50:

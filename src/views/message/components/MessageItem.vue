@@ -24,7 +24,10 @@ const messageData = messageStore()
 const groupCardData = groupCardStore()
 
 const isSystemMsg = computed(() => {
-  if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
+  if (
+    props.msg.msgType === MsgType.SYS_GROUP_CREATE ||
+    props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER
+  ) {
     return true
   } else {
     return false
@@ -50,6 +53,23 @@ const systemMsgContent = computed(() => {
       '创建了群聊，并邀请了' +
       str.slice(0, -1) +
       `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
+    )
+  } else if (props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER) {
+    const content = JSON.parse(props.msg.content)
+    const manager = content['manager']
+    const newMembers = content['newMembers']
+    let str = ''
+    for (let key in newMembers) {
+      str =
+        str +
+        `<span class="member-nickName" id="${key}" style="color: #409eff; cursor: pointer;">${newMembers[key]}</span>，`
+    }
+
+    return (
+      `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+      '邀请' +
+      str.slice(0, -1) +
+      '加入了群聊'
     )
   } else {
     return ''
