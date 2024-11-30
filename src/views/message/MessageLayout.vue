@@ -1242,7 +1242,7 @@ const onConfirmSelect = async (selected) => {
 
           .bottom-tips {
             position: absolute;
-            right: 40%;
+            right: 0%;
             bottom: -40px;
             transition: bottom 1s ease-in-out;
 
@@ -1253,7 +1253,7 @@ const onConfirmSelect = async (selected) => {
 
           .top-tips {
             position: absolute;
-            right: 40%;
+            right: 0%;
             top: -40px;
             transition: top 1s ease-in-out;
 
