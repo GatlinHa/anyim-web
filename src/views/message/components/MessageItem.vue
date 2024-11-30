@@ -35,60 +35,71 @@ const isSystemMsg = computed(() => {
   }
 })
 
+const getSysCreateGroupMsgTips = (content) => {
+  const creatorId = content['creatorId']
+  const members = content['members']
+  const creator = members.find((item) => item.account === creatorId)
+  const creatorNickName = creator.nickName
+  let membersExcludeCreator = members.filter((item) => item.account !== creatorId)
+  let str = ''
+  membersExcludeCreator.forEach((item) => {
+    str =
+      str +
+      `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
+  })
+
+  return (
+    `<span class="member-nickName" id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
+    '创建了群聊，并邀请了' +
+    str.slice(0, -1) +
+    `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
+  )
+}
+
+const getSysGroupAddMemberMsgTips = (content) => {
+  const manager = content['manager']
+  const newMembers = content['newMembers']
+  let str = ''
+  newMembers.forEach((item) => {
+    str =
+      str +
+      `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
+  })
+
+  return (
+    `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+    '邀请' +
+    str.slice(0, -1) +
+    '加入了群聊'
+  )
+}
+
+const getSysGroupDelMemberMsgTips = (content) => {
+  const manager = content['manager']
+  const delMembers = content['delMembers']
+  let str = ''
+  delMembers.forEach((item) => {
+    str =
+      str +
+      `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
+  })
+  return (
+    `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+    '移除了' +
+    str.slice(0, -1)
+  )
+}
+
 const systemMsgContent = computed(() => {
-  if (props.msg.msgType === MsgType.SYS_GROUP_CREATE) {
-    const content = JSON.parse(props.msg.content)
-    const creatorId = content['creatorId']
-    const members = content['members']
-    const creatorNickName = members[creatorId]
-    delete members[creatorId]
-    let str = ''
-    for (let key in members) {
-      str =
-        str +
-        `<span class="member-nickName" id="${key}" style="color: #409eff; cursor: pointer;">${members[key]}</span>，`
-    }
-
-    return (
-      `<span class="member-nickName" id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
-      '创建了群聊，并邀请了' +
-      str.slice(0, -1) +
-      `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
-    )
-  } else if (props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER) {
-    const content = JSON.parse(props.msg.content)
-    const manager = content['manager']
-    const newMembers = content['newMembers']
-    let str = ''
-    for (let key in newMembers) {
-      str =
-        str +
-        `<span class="member-nickName" id="${key}" style="color: #409eff; cursor: pointer;">${newMembers[key]}</span>，`
-    }
-
-    return (
-      `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
-      '邀请' +
-      str.slice(0, -1) +
-      '加入了群聊'
-    )
-  } else if (props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER) {
-    const content = JSON.parse(props.msg.content)
-    const manager = content['manager']
-    const delMembers = content['delMembers']
-    let str = ''
-    delMembers.forEach((item) => {
-      str =
-        str +
-        `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
-    })
-    return (
-      `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
-      '移除了' +
-      str.slice(0, -1)
-    )
-  } else {
-    return ''
+  switch (props.msg.msgType) {
+    case MsgType.SYS_GROUP_CREATE:
+      return getSysCreateGroupMsgTips(JSON.parse(props.msg.content))
+    case MsgType.SYS_GROUP_ADD_MEMBER:
+      return getSysGroupAddMemberMsgTips(JSON.parse(props.msg.content))
+    case MsgType.SYS_GROUP_DEL_MEMBER:
+      return getSysGroupDelMemberMsgTips(JSON.parse(props.msg.content))
+    default:
+      return ''
   }
 })
 

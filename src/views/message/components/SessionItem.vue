@@ -78,47 +78,64 @@ const showTime = computed(() => {
   return sessionShowTime(sessionInfo.value.lastMsgTime)
 })
 
+const getSysGroupCreateMsgTips = (content) => {
+  const creatorId = content['creatorId']
+  const members = content['members']
+  const creator = members.find((item) => item.account === creatorId)
+  const creatorNickName = creator.nickName
+  let membersExcludeCreator = members.filter((item) => item.account === creatorId)
+  let str = ''
+  membersExcludeCreator.forEach((item) => {
+    str = str + item.nickName + '，'
+  })
+  return creatorNickName + '创建了群聊，并邀请了' + str.slice(0, -1)
+}
+
+const getSysGroupAddMemberMsgTips = (content) => {
+  const manager = content['manager']
+  const newMembers = content['newMembers']
+  let str = ''
+  newMembers.forEach((item) => {
+    str = str + item.nickName + '，'
+  })
+  return manager.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
+}
+
+const getSysGroupDelMemberMsgTips = (content) => {
+  const manager = content['manager']
+  const delMembers = content['delMembers']
+  let str = ''
+  delMembers.forEach((item) => {
+    str = str + item.nickName + '，'
+  })
+  return manager.nickName + '移除了' + str.slice(0, -1)
+}
+
+const getGroupChatMsgTips = (content) => {
+  const memberList = groupData.groupMembersList[showId.value]
+  const prefix = memberList
+    ? memberList[sessionInfo.value.lastMsgAccount].nickName
+    : sessionInfo.value.lastMsgAccount
+  return prefix + '：' + content
+}
+
 const showDetailContent = computed(() => {
   if (isShowDraft.value) {
     return sessionInfo.value.draft
   } else {
     if (sessionInfo.value.lastMsgContent) {
       if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
-        if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_CREATE) {
-          const content = JSON.parse(sessionInfo.value.lastMsgContent)
-          const creatorId = content['creatorId']
-          const members = content['members']
-          const creatorNickName = members[creatorId]
-          delete members[creatorId]
-          let str = ''
-          for (let key in members) {
-            str = str + members[key] + '，'
-          }
-          return creatorNickName + '创建了群聊，并邀请了' + str.slice(0, -1)
-        } else if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_ADD_MEMBER) {
-          const content = JSON.parse(sessionInfo.value.lastMsgContent)
-          const manager = content['manager']
-          const newMembers = content['newMembers']
-          let str = ''
-          for (let key in newMembers) {
-            str = str + newMembers[key] + '，'
-          }
-          return manager.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
-        } else if (sessionInfo.value.lastMsgType === MsgType.SYS_GROUP_DEL_MEMBER) {
-          const content = JSON.parse(sessionInfo.value.lastMsgContent)
-          const manager = content['manager']
-          const delMembers = content['delMembers']
-          let str = ''
-          delMembers.forEach((item) => {
-            str = str + item.nickName + '，'
-          })
-          return manager.nickName + '移除了' + str.slice(0, -1)
-        } else {
-          const memberList = groupData.groupMembersList[showId.value]
-          const nickName = memberList
-            ? memberList[sessionInfo.value.lastMsgAccount].nickName
-            : sessionInfo.value.lastMsgAccount
-          return nickName + '：' + sessionInfo.value.lastMsgContent
+        switch (sessionInfo.value.lastMsgType) {
+          case MsgType.SYS_GROUP_CREATE:
+            return getSysGroupCreateMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+          case MsgType.SYS_GROUP_ADD_MEMBER:
+            return getSysGroupAddMemberMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+          case MsgType.SYS_GROUP_DEL_MEMBER:
+            return getSysGroupDelMemberMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+          case MsgType.GROUP_CHAT:
+            return getGroupChatMsgTips(sessionInfo.value.lastMsgContent)
+          default:
+            return ''
         }
       } else {
         return sessionInfo.value.lastMsgContent
