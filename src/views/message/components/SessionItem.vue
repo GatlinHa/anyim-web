@@ -109,6 +109,14 @@ const getSysGroupDelMemberMsgTips = (content) => {
   return operator.nickName + '移除了' + str.slice(0, -1)
 }
 
+const getSysGroupChangeRoleMsgTips = (msgType, content) => {
+  const operator = content['operator']
+  const member = content['member']
+  return msgType === MsgType.SYS_GROUP_SET_MANAGER
+    ? `${operator.nickName}设置了${member.nickName}为管理员`
+    : `${operator.nickName}取消了${member.nickName}的管理员权限`
+}
+
 const getGroupChatMsgTips = (content) => {
   const memberList = groupData.groupMembersList[showId.value]
   const prefix = memberList
@@ -123,13 +131,17 @@ const showDetailContent = computed(() => {
   } else {
     if (sessionInfo.value.lastMsgContent) {
       if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
+        const content = JSON.parse(sessionInfo.value.lastMsgContent)
         switch (sessionInfo.value.lastMsgType) {
           case MsgType.SYS_GROUP_CREATE:
-            return getSysGroupCreateMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+            return getSysGroupCreateMsgTips(content)
           case MsgType.SYS_GROUP_ADD_MEMBER:
-            return getSysGroupAddMemberMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+            return getSysGroupAddMemberMsgTips(content)
           case MsgType.SYS_GROUP_DEL_MEMBER:
-            return getSysGroupDelMemberMsgTips(JSON.parse(sessionInfo.value.lastMsgContent))
+            return getSysGroupDelMemberMsgTips(content)
+          case MsgType.SYS_GROUP_SET_MANAGER:
+          case MsgType.SYS_GROUP_CANCEL_MANAGER:
+            return getSysGroupChangeRoleMsgTips(sessionInfo.value.lastMsgType, content)
           case MsgType.GROUP_CHAT:
             return getGroupChatMsgTips(sessionInfo.value.lastMsgContent)
           default:

@@ -296,6 +296,8 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} SYS_GROUP_CREATE=21 SYS_GROUP_CREATE value
  * @property {number} SYS_GROUP_ADD_MEMBER=22 SYS_GROUP_ADD_MEMBER value
  * @property {number} SYS_GROUP_DEL_MEMBER=23 SYS_GROUP_DEL_MEMBER value
+ * @property {number} SYS_GROUP_SET_MANAGER=24 SYS_GROUP_SET_MANAGER value
+ * @property {number} SYS_GROUP_CANCEL_MANAGER=25 SYS_GROUP_CANCEL_MANAGER value
  * @property {number} CLOSE_BY_READ_IDLE=50 CLOSE_BY_READ_IDLE value
  * @property {number} CLOSE_BY_ERROR_MAGIC=51 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
@@ -317,6 +319,8 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[21] = 'SYS_GROUP_CREATE')] = 21
   values[(valuesById[22] = 'SYS_GROUP_ADD_MEMBER')] = 22
   values[(valuesById[23] = 'SYS_GROUP_DEL_MEMBER')] = 23
+  values[(valuesById[24] = 'SYS_GROUP_SET_MANAGER')] = 24
+  values[(valuesById[25] = 'SYS_GROUP_CANCEL_MANAGER')] = 25
   values[(valuesById[50] = 'CLOSE_BY_READ_IDLE')] = 50
   values[(valuesById[51] = 'CLOSE_BY_ERROR_MAGIC')] = 51
   values[(valuesById[99] = 'DEFAULT')] = 99
@@ -516,6 +520,8 @@ export const Header = ($root.Header = (() => {
         case 21:
         case 22:
         case 23:
+        case 24:
+        case 25:
         case 50:
         case 51:
         case 99:
@@ -601,6 +607,14 @@ export const Header = ($root.Header = (() => {
       case 'SYS_GROUP_DEL_MEMBER':
       case 23:
         message.msgType = 23
+        break
+      case 'SYS_GROUP_SET_MANAGER':
+      case 24:
+        message.msgType = 24
+        break
+      case 'SYS_GROUP_CANCEL_MANAGER':
+      case 25:
+        message.msgType = 25
         break
       case 'CLOSE_BY_READ_IDLE':
       case 50:

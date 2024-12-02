@@ -27,7 +27,9 @@ const isSystemMsg = computed(() => {
   if (
     props.msg.msgType === MsgType.SYS_GROUP_CREATE ||
     props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
-    props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER
+    props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER ||
+    props.msg.msgType === MsgType.SYS_GROUP_SET_MANAGER ||
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_MANAGER
   ) {
     return true
   } else {
@@ -88,14 +90,28 @@ const getSysGroupDelMemberMsgTips = (content) => {
   )
 }
 
+const getSysGroupChangeRoleMsgTips = (msgType, content) => {
+  const operator = content['operator']
+  const member = content['member']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const memberStr = `<span class="member-nickName" id="${member.account}" style="color: #409eff; cursor: pointer;">${member.nickName}</span>`
+  return msgType === MsgType.SYS_GROUP_SET_MANAGER
+    ? `${operatorStr}设置了${memberStr}为管理员`
+    : `${operatorStr}取消了${memberStr}的管理员权限`
+}
+
 const systemMsgContent = computed(() => {
+  const content = JSON.parse(props.msg.content)
   switch (props.msg.msgType) {
     case MsgType.SYS_GROUP_CREATE:
-      return getSysCreateGroupMsgTips(JSON.parse(props.msg.content))
+      return getSysCreateGroupMsgTips(content)
     case MsgType.SYS_GROUP_ADD_MEMBER:
-      return getSysGroupAddMemberMsgTips(JSON.parse(props.msg.content))
+      return getSysGroupAddMemberMsgTips(content)
     case MsgType.SYS_GROUP_DEL_MEMBER:
-      return getSysGroupDelMemberMsgTips(JSON.parse(props.msg.content))
+      return getSysGroupDelMemberMsgTips(content)
+    case MsgType.SYS_GROUP_SET_MANAGER:
+    case MsgType.SYS_GROUP_CANCEL_MANAGER:
+      return getSysGroupChangeRoleMsgTips(props.msg.msgType, content)
     default:
       return ''
   }
