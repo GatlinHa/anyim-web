@@ -79,36 +79,34 @@ const showTime = computed(() => {
 })
 
 const getSysGroupCreateMsgTips = (content) => {
-  const creatorId = content['creatorId']
+  const operator = content['operator']
   const members = content['members']
-  const creator = members.find((item) => item.account === creatorId)
-  const creatorNickName = creator.nickName
-  let membersExcludeCreator = members.filter((item) => item.account === creatorId)
+  let membersExcludeCreator = members.filter((item) => item.account === operator.account)
   let str = ''
   membersExcludeCreator.forEach((item) => {
     str = str + item.nickName + '，'
   })
-  return creatorNickName + '创建了群聊，并邀请了' + str.slice(0, -1)
+  return operator.nickName + '创建了群聊，并邀请了' + str.slice(0, -1)
 }
 
 const getSysGroupAddMemberMsgTips = (content) => {
-  const manager = content['manager']
-  const newMembers = content['newMembers']
+  const operator = content['operator']
+  const members = content['members']
   let str = ''
-  newMembers.forEach((item) => {
+  members.forEach((item) => {
     str = str + item.nickName + '，'
   })
-  return manager.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
+  return operator.nickName + '邀请' + str.slice(0, -1) + '加入了群聊'
 }
 
 const getSysGroupDelMemberMsgTips = (content) => {
-  const manager = content['manager']
-  const delMembers = content['delMembers']
+  const operator = content['operator']
+  const members = content['members']
   let str = ''
-  delMembers.forEach((item) => {
+  members.forEach((item) => {
     str = str + item.nickName + '，'
   })
-  return manager.nickName + '移除了' + str.slice(0, -1)
+  return operator.nickName + '移除了' + str.slice(0, -1)
 }
 
 const getGroupChatMsgTips = (content) => {

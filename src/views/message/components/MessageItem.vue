@@ -36,11 +36,9 @@ const isSystemMsg = computed(() => {
 })
 
 const getSysCreateGroupMsgTips = (content) => {
-  const creatorId = content['creatorId']
+  const operator = content['operator']
   const members = content['members']
-  const creator = members.find((item) => item.account === creatorId)
-  const creatorNickName = creator.nickName
-  let membersExcludeCreator = members.filter((item) => item.account !== creatorId)
+  let membersExcludeCreator = members.filter((item) => item.account !== operator.account)
   let str = ''
   membersExcludeCreator.forEach((item) => {
     str =
@@ -49,7 +47,7 @@ const getSysCreateGroupMsgTips = (content) => {
   })
 
   return (
-    `<span class="member-nickName" id="${creatorId}" style="color: #409eff; cursor: pointer;">${creatorNickName}</span>` +
+    `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>` +
     '创建了群聊，并邀请了' +
     str.slice(0, -1) +
     `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
@@ -57,17 +55,17 @@ const getSysCreateGroupMsgTips = (content) => {
 }
 
 const getSysGroupAddMemberMsgTips = (content) => {
-  const manager = content['manager']
-  const newMembers = content['newMembers']
+  const operator = content['operator']
+  const members = content['members']
   let str = ''
-  newMembers.forEach((item) => {
+  members.forEach((item) => {
     str =
       str +
       `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
   })
 
   return (
-    `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+    `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>` +
     '邀请' +
     str.slice(0, -1) +
     '加入了群聊'
@@ -75,16 +73,16 @@ const getSysGroupAddMemberMsgTips = (content) => {
 }
 
 const getSysGroupDelMemberMsgTips = (content) => {
-  const manager = content['manager']
-  const delMembers = content['delMembers']
+  const operator = content['operator']
+  const members = content['members']
   let str = ''
-  delMembers.forEach((item) => {
+  members.forEach((item) => {
     str =
       str +
       `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
   })
   return (
-    `<span class="member-nickName" id="${manager.account}" style="color: #409eff; cursor: pointer;">${manager.nickName}</span>` +
+    `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>` +
     '移除了' +
     str.slice(0, -1)
   )
