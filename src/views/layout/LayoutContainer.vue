@@ -68,7 +68,9 @@ onMounted(async () => {
   }, CREATE_WS_DELAY) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
 
-  // 定时查询自己的状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
+  statusSync() // 页面onMounted时主动同步一次本账号本客户端的状态
+
+  // 定时任务查询本账号的多端下的最终状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
   let accounts = []
   accounts.push(userData.user.account)
   statusReqTask = setInterval(() => {
@@ -95,6 +97,7 @@ const onMouseMove = () => {
   autoLogout() //自动登出：8小时内未移动鼠标就会自动登出
 }
 
+// 同步本账号本客户端的状态
 let statusSyncTimer
 const statusSync = () => {
   if (userData.user.status === STATUS.LEAVING) {
