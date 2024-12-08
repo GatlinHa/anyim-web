@@ -109,7 +109,20 @@ class WsConnect {
     [MsgType.SYS_GROUP_ADD_MEMBER]: onReceiveSystemMsg(),
     [MsgType.SYS_GROUP_DEL_MEMBER]: onReceiveSystemMsg(),
     [MsgType.SYS_GROUP_SET_MANAGER]: onReceiveSystemMsg(),
-    [MsgType.SYS_GROUP_CANCEL_MANAGER]: onReceiveSystemMsg()
+    [MsgType.SYS_GROUP_CANCEL_MANAGER]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_SET_ALL_MUTED]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_ALL_MUTED]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_SET_JOIN_APPROVAL]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_SET_HISTORY_BROWSE]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_OWNER_TRANSFER]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_LEAVE]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_DROP]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_NAME]: onReceiveSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_AVATAR]: onReceiveSystemMsg()
   }
 
   /**

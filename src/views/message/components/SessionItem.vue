@@ -117,6 +117,79 @@ const getSysGroupChangeRoleMsgTips = (msgType, content) => {
     : `${operator.nickName}取消了${member.nickName}的管理员权限`
 }
 
+const getSysGroupUpdateAllMuted = (msgType, content) => {
+  const operator = content['operator']
+  return msgType === MsgType.SYS_GROUP_SET_ALL_MUTED
+    ? `${operator.nickName}设置了全员禁言`
+    : `${operator.nickName}取消了全员禁言`
+}
+
+const getSysGroupUpdateJoinApproval = (msgType, content) => {
+  const operator = content['operator']
+  return msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL
+    ? `${operator.nickName}设置了全员禁言`
+    : `${operator.nickName}取消了全员禁言`
+}
+
+const getSysGroupUpdateHistoryBrowse = (msgType, content) => {
+  const operator = content['operator']
+  return msgType === MsgType.SYS_GROUP_SET_HISTORY_BROWSE
+    ? `${operator.nickName}开启了新成员浏览历史记录`
+    : `${operator.nickName}关闭了新成员浏览历史记录`
+}
+
+const getSysGroupOwnerTransfer = (content) => {
+  const operator = content['operator']
+  const member = content['member']
+  return `${operator.nickName}将群主转让给了${member.nickName}`
+}
+
+const getSysGroupUpdateMemberMuted = (content) => {
+  const operator = content['operator']
+  const member = content['member']
+  const mutedMode = content['mutedMode']
+  const allMuted = groupData.groupInfoList[sessionInfo.value.remoteId]?.allMuted
+  if (allMuted) {
+    if (mutedMode === 2) {
+      return `${operator.nickName}允许了${member.nickName}的发言`
+    } else {
+      return `${operator.nickName}禁止了${member.nickName}的发言`
+    }
+  } else {
+    if (mutedMode === 1) {
+      return `${operator.nickName}禁止了${member.nickName}的发言`
+    } else {
+      return `${operator.nickName}允许了${member.nickName}的发言`
+    }
+  }
+}
+
+const getSysGroupLeave = (content) => {
+  const operator = content['operator']
+  return `${operator.nickName}离开了群组`
+}
+
+const getSysGroupDrop = (content) => {
+  const operator = content['operator']
+  return `${operator.nickName}解散了群组`
+}
+
+const getSysGroupUpdateAnnouncement = (content) => {
+  const operator = content['operator']
+  return `${operator.nickName}更改了群公告`
+}
+
+const getSysGroupUpdateName = (content) => {
+  const operator = content['operator']
+  const groupName = content['groupName']
+  return `${operator.nickName}更改了群聊名称：${groupName}`
+}
+
+const getSysGroupUpdateAvatar = (content) => {
+  const operator = content['operator']
+  return `${operator.nickName}更改了群头像`
+}
+
 const getGroupChatMsgTips = (content) => {
   const memberList = groupData.groupMembersList[showId.value]
   const prefix = memberList
@@ -139,9 +212,32 @@ const showDetailContent = computed(() => {
             return getSysGroupAddMemberMsgTips(content)
           case MsgType.SYS_GROUP_DEL_MEMBER:
             return getSysGroupDelMemberMsgTips(content)
+          case MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT:
+            return getSysGroupUpdateAnnouncement(content)
+          case MsgType.SYS_GROUP_UPDATE_NAME:
+            return getSysGroupUpdateName(content)
+          case MsgType.SYS_GROUP_UPDATE_AVATAR:
+            return getSysGroupUpdateAvatar(content)
           case MsgType.SYS_GROUP_SET_MANAGER:
           case MsgType.SYS_GROUP_CANCEL_MANAGER:
             return getSysGroupChangeRoleMsgTips(sessionInfo.value.lastMsgType, content)
+          case MsgType.SYS_GROUP_SET_ALL_MUTED:
+          case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:
+            return getSysGroupUpdateAllMuted(sessionInfo.value.lastMsgType, content)
+          case MsgType.SYS_GROUP_SET_JOIN_APPROVAL:
+          case MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL:
+            return getSysGroupUpdateJoinApproval(sessionInfo.value.lastMsgType, content)
+          case MsgType.SYS_GROUP_SET_HISTORY_BROWSE:
+          case MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE:
+            return getSysGroupUpdateHistoryBrowse(sessionInfo.value.lastMsgType, content)
+          case MsgType.SYS_GROUP_OWNER_TRANSFER:
+            return getSysGroupOwnerTransfer(content)
+          case MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED:
+            return getSysGroupUpdateMemberMuted(content)
+          case MsgType.SYS_GROUP_LEAVE:
+            return getSysGroupLeave(content)
+          case MsgType.SYS_GROUP_DROP:
+            return getSysGroupDrop(content)
           case MsgType.GROUP_CHAT:
             return getGroupChatMsgTips(sessionInfo.value.lastMsgContent)
           default:

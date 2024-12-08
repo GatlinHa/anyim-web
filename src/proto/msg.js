@@ -298,6 +298,19 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} SYS_GROUP_DEL_MEMBER=23 SYS_GROUP_DEL_MEMBER value
  * @property {number} SYS_GROUP_SET_MANAGER=24 SYS_GROUP_SET_MANAGER value
  * @property {number} SYS_GROUP_CANCEL_MANAGER=25 SYS_GROUP_CANCEL_MANAGER value
+ * @property {number} SYS_GROUP_SET_ALL_MUTED=26 SYS_GROUP_SET_ALL_MUTED value
+ * @property {number} SYS_GROUP_CANCEL_ALL_MUTED=27 SYS_GROUP_CANCEL_ALL_MUTED value
+ * @property {number} SYS_GROUP_SET_JOIN_APPROVAL=28 SYS_GROUP_SET_JOIN_APPROVAL value
+ * @property {number} SYS_GROUP_CANCEL_JOIN_APPROVAL=29 SYS_GROUP_CANCEL_JOIN_APPROVAL value
+ * @property {number} SYS_GROUP_SET_HISTORY_BROWSE=30 SYS_GROUP_SET_HISTORY_BROWSE value
+ * @property {number} SYS_GROUP_CANCEL_HISTORY_BROWSE=31 SYS_GROUP_CANCEL_HISTORY_BROWSE value
+ * @property {number} SYS_GROUP_OWNER_TRANSFER=32 SYS_GROUP_OWNER_TRANSFER value
+ * @property {number} SYS_GROUP_UPDATE_MEMBER_MUTED=33 SYS_GROUP_UPDATE_MEMBER_MUTED value
+ * @property {number} SYS_GROUP_LEAVE=34 SYS_GROUP_LEAVE value
+ * @property {number} SYS_GROUP_DROP=35 SYS_GROUP_DROP value
+ * @property {number} SYS_GROUP_UPDATE_ANNOUNCEMENT=36 SYS_GROUP_UPDATE_ANNOUNCEMENT value
+ * @property {number} SYS_GROUP_UPDATE_NAME=37 SYS_GROUP_UPDATE_NAME value
+ * @property {number} SYS_GROUP_UPDATE_AVATAR=38 SYS_GROUP_UPDATE_AVATAR value
  * @property {number} CLOSE_BY_READ_IDLE=50 CLOSE_BY_READ_IDLE value
  * @property {number} CLOSE_BY_ERROR_MAGIC=51 CLOSE_BY_ERROR_MAGIC value
  * @property {number} DEFAULT=99 DEFAULT value
@@ -321,6 +334,19 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[23] = 'SYS_GROUP_DEL_MEMBER')] = 23
   values[(valuesById[24] = 'SYS_GROUP_SET_MANAGER')] = 24
   values[(valuesById[25] = 'SYS_GROUP_CANCEL_MANAGER')] = 25
+  values[(valuesById[26] = 'SYS_GROUP_SET_ALL_MUTED')] = 26
+  values[(valuesById[27] = 'SYS_GROUP_CANCEL_ALL_MUTED')] = 27
+  values[(valuesById[28] = 'SYS_GROUP_SET_JOIN_APPROVAL')] = 28
+  values[(valuesById[29] = 'SYS_GROUP_CANCEL_JOIN_APPROVAL')] = 29
+  values[(valuesById[30] = 'SYS_GROUP_SET_HISTORY_BROWSE')] = 30
+  values[(valuesById[31] = 'SYS_GROUP_CANCEL_HISTORY_BROWSE')] = 31
+  values[(valuesById[32] = 'SYS_GROUP_OWNER_TRANSFER')] = 32
+  values[(valuesById[33] = 'SYS_GROUP_UPDATE_MEMBER_MUTED')] = 33
+  values[(valuesById[34] = 'SYS_GROUP_LEAVE')] = 34
+  values[(valuesById[35] = 'SYS_GROUP_DROP')] = 35
+  values[(valuesById[36] = 'SYS_GROUP_UPDATE_ANNOUNCEMENT')] = 36
+  values[(valuesById[37] = 'SYS_GROUP_UPDATE_NAME')] = 37
+  values[(valuesById[38] = 'SYS_GROUP_UPDATE_AVATAR')] = 38
   values[(valuesById[50] = 'CLOSE_BY_READ_IDLE')] = 50
   values[(valuesById[51] = 'CLOSE_BY_ERROR_MAGIC')] = 51
   values[(valuesById[99] = 'DEFAULT')] = 99
@@ -522,6 +548,19 @@ export const Header = ($root.Header = (() => {
         case 23:
         case 24:
         case 25:
+        case 26:
+        case 27:
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 32:
+        case 33:
+        case 34:
+        case 35:
+        case 36:
+        case 37:
+        case 38:
         case 50:
         case 51:
         case 99:
@@ -615,6 +654,58 @@ export const Header = ($root.Header = (() => {
       case 'SYS_GROUP_CANCEL_MANAGER':
       case 25:
         message.msgType = 25
+        break
+      case 'SYS_GROUP_SET_ALL_MUTED':
+      case 26:
+        message.msgType = 26
+        break
+      case 'SYS_GROUP_CANCEL_ALL_MUTED':
+      case 27:
+        message.msgType = 27
+        break
+      case 'SYS_GROUP_SET_JOIN_APPROVAL':
+      case 28:
+        message.msgType = 28
+        break
+      case 'SYS_GROUP_CANCEL_JOIN_APPROVAL':
+      case 29:
+        message.msgType = 29
+        break
+      case 'SYS_GROUP_SET_HISTORY_BROWSE':
+      case 30:
+        message.msgType = 30
+        break
+      case 'SYS_GROUP_CANCEL_HISTORY_BROWSE':
+      case 31:
+        message.msgType = 31
+        break
+      case 'SYS_GROUP_OWNER_TRANSFER':
+      case 32:
+        message.msgType = 32
+        break
+      case 'SYS_GROUP_UPDATE_MEMBER_MUTED':
+      case 33:
+        message.msgType = 33
+        break
+      case 'SYS_GROUP_LEAVE':
+      case 34:
+        message.msgType = 34
+        break
+      case 'SYS_GROUP_DROP':
+      case 35:
+        message.msgType = 35
+        break
+      case 'SYS_GROUP_UPDATE_ANNOUNCEMENT':
+      case 36:
+        message.msgType = 36
+        break
+      case 'SYS_GROUP_UPDATE_NAME':
+      case 37:
+        message.msgType = 37
+        break
+      case 'SYS_GROUP_UPDATE_AVATAR':
+      case 38:
+        message.msgType = 38
         break
       case 'CLOSE_BY_READ_IDLE':
       case 50:

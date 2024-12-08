@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
-import { userStore, messageStore, groupCardStore } from '@/stores'
+import { userStore, messageStore, groupStore, groupCardStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime } from '@/js/utils/common'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
@@ -21,6 +21,7 @@ const emit = defineEmits(['loadMore', 'showUserCard', 'showGroupCard'])
 
 const userData = userStore()
 const messageData = messageStore()
+const groupData = groupStore()
 const groupCardData = groupCardStore()
 
 const isSystemMsg = computed(() => {
@@ -29,7 +30,20 @@ const isSystemMsg = computed(() => {
     props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
     props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER ||
     props.msg.msgType === MsgType.SYS_GROUP_SET_MANAGER ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_MANAGER
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_MANAGER ||
+    props.msg.msgType === MsgType.SYS_GROUP_SET_ALL_MUTED ||
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_ALL_MUTED ||
+    props.msg.msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL ||
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL ||
+    props.msg.msgType === MsgType.SYS_GROUP_SET_HISTORY_BROWSE ||
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE ||
+    props.msg.msgType === MsgType.SYS_GROUP_OWNER_TRANSFER ||
+    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED ||
+    props.msg.msgType === MsgType.SYS_GROUP_LEAVE ||
+    props.msg.msgType === MsgType.SYS_GROUP_DROP ||
+    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT ||
+    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_NAME ||
+    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_AVATAR
   ) {
     return true
   } else {
@@ -100,6 +114,95 @@ const getSysGroupChangeRoleMsgTips = (msgType, content) => {
     : `${operatorStr}取消了${memberStr}的管理员权限`
 }
 
+const getSysGroupUpdateAllMuted = (msgType, content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  return msgType === MsgType.SYS_GROUP_SET_ALL_MUTED
+    ? `${operatorStr}设置了全员禁言`
+    : `${operatorStr}取消了全员禁言`
+}
+
+const getSysGroupUpdateJoinApproval = (msgType, content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  return msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL
+    ? `${operatorStr}开启了入群验证`
+    : `${operatorStr}关闭了入群验证`
+}
+
+const getSysGroupUpdateHistoryBrowse = (msgType, content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  return msgType === MsgType.SYS_GROUP_SET_HISTORY_BROWSE
+    ? `${operatorStr}开启了新成员浏览历史记录`
+    : `${operatorStr}关闭了新成员浏览历史记录`
+}
+
+const getSysGroupOwnerTransfer = (content) => {
+  const operator = content['operator']
+  const member = content['member']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const memberStr = `<span class="member-nickName" id="${member.account}" style="color: #409eff; cursor: pointer;">${member.nickName}</span>`
+  return `${operatorStr}将群主转让给了${memberStr}`
+}
+
+const getSysGroupUpdateMemberMuted = (content) => {
+  const operator = content['operator']
+  const member = content['member']
+  const mutedMode = content['mutedMode']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const memberStr = `<span class="member-nickName" id="${member.account}" style="color: #409eff; cursor: pointer;">${member.nickName}</span>`
+  const groupId = messageData.sessionList[props.sessionId].remoteId
+  const allMuted = groupData.groupInfoList[groupId].allMuted
+  if (allMuted) {
+    if (mutedMode === 2) {
+      return `${operatorStr}允许了${memberStr}的发言`
+    } else {
+      return `${operatorStr}禁止了${memberStr}的发言`
+    }
+  } else {
+    if (mutedMode === 1) {
+      return `${operatorStr}禁止了${memberStr}的发言`
+    } else {
+      return `${operatorStr}允许了${memberStr}的发言`
+    }
+  }
+}
+
+const getSysGroupLeave = (content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  return `${operatorStr}离开了群组`
+}
+
+const getSysGroupDrop = (content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  return `${operatorStr}解散了群组`
+}
+
+const getSysGroupUpdateAnnouncement = (content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const announcementStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">群公告</span>`
+  return `${operatorStr}更改了${announcementStr}`
+}
+
+const getSysGroupUpdateName = (content) => {
+  const operator = content['operator']
+  const groupName = content['groupName']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const groupNameStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">${groupName}</span>`
+  return `${operatorStr}更改了群名称：${groupNameStr}`
+}
+
+const getSysGroupUpdateAvatar = (content) => {
+  const operator = content['operator']
+  const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
+  const avatarStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">群头像</span>`
+  return `${operatorStr}更改了${avatarStr}`
+}
+
 const systemMsgContent = computed(() => {
   const content = JSON.parse(props.msg.content)
   switch (props.msg.msgType) {
@@ -109,9 +212,32 @@ const systemMsgContent = computed(() => {
       return getSysGroupAddMemberMsgTips(content)
     case MsgType.SYS_GROUP_DEL_MEMBER:
       return getSysGroupDelMemberMsgTips(content)
+    case MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT:
+      return getSysGroupUpdateAnnouncement(content)
+    case MsgType.SYS_GROUP_UPDATE_NAME:
+      return getSysGroupUpdateName(content)
+    case MsgType.SYS_GROUP_UPDATE_AVATAR:
+      return getSysGroupUpdateAvatar(content)
     case MsgType.SYS_GROUP_SET_MANAGER:
     case MsgType.SYS_GROUP_CANCEL_MANAGER:
       return getSysGroupChangeRoleMsgTips(props.msg.msgType, content)
+    case MsgType.SYS_GROUP_SET_ALL_MUTED:
+    case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:
+      return getSysGroupUpdateAllMuted(props.msg.msgType, content)
+    case MsgType.SYS_GROUP_SET_JOIN_APPROVAL:
+    case MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL:
+      return getSysGroupUpdateJoinApproval(props.msg.msgType, content)
+    case MsgType.SYS_GROUP_SET_HISTORY_BROWSE:
+    case MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE:
+      return getSysGroupUpdateHistoryBrowse(props.msg.msgType, content)
+    case MsgType.SYS_GROUP_OWNER_TRANSFER:
+      return getSysGroupOwnerTransfer(content)
+    case MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED:
+      return getSysGroupUpdateMemberMuted(content)
+    case MsgType.SYS_GROUP_LEAVE:
+      return getSysGroupLeave(content)
+    case MsgType.SYS_GROUP_DROP:
+      return getSysGroupDrop(content)
     default:
       return ''
   }
@@ -203,13 +329,15 @@ const onShowUserCard = () => {
 
 const onClickSystemMsg = (e) => {
   if (e.target.className === 'update-group-name') {
-    emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId]['remoteId'] })
+    emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId].remoteId })
     setTimeout(() => {
       // 这里要延迟打开，否则会与GroupCard的初始化ShowModel冲突
       groupCardData.setShowModel('editAvatarAndName')
     }, 100)
   } else if (e.target.className === 'member-nickName') {
     emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
+  } else if (e.target.className === 'show-group-announcement') {
+    emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId].remoteId })
   }
 }
 </script>
