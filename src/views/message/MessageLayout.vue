@@ -220,11 +220,16 @@ onMounted(async () => {
     if (routerSessionId in messageData.sessionList) {
       handleSelectedSession(routerSessionId)
     } else {
-      const res = await msgChatQuerySessionService({ sessionId: routerSessionId })
-      if (res.data.data) {
-        messageData.addSession(res.data.data)
-        handleSelectedSession(routerSessionId)
-      }
+      msgChatQuerySessionService({ sessionId: routerSessionId })
+        .then((res) => {
+          if (res.data.data) {
+            messageData.addSession(res.data.data)
+            handleSelectedSession(routerSessionId)
+          }
+        })
+        .catch(() => {
+          router.replace({ query: {} })
+        })
     }
   }
 })
