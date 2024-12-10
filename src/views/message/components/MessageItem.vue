@@ -254,7 +254,11 @@ const loadMoreTips = computed(() => {
 })
 
 const isUnreadMsg = computed(() => {
-  return props.readMsgId < props.msg.msgId && !isSelf.value
+  if (!isSystemMsg.value && props.readMsgId < props.msg.msgId && !isSelf.value) {
+    return true
+  } else {
+    return false
+  }
 })
 
 const myMsgIsRead = computed(() => {
