@@ -65,6 +65,7 @@ const groupCardData = groupCardStore()
 const groupData = groupStore()
 const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
+const lastReadMsgId = ref()
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -176,7 +177,27 @@ const locateSession = (sessionId) => {
 }
 
 const msgRecords = computed(() => {
-  return messageData.msgRecordsList[selectedSessionId.value]?.slice(startIndex.value)
+  const records = messageData.msgRecordsList[selectedSessionId.value]?.slice(startIndex.value)
+  if (!records) return null
+
+  for (let index = 0; index < records.length; index++) {
+    const element = records[index]
+
+    // 判断是否是打开session后的第一条未读消息
+    if (index > 0 && records[index - 1].msgId == lastReadMsgId.value) {
+      element['isFirstNew'] = true
+    } else {
+      element['isFirstNew'] = false
+    }
+
+    // 上一条消息的时间，相邻的时间只出一条tips
+    if (index > 0) {
+      element['preMsgTime'] = records[index - 1].msgTime
+    } else {
+      element['preMsgTime'] = null
+    }
+  }
+  return records
 })
 
 const selectedSession = computed(() => {
@@ -303,14 +324,6 @@ const showId = computed(() => {
   return selectedSession.value.remoteId
 })
 
-const getPreMsgTime = (index) => {
-  if (index > 0) {
-    return msgRecords.value[index - 1].msgTime
-  } else {
-    return null
-  }
-}
-
 const getMsgSenderObj = (item) => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     // 如果此时memberList还没有加载完成，先return account给MessageItem子组件
@@ -323,18 +336,6 @@ const getMsgSenderObj = (item) => {
       return selectedSession.value.objectInfo
     }
   }
-}
-
-const lastReadMsgId = ref()
-/**
- * 判断是否是打开session后的第一条未读消息
- * @param index
- */
-const isFirstNew = (index) => {
-  if (index > 0 && msgRecords.value[index - 1].msgId == lastReadMsgId.value) {
-    return true
-  }
-  return false
 }
 
 const onAsideDragUpdate = ({ width }) => {
@@ -535,15 +536,16 @@ const onLoadMore = async () => {
 }
 
 // 消息列表拉到最底部
-const msgListReachBottom = (isSmooth = true) => {
+const msgListReachBottom = async (isSmooth = true) => {
   const behavior = isSmooth ? 'smooth' : 'instant'
+  await nextTick() // 经测试，在未读消息的session页面刷新时，不能到达底部，需要再加一个nextTick
   nextTick(() => {
     msgListDiv.value?.scrollTo({
       top: msgListDiv.value.scrollHeight,
       behavior: behavior
     })
+    newMsgTips.value.isShowBottomTips = false
   })
-  newMsgTips.value.isShowBottomTips = false
 }
 
 const onReturnBottom = () => {
@@ -975,8 +977,6 @@ const onConfirmSelect = async (selected) => {
                 :obj="getMsgSenderObj(item)"
                 :readMsgId="selectedSession.readMsgId"
                 :remoteRead="selectedSession.remoteRead"
-                :preMsgTime="getPreMsgTime(index)"
-                :isFirstNew="isFirstNew(index)"
                 :firstMsgId="firstMsgId"
                 :hasNoMoreMsg="hasNoMoreMsg"
                 :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
