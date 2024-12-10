@@ -12,7 +12,7 @@ import {
   groupChatConstructor,
   groupChatReadConstructor
 } from './constructor'
-import { onReceiveStatusResMsg, onReceiveGroupSystemMsg } from '@/js/event'
+import { onReceiveStatusResMsg } from '@/js/event'
 
 class WsConnect {
   /**
@@ -104,25 +104,7 @@ class WsConnect {
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
     },
-    [MsgType.STATUS_RES]: onReceiveStatusResMsg(),
-    [MsgType.SYS_GROUP_CREATE]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_ADD_MEMBER]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_DEL_MEMBER]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_SET_MANAGER]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_CANCEL_MANAGER]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_SET_ALL_MUTED]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_CANCEL_ALL_MUTED]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_SET_JOIN_APPROVAL]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_SET_HISTORY_BROWSE]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_OWNER_TRANSFER]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_LEAVE]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_DROP]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_UPDATE_NAME]: onReceiveGroupSystemMsg(),
-    [MsgType.SYS_GROUP_UPDATE_AVATAR]: onReceiveGroupSystemMsg()
+    [MsgType.STATUS_RES]: onReceiveStatusResMsg()
   }
 
   /**
@@ -285,6 +267,31 @@ class WsConnect {
    */
   bindEvent(event, callback) {
     this.events[event] = callback
+  }
+
+  /**
+   * 绑定GroupSystemMsg事件
+   * @param {*} callback
+   */
+  bindGroupSystemMsgEvent(callback) {
+    this.events[MsgType.SYS_GROUP_CREATE] = callback
+    this.events[MsgType.SYS_GROUP_ADD_MEMBER] = callback
+    this.events[MsgType.SYS_GROUP_DEL_MEMBER] = callback
+    this.events[MsgType.SYS_GROUP_SET_MANAGER] = callback
+    this.events[MsgType.SYS_GROUP_CANCEL_MANAGER] = callback
+    this.events[MsgType.SYS_GROUP_SET_ALL_MUTED] = callback
+    this.events[MsgType.SYS_GROUP_CANCEL_ALL_MUTED] = callback
+    this.events[MsgType.SYS_GROUP_SET_JOIN_APPROVAL] = callback
+    this.events[MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL] = callback
+    this.events[MsgType.SYS_GROUP_SET_HISTORY_BROWSE] = callback
+    this.events[MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE] = callback
+    this.events[MsgType.SYS_GROUP_OWNER_TRANSFER] = callback
+    this.events[MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED] = callback
+    this.events[MsgType.SYS_GROUP_LEAVE] = callback
+    this.events[MsgType.SYS_GROUP_DROP] = callback
+    this.events[MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT] = callback
+    this.events[MsgType.SYS_GROUP_UPDATE_NAME] = callback
+    this.events[MsgType.SYS_GROUP_UPDATE_AVATAR] = callback
   }
 
   /**

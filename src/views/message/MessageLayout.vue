@@ -45,7 +45,8 @@ import {
   onReceiveChatMsg,
   onReceiveChatReadMsg,
   onReceiveGroupChatMsg,
-  onReceiveGroupChatReadMsg
+  onReceiveGroupChatReadMsg,
+  onReceiveGroupSystemMsg
 } from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
@@ -219,6 +220,9 @@ onMounted(async () => {
     onReceiveGroupChatMsg(selectedSessionId, msgListDiv, capacity)
   ) //绑定接收GroupChat消息的事件
   wsConnect.bindEvent(MsgType.GROUP_CHAT_READ, onReceiveGroupChatReadMsg()) //绑定接收GroupChat已读消息的事件
+  wsConnect.bindGroupSystemMsgEvent(
+    onReceiveGroupSystemMsg(selectedSessionId, msgListDiv, capacity)
+  ) //绑定接收群系统消息事件
 
   // 定时更新单聊对象的状态
   const accounts = []
