@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { MsgType } from '@/proto/msg'
 import { userStore, messageStore, groupStore, groupCardStore } from '@/stores'
-import { messageSysShowTime, messageBoxShowTime } from '@/js/utils/common'
+import { messageSysShowTime, messageBoxShowTime, jsonParseSafe } from '@/js/utils/common'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
 const props = defineProps([
@@ -202,7 +202,7 @@ const getSysGroupUpdateAvatar = (content) => {
 }
 
 const systemMsgContent = computed(() => {
-  const content = JSON.parse(props.msg.content)
+  const content = jsonParseSafe(props.msg.content)
   switch (props.msg.msgType) {
     case MsgType.SYS_GROUP_CREATE:
       return getSysCreateGroupMsgTips(content)

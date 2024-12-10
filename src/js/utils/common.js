@@ -191,3 +191,11 @@ export const highLightedText = (content, keyWords, color, model = 'include') => 
       return content.replace(new RegExp(keyWords, 'gi'), `<span style="color: ${color};">$&</span>`)
   }
 }
+
+export const jsonParseSafe = (str) => {
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    return ''
+  }
+}

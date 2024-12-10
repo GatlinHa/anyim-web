@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import SessionTag from './SessionTag.vue'
-import { sessionShowTime } from '@/js/utils/common'
+import { jsonParseSafe, sessionShowTime } from '@/js/utils/common'
 import { Top, MuteNotification } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { messageStore, groupStore } from '@/stores'
@@ -204,7 +204,7 @@ const showDetailContent = computed(() => {
   } else {
     if (sessionInfo.value.lastMsgContent) {
       if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
-        const content = JSON.parse(sessionInfo.value.lastMsgContent)
+        const content = jsonParseSafe(sessionInfo.value.lastMsgContent)
         switch (sessionInfo.value.lastMsgType) {
           case MsgType.SYS_GROUP_CREATE:
             return getSysGroupCreateMsgTips(content)

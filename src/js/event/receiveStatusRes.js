@@ -1,11 +1,11 @@
 import { userStore, messageStore } from '@/stores'
-import { combineId } from '@/js/utils/common'
+import { combineId, jsonParseSafe } from '@/js/utils/common'
 
 export const onReceiveStatusResMsg = () => {
   return async (msg) => {
     const userData = userStore()
     const messageData = messageStore()
-    const content = JSON.parse(msg.body.content)
+    const content = jsonParseSafe(msg.body.content)
     if (content[userData.user.account]) {
       userData.updateUserStatus(content[userData.user.account])
     }
