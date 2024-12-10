@@ -962,7 +962,7 @@ const onConfirmSelect = async (selected) => {
           </div>
         </el-header>
         <el-main class="body">
-          <div class="show-box">
+          <div class="show-message-box">
             <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
               数据加载中……
             </div>
@@ -1202,7 +1202,7 @@ const onConfirmSelect = async (selected) => {
         overflow: hidden; // 禁用它的滚动条
         position: relative;
 
-        .show-box {
+        .show-message-box {
           width: 100%;
           display: flex;
           flex: 1;
