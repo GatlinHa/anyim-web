@@ -1,9 +1,11 @@
-import { messageStore } from '@/stores'
+import { messageStore, groupStore } from '@/stores'
 import { msgChatQuerySessionService } from '@/api/message'
+import { groupInfoService } from '@/api/group'
 
-export const onReceiveSystemMsg = () => {
+export const onReceiveGroupSystemMsg = () => {
   return async (msg) => {
     const messageData = messageStore()
+    const groupData = groupStore()
     const sessionId = msg.body.sessionId
     const now = new Date()
 
@@ -12,6 +14,13 @@ export const onReceiveSystemMsg = () => {
       const res = await msgChatQuerySessionService({ sessionId: sessionId })
       messageData.addSession(res.data.data)
     }
+
+    const res = await groupInfoService({ groupId: msg.body.groupId })
+    groupData.setGroupInfo(res.data.data.groupInfo)
+    groupData.setGroupMembers({
+      groupId: msg.body.groupId,
+      members: res.data.data.members
+    })
 
     messageData.updateSession({
       sessionId: sessionId,
