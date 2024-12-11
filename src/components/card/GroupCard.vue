@@ -1,10 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
-import { Avatar, Search, Mute } from '@element-plus/icons-vue'
+import { Avatar, Search, Mute, ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
-import { ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
 import AddButton from '@/components/common/AddButton.vue'

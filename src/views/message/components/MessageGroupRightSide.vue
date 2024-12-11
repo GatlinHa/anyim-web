@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { MsgType } from '@/proto/msg'
-import { ArrowRight } from '@element-plus/icons-vue'
-import { userStore, settingStore, messageStore, groupStore } from '@/stores'
+import { Edit } from '@element-plus/icons-vue'
+import { userStore, settingStore, messageStore, groupStore, groupCardStore } from '@/stores'
 import DragLine from '@/components/common/DragLine.vue'
 
 const props = defineProps(['sessionId'])
@@ -12,6 +12,7 @@ const userData = userStore()
 const settingData = settingStore()
 const messageData = messageStore()
 const groupData = groupStore()
+const groupCardData = groupCardStore()
 
 const msgGroupRightSideWidth = ref(0)
 const announcementInSideHeight = ref(0)
@@ -37,6 +38,15 @@ const announcement = computed(() => {
   return groupData.groupInfoList[groupId.value].announcement || '暂无公告'
 })
 
+const iAmManager = computed(() => {
+  const members = groupData.groupMembersList[groupId.value]
+  if (members) {
+    return members[myAccount.value]?.role > 0
+  } else {
+    return false
+  }
+})
+
 const onMsgGroupRightSideWidthDragUpdate = ({ width }) => {
   msgGroupRightSideWidth.value = width
   settingData.setMsgGroupRightSideDrag({
@@ -53,8 +63,12 @@ const onAnnouncementInSideHeightDragUpdate = ({ height }) => {
   })
 }
 
-const onClickAnnouncement = () => {
+const onEditAnnouncement = () => {
   emit('showGroupCard', { groupId: groupId.value })
+  setTimeout(() => {
+    // 这里要延迟打开，否则会与GroupCard的初始化ShowModel冲突
+    groupCardData.setShowModel('editAnnouncement')
+  }, 100)
 }
 </script>
 
@@ -78,7 +92,9 @@ const onClickAnnouncement = () => {
       <div style="height: 100%; display: flex; flex-direction: column">
         <div style="padding: 8px; display: flex; justify-content: space-between">
           <span>群公告</span>
-          <el-icon style="cursor: pointer" @click="onClickAnnouncement"><ArrowRight /></el-icon>
+          <el-icon class="edit-announcement-icon" v-if="iAmManager" @click="onEditAnnouncement">
+            <Edit />
+          </el-icon>
         </div>
         <div class="announcement my-scrollbar">{{ announcement }}</div>
       </div>
@@ -117,6 +133,17 @@ const onClickAnnouncement = () => {
       word-wrap: break-word; //允许长单词换行
       word-break: break-all; //在任意字符处断行
     }
+  }
+}
+
+.edit-announcement-icon {
+  padding: 4px;
+  background-color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #dedfe0;
   }
 }
 </style>
