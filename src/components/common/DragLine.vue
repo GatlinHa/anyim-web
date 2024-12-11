@@ -40,7 +40,7 @@ const onMouseMove = (e) => {
     case 'top':
       height = dragData.value.height + dragData.value.pageY - e.pageY
       break
-    case 'botton':
+    case 'bottom':
       height = dragData.value.height + e.pageY - dragData.value.pageY
       break
   }
@@ -91,7 +91,7 @@ onUnmounted(() => {
     cursor: row-resize;
   }
 
-  &.drag-line-botton {
+  &.drag-line-bottom {
     bottom: 0;
     left: 0;
     height: 2px;

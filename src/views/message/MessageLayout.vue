@@ -75,6 +75,7 @@ const asideWidthMax = 500
 const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
+const announcementHeightInSide = ref(100)
 
 const msgListDiv = ref()
 const newMsgTips = ref({
@@ -357,6 +358,10 @@ const onInputBoxDragUpdate = ({ height }) => {
     ...settingData.inputBoxDrag,
     [myAccount.value]: height
   })
+}
+
+const onAnnouncementHeightInSideDragUpdate = ({ height }) => {
+  announcementHeightInSide.value = height
 }
 
 /**
@@ -962,116 +967,139 @@ const onConfirmSelect = async (selected) => {
           </div>
         </el-header>
         <el-main class="body">
-          <div class="show-message-box">
-            <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
-              数据加载中……
-            </div>
-            <div v-else-if="!selectedSession.lastMsgId" class="no-more-message">当前无更多消息</div>
-            <div
-              v-else
-              class="message-main my-scrollbar"
-              ref="msgListDiv"
-              @wheel="handleMsgListWheel"
-            >
-              <MessageItem
-                v-for="(item, index) in msgRecords"
-                :key="index"
-                :sessionId="selectedSessionId"
-                :msg="item"
-                :obj="getMsgSenderObj(item)"
-                :readMsgId="selectedSession.readMsgId"
-                :remoteRead="selectedSession.remoteRead"
-                :firstMsgId="firstMsgId"
-                :hasNoMoreMsg="hasNoMoreMsg"
-                :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
-                @loadMore="onLoadMore"
-                @showUserCard="onShowUserCard"
-                @showGroupCard="onShowGroupCard"
-              ></MessageItem>
-            </div>
-            <el-button
-              type="primary"
-              class="return-bottom"
-              :class="{ showIt: isShowReturnBottom }"
-              @click="onReturnBottom"
-            >
-              返回底部
-              <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
-            </el-button>
-            <el-button
-              type="primary"
-              class="bottom-tips"
-              :class="{ showIt: newMsgTips.isShowBottomTips }"
-              @click="onReturnBottom"
-            >
-              {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
-              <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
-            </el-button>
-            <el-button
-              type="primary"
-              class="top-tips"
-              :class="{ showIt: newMsgTips.isShowTopTips }"
-              @click="onReachFirstUnReadMsg"
-            >
-              {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
-              <el-icon class="el-icon--right"><ArrowUp /></el-icon>
-            </el-button>
-          </div>
-          <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
-            <el-container class="input-box-container">
-              <el-header class="input-box-header">
-                <DragLine
-                  direction="top"
-                  :min="inputBoxHeightMin"
-                  :max="inputBoxHeightMax"
-                  :origin-size="inputBoxHeight"
-                  @drag-update="onInputBoxDragUpdate"
-                ></DragLine>
-                <div class="tool-set">
-                  <div class="left-tools">
-                    <InputTool tips="表情">
-                      <template #iconSlot>
-                        <PictureRounded />
-                      </template>
-                    </InputTool>
-                    <InputTool tips="图片">
-                      <template #iconSlot>
-                        <Picture />
-                      </template>
-                    </InputTool>
-                    <InputTool tips="文件">
-                      <template #iconSlot>
-                        <FolderAdd />
-                      </template>
-                    </InputTool>
-                    <InputTool tips="代码">
-                      <template #iconSlot>
-                        <CreditCard />
-                      </template>
-                    </InputTool>
-                    <InputTool tips="位置">
-                      <template #iconSlot>
-                        <LocationInformation />
-                      </template>
-                    </InputTool>
-                  </div>
-                  <div class="right-tools">
-                    <InputTool tips="聊天记录">
-                      <template #iconSlot>
-                        <Clock />
-                      </template>
-                    </InputTool>
-                  </div>
-                </div>
-              </el-header>
-              <el-main class="input-box-main">
-                <InputEditor
+          <div class="show-main">
+            <div class="show-message-box">
+              <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
+                数据加载中……
+              </div>
+              <div v-else-if="!selectedSession.lastMsgId" class="no-more-message">
+                当前无更多消息
+              </div>
+              <div
+                v-else
+                class="message-main my-scrollbar"
+                ref="msgListDiv"
+                @wheel="handleMsgListWheel"
+              >
+                <MessageItem
+                  v-for="(item, index) in msgRecords"
+                  :key="index"
                   :sessionId="selectedSessionId"
-                  :draft="selectedSession.draft || ''"
-                  @sendMessage="handleSendMessage"
-                ></InputEditor>
-              </el-main>
-            </el-container>
+                  :msg="item"
+                  :obj="getMsgSenderObj(item)"
+                  :readMsgId="selectedSession.readMsgId"
+                  :remoteRead="selectedSession.remoteRead"
+                  :firstMsgId="firstMsgId"
+                  :hasNoMoreMsg="hasNoMoreMsg"
+                  :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
+                  @loadMore="onLoadMore"
+                  @showUserCard="onShowUserCard"
+                  @showGroupCard="onShowGroupCard"
+                ></MessageItem>
+              </div>
+              <el-button
+                type="primary"
+                class="return-bottom"
+                :class="{ showIt: isShowReturnBottom }"
+                @click="onReturnBottom"
+              >
+                返回底部
+                <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
+              </el-button>
+              <el-button
+                type="primary"
+                class="bottom-tips"
+                :class="{ showIt: newMsgTips.isShowBottomTips }"
+                @click="onReturnBottom"
+              >
+                {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
+                <el-icon class="el-icon--right"><ArrowDownBold /></el-icon>
+              </el-button>
+              <el-button
+                type="primary"
+                class="top-tips"
+                :class="{ showIt: newMsgTips.isShowTopTips }"
+                @click="onReachFirstUnReadMsg"
+              >
+                {{ newMsgTips.unreadCount > 99 ? `99+` : newMsgTips.unreadCount }}条未读消息
+                <el-icon class="el-icon--right"><ArrowUp /></el-icon>
+              </el-button>
+            </div>
+            <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
+              <el-container class="input-box-container">
+                <el-header class="input-box-header">
+                  <DragLine
+                    direction="top"
+                    :min="inputBoxHeightMin"
+                    :max="inputBoxHeightMax"
+                    :origin-size="inputBoxHeight"
+                    @drag-update="onInputBoxDragUpdate"
+                  ></DragLine>
+                  <div class="tool-set">
+                    <div class="left-tools">
+                      <InputTool tips="表情">
+                        <template #iconSlot>
+                          <PictureRounded />
+                        </template>
+                      </InputTool>
+                      <InputTool tips="图片">
+                        <template #iconSlot>
+                          <Picture />
+                        </template>
+                      </InputTool>
+                      <InputTool tips="文件">
+                        <template #iconSlot>
+                          <FolderAdd />
+                        </template>
+                      </InputTool>
+                      <InputTool tips="代码">
+                        <template #iconSlot>
+                          <CreditCard />
+                        </template>
+                      </InputTool>
+                      <InputTool tips="位置">
+                        <template #iconSlot>
+                          <LocationInformation />
+                        </template>
+                      </InputTool>
+                    </div>
+                    <div class="right-tools">
+                      <InputTool tips="聊天记录">
+                        <template #iconSlot>
+                          <Clock />
+                        </template>
+                      </InputTool>
+                    </div>
+                  </div>
+                </el-header>
+                <el-main class="input-box-main">
+                  <InputEditor
+                    :sessionId="selectedSessionId"
+                    :draft="selectedSession.draft || ''"
+                    @sendMessage="handleSendMessage"
+                  ></InputEditor>
+                </el-main>
+              </el-container>
+            </div>
+          </div>
+          <div
+            v-if="selectedSession.sessionType === MsgType.GROUP_CHAT"
+            class="show-right-aside bdr-l"
+          >
+            <div
+              class="announcement-in-side-wrapper bdr-b"
+              :style="{ height: announcementHeightInSide + 'px' }"
+            >
+              <div>群公告</div>
+              <DragLine
+                direction="bottom"
+                :min="100"
+                :max="400"
+                :origin-size="announcementHeightInSide"
+                @drag-update="onAnnouncementHeightInSideDragUpdate"
+              ></DragLine>
+            </div>
+            <div>群成员</div>
           </div>
         </el-main>
       </el-container>
@@ -1198,109 +1226,121 @@ const onConfirmSelect = async (selected) => {
         height: 100%;
         padding: 0;
         display: flex;
-        flex-direction: column;
-        overflow: hidden; // 禁用它的滚动条
-        position: relative;
 
-        .show-message-box {
-          width: 100%;
+        .show-main {
           display: flex;
+          flex-direction: column;
           flex: 1;
-          overflow: hidden;
-          position: relative;
 
-          .show-loading {
-            width: 100%;
-            height: 30px;
-            padding: 20px;
+          .show-message-box {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #409eff;
-            font-size: 14px;
-          }
+            flex: 1;
+            overflow: hidden;
+            position: relative;
 
-          .no-more-message {
-            width: 100%;
-            height: 30px;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            color: gray;
-            user-select: text;
-          }
+            .show-loading {
+              width: 100%;
+              height: 30px;
+              padding: 20px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              color: #409eff;
+              font-size: 14px;
+            }
 
-          .message-main {
-            width: 100%;
-            padding: 10px;
-            overflow-y: scroll; // 用它的滚动条
-          }
+            .no-more-message {
+              width: 100%;
+              height: 30px;
+              padding: 20px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              font-size: 14px;
+              color: gray;
+              user-select: text;
+            }
 
-          .return-bottom {
-            position: absolute;
-            left: 0px;
-            bottom: -40px;
-            transition: bottom 1s ease-in-out;
+            .message-main {
+              width: 100%;
+              padding: 10px;
+              overflow-y: scroll; // 用它的滚动条
+            }
 
-            &.showIt {
-              bottom: -2px;
+            .return-bottom {
+              position: absolute;
+              left: 0px;
+              bottom: -40px;
+              transition: bottom 1s ease-in-out;
+
+              &.showIt {
+                bottom: -2px;
+              }
+            }
+
+            .bottom-tips {
+              position: absolute;
+              right: 0%;
+              bottom: -40px;
+              transition: bottom 1s ease-in-out;
+
+              &.showIt {
+                bottom: -2px;
+              }
+            }
+
+            .top-tips {
+              position: absolute;
+              right: 0%;
+              top: -40px;
+              transition: top 1s ease-in-out;
+
+              &.showIt {
+                top: -2px;
+              }
             }
           }
 
-          .bottom-tips {
-            position: absolute;
-            right: 0%;
-            bottom: -40px;
-            transition: bottom 1s ease-in-out;
+          .input-box {
+            width: 100%;
+            display: flex;
+            position: relative;
 
-            &.showIt {
-              bottom: -2px;
+            .input-box-header {
+              width: 100%;
+              height: auto;
+              padding: 0;
+              display: flex;
+              flex-direction: column;
+
+              .tool-set {
+                display: flex;
+                justify-content: space-between;
+
+                .left-tools {
+                  display: flex;
+                }
+
+                .right-tools {
+                  margin-right: 10px;
+                }
+              }
             }
-          }
 
-          .top-tips {
-            position: absolute;
-            right: 0%;
-            top: -40px;
-            transition: top 1s ease-in-out;
-
-            &.showIt {
-              top: -2px;
+            .input-box-main {
+              width: 100%;
+              padding: 0;
             }
           }
         }
 
-        .input-box {
-          width: 100%;
+        .show-right-aside {
+          width: 200px;
           display: flex;
-          position: relative;
+          flex-direction: column;
 
-          .input-box-header {
-            width: 100%;
-            height: auto;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-
-            .tool-set {
-              display: flex;
-              justify-content: space-between;
-
-              .left-tools {
-                display: flex;
-              }
-
-              .right-tools {
-                margin-right: 10px;
-              }
-            }
-          }
-
-          .input-box-main {
-            width: 100%;
-            padding: 0;
+          .announcement-in-side-wrapper {
+            position: relative;
           }
         }
       }
