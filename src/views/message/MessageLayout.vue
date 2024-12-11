@@ -57,6 +57,7 @@ import router from '@/router'
 import { BEGIN_MSG_ID } from '@/const/msgConst'
 import EditDialog from '@/components/common/EditDialog.vue'
 import AddOprMenu from './components/AddOprMenu.vue'
+import MessageGroupRightSide from './components/MessageGroupRightSide.vue'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -75,7 +76,6 @@ const asideWidthMax = 500
 const inputBoxHeight = ref(0)
 const inputBoxHeightMin = 200
 const inputBoxHeightMax = 500
-const announcementHeightInSide = ref(100)
 
 const msgListDiv = ref()
 const newMsgTips = ref({
@@ -358,10 +358,6 @@ const onInputBoxDragUpdate = ({ height }) => {
     ...settingData.inputBoxDrag,
     [myAccount.value]: height
   })
-}
-
-const onAnnouncementHeightInSideDragUpdate = ({ height }) => {
-  announcementHeightInSide.value = height
 }
 
 /**
@@ -1082,25 +1078,10 @@ const onConfirmSelect = async (selected) => {
               </el-container>
             </div>
           </div>
-          <div
-            v-if="selectedSession.sessionType === MsgType.GROUP_CHAT"
-            class="show-right-aside bdr-l"
-          >
-            <div
-              class="announcement-in-side-wrapper bdr-b"
-              :style="{ height: announcementHeightInSide + 'px' }"
-            >
-              <div>群公告</div>
-              <DragLine
-                direction="bottom"
-                :min="100"
-                :max="400"
-                :origin-size="announcementHeightInSide"
-                @drag-update="onAnnouncementHeightInSideDragUpdate"
-              ></DragLine>
-            </div>
-            <div>群成员</div>
-          </div>
+          <MessageGroupRightSide
+            :sessionId="selectedSessionId"
+            @showGroupCard="onShowGroupCard"
+          ></MessageGroupRightSide>
         </el-main>
       </el-container>
     </el-main>
@@ -1331,16 +1312,6 @@ const onConfirmSelect = async (selected) => {
               width: 100%;
               padding: 0;
             }
-          }
-        }
-
-        .show-right-aside {
-          width: 200px;
-          display: flex;
-          flex-direction: column;
-
-          .announcement-in-side-wrapper {
-            position: relative;
           }
         }
       }
