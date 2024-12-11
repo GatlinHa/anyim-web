@@ -112,9 +112,10 @@ const onClickAnnouncement = () => {
       flex: 1;
       color: gray;
       overflow-y: scroll;
-      white-space: normal;
       user-select: text;
       white-space: pre-wrap; //给文本中的\n换行
+      word-wrap: break-word; //允许长单词换行
+      word-break: break-all; //在任意字符处断行
     }
   }
 }
