@@ -1,12 +1,13 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { MsgType } from '@/proto/msg'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, Search } from '@element-plus/icons-vue'
 import { userStore, settingStore, messageStore, groupStore, groupCardStore } from '@/stores'
 import DragLine from '@/components/common/DragLine.vue'
+import GroupMembersTable from '@/components/common/GroupMembersTable.vue'
 
 const props = defineProps(['sessionId'])
-const emit = defineEmits(['showGroupCard'])
+const emit = defineEmits(['showGroupCard', 'openSession'])
 
 const userData = userStore()
 const settingData = settingStore()
@@ -17,6 +18,10 @@ const groupCardData = groupCardStore()
 const msgGroupRightSideWidth = ref(0)
 const announcementInSideHeight = ref(0)
 
+const searchRef = ref()
+const searchMode = ref(false)
+const memberSearchKey = ref('')
+
 const myAccount = computed(() => {
   return userData.user.account
 })
@@ -24,6 +29,12 @@ const myAccount = computed(() => {
 onMounted(() => {
   msgGroupRightSideWidth.value = settingData.msgGroupRightSideDrag[myAccount.value] || 200
   announcementInSideHeight.value = settingData.announcementInSideDrag[myAccount.value] || 100
+
+  document.addEventListener('click', clickListener)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', clickListener)
 })
 
 const sessionType = computed(() => {
@@ -38,6 +49,11 @@ const announcement = computed(() => {
   return groupData.groupInfoList[groupId.value].announcement || '暂无公告'
 })
 
+const membersCount = computed(() => {
+  const members = groupData.groupMembersList[groupId.value]
+  return members ? Object.keys(members).length : 0
+})
+
 const iAmManager = computed(() => {
   const members = groupData.groupMembersList[groupId.value]
   if (members) {
@@ -46,6 +62,15 @@ const iAmManager = computed(() => {
     return false
   }
 })
+
+const clickListener = (e) => {
+  if (!searchMode.value) return
+  // 鼠标点击搜索框以外区域，则关闭卡片
+  if (!searchRef.value?.$el.contains(e.target)) {
+    searchMode.value = false
+    memberSearchKey.value = ''
+  }
+}
 
 const onMsgGroupRightSideWidthDragUpdate = ({ width }) => {
   msgGroupRightSideWidth.value = width
@@ -70,6 +95,18 @@ const onEditAnnouncement = () => {
     groupCardData.setShowModel('editAnnouncement')
   }, 100)
 }
+
+const onSwitchSearchMode = () => {
+  memberSearchKey.value = ''
+  searchMode.value = true
+  nextTick(() => {
+    searchRef.value.focus()
+  })
+}
+
+const onOpenSession = (obj) => {
+  emit('openSession', obj)
+}
 </script>
 
 <template>
@@ -90,9 +127,14 @@ const onEditAnnouncement = () => {
       :style="{ height: announcementInSideHeight + 'px' }"
     >
       <div style="height: 100%; display: flex; flex-direction: column">
-        <div style="padding: 8px; display: flex; justify-content: space-between">
+        <div style="padding: 10px; display: flex; justify-content: space-between">
           <span>群公告</span>
-          <el-icon class="edit-announcement-icon" v-if="iAmManager" @click="onEditAnnouncement">
+          <el-icon
+            class="edit-announcement"
+            v-if="iAmManager"
+            title="修改群公告"
+            @click.stop="onEditAnnouncement"
+          >
             <Edit />
           </el-icon>
         </div>
@@ -106,7 +148,30 @@ const onEditAnnouncement = () => {
         @drag-update="onAnnouncementInSideHeightDragUpdate"
       ></DragLine>
     </div>
-    <div>群成员</div>
+    <div class="members-in-side-wrapper">
+      <div
+        v-if="!searchMode"
+        style="height: 24px; padding: 10px; display: flex; justify-content: space-between"
+      >
+        <span>群组成员 ({{ membersCount }})</span>
+        <el-icon class="search-member" title="搜索成员" @click.stop="onSwitchSearchMode">
+          <Search />
+        </el-icon>
+      </div>
+      <el-input
+        v-else
+        ref="searchRef"
+        v-model="memberSearchKey"
+        placeholder="搜索：群内昵称/账号"
+        :prefix-icon="Search"
+        :clearable="true"
+      ></el-input>
+      <GroupMembersTable
+        :groupId="groupId"
+        :memberSearchKey="memberSearchKey"
+        @openSession="onOpenSession"
+      ></GroupMembersTable>
+    </div>
   </div>
 </template>
 
@@ -120,6 +185,7 @@ const onEditAnnouncement = () => {
 
   .announcement-in-side-wrapper {
     position: relative;
+    margin: 2px;
 
     .announcement {
       height: 0;
@@ -134,9 +200,24 @@ const onEditAnnouncement = () => {
       word-break: break-all; //在任意字符处断行
     }
   }
+
+  .members-in-side-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin: 2px;
+
+    .el-input {
+      height: 44px;
+      padding: 10px;
+      :deep(.el-input__wrapper) {
+        border-radius: 25px;
+      }
+    }
+  }
 }
 
-.edit-announcement-icon {
+.edit-announcement,
+.search-member {
   padding: 4px;
   background-color: transparent;
   border-radius: 4px;

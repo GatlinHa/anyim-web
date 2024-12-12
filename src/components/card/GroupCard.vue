@@ -254,7 +254,7 @@ const onAddmember = () => {
   groupCardData.setChangeMemberModel('addMember')
 }
 
-const delAddmember = () => {
+const delMember = () => {
   isShowSelectDialog.value = true
   groupCardData.setChangeMemberModel('delMember')
 }
@@ -499,7 +499,7 @@ const setMute = (account, mode) => {
 
 const onSpecifyManager = (userInfo) => {
   ElMessageBox.confirm(
-    `是否要将${userInfo.nickName}(${userInfo.account})设置为管理员？`,
+    `是否要将${userInfo.nickName}(${userInfo.account})设为管理员？`,
     '温馨提示',
     {
       type: 'warning',
@@ -828,7 +828,7 @@ const onConfirmSingleSelect = (selected) => {
             <div class="text">添加成员</div>
           </div>
           <div class="group-card-members-grid-item" v-if="isShowDelButton">
-            <DeleteButton :size="40" @click="delAddmember"></DeleteButton>
+            <DeleteButton :size="40" @click="delMember"></DeleteButton>
             <div class="text">移除成员</div>
           </div>
         </div>
@@ -1043,7 +1043,7 @@ const onConfirmSingleSelect = (selected) => {
     <div v-if="showModel === 'members'" class="show-all-members">
       <el-input
         v-model.trim="memberSearchKey"
-        placeholder="搜索: 群组成员昵称/账号"
+        placeholder="搜索: 群内昵称/账号"
         :prefix-icon="Search"
         :clearable="true"
       />
@@ -1152,7 +1152,7 @@ const onConfirmSingleSelect = (selected) => {
                 :icon="Avatar"
                 size="small"
                 circle
-                title="设置为管理员"
+                title="设为管理员"
                 style="margin-left: 2px"
                 @click="onSpecifyManager(scope.row)"
               />

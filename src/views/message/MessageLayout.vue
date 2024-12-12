@@ -1081,6 +1081,7 @@ const onConfirmSelect = async (selected) => {
           <MessageGroupRightSide
             :sessionId="selectedSessionId"
             @showGroupCard="onShowGroupCard"
+            @openSession="onOpenSession"
           ></MessageGroupRightSide>
         </el-main>
       </el-container>
