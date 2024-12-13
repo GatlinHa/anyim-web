@@ -26,6 +26,7 @@ import {
 import { MsgType } from '@/proto/msg'
 import router from '@/router'
 import GroupMembersTable from '../common/GroupMembersTable.vue'
+import { msgChatCreateSessionService } from '@/api/message'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -434,9 +435,41 @@ const updateAnnouncement = () => {
     })
 }
 
-const onOpenSession = (obj) => {
-  console.log('onOpenSession', obj)
-  // TODO 要关闭groupcard
+const onOpenSession = async ({ msgType, objectInfo }) => {
+  if (myAccount.value === objectInfo.account) {
+    console.log('暂不支持自己给自己发消息') //TODO
+    return
+  }
+
+  const sessionId = combineId(myAccount.value, objectInfo.account)
+  const remoteId = objectInfo.accoun
+
+  if (messageData.sessionList[sessionId]) {
+    groupCardData.setIsShow(false)
+    groupCardData.setGroupId('')
+    router.push({
+      path: '/message',
+      query: {
+        sessionId: sessionId
+      }
+    })
+  } else {
+    msgChatCreateSessionService({
+      sessionId: sessionId,
+      remoteId: remoteId,
+      sessionType: msgType
+    }).then((res) => {
+      messageData.addSession(res.data.data)
+      groupCardData.setIsShow(false)
+      groupCardData.setGroupId('')
+      router.push({
+        path: '/message',
+        query: {
+          sessionId: sessionId
+        }
+      })
+    })
+  }
 }
 
 const myGroupNickNameRef = ref()
@@ -1015,6 +1048,7 @@ const onClick = () => {
       .el-input {
         .el-input__wrapper {
           border-radius: 25px;
+          margin-bottom: 10px;
         }
       }
     }

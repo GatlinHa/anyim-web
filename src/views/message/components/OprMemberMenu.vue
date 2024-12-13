@@ -235,6 +235,7 @@ const handleClick = (item) => {
   border-radius: 6px;
   background-color: #fff;
   position: fixed;
+  box-shadow: 5px 5px 20px gray;
   z-index: 1; //因为el-drawer的遮罩元素的z-index是1，这里如果不改菜单出不来
 
   .menu-item {
