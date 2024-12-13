@@ -604,6 +604,13 @@ const onConfirmSingleSelect = (selected) => {
       loadingInstance.close()
     })
 }
+
+/**
+ * 在el-drawer上所有的document监听的click事件都不会触发，这里要把click事件抛给document
+ */
+const onClick = () => {
+  document.dispatchEvent(new Event('click'))
+}
 </script>
 
 <template>
@@ -616,6 +623,7 @@ const onConfirmSingleSelect = (selected) => {
     modal-class="group-card-modal"
     :show-close="false"
     @close="groupCardData.setIsShow(false)"
+    @click="onClick"
   >
     <template #header>
       <div style="height: 24px; display: flex">
