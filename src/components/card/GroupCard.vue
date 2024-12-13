@@ -948,9 +948,11 @@ const onClick = () => {
         :clearable="true"
       />
       <GroupMembersTable
+        class="my-scrollbar"
         :groupId="groupCardData.groupId"
         :memberSearchKey="memberSearchKey"
         @openSession="onOpenSession"
+        style="padding: 0 4px 0 8px; overflow-y: scroll"
       ></GroupMembersTable>
     </div>
   </el-drawer>

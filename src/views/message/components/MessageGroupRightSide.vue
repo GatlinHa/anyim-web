@@ -66,8 +66,11 @@ const iAmAdmin = computed(() => {
 
 const clickListener = (e) => {
   if (!searchMode.value) return
-  // 鼠标点击搜索框及成员列表以外区域，则关闭卡片
-  if (!searchRef.value?.$el.contains(e.target) && !groupMembersRef.value?.$el.contains(e.target)) {
+  if (
+    !searchRef.value?.$el.contains(e.target) &&
+    !groupMembersRef.value?.$el.contains(e.target) &&
+    !e.target.closest('.member-context-menu')
+  ) {
     searchMode.value = false
     memberSearchKey.value = ''
   }
@@ -150,10 +153,7 @@ const onOpenSession = (obj) => {
       ></DragLine>
     </div>
     <div class="members-in-side-wrapper">
-      <div
-        v-if="!searchMode"
-        style="height: 24px; padding: 10px; display: flex; justify-content: space-between"
-      >
+      <div v-if="!searchMode" style="padding: 10px; display: flex; justify-content: space-between">
         <span>群组成员 ({{ membersCount }})</span>
         <el-icon class="search-member" title="搜索成员" @click.stop="onSwitchSearchMode">
           <Search />
@@ -168,11 +168,12 @@ const onOpenSession = (obj) => {
         :clearable="true"
       ></el-input>
       <GroupMembersTable
+        class="my-scrollbar"
         ref="groupMembersRef"
         :groupId="groupId"
         :memberSearchKey="memberSearchKey"
         @openSession="onOpenSession"
-        style="padding: 0 4px 0 8px"
+        style="padding: 0 4px 0 8px; overflow-y: scroll"
       ></GroupMembersTable>
     </div>
   </div>
@@ -205,12 +206,14 @@ const onOpenSession = (obj) => {
   }
 
   .members-in-side-wrapper {
+    height: 0;
     display: flex;
+    flex: 1;
     flex-direction: column;
     margin: 2px;
 
     .el-input {
-      height: 44px;
+      height: 42px;
       padding: 10px;
       :deep(.el-input__wrapper) {
         border-radius: 25px;

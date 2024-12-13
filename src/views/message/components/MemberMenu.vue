@@ -213,13 +213,18 @@ const handleClick = (item) => {
     <Teleport to="body">
       <div
         v-if="isShowMenu"
-        class="context-menu"
+        class="member-context-menu"
         :style="{ left: x + 'px', top: y + 'px' }"
         @contextmenu.prevent
         ref="menuRef"
       >
         <div class="menu-list">
-          <div class="menu-item" v-for="item in menu" :key="item.label" @click="handleClick(item)">
+          <div
+            class="member-menu-item"
+            v-for="item in menu"
+            :key="item.label"
+            @click="handleClick(item)"
+          >
             <component class="menu-icon" :is="item.icon" />
             <span class="menu-desc text-ellipsis">{{ item.desc }}</span>
           </div>
@@ -230,7 +235,7 @@ const handleClick = (item) => {
 </template>
 
 <style lang="scss" scoped>
-.context-menu {
+.member-context-menu {
   padding: 5px;
   border-radius: 6px;
   background-color: #fff;
@@ -238,7 +243,7 @@ const handleClick = (item) => {
   box-shadow: 2px 2px 20px gray;
   z-index: 1; //因为el-drawer的遮罩元素的z-index是1，这里如果不改菜单出不来
 
-  .menu-item {
+  .member-menu-item {
     padding: 5px;
     padding-left: 10px;
     padding-right: 10px;

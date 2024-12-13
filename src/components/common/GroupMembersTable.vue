@@ -13,7 +13,7 @@ import {
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
-import OprMemberMenu from '@/views/message/components/OprMemberMenu.vue'
+import MemberMenu from '@/views/message/components/MemberMenu.vue'
 import { MsgType } from '@/proto/msg'
 
 const props = defineProps(['groupId', 'memberSearchKey'])
@@ -368,7 +368,7 @@ const onSelectMenu = (item) => {
 </script>
 
 <template>
-  <OprMemberMenu :groupId="props.groupId" :account="showMenuAccount" @selectMenu="onSelectMenu">
+  <MemberMenu :groupId="props.groupId" :account="showMenuAccount" @selectMenu="onSelectMenu">
     <el-table
       class="group-members-table"
       :data="showMembersArrSorted"
@@ -459,7 +459,7 @@ const onSelectMenu = (item) => {
         </template>
       </el-table-column>
     </el-table>
-  </OprMemberMenu>
+  </MemberMenu>
 </template>
 
 <style lang="scss" scoped>
