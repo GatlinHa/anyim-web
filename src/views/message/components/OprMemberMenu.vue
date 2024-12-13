@@ -102,7 +102,11 @@ const lable_queryInfo = ref({
 
 const menu = computed(() => {
   if (memberIsSelf.value) {
-    return [lable_queryInfo.value]
+    if (memberIsManager.value) {
+      return [lable_queryInfo.value, lable_setMuted.value]
+    } else {
+      return [lable_queryInfo.value]
+    }
   } else if (iAmOwner.value) {
     return [
       lable_sendMsg.value,
@@ -173,8 +177,12 @@ const handleSessionMenu = (e) => {
   isShowMenu.value = true
 
   nextTick(() => {
-    //因为成员列表是在浏览器最右边，菜单要在鼠标点击的左侧展开，因此要减去菜单框的宽度
-    x.value = e.clientX - menuRef.value.clientWidth
+    //如果发现菜单超出window.innerWidth屏幕宽度，x要修正一下，往左边弹出菜单
+    if (e.clientX + menuRef.value.clientWidth > window.innerWidth) {
+      x.value = e.clientX - menuRef.value.clientWidth
+    } else {
+      x.value = e.clientX
+    }
 
     // 如果发现菜单超出window.innerHeight屏幕高度，y要修正一下，往上面弹出菜单
     if (e.clientY + menuRef.value.clientHeight > window.innerHeight) {
@@ -227,6 +235,7 @@ const handleClick = (item) => {
   border-radius: 6px;
   background-color: #fff;
   position: fixed;
+  z-index: 1; //因为el-drawer的遮罩元素的z-index是1，这里如果不改菜单出不来
 
   .menu-item {
     padding: 5px;

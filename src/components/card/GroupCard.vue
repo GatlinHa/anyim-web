@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
-import { Avatar, Search, Mute, ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
+import { Search, ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
 import { el_loading_options } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
@@ -18,15 +18,14 @@ import {
   groupAddMembersService,
   groupDelMembersService,
   groupUpdateInfoService,
-  groupChangeRoleService,
   groupUpdateNickNameInGroupService,
   groupLeaveService,
   groupDropService,
-  groupOwnerTransferService,
-  groupUpdateMuteService
+  groupOwnerTransferService
 } from '@/api/group'
 import { MsgType } from '@/proto/msg'
 import router from '@/router'
+import GroupMembersTable from '../common/GroupMembersTable.vue'
 
 const groupData = groupStore()
 const userData = userStore()
@@ -435,144 +434,9 @@ const updateAnnouncement = () => {
     })
 }
 
-const isShowSpecifyManagerButton = (role) => {
-  if (iAmOwner.value && role === 0) {
-    return true
-  } else {
-    return false
-  }
-}
-
-const isShowCancelManagerButton = (role) => {
-  if (iAmOwner.value && role === 1) {
-    return true
-  } else {
-    return false
-  }
-}
-
-const isMuted = (mutedMode) => {
-  if (mutedMode === 1 || (groupInfo.value.allMuted && mutedMode !== 2)) {
-    return true
-  } else {
-    return false
-  }
-}
-
-let setMuteTimer
-const setMute = (account, mode) => {
-  let mutedMode
-  if (groupInfo.value.allMuted) {
-    // 全员禁言模式下对某个成员取消禁言就是把mutedMode置为2(白名单), 设置禁言就是把mutedMode置为0(从白名单剔除)
-    mutedMode = mode === 'cancle' ? 2 : 0
-  } else {
-    // 非全员禁言模式下对某个成员设置禁言就是把mutedMode置为1(黑名单), 取消禁言就是把mutedMode置为0(从黑名单剔除)
-    mutedMode = mode === 'set' ? 1 : 0
-  }
-
-  clearTimeout(setMuteTimer)
-  setMuteTimer = setTimeout(() => {
-    const loadingInstance = ElLoading.service(el_loading_options)
-    groupUpdateMuteService({
-      groupId: groupCardData.groupId,
-      account: account,
-      mutedMode: mutedMode
-    })
-      .then((res) => {
-        if (res.data.code === 0) {
-          groupData.setOneOfGroupMembers({
-            groupId: groupCardData.groupId,
-            account: account,
-            userInfo: {
-              ...showMembers.value[account],
-              mutedMode: mutedMode
-            }
-          })
-          ElMessage.success('设置成功')
-        }
-      })
-      .finally(() => {
-        loadingInstance.close()
-      })
-  }, 300)
-}
-
-const onSpecifyManager = (userInfo) => {
-  ElMessageBox.confirm(
-    `是否要将${userInfo.nickName}(${userInfo.account})设为管理员？`,
-    '温馨提示',
-    {
-      type: 'warning',
-      confirmButtonText: '确认',
-      cancelButtonText: '取消'
-    }
-  )
-    .then(() => {
-      const loadingInstance = ElLoading.service(el_loading_options)
-      groupChangeRoleService({
-        groupId: groupCardData.groupId,
-        account: userInfo.account,
-        role: 1
-      })
-        .then((res) => {
-          if (res.data.code === 0) {
-            groupData.setOneOfGroupMembers({
-              groupId: groupCardData.groupId,
-              account: userInfo.account,
-              userInfo: {
-                ...userInfo,
-                role: 1
-              }
-            })
-            ElMessage.success('设置成功')
-          }
-        })
-        .finally(() => {
-          loadingInstance.close()
-        })
-    })
-    .catch(() => {
-      // do nothing
-    })
-}
-
-const onCancelManager = (userInfo) => {
-  ElMessageBox.confirm(
-    `是否要取消${userInfo.nickName}(${userInfo.account})的管理员权限？`,
-    '温馨提示',
-    {
-      type: 'warning',
-      confirmButtonText: '确认',
-      cancelButtonText: '取消'
-    }
-  )
-    .then(() => {
-      const loadingInstance = ElLoading.service(el_loading_options)
-      groupChangeRoleService({
-        groupId: groupCardData.groupId,
-        account: userInfo.account,
-        role: 0
-      })
-        .then((res) => {
-          if (res.data.code === 0) {
-            groupData.setOneOfGroupMembers({
-              groupId: groupCardData.groupId,
-              account: userInfo.account,
-              userInfo: {
-                ...userInfo,
-                role: 0
-              }
-            })
-            ElMessage.success('取消成功')
-          }
-        })
-        .finally(() => {
-          loadingInstance.close()
-        })
-    })
-    .catch(() => {
-      // do nothing
-    })
+const onOpenSession = (obj) => {
+  console.log('onOpenSession', obj)
+  // TODO 要关闭groupcard
 }
 
 const myGroupNickNameRef = ref()
@@ -1047,129 +911,11 @@ const onConfirmSingleSelect = (selected) => {
         :prefix-icon="Search"
         :clearable="true"
       />
-      <el-table :data="showMembersArrSorted" :show-header="false">
-        <el-table-column>
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <UserAvatarIcon
-                :showName="scope.row.nickName"
-                :showId="scope.row.account"
-                :showAvatarThumb="scope.row.avatarThumb"
-                :userStatus="scope.row.status"
-                :size="'small'"
-                @click="onShowUserCard(scope.row.account)"
-              ></UserAvatarIcon>
-              <div
-                style="
-                  margin-left: 5px;
-                  display: flex;
-                  flex-direction: column;
-                  flex: 1;
-                  width: 0;
-                  user-select: text;
-                "
-              >
-                <span
-                  class="text-ellipsis"
-                  :title="scope.row.nickName"
-                  style="height: 20px; font-size: 14px"
-                >
-                  {{ scope.row.nickName }}
-                </span>
-                <span
-                  class="text-ellipsis"
-                  :title="scope.row.account"
-                  style="height: 20px; font-size: 12px"
-                >
-                  {{ scope.row.account }}
-                </span>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column width="64">
-          <template #default="scope">
-            <div
-              v-if="scope.row.role === 2"
-              style="
-                font-size: 12px;
-                background-color: rgb(250, 181.5, 181.5);
-                text-align: center;
-                border-radius: 4px;
-              "
-            >
-              群主
-            </div>
-            <div
-              v-else-if="scope.row.role === 1"
-              style="
-                font-size: 12px;
-                background-color: rgb(179, 224.5, 156.5);
-                text-align: center;
-                border-radius: 4px;
-              "
-            >
-              管理员
-            </div>
-            <div
-              v-else
-              style="
-                font-size: 12px;
-                background-color: #dcdfe6;
-                text-align: center;
-                border-radius: 4px;
-              "
-            >
-              成员
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="iAmManager" width="80">
-          <template #default="scope">
-            <div style="display: flex">
-              <el-button
-                v-if="isMuted(scope.row.mutedMode)"
-                class="cancle-mute-btn"
-                type="info"
-                :icon="Mute"
-                size="small"
-                circle
-                title="取消禁言"
-                @click="setMute(scope.row.account, 'cancle')"
-              />
-              <el-button
-                v-else
-                class="set-mute-btn"
-                :icon="Mute"
-                size="small"
-                circle
-                title="设置禁言"
-                @click="setMute(scope.row.account, 'set')"
-              />
-              <el-button
-                v-if="isShowSpecifyManagerButton(scope.row.role)"
-                type="primary"
-                :icon="Avatar"
-                size="small"
-                circle
-                title="设为管理员"
-                style="margin-left: 2px"
-                @click="onSpecifyManager(scope.row)"
-              />
-              <el-button
-                v-if="isShowCancelManagerButton(scope.row.role)"
-                type="info"
-                :icon="Avatar"
-                size="small"
-                circle
-                title="取消管理员"
-                style="margin-left: 2px"
-                @click="onCancelManager(scope.row)"
-              />
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <GroupMembersTable
+        :groupId="groupCardData.groupId"
+        :memberSearchKey="memberSearchKey"
+        @openSession="onOpenSession"
+      ></GroupMembersTable>
     </div>
   </el-drawer>
   <SelectDialog
@@ -1262,34 +1008,6 @@ const onConfirmSingleSelect = (selected) => {
         .el-input__wrapper {
           border-radius: 25px;
         }
-      }
-
-      .el-table {
-        width: 100%;
-        margin-top: 10px;
-      }
-
-      .el-table__cell {
-        padding: 2px 0 2px 0;
-      }
-
-      .el-table__row {
-        :hover {
-          --mute-button-color: rgb(255, 255, 255);
-          --mute-button-bgc: rgb(144, 147, 153);
-          --mute-button-border: unset;
-        }
-      }
-
-      .cancle-mute-btn {
-        color: var(--mute-button-color);
-        background-color: var(--mute-button-bgc);
-      }
-
-      .set-mute-btn {
-        color: var(--mute-button-color, transparent);
-        background-color: var(--mute-button-bgc, transparent);
-        border: var(--mute-button-border, unset);
       }
     }
   }
