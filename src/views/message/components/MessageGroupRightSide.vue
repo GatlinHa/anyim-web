@@ -19,6 +19,7 @@ const msgGroupRightSideWidth = ref(0)
 const announcementInSideHeight = ref(0)
 
 const searchRef = ref()
+const groupMembersRef = ref()
 const searchMode = ref(false)
 const memberSearchKey = ref('')
 
@@ -65,8 +66,8 @@ const iAmAdmin = computed(() => {
 
 const clickListener = (e) => {
   if (!searchMode.value) return
-  // 鼠标点击搜索框以外区域，则关闭卡片
-  if (!searchRef.value?.$el.contains(e.target)) {
+  // 鼠标点击搜索框及成员列表以外区域，则关闭卡片
+  if (!searchRef.value?.$el.contains(e.target) && !groupMembersRef.value?.$el.contains(e.target)) {
     searchMode.value = false
     memberSearchKey.value = ''
   }
@@ -167,6 +168,7 @@ const onOpenSession = (obj) => {
         :clearable="true"
       ></el-input>
       <GroupMembersTable
+        ref="groupMembersRef"
         :groupId="groupId"
         :memberSearchKey="memberSearchKey"
         @openSession="onOpenSession"
