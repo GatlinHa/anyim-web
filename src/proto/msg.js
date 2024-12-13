@@ -296,8 +296,8 @@ export const Msg = ($root.Msg = (() => {
  * @property {number} SYS_GROUP_CREATE=21 SYS_GROUP_CREATE value
  * @property {number} SYS_GROUP_ADD_MEMBER=22 SYS_GROUP_ADD_MEMBER value
  * @property {number} SYS_GROUP_DEL_MEMBER=23 SYS_GROUP_DEL_MEMBER value
- * @property {number} SYS_GROUP_SET_MANAGER=24 SYS_GROUP_SET_MANAGER value
- * @property {number} SYS_GROUP_CANCEL_MANAGER=25 SYS_GROUP_CANCEL_MANAGER value
+ * @property {number} SYS_GROUP_SET_ADMIN=24 SYS_GROUP_SET_ADMIN value
+ * @property {number} SYS_GROUP_CANCEL_ADMIN=25 SYS_GROUP_CANCEL_ADMIN value
  * @property {number} SYS_GROUP_SET_ALL_MUTED=26 SYS_GROUP_SET_ALL_MUTED value
  * @property {number} SYS_GROUP_CANCEL_ALL_MUTED=27 SYS_GROUP_CANCEL_ALL_MUTED value
  * @property {number} SYS_GROUP_SET_JOIN_APPROVAL=28 SYS_GROUP_SET_JOIN_APPROVAL value
@@ -332,8 +332,8 @@ export const MsgType = ($root.MsgType = (() => {
   values[(valuesById[21] = 'SYS_GROUP_CREATE')] = 21
   values[(valuesById[22] = 'SYS_GROUP_ADD_MEMBER')] = 22
   values[(valuesById[23] = 'SYS_GROUP_DEL_MEMBER')] = 23
-  values[(valuesById[24] = 'SYS_GROUP_SET_MANAGER')] = 24
-  values[(valuesById[25] = 'SYS_GROUP_CANCEL_MANAGER')] = 25
+  values[(valuesById[24] = 'SYS_GROUP_SET_ADMIN')] = 24
+  values[(valuesById[25] = 'SYS_GROUP_CANCEL_ADMIN')] = 25
   values[(valuesById[26] = 'SYS_GROUP_SET_ALL_MUTED')] = 26
   values[(valuesById[27] = 'SYS_GROUP_CANCEL_ALL_MUTED')] = 27
   values[(valuesById[28] = 'SYS_GROUP_SET_JOIN_APPROVAL')] = 28
@@ -647,11 +647,11 @@ export const Header = ($root.Header = (() => {
       case 23:
         message.msgType = 23
         break
-      case 'SYS_GROUP_SET_MANAGER':
+      case 'SYS_GROUP_SET_ADMIN':
       case 24:
         message.msgType = 24
         break
-      case 'SYS_GROUP_CANCEL_MANAGER':
+      case 'SYS_GROUP_CANCEL_ADMIN':
       case 25:
         message.msgType = 25
         break
@@ -822,7 +822,7 @@ export const Body = ($root.Body = (() => {
    * | 10 | tempMsgId    |   -  |    -      |  O  |     O     |     O    |        O       |    M     |       todo        |         todo        |
    * | 11 | sessionId    |   -  |    -      |  M  |     M     |     M    |        M       |    M     |       todo        |         todo        |
    * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+-------------------+---------------------+
-   * NO       filed      STATUS_REQ   STATUS_RES   STATUS_SYNC  SYS_GROUP_CREATE
+   * NO       filed      STATUS_REQ   STATUS_RES   STATUS_SYNC  SYS_GROUP_XXX
    * +----+--------------+------------+------------+-------------+------------+
    * | 1  | fromId       |      M     |      M     |      M      |      -     |
    * | 2  | fromClient   |      M     |      M     |      M      |      -     |

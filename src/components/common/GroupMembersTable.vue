@@ -61,7 +61,7 @@ const onOpenSession = () => {
 }
 
 const mutedButtonTitle = (mutedMode) => {
-  if (!iAmManager.value) return ''
+  if (!iAmAdmin.value) return ''
   return isMuted(mutedMode) ? '取消禁言' : '禁言'
 }
 
@@ -75,7 +75,7 @@ const isMuted = (mutedMode) => {
 
 let setMutedTimer
 const setMuted = (account, mode) => {
-  if (!iAmManager.value) return
+  if (!iAmAdmin.value) return
 
   let mutedMode
   if (groupInfo.value.allMuted) {
@@ -113,11 +113,11 @@ const setMuted = (account, mode) => {
   }, 300)
 }
 
-const iAmManager = computed(() => {
+const iAmAdmin = computed(() => {
   return showMembers.value[myAccount.value]?.role > 0
 })
 
-const setManager = (userInfo) => {
+const setAdmin = (userInfo) => {
   ElMessageBox.confirm(
     `是否要将 ${userInfo.nickName}(${userInfo.account}) 设为管理员？`,
     '温馨提示',
@@ -156,7 +156,7 @@ const setManager = (userInfo) => {
     })
 }
 
-const cancelManager = (userInfo) => {
+const cancelAdmin = (userInfo) => {
   ElMessageBox.confirm(
     `是否要取消 ${userInfo.nickName}(${userInfo.account}) 的管理员权限？`,
     '温馨提示',
@@ -315,7 +315,7 @@ const showMenuMember = computed(() => {
   return showMembers.value[showMenuAccount.value]
 })
 
-const showMenuMemberIsManager = computed(() => {
+const showMenuMemberIsAdmin = computed(() => {
   return showMenuMember.value.role > 0
 })
 
@@ -345,11 +345,11 @@ const onSelectMenu = (item) => {
     case 'setMuted':
       setMuted(showMenuAccount.value, isMuted(showMenuMember.value.mutedMode) ? 'cancle' : 'set')
       break
-    case 'setManager':
-      if (showMenuMemberIsManager.value) {
-        cancelManager(showMenuMember.value)
+    case 'setAdmin':
+      if (showMenuMemberIsAdmin.value) {
+        cancelAdmin(showMenuMember.value)
       } else {
-        setManager(showMenuMember.value)
+        setAdmin(showMenuMember.value)
       }
       break
     case 'delete':
@@ -490,7 +490,7 @@ const onSelectMenu = (item) => {
   }
 
   .el-button-muted {
-    cursor: v-bind('iAmManager ? "pointer": "default"');
+    cursor: v-bind('iAmAdmin ? "pointer": "default"');
   }
 
   .muted-active {
@@ -500,7 +500,7 @@ const onSelectMenu = (item) => {
   .muted-not-active {
     opacity: 0;
     &:hover {
-      opacity: v-bind('iAmManager ? 1: 0');
+      opacity: v-bind('iAmAdmin ? 1: 0');
     }
   }
 }

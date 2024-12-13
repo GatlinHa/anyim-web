@@ -277,8 +277,8 @@ class WsConnect {
     this.events[MsgType.SYS_GROUP_CREATE] = callback
     this.events[MsgType.SYS_GROUP_ADD_MEMBER] = callback
     this.events[MsgType.SYS_GROUP_DEL_MEMBER] = callback
-    this.events[MsgType.SYS_GROUP_SET_MANAGER] = callback
-    this.events[MsgType.SYS_GROUP_CANCEL_MANAGER] = callback
+    this.events[MsgType.SYS_GROUP_SET_ADMIN] = callback
+    this.events[MsgType.SYS_GROUP_CANCEL_ADMIN] = callback
     this.events[MsgType.SYS_GROUP_SET_ALL_MUTED] = callback
     this.events[MsgType.SYS_GROUP_CANCEL_ALL_MUTED] = callback
     this.events[MsgType.SYS_GROUP_SET_JOIN_APPROVAL] = callback

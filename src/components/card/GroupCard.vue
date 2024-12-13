@@ -150,7 +150,7 @@ const iAmOwner = computed(() => {
   return showMembers.value[myAccount.value]?.role === 2
 })
 
-const iAmManager = computed(() => {
+const iAmAdmin = computed(() => {
   return showMembers.value[myAccount.value]?.role > 0
 })
 
@@ -159,7 +159,7 @@ const iAmManager = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowAddButton = computed(() => {
-  if (groupInfo.value?.joinGroupApproval || iAmManager.value) {
+  if (groupInfo.value?.joinGroupApproval || iAmAdmin.value) {
     return true
   } else {
     return false
@@ -171,7 +171,7 @@ const isShowAddButton = computed(() => {
  * @param memberInfo 成员信息
  */
 const isShowDelButton = computed(() => {
-  if (iAmManager.value) {
+  if (iAmAdmin.value) {
     return true
   } else {
     return false
@@ -739,7 +739,7 @@ const onClick = () => {
           {{ groupInfo.announcement || '暂无公告' }}
         </el-text>
         <el-icon
-          v-if="iAmManager"
+          v-if="iAmAdmin"
           class="edit"
           size="20"
           title="修改群公告"
@@ -796,7 +796,7 @@ const onClick = () => {
               <el-button :icon="ArrowRight" size="small" circle @click="levelGroup" />
             </div>
           </el-tab-pane>
-          <el-tab-pane v-if="iAmManager" label="群组设置" name="groupSetting">
+          <el-tab-pane v-if="iAmAdmin" label="群组设置" name="groupSetting">
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span style="font-size: 14px">入群验证</span>
               <el-switch
@@ -869,7 +869,7 @@ const onClick = () => {
       </div>
     </div>
     <div v-if="showModel === 'editAvatarAndName'" class="group-card-editAvatarAndName">
-      <div v-if="iAmManager" class="group-card-avatar-wrapper">
+      <div v-if="iAmAdmin" class="group-card-avatar-wrapper">
         <div @click="isShowEditAvatar = true">
           <GroupAvatarIcon
             class="group-card-avatar"
@@ -898,7 +898,7 @@ const onClick = () => {
           flex-direction: column;
         "
       >
-        <div v-if="iAmManager" style="display: flex">
+        <div v-if="iAmAdmin" style="display: flex">
           <span style="width: 80px; font-size: 14px; display: flex; align-items: center">
             群组名称
           </span>

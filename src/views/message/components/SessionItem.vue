@@ -112,7 +112,7 @@ const getSysGroupDelMemberMsgTips = (content) => {
 const getSysGroupChangeRoleMsgTips = (msgType, content) => {
   const operator = content['operator']
   const member = content['member']
-  return msgType === MsgType.SYS_GROUP_SET_MANAGER
+  return msgType === MsgType.SYS_GROUP_SET_ADMIN
     ? `${operator.nickName}设置了${member.nickName}为管理员`
     : `${operator.nickName}取消了${member.nickName}的管理员权限`
 }
@@ -218,8 +218,8 @@ const showDetailContent = computed(() => {
             return getSysGroupUpdateName(content)
           case MsgType.SYS_GROUP_UPDATE_AVATAR:
             return getSysGroupUpdateAvatar(content)
-          case MsgType.SYS_GROUP_SET_MANAGER:
-          case MsgType.SYS_GROUP_CANCEL_MANAGER:
+          case MsgType.SYS_GROUP_SET_ADMIN:
+          case MsgType.SYS_GROUP_CANCEL_ADMIN:
             return getSysGroupChangeRoleMsgTips(sessionInfo.value.lastMsgType, content)
           case MsgType.SYS_GROUP_SET_ALL_MUTED:
           case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, markRaw } from 'vue'
 import { ChatDotRound, Tickets, Microphone, VideoCamera, Mute } from '@element-plus/icons-vue'
 import AtIcon from '@/assets/svg/at.svg'
-import ManagerIcon from '@/assets/svg/manager.svg'
+import adminIcon from '@/assets/svg/administrator.svg'
 import DeleteIcon from '@/assets/svg/delete.svg'
 import TransferIcon from '@/assets/svg/transfer.svg'
 import { userStore, groupStore } from '@/stores'
@@ -27,7 +27,7 @@ const memberInfo = computed(() => {
   return groupData.groupMembersList[props.groupId][props.account]
 })
 
-const iAmManager = computed(() => {
+const iAmAdmin = computed(() => {
   return groupData.groupMembersList[props.groupId][myAccount.value].role > 0
 })
 
@@ -46,7 +46,7 @@ const memberIsMuted = computed(() => {
   }
 })
 
-const memberIsManager = computed(() => {
+const memberIsAdmin = computed(() => {
   return memberInfo.value.role > 0
 })
 
@@ -77,11 +77,11 @@ const lable_setMuted = computed(() => {
     icon: memberIsMuted.value ? markRaw(Microphone) : markRaw(Mute)
   }
 })
-const lable_setManager = computed(() => {
+const lable_setAdmin = computed(() => {
   return {
-    label: 'setManager',
-    desc: memberIsManager.value ? '取消管理员' : '设为管理员',
-    icon: markRaw(ManagerIcon)
+    label: 'setAdmin',
+    desc: memberIsAdmin.value ? '取消管理员' : '设为管理员',
+    icon: markRaw(adminIcon)
   }
 })
 const lable_delete = ref({
@@ -102,7 +102,7 @@ const lable_queryInfo = ref({
 
 const menu = computed(() => {
   if (memberIsSelf.value) {
-    if (memberIsManager.value) {
+    if (memberIsAdmin.value) {
       return [lable_queryInfo.value, lable_setMuted.value]
     } else {
       return [lable_queryInfo.value]
@@ -114,13 +114,13 @@ const menu = computed(() => {
       lable_voiceCall.value,
       lable_videoCall.value,
       lable_setMuted.value,
-      lable_setManager.value,
+      lable_setAdmin.value,
       lable_delete.value,
       lable_transferOwner.value,
       lable_queryInfo.value
     ]
-  } else if (iAmManager.value) {
-    if (memberIsManager.value) {
+  } else if (iAmAdmin.value) {
+    if (memberIsAdmin.value) {
       return [
         lable_sendMsg.value,
         lable_atTa.value,

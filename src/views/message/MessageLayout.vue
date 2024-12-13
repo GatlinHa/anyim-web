@@ -759,7 +759,7 @@ const onInviteToGroup = () => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     const groupId = selectedSession.value.remoteId
     const joinGroupApproval = groupData.groupInfoList[groupId].joinGroupApproval
-    if (joinGroupApproval || iAmManager.value) {
+    if (joinGroupApproval || iAmAdmin.value) {
       onShowGroupCard({ groupId: selectedSession.value.remoteId })
       setTimeout(() => {
         groupCardData.setChangeMemberModel('addMember')
@@ -773,7 +773,7 @@ const onInviteToGroup = () => {
   }
 }
 
-const iAmManager = computed(() => {
+const iAmAdmin = computed(() => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     const groupId = selectedSession.value.remoteId
     const members = groupData.groupMembersList[groupId]

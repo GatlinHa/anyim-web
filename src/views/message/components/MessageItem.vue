@@ -27,8 +27,8 @@ const isSystemMsg = computed(() => {
     props.msg.msgType === MsgType.SYS_GROUP_CREATE ||
     props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
     props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER ||
-    props.msg.msgType === MsgType.SYS_GROUP_SET_MANAGER ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_MANAGER ||
+    props.msg.msgType === MsgType.SYS_GROUP_SET_ADMIN ||
+    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_ADMIN ||
     props.msg.msgType === MsgType.SYS_GROUP_SET_ALL_MUTED ||
     props.msg.msgType === MsgType.SYS_GROUP_CANCEL_ALL_MUTED ||
     props.msg.msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL ||
@@ -107,7 +107,7 @@ const getSysGroupChangeRoleMsgTips = (msgType, content) => {
   const member = content['member']
   const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
   const memberStr = `<span class="member-nickName" id="${member.account}" style="color: #409eff; cursor: pointer;">${member.nickName}</span>`
-  return msgType === MsgType.SYS_GROUP_SET_MANAGER
+  return msgType === MsgType.SYS_GROUP_SET_ADMIN
     ? `${operatorStr}设置了${memberStr}为管理员`
     : `${operatorStr}取消了${memberStr}的管理员权限`
 }
@@ -216,8 +216,8 @@ const systemMsgContent = computed(() => {
       return getSysGroupUpdateName(content)
     case MsgType.SYS_GROUP_UPDATE_AVATAR:
       return getSysGroupUpdateAvatar(content)
-    case MsgType.SYS_GROUP_SET_MANAGER:
-    case MsgType.SYS_GROUP_CANCEL_MANAGER:
+    case MsgType.SYS_GROUP_SET_ADMIN:
+    case MsgType.SYS_GROUP_CANCEL_ADMIN:
       return getSysGroupChangeRoleMsgTips(props.msg.msgType, content)
     case MsgType.SYS_GROUP_SET_ALL_MUTED:
     case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:

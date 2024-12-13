@@ -54,7 +54,7 @@ const membersCount = computed(() => {
   return members ? Object.keys(members).length : 0
 })
 
-const iAmManager = computed(() => {
+const iAmAdmin = computed(() => {
   const members = groupData.groupMembersList[groupId.value]
   if (members) {
     return members[myAccount.value]?.role > 0
@@ -131,7 +131,7 @@ const onOpenSession = (obj) => {
           <span>群公告</span>
           <el-icon
             class="edit-announcement"
-            v-if="iAmManager"
+            v-if="iAmAdmin"
             title="修改群公告"
             @click.stop="onEditAnnouncement"
           >
