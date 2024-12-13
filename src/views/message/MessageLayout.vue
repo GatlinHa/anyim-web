@@ -203,7 +203,7 @@ const msgRecords = computed(() => {
 })
 
 const selectedSession = computed(() => {
-  return messageData.sessionList[selectedSessionId.value]
+  return messageData.sessionList[selectedSessionId.value] || {}
 })
 
 onMounted(async () => {

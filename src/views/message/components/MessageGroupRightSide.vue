@@ -38,15 +38,15 @@ onUnmounted(() => {
 })
 
 const sessionType = computed(() => {
-  return messageData.sessionList[props.sessionId].sessionType
+  return messageData.sessionList[props.sessionId]?.sessionType
 })
 
 const groupId = computed(() => {
-  return messageData.sessionList[props.sessionId].remoteId
+  return messageData.sessionList[props.sessionId]?.remoteId
 })
 
 const announcement = computed(() => {
-  return groupData.groupInfoList[groupId.value].announcement || '暂无公告'
+  return groupData.groupInfoList[groupId.value]?.announcement || '暂无公告'
 })
 
 const membersCount = computed(() => {
