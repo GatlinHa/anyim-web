@@ -416,6 +416,22 @@ const onSelectMenu = (item) => {
           </div>
         </template>
       </el-table-column>
+      <el-table-column width="30">
+        <template #default="scope">
+          <el-button
+            class="el-button-muted"
+            :class="{
+              'muted-active': isMuted(scope.row.mutedMode),
+              'muted-not-active': !isMuted(scope.row.mutedMode)
+            }"
+            :icon="Mute"
+            size="small"
+            circle
+            :title="mutedButtonTitle(scope.row.mutedMode)"
+            @click="setMuted(scope.row.account, isMuted(scope.row.mutedMode) ? 'cancle' : 'set')"
+          />
+        </template>
+      </el-table-column>
       <el-table-column width="45">
         <template #default="scope">
           <div
@@ -442,22 +458,6 @@ const onSelectMenu = (item) => {
           </div>
         </template>
       </el-table-column>
-      <el-table-column width="40">
-        <template #default="scope">
-          <el-button
-            class="el-button-muted"
-            :class="{
-              'muted-active': isMuted(scope.row.mutedMode),
-              'muted-not-active': !isMuted(scope.row.mutedMode)
-            }"
-            :icon="Mute"
-            size="small"
-            circle
-            :title="mutedButtonTitle(scope.row.mutedMode)"
-            @click="setMuted(scope.row.account, isMuted(scope.row.mutedMode) ? 'cancle' : 'set')"
-          />
-        </template>
-      </el-table-column>
     </el-table>
   </OprMemberMenu>
 </template>
@@ -465,7 +465,6 @@ const onSelectMenu = (item) => {
 <style lang="scss" scoped>
 .group-members-table {
   :deep(.el-table) {
-    margin-top: 10px;
     --el-table-bg-color: transparent;
   }
 
@@ -480,7 +479,7 @@ const onSelectMenu = (item) => {
   }
 
   :deep(.cell) {
-    padding: 0 0 0 5px;
+    padding: 0;
   }
 
   :deep(.el-table__inner-wrapper) {

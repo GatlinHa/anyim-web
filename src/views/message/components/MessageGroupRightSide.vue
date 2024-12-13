@@ -170,6 +170,7 @@ const onOpenSession = (obj) => {
         :groupId="groupId"
         :memberSearchKey="memberSearchKey"
         @openSession="onOpenSession"
+        style="padding: 0 4px 0 8px"
       ></GroupMembersTable>
     </div>
   </div>
