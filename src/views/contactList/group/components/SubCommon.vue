@@ -236,8 +236,7 @@ const onConfirmSelect = async (selected) => {
 
 const onShowGroupCard = async (groupInfo) => {
   const res = await groupInfoService({ groupId: groupInfo.groupId })
-  groupCardData.setIsShow(true)
-  groupCardData.setGroupId(groupInfo.groupId)
+  groupCardData.setOpened(groupInfo.groupId)
   groupData.setGroupMembers({
     groupId: groupInfo.groupId,
     members: res.data.data.members

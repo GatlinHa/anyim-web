@@ -111,8 +111,7 @@ const goToSessionTab = () => {
       sessionId: sessionInfo.value.sessionId
     }
   })
-  groupCardData.setIsShow(false)
-  groupCardData.setGroupId('')
+  groupCardData.setClosed()
 }
 
 const groupInfo = computed(() => {
@@ -445,8 +444,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
   const remoteId = objectInfo.accoun
 
   if (messageData.sessionList[sessionId]) {
-    groupCardData.setIsShow(false)
-    groupCardData.setGroupId('')
+    groupCardData.setClosed()
     router.push({
       path: '/message',
       query: {
@@ -460,8 +458,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
       sessionType: msgType
     }).then((res) => {
       messageData.addSession(res.data.data)
-      groupCardData.setIsShow(false)
-      groupCardData.setGroupId('')
+      groupCardData.setClosed()
       router.push({
         path: '/message',
         query: {
@@ -557,8 +554,7 @@ const levelGroup = () => {
           if (res.data.code === 0) {
             groupData.deleteGroup(groupCardData.groupId)
             ElMessage.success('退出成功')
-            groupCardData.setIsShow(false)
-            groupCardData.setGroupId('')
+            groupCardData.setClosed()
             // TODO 这里要清空群组的聊天记录
           }
         })
@@ -586,8 +582,7 @@ const dropGroup = () => {
           if (res.data.code === 0) {
             groupData.deleteGroup(groupCardData.groupId)
             ElMessage.success('解散成功')
-            groupCardData.setIsShow(false)
-            groupCardData.setGroupId('')
+            groupCardData.setClosed()
             // TODO 这里要清空群组的聊天记录
           }
         })
@@ -655,7 +650,7 @@ const onClick = () => {
     :z-index="1"
     modal-class="group-card-modal"
     :show-close="false"
-    @close="groupCardData.setIsShow(false)"
+    @close="groupCardData.setClosed()"
     @click="onClick"
   >
     <template #header>

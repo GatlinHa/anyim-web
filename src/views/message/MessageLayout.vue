@@ -641,8 +641,7 @@ const onShowGroupCard = async ({ groupId }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   groupInfoService({ groupId: groupId })
     .then((res) => {
-      groupCardData.setGroupId(groupId)
-      groupCardData.setIsShow(true)
+      groupCardData.setOpened(groupId)
       groupData.setGroupInfo(res.data.data.groupInfo)
       groupData.setGroupMembers({
         groupId: groupId,
