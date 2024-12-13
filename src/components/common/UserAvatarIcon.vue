@@ -37,8 +37,13 @@ const firstChar = computed(() => {
   return props.showName ? props.showName.charAt(0) : '*'
 })
 
-const randomColor = getRandomColor(props.showName || props.showId)
-const fontColor = getFontColor(randomColor)
+const randomColor = computed(() => {
+  return getRandomColor(props.showName || props.showId)
+})
+
+const fontColor = computed(() => {
+  return getFontColor(randomColor.value)
+})
 
 const statusCircleColor = computed(() => {
   switch (props.userStatus) {
