@@ -154,7 +154,7 @@ const onOpenSession = (obj) => {
     </div>
     <div class="members-in-side-wrapper">
       <div v-if="!searchMode" style="padding: 10px; display: flex; justify-content: space-between">
-        <span>群组成员 ({{ membersCount }})</span>
+        <span style="height: 28px">群组成员 ({{ membersCount }})</span>
         <el-icon class="search-member" title="搜索成员" @click.stop="onSwitchSearchMode">
           <Search />
         </el-icon>
@@ -213,7 +213,7 @@ const onOpenSession = (obj) => {
     margin: 2px;
 
     .el-input {
-      height: 42px;
+      height: 48px;
       padding: 10px;
       :deep(.el-input__wrapper) {
         border-radius: 25px;
