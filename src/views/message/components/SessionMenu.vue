@@ -120,6 +120,7 @@ const handleClick = (item) => {
   border-radius: 6px;
   background-color: #fff;
   position: fixed;
+  box-shadow: 2px 2px 20px gray;
 
   .menu-item {
     padding: 5px;
