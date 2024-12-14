@@ -1186,6 +1186,8 @@ const onConfirmSelect = async (selected) => {
         }
 
         .action-set {
+          min-width: 200px;
+
           .action-button {
             padding: 8px;
             margin-left: 10px;
