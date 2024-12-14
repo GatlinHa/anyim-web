@@ -65,7 +65,6 @@ const messageData = messageStore()
 const userCardData = userCardStore()
 const groupCardData = groupCardStore()
 const groupData = groupStore()
-const selectedSessionId = ref('') //当前被选中的session
 const sessionListRef = ref()
 const lastReadMsgId = ref()
 
@@ -87,6 +86,11 @@ const newMsgTips = ref({
 
 const myAccount = computed(() => {
   return userData.user.account
+})
+
+//当前被选中的session
+const selectedSessionId = computed(() => {
+  return messageData.selectedSessionId || ''
 })
 
 // 消息拉取是否结束
@@ -241,7 +245,7 @@ onMounted(async () => {
   }, 5000)
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
-  const routerSessionId = router.currentRoute.value.query.sessionId
+  const routerSessionId = router.currentRoute.value.query.sessionId || selectedSessionId.value
   if (routerSessionId) {
     if (routerSessionId in messageData.sessionList) {
       handleSelectedSession(routerSessionId)
@@ -420,14 +424,10 @@ const pullMsg = async (mode = 0, ref = -1) => {
 
 // 表示有个session被选中了
 const handleSelectedSession = async (sessionId) => {
+  router.replace({ query: { sessionId: sessionId } })
+
   if (selectedSessionId.value !== sessionId) {
-    selectedSessionId.value = sessionId
-    router.push({
-      path: '/message',
-      query: {
-        sessionId: sessionId
-      }
-    })
+    messageData.setSelectedSessionId(sessionId)
     initSession(sessionId)
     locateSession(sessionId)
 
@@ -744,7 +744,7 @@ const onOpenSessionMenu = (sessionId) => {
 }
 
 const onNoneSelected = () => {
-  selectedSessionId.value = ''
+  messageData.setSelectedSessionId('')
 }
 
 const onVoiceCall = () => {
@@ -964,7 +964,7 @@ const onConfirmSelect = async (selected) => {
         <el-main class="body">
           <div class="show-main">
             <div class="show-message-box">
-              <div v-if="selectedSessionCache[selectedSessionId].isLoading" class="show-loading">
+              <div v-if="selectedSessionCache[selectedSessionId]?.isLoading" class="show-loading">
                 数据加载中……
               </div>
               <div v-else-if="!selectedSession.lastMsgId" class="no-more-message">
@@ -986,7 +986,7 @@ const onConfirmSelect = async (selected) => {
                   :remoteRead="selectedSession.remoteRead"
                   :firstMsgId="firstMsgId"
                   :hasNoMoreMsg="hasNoMoreMsg"
-                  :isLoadMoreLoading="selectedSessionCache[selectedSessionId].isLoadMoreLoading"
+                  :isLoadMoreLoading="selectedSessionCache[selectedSessionId]?.isLoadMoreLoading"
                   @loadMore="onLoadMore"
                   @showUserCard="onShowUserCard"
                   @showGroupCard="onShowGroupCard"
