@@ -3,7 +3,7 @@ import { messageStore, groupStore } from '@/stores'
 import { msgChatQuerySessionService } from '@/api/message'
 import { groupInfoService } from '@/api/group'
 
-export const onReceiveGroupSystemMsg = (curSessionId, msgListDiv, capacity) => {
+export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
   return async (msg) => {
     const messageData = messageStore()
     const groupData = groupStore()
@@ -44,7 +44,7 @@ export const onReceiveGroupSystemMsg = (curSessionId, msgListDiv, capacity) => {
     ])
 
     // 如果是当前正打开的会话
-    if (curSessionId.value === sessionId) {
+    if (messageData.selectedSessionId === sessionId) {
       const scrollHeight = msgListDiv.value?.scrollHeight
       const clientHeight = document.querySelector('.show-message-box')?.clientHeight
       capacity.value += 1 //接收一条消息,展示列表的容量就+1

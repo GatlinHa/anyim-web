@@ -218,16 +218,11 @@ onMounted(async () => {
   asideWidth.value = settingData.sessionListDrag[myAccount.value] || 300
   inputBoxHeight.value = settingData.inputBoxDrag[myAccount.value] || 300
 
-  wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(selectedSessionId, msgListDiv, capacity)) //绑定接收Chat消息的事件
+  wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
   wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
-  wsConnect.bindEvent(
-    MsgType.GROUP_CHAT,
-    onReceiveGroupChatMsg(selectedSessionId, msgListDiv, capacity)
-  ) //绑定接收GroupChat消息的事件
+  wsConnect.bindEvent(MsgType.GROUP_CHAT, onReceiveGroupChatMsg(msgListDiv, capacity)) //绑定接收GroupChat消息的事件
   wsConnect.bindEvent(MsgType.GROUP_CHAT_READ, onReceiveGroupChatReadMsg()) //绑定接收GroupChat已读消息的事件
-  wsConnect.bindGroupSystemMsgEvent(
-    onReceiveGroupSystemMsg(selectedSessionId, msgListDiv, capacity)
-  ) //绑定接收群系统消息事件
+  wsConnect.bindGroupSystemMsgEvent(onReceiveGroupSystemMsg(msgListDiv, capacity)) //绑定接收群系统消息事件
 
   // 定时更新单聊对象的状态
   const accounts = []
