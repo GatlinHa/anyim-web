@@ -33,7 +33,7 @@ const groupInfo = computed(() => {
 const showMembers = computed(() => groupData.groupMembersList[props.groupId] || {})
 
 /**
- * 按照role倒序排
+ * 按照role倒序排, 其中自己在role相同时是第一个
  */
 const showMembersArrSorted = computed(() => {
   const data = []
@@ -50,7 +50,19 @@ const showMembersArrSorted = computed(() => {
     }
   })
 
-  return data.sort((a, b) => b.role - a.role)
+  return data.sort((a, b) => {
+    if (b.role !== a.role) {
+      return b.role - a.role
+    } else {
+      if (myAccount.value === b.account) {
+        return 1
+      } else if (myAccount.value === a.account) {
+        return -1
+      } else {
+        return 0
+      }
+    }
+  })
 })
 
 const onOpenSession = () => {
