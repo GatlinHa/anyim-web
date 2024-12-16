@@ -303,14 +303,14 @@ const sysShowTime = computed(() => {
   return messageSysShowTime(new Date(props.msg.msgTime))
 })
 
-// 判断是否是连续的会话，与上个会话时间差小于1分钟
+// 判断是否是连续的会话，与上个会话时间差小于5分钟
 const isContinuousSession = computed(() => {
   if (!props.msg.preMsgTime) {
     return false
   }
 
   const diff = new Date(props.msg.msgTime).getTime() - new Date(props.msg.preMsgTime).getTime()
-  if (diff < 1 * 60 * 1000) {
+  if (diff < 5 * 60 * 1000) {
     return true
   } else {
     return false
