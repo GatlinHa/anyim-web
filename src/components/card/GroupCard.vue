@@ -778,8 +778,15 @@ const onClick = () => {
                 align-items: center;
               "
             >
-              <span style="font-size: 14px; color: red">清空聊天记录</span>
-              <el-button :icon="ArrowRight" size="small" circle />
+              <span style="font-size: 14px; color: red" @click="ElMessage.warning('功能开发中')"
+                >清空聊天记录</span
+              >
+              <el-button
+                :icon="ArrowRight"
+                size="small"
+                circle
+                @click="ElMessage.warning('功能开发中')"
+              />
             </div>
             <div
               v-if="!iAmOwner"
