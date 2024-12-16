@@ -7,7 +7,7 @@ import {
   SwitchButton
 } from '@element-plus/icons-vue'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { userStore, messageStore, searchStore } from '@/stores'
+import { userStore, messageStore, searchStore, groupStore } from '@/stores'
 import router from '@/router'
 import MyCard from '@/views/layout/components/MyCard.vue'
 import NaviMenu from '@/views/layout/components/NaviMenu.vue'
@@ -22,16 +22,18 @@ import {
   LEAVING_AFTER_DURATION,
   LOGOUT_AFTER_DURATION,
   CREATE_WS_DELAY,
-  SYNC_STATUS_INTERVAL
+  STATUS_REQ_INTERVAL
 } from '@/const/userConst'
 import UserCard from '@/components/card/UserCard.vue'
 import GroupCard from '@/components/card/GroupCard.vue'
+import { MsgType } from '@/proto/msg'
 
 const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
 const messageData = messageStore()
 const searchData = searchStore()
+const groupData = groupStore()
 
 const userStatusDesc = computed(() => {
   switch (userData.user.status) {
@@ -68,14 +70,13 @@ onMounted(async () => {
   }, CREATE_WS_DELAY) // 延迟启动，防止token刷新碰撞
   document.addEventListener('click', clickListener)
 
-  statusSync() // 页面onMounted时主动同步一次本账号本客户端的状态
+  // 页面onMounted时主动同步一次本账号本客户端的状态
+  statusSync()
 
-  // 定时任务查询本账号的多端下的最终状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
-  let accounts = []
-  accounts.push(userData.user.account)
+  // 启动全局的用户状态同步器
   statusReqTask = setInterval(() => {
-    wsConnect.statusReq(JSON.stringify(accounts))
-  }, SYNC_STATUS_INTERVAL)
+    wsConnect.statusReq(toSyncStatusAccounts.value)
+  }, STATUS_REQ_INTERVAL)
 })
 
 onUnmounted(() => {
@@ -90,6 +91,35 @@ onUnmounted(() => {
   wsConnect.closeWs()
 })
 
+const toSyncStatusAccounts = computed(() => {
+  const accountsSet = new Set()
+
+  // 1. 定时任务查询本账号的多端下的最终状态（多端设备场景，比如其他设备正在忙碌，要同步过来）
+  accountsSet.add(userData.user.account)
+
+  // 2. 定时更新单聊对象的状态
+  Object.keys(messageData.sessionList).forEach((key) => {
+    const session = messageData.sessionList[key]
+    const sessionType = session.sessionType
+    if (sessionType === MsgType.CHAT) {
+      //只看单聊的，群里在打开聊天窗时触发查询
+      accountsSet.add(session.objectInfo.account)
+    }
+  })
+
+  // 3. 更新打开群组聊天中的成员对象的状态
+  const selectedSession = messageData.sessionList[messageData.selectedSessionId]
+  if (selectedSession && selectedSession.sessionType === MsgType.GROUP_CHAT) {
+    const groupId = selectedSession.remoteId
+    const groupMembers = groupData.groupMembersList[groupId]
+    Object.keys(groupMembers).forEach((item) => {
+      accountsSet.add(item)
+    })
+  }
+
+  return [...accountsSet]
+})
+
 const onMouseMove = () => {
   if (!document.hasFocus()) return
 
@@ -100,7 +130,7 @@ const onMouseMove = () => {
 // 同步本账号本客户端的状态
 let statusSyncTimer
 const statusSync = () => {
-  if (userData.user.status === STATUS.LEAVING) {
+  if (userData.user.status <= STATUS.LEAVING) {
     userData.updateUserStatus(STATUS.ONLINE) //修改本地状态
     wsConnect.statusSync(STATUS.ONLINE) //状态同步给云端
   }

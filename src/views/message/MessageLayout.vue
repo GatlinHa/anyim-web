@@ -224,21 +224,6 @@ onMounted(async () => {
   wsConnect.bindEvent(MsgType.GROUP_CHAT_READ, onReceiveGroupChatReadMsg()) //绑定接收GroupChat已读消息的事件
   wsConnect.bindGroupSystemMsgEvent(onReceiveGroupSystemMsg(msgListDiv, capacity)) //绑定接收群系统消息事件
 
-  // 定时更新单聊对象的状态
-  const accounts = []
-  Object.keys(messageData.sessionList).forEach((key) => {
-    const session = messageData.sessionList[key]
-    const sessionType = session.sessionType
-    if (sessionType === MsgType.CHAT) {
-      //只看单聊的，群里在打开聊天窗时触发查询
-      accounts.push(session.objectInfo.account)
-    }
-  })
-
-  setInterval(() => {
-    wsConnect.statusReq(JSON.stringify(accounts))
-  }, 5000)
-
   // 这里要接收从其他页面跳转过来传递的sessionId参数
   const routerSessionId = router.currentRoute.value.query.sessionId || selectedSessionId.value
   if (routerSessionId) {

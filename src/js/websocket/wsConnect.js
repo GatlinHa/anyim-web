@@ -383,8 +383,10 @@ class WsConnect {
   }
 
   statusReq(accounts) {
-    const data = this.dataConstructor[MsgType.STATUS_REQ](accounts)
-    this.isConnect && this.connect.send(data)
+    if (accounts.length > 0) {
+      const data = this.dataConstructor[MsgType.STATUS_REQ](JSON.stringify(accounts))
+      this.isConnect && this.connect.send(data)
+    }
   }
 
   statusSync(status) {
