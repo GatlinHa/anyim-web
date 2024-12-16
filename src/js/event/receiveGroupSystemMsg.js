@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { messageStore, groupStore } from '@/stores'
 import { msgChatQuerySessionService } from '@/api/message'
 import { groupInfoService } from '@/api/group'
+import { MsgType } from '@/proto/msg'
 
 export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
   return async (msg) => {
@@ -16,12 +17,17 @@ export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
       messageData.addSession(res.data.data)
     }
 
-    const res = await groupInfoService({ groupId: msg.body.groupId })
-    groupData.setGroupInfo(res.data.data.groupInfo)
-    groupData.setGroupMembers({
-      groupId: msg.body.groupId,
-      members: res.data.data.members
-    })
+    if (
+      msg.header.msgType !== MsgType.SYS_GROUP_LEAVE &&
+      msg.header.msgType !== MsgType.SYS_GROUP_DROP
+    ) {
+      const res = await groupInfoService({ groupId: msg.body.groupId })
+      groupData.setGroupInfo(res.data.data.groupInfo)
+      groupData.setGroupMembers({
+        groupId: msg.body.groupId,
+        members: res.data.data.members
+      })
+    }
 
     messageData.updateSession({
       sessionId: sessionId,
