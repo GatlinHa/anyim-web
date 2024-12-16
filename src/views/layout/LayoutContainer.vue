@@ -67,9 +67,12 @@ onMounted(() => {
   wsConnect.createWs() // 页面onMounted时主动同步一次本账号本客户端的状态
   statusSync()
   // 启动全局的用户状态同步器
-  statusReqTask = setInterval(() => {
-    wsConnect.statusReq(toSyncStatusAccounts.value)
-  }, STATUS_REQ_INTERVAL)
+  setTimeout(() => {
+    wsConnect.statusReq(toSyncStatusAccounts.value) //延迟500毫秒启动第一次同步
+    statusReqTask = setInterval(() => {
+      wsConnect.statusReq(toSyncStatusAccounts.value)
+    }, STATUS_REQ_INTERVAL)
+  }, 500)
   document.addEventListener('click', clickListener)
 })
 
