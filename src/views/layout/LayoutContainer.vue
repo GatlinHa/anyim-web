@@ -21,7 +21,6 @@ import {
   STATUS,
   LEAVING_AFTER_DURATION,
   LOGOUT_AFTER_DURATION,
-  CREATE_WS_DELAY,
   STATUS_REQ_INTERVAL
 } from '@/const/userConst'
 import UserCard from '@/components/card/UserCard.vue'
@@ -64,19 +63,14 @@ const statusCircleColor = computed(() => {
 })
 
 let statusReqTask
-onMounted(async () => {
-  setTimeout(() => {
-    wsConnect.createWs()
-  }, CREATE_WS_DELAY) // 延迟启动，防止token刷新碰撞
-  document.addEventListener('click', clickListener)
-
-  // 页面onMounted时主动同步一次本账号本客户端的状态
+onMounted(() => {
+  wsConnect.createWs() // 页面onMounted时主动同步一次本账号本客户端的状态
   statusSync()
-
   // 启动全局的用户状态同步器
   statusReqTask = setInterval(() => {
     wsConnect.statusReq(toSyncStatusAccounts.value)
   }, STATUS_REQ_INTERVAL)
+  document.addEventListener('click', clickListener)
 })
 
 onUnmounted(() => {
