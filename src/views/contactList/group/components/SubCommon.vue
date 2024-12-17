@@ -223,7 +223,10 @@ const onConfirmSelect = async (selected) => {
     groupType: 1, //普通群
     members: members
   })
-  groupData.setGroupInfo(res.data.data.groupInfo)
+  groupData.setGroupInfo({
+    groupId: res.data.data.groupInfo.groupId,
+    groupInfo: res.data.data.groupInfo
+  })
   isShowSelectDialog.value = false
 
   // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询

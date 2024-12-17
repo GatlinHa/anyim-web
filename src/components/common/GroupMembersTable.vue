@@ -30,14 +30,22 @@ const groupInfo = computed(() => {
   return groupData.groupInfoList[props.groupId] || {}
 })
 
-const showMembers = computed(() => groupData.groupMembersList[props.groupId] || {})
+const validMembers = computed(() => {
+  return groupData.getValidGroupMembers(props.groupId)
+})
+
+const isNotInGroup = computed(() => {
+  return !(myAccount.value in validMembers.value)
+})
 
 /**
  * 按照role倒序排, 其中自己在role相同时是第一个
  */
-const showMembersArrSorted = computed(() => {
+const validMembersSorted = computed(() => {
+  if (isNotInGroup.value) return []
+
   const data = []
-  Object.values(showMembers.value).forEach((item) => {
+  Object.values(validMembers.value).forEach((item) => {
     if (!props.memberSearchKey) {
       data.push(item)
     } else {
@@ -68,7 +76,7 @@ const showMembersArrSorted = computed(() => {
 const onOpenSession = () => {
   emit('openSession', {
     msgType: MsgType.CHAT,
-    objectInfo: showMembers.value[showMenuAccount.value]
+    objectInfo: validMembers.value[showMenuAccount.value]
   })
 }
 
@@ -112,7 +120,7 @@ const setMuted = (account, mode) => {
             groupId: props.groupId,
             account: account,
             userInfo: {
-              ...showMembers.value[account],
+              ...validMembers.value[account],
               mutedMode: mutedMode
             }
           })
@@ -126,7 +134,7 @@ const setMuted = (account, mode) => {
 }
 
 const iAmAdmin = computed(() => {
-  return showMembers.value[myAccount.value]?.role > 0
+  return validMembers.value[myAccount.value]?.role > 0
 })
 
 const setAdmin = (userInfo) => {
@@ -222,6 +230,7 @@ const onDelete = (userInfo) => {
       const members = [{ account: userInfo.account, nickName: userInfo.nickName }]
       groupDelMembersService({
         groupId: props.groupId,
+        leaveMsgId: messageData.sessionList[messageData.selectedSessionId].lastMsgId,
         members: members
       })
         .then((res) => {
@@ -266,7 +275,7 @@ const onTransferOwner = (userInfo) => {
               groupId: props.groupId,
               account: myAccount.value,
               userInfo: {
-                ...showMembers.value[myAccount.value],
+                ...validMembers.value[myAccount.value],
                 role: 1
               }
             })
@@ -279,8 +288,11 @@ const onTransferOwner = (userInfo) => {
               }
             })
             groupData.setGroupInfo({
-              ...groupInfo.value,
-              myRole: 1
+              groupId: props.groupId,
+              groupInfo: {
+                ...groupInfo.value,
+                myRole: 1
+              }
             })
 
             ElMessage.success('转移成功')
@@ -324,7 +336,7 @@ const onShowUserCard = (account) => {
 
 const showMenuAccount = ref('')
 const showMenuMember = computed(() => {
-  return showMembers.value[showMenuAccount.value]
+  return validMembers.value[showMenuAccount.value]
 })
 
 const showMenuMemberIsAdmin = computed(() => {
@@ -383,7 +395,7 @@ const onSelectMenu = (item) => {
   <MemberMenu :groupId="props.groupId" :account="showMenuAccount" @selectMenu="onSelectMenu">
     <el-table
       class="group-members-table"
-      :data="showMembersArrSorted"
+      :data="validMembersSorted"
       :show-header="false"
       @row-contextmenu="onRowContextmenu"
       @row-dblclick="onDblclick"

@@ -150,8 +150,8 @@ const getSysGroupUpdateMemberMuted = (content) => {
   const mutedMode = content['mutedMode']
   const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
   const memberStr = `<span class="member-nickName" id="${member.account}" style="color: #409eff; cursor: pointer;">${member.nickName}</span>`
-  const groupId = messageData.sessionList[props.sessionId].remoteId
-  const allMuted = groupData.groupInfoList[groupId].allMuted
+  const groupId = messageData.sessionList[props.sessionId]?.remoteId
+  const allMuted = groupData.groupInfoList[groupId]?.allMuted
   if (allMuted) {
     if (mutedMode === 2) {
       return `${operatorStr}允许了${memberStr}的发言`

@@ -123,14 +123,29 @@ const sessionInfo = computed(() => {
   return messageData.sessionList[sessionId] || {}
 })
 
-const showMembers = computed(() => groupData.groupMembersList[groupCardData.groupId] || {})
+const showMembers = computed(() => {
+  const members = groupData.groupMembersList[groupCardData.groupId]
+  if (!members) {
+    return {}
+  }
+
+  const data = {}
+  Object.values(members).forEach((item) => {
+    if (item.inStatus === 0) {
+      data[item.account] = item
+    }
+  })
+
+  return data
+})
 
 /**
  * 按照role倒序排
  */
-const showMembersArrSorted = computed(() => {
+const validMembersSorted = computed(() => {
   const data = []
-  Object.values(showMembers.value).forEach((item) => {
+  const validMembers = groupData.getValidGroupMembers(groupCardData.groupId)
+  Object.values(validMembers).forEach((item) => {
     if (!memberSearchKey.value) {
       data.push(item)
     } else {
@@ -290,6 +305,7 @@ const doDelete = (userArray) => {
   const members = userArray.map((item) => ({ account: item.account, nickName: item.nickName }))
   groupDelMembersService({
     groupId: groupCardData.groupId,
+    leaveMsgId: sessionInfo.value.lastMsgId,
     members: members
   })
     .then((res) => {
@@ -350,9 +366,12 @@ const onNewAvatar = ({ avatar, avatarThumb }) => {
   })
     .then(() => {
       groupData.setGroupInfo({
-        ...groupInfo.value,
-        avatar: avatar,
-        avatarThumb: avatarThumb
+        groupId: groupCardData.groupId,
+        groupInfo: {
+          ...groupInfo.value,
+          avatar: avatar,
+          avatarThumb: avatarThumb
+        }
       })
     })
     .finally(() => {
@@ -376,8 +395,11 @@ const updateGroupName = () => {
   })
     .then(() => {
       groupData.setGroupInfo({
-        ...groupInfo.value,
-        groupName: trimValue
+        groupId: groupCardData.groupId,
+        groupInfo: {
+          ...groupInfo.value,
+          groupName: trimValue
+        }
       })
       ElMessage.success('修改成功')
     })
@@ -423,8 +445,11 @@ const updateAnnouncement = () => {
   })
     .then(() => {
       groupData.setGroupInfo({
-        ...groupInfo.value,
-        announcement: trimValue
+        groupId: groupCardData.groupId,
+        groupInfo: {
+          ...groupInfo.value,
+          announcement: trimValue
+        }
       })
       ElMessage.success('修改成功')
     })
@@ -529,8 +554,11 @@ const handleGroupSwitch = (obj) => {
     })
       .then(() => {
         groupData.setGroupInfo({
-          ...groupInfo.value,
-          ...obj
+          groupId: groupCardData.groupId,
+          groupInfo: {
+            ...groupInfo.value,
+            ...obj
+          }
         })
       })
       .finally(() => {
@@ -548,7 +576,8 @@ const levelGroup = () => {
     .then(() => {
       const loadingInstance = ElLoading.service(el_loading_options)
       groupLeaveService({
-        groupId: groupCardData.groupId
+        groupId: groupCardData.groupId,
+        leaveMsgId: sessionInfo.value.lastMsgId
       })
         .then((res) => {
           if (res.data.code === 0) {
@@ -620,8 +649,11 @@ const onConfirmSingleSelect = (selected) => {
           }
         })
         groupData.setGroupInfo({
-          ...groupInfo.value,
-          myRole: 1
+          groupId: groupCardData.groupId,
+          groupInfo: {
+            ...groupInfo.value,
+            myRole: 1
+          }
         })
 
         ElMessage.success('转移成功')
@@ -709,7 +741,7 @@ const onClick = () => {
         <div class="group-card-members-grid">
           <div
             class="group-card-members-grid-item"
-            v-for="item in showMembersArrSorted?.slice(0, showMembersCount)"
+            v-for="item in validMembersSorted?.slice(0, showMembersCount)"
             :key="item.account"
           >
             <UserAvatarIcon
@@ -979,7 +1011,7 @@ const onClick = () => {
   </SelectDialog>
   <SingleSelectDialog
     v-model="isShowSingleSelectDialog"
-    :options="showMembersArrSorted"
+    :options="validMembersSorted"
     :disabledOptionIds="new Array(myAccount)"
     @showUserCard="onShowUserCard"
     @confirm="onConfirmSingleSelect"

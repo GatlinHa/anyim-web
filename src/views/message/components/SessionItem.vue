@@ -81,7 +81,7 @@ const showTime = computed(() => {
 const getSysGroupCreateMsgTips = (content) => {
   const operator = content['operator']
   const members = content['members']
-  let membersExcludeCreator = members.filter((item) => item.account === operator.account)
+  let membersExcludeCreator = members.filter((item) => item.account !== operator.account)
   let str = ''
   membersExcludeCreator.forEach((item) => {
     str = str + item.nickName + '，'

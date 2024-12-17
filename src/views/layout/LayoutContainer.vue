@@ -109,9 +109,11 @@ const toSyncStatusAccounts = computed(() => {
   if (selectedSession && selectedSession.sessionType === MsgType.GROUP_CHAT) {
     const groupId = selectedSession.remoteId
     const groupMembers = groupData.groupMembersList[groupId]
-    Object.keys(groupMembers).forEach((item) => {
-      accountsSet.add(item)
-    })
+    if (groupMembers) {
+      Object.keys(groupMembers).forEach((item) => {
+        accountsSet.add(item)
+      })
+    }
   }
 
   return [...accountsSet]

@@ -15,8 +15,25 @@ export const groupStore = defineStore('anyim-group', () => {
    */
   const groupMembersList = ref({})
 
-  const setGroupInfo = (groupInfo) => {
-    groupInfoList.value[groupInfo.groupId] = groupInfo
+  /**
+   * 获取有效的成员数组，意思是刨除inStatu不等于0的
+   * @param {*} groupId
+   */
+  const getValidGroupMembers = (groupId) => {
+    const data = {}
+    const membersArray = Object.values(groupMembersList.value[groupId] || {})
+    for (let index = 0; index < membersArray.length; index++) {
+      const item = membersArray[index]
+      if (item.inStatus > 0) {
+        continue
+      }
+      data[item.account] = item
+    }
+    return data
+  }
+
+  const setGroupInfo = ({ groupId, groupInfo }) => {
+    groupInfoList.value[groupId] = groupInfo
   }
 
   const setGroupMembers = ({ groupId, members }) => {
@@ -44,6 +61,7 @@ export const groupStore = defineStore('anyim-group', () => {
   return {
     groupInfoList,
     groupMembersList,
+    getValidGroupMembers,
     setGroupInfo,
     setGroupMembers,
     setOneOfGroupMembers,

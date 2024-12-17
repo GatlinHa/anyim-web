@@ -117,11 +117,25 @@ const hasNoMoreMsg = computed(() => {
   return pullMsgDone.value || firstMsgId.value === BEGIN_MSG_ID
 })
 
+const allMembers = computed(() => {
+  return groupData.groupMembersList[selectedSession.value?.remoteId]
+})
+
+const validMembers = computed(() => {
+  return groupData.getValidGroupMembers(selectedSession.value?.remoteId)
+})
+
+const isNotInGroup = computed(() => {
+  return (
+    selectedSession.value.sessionType === MsgType.GROUP_CHAT &&
+    !(myAccount.value in validMembers.value)
+  )
+})
+
 const isMutedInGroup = computed(() => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     const groupInfo = groupData.groupInfoList[selectedSession.value.remoteId]
-    const members = groupData.groupMembersList[selectedSession.value.remoteId]
-    const me = members[myAccount.value]
+    const me = allMembers.value[myAccount.value]
     if (me.mutedMode === 1 || (groupInfo.allMuted && me.mutedMode !== 2)) {
       return true
     } else {
@@ -316,8 +330,7 @@ const showId = computed(() => {
 const getMsgSenderObj = (item) => {
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     // 如果此时memberList还没有加载完成，先return account给MessageItem子组件
-    const memberList = groupData.groupMembersList[selectedSession.value.remoteId]
-    return memberList ? memberList[item.fromId] : { account: item.fromId }
+    return allMembers.value ? allMembers.value[item.fromId] : { account: item.fromId }
   } else {
     if (myAccount.value === item.fromId) {
       return userData.user
@@ -416,18 +429,31 @@ const handleSelectedSession = async (sessionId) => {
       const groupId = selectedSession.value.remoteId
       // 没有members数据才需要加载成员列表，加载过了就不重复加载了
       if (!groupData.groupMembersList[groupId]) {
-        const res = await groupInfoService({ groupId: groupId })
-        groupData.setGroupInfo(res.data.data.groupInfo)
-        groupData.setGroupMembers({
-          groupId: groupId,
-          members: res.data.data.members
-        })
+        try {
+          // TODO 看看这里的try还要不要
+          const res = await groupInfoService({ groupId: groupId })
+          groupData.setGroupInfo({
+            groupId: groupId,
+            groupInfo: res.data.data.groupInfo || {}
+          })
+          groupData.setGroupMembers({
+            groupId: groupId,
+            members: res.data.data.members || {}
+          })
+        } catch {
+          // do nothing
+        }
       }
     }
 
     // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
     if (!msgRecords.value && selectedSession.value.lastMsgId) {
-      await pullMsg()
+      if (isNotInGroup.value) {
+        await pullMsg(1, selectedSession.value.leaveMsgId + 1)
+      } else {
+        await pullMsg()
+      }
+
       msgListReachBottom()
     }
     lastReadMsgId.value = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
@@ -457,6 +483,10 @@ const handleRead = () => {
 }
 
 const handleSendMessage = (content) => {
+  if (isNotInGroup.value) {
+    ElMessage.error('您已离开或解散该群')
+    return
+  }
   if (isMutedInGroup.value) {
     ElMessage.warning('您已被禁言，请联系管理员')
     return
@@ -622,10 +652,13 @@ const onShowGroupCard = async ({ groupId }) => {
   groupInfoService({ groupId: groupId })
     .then((res) => {
       groupCardData.setOpened(groupId)
-      groupData.setGroupInfo(res.data.data.groupInfo)
+      groupData.setGroupInfo({
+        groupId: groupId,
+        groupInfo: res.data.data.groupInfo || {}
+      })
       groupData.setGroupMembers({
         groupId: groupId,
-        members: res.data.data.members
+        members: res.data.data.members || {}
       })
     })
     .finally(() => {
@@ -828,7 +861,10 @@ const onConfirmSelect = async (selected) => {
     groupType: 1, //普通群
     members: members
   })
-  groupData.setGroupInfo(res.data.data.groupInfo)
+  groupData.setGroupInfo({
+    groupId: res.data.data.groupInfo.groupId,
+    groupInfo: res.data.data.groupInfo
+  })
   isShowSelectDialog.value = false
 
   // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询

@@ -50,9 +50,18 @@ const announcement = computed(() => {
   return groupData.groupInfoList[groupId.value]?.announcement || '暂无公告'
 })
 
+const validMembers = computed(() => {
+  return groupData.getValidGroupMembers(groupId.value)
+})
+
+const isNotInGroup = computed(() => {
+  return !(myAccount.value in validMembers.value)
+})
+
 const membersCount = computed(() => {
-  const members = groupData.groupMembersList[groupId.value]
-  return members ? Object.keys(members).length : 0
+  if (isNotInGroup.value) return 0
+  const validMembers = groupData.getValidGroupMembers(groupId.value)
+  return Object.values(validMembers).length
 })
 
 const iAmAdmin = computed(() => {

@@ -34,7 +34,7 @@ export const onReceiveStatusResMsg = () => {
       if (selectedSession && selectedSession.sessionType === MsgType.GROUP_CHAT) {
         const groupId = selectedSession.remoteId
         const groupMembers = groupData.groupMembersList[groupId]
-        if (key in groupMembers) {
+        if (groupMembers && key in groupMembers) {
           groupMembers[key].status = content[key]
         }
       }
