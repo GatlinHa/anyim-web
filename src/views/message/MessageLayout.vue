@@ -475,7 +475,7 @@ const handleRead = () => {
 
 const handleSendMessage = (content) => {
   if (isNotInGroup.value) {
-    ElMessage.error('您已离开或解散该群')
+    ElMessage.error('您已离开该群或群已被解散')
     return
   }
   if (isMutedInGroup.value) {
@@ -938,7 +938,7 @@ const onConfirmSelect = async (selected) => {
             <span class="show-id" :title="showId">{{ showId }}</span>
           </div>
 
-          <div class="action-set">
+          <div v-if="!isNotInGroup" class="action-set">
             <el-icon
               class="action-button"
               size="20"
@@ -1038,7 +1038,7 @@ const onConfirmSelect = async (selected) => {
                     @drag-update="onInputBoxDragUpdate"
                   ></DragLine>
                   <div class="tool-set">
-                    <div class="left-tools">
+                    <div v-if="!isNotInGroup" class="left-tools">
                       <InputTool tips="表情">
                         <template #iconSlot>
                           <PictureRounded />
@@ -1075,7 +1075,22 @@ const onConfirmSelect = async (selected) => {
                   </div>
                 </el-header>
                 <el-main class="input-box-main">
+                  <div
+                    v-if="isNotInGroup"
+                    style="
+                      height: 100%;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      font-size: 14px;
+                      color: gray;
+                      user-select: text;
+                    "
+                  >
+                    您已离开该群或群已被解散
+                  </div>
                   <InputEditor
+                    v-else
                     :sessionId="selectedSessionId"
                     :draft="selectedSession.draft || ''"
                     @sendMessage="handleSendMessage"
@@ -1305,14 +1320,15 @@ const onConfirmSelect = async (selected) => {
 
               .tool-set {
                 display: flex;
-                justify-content: space-between;
+                position: relative;
 
                 .left-tools {
                   display: flex;
                 }
 
                 .right-tools {
-                  margin-right: 10px;
+                  position: absolute;
+                  right: 0;
                 }
               }
             }
