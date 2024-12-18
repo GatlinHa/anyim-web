@@ -589,7 +589,8 @@ const dropGroup = () => {
     .then(() => {
       const loadingInstance = ElLoading.service(el_loading_options)
       groupDropService({
-        groupId: groupCardData.groupId
+        groupId: groupCardData.groupId,
+        leaveMsgId: sessionInfo.value.lastMsgId
       })
         .then((res) => {
           if (res.data.code === 0) {
