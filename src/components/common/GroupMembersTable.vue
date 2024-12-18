@@ -229,16 +229,14 @@ const onDelete = (userInfo) => {
       const loadingInstance = ElLoading.service(el_loading_options)
       const members = [{ account: userInfo.account, nickName: userInfo.nickName }]
       groupDelMembersService({
+        operatorId: myAccount.value,
+        operatorNickName: validMembers.value[myAccount.value].nickName,
         groupId: props.groupId,
         leaveMsgId: messageData.sessionList[messageData.selectedSessionId].lastMsgId,
         members: members
       })
         .then((res) => {
-          if (res.data.data) {
-            groupData.setGroupMembers({
-              groupId: props.groupId,
-              members: res.data.data.members
-            })
+          if (res.data.code === 0) {
             ElMessage.success('移除成功')
           } else {
             ElMessage.error('移除失败')

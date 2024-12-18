@@ -281,15 +281,13 @@ const doAdd = (userArray) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   const members = userArray.map((item) => ({ account: item.account, nickName: item.nickName }))
   groupAddMembersService({
+    operatorId: myAccount.value,
+    operatorNickName: showMembers.value[myAccount.value].nickName,
     groupId: groupCardData.groupId,
     members: members
   })
     .then((res) => {
-      if (res.data.data) {
-        groupData.setGroupMembers({
-          groupId: groupCardData.groupId,
-          members: res.data.data.members
-        })
+      if (res.data.code === 0) {
         ElMessage.success('添加成功')
       } else {
         ElMessage.error('添加失败')
@@ -304,16 +302,14 @@ const doDelete = (userArray) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   const members = userArray.map((item) => ({ account: item.account, nickName: item.nickName }))
   groupDelMembersService({
+    operatorId: myAccount.value,
+    operatorNickName: showMembers.value[myAccount.value].nickName,
     groupId: groupCardData.groupId,
     leaveMsgId: sessionInfo.value.lastMsgId,
     members: members
   })
     .then((res) => {
-      if (res.data.data) {
-        groupData.setGroupMembers({
-          groupId: groupCardData.groupId,
-          members: res.data.data.members
-        })
+      if (res.data.code === 0) {
         ElMessage.success('移除成功')
       } else {
         ElMessage.error('移除失败')
