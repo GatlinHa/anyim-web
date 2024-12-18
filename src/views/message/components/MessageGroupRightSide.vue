@@ -50,12 +50,8 @@ const announcement = computed(() => {
   return groupData.groupInfoList[groupId.value]?.announcement || '暂无公告'
 })
 
-const validMembers = computed(() => {
-  return groupData.getValidGroupMembers(groupId.value)
-})
-
 const isNotInGroup = computed(() => {
-  return !(myAccount.value in validMembers.value)
+  return messageData.sessionList[props.sessionId]?.leaveFlag === true
 })
 
 const membersCount = computed(() => {

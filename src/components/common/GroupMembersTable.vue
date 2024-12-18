@@ -35,7 +35,7 @@ const validMembers = computed(() => {
 })
 
 const isNotInGroup = computed(() => {
-  return !(myAccount.value in validMembers.value)
+  return messageData.sessionList[props.groupId]?.leaveFlag === true
 })
 
 /**

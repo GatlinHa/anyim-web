@@ -10,31 +10,24 @@ export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
     const sessionId = msg.body.sessionId
     const now = new Date()
 
-    // 如果sessionList中没有,需要加载这个session
-    if (!messageData.sessionList[sessionId]) {
-      const res = await msgChatQuerySessionService({ sessionId: sessionId })
+    // 更新session
+    msgChatQuerySessionService({ sessionId: sessionId }).then((res) => {
       messageData.addSession(res.data.data)
-    }
-
-    const res = await groupInfoService({ groupId: msg.body.groupId })
-    groupData.setGroupInfo({
-      groupId: msg.body.groupId,
-      groupInfo: res.data.data.groupInfo || {}
-    })
-    groupData.setGroupMembers({
-      groupId: msg.body.groupId,
-      members: res.data.data.members || {}
     })
 
-    messageData.updateSession({
-      sessionId: sessionId,
-      lastMsgId: msg.body.msgId,
-      lastMsgType: msg.header.msgType,
-      lastMsgContent: msg.body.content,
-      lastMsgAccount: msg.body.fromId,
-      lastMsgTime: now
+    // 更新group信息
+    groupInfoService({ groupId: msg.body.groupId }).then((res) => {
+      groupData.setGroupInfo({
+        groupId: msg.body.groupId,
+        groupInfo: res.data.data.groupInfo || {}
+      })
+      groupData.setGroupMembers({
+        groupId: msg.body.groupId,
+        members: res.data.data.members || {}
+      })
     })
 
+    // 更新聊天记录
     messageData.addMsgRecords(sessionId, [
       {
         sessionId: sessionId,

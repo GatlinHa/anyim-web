@@ -121,14 +121,10 @@ const allMembers = computed(() => {
   return groupData.groupMembersList[selectedSession.value?.remoteId]
 })
 
-const validMembers = computed(() => {
-  return groupData.getValidGroupMembers(selectedSession.value?.remoteId)
-})
-
 const isNotInGroup = computed(() => {
   return (
     selectedSession.value.sessionType === MsgType.GROUP_CHAT &&
-    !(myAccount.value in validMembers.value)
+    selectedSession.value.leaveFlag === true
   )
 })
 

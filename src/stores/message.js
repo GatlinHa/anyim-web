@@ -27,7 +27,7 @@ export const messageStore = defineStore('anyim-message', () => {
     sessionList.value = sessions
   }
 
-  // 加入新的会话（陌生人发消息，产生新的会话）
+  // 加入新的会话（陌生人发消息，产生新的会话）， 或覆盖式更新
   const addSession = (session) => {
     sessionList.value[session.sessionId] = session
   }
