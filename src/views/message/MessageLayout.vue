@@ -425,20 +425,15 @@ const handleSelectedSession = async (sessionId) => {
       const groupId = selectedSession.value.remoteId
       // 没有members数据才需要加载成员列表，加载过了就不重复加载了
       if (!groupData.groupMembersList[groupId]) {
-        try {
-          // TODO 看看这里的try还要不要
-          const res = await groupInfoService({ groupId: groupId })
-          groupData.setGroupInfo({
-            groupId: groupId,
-            groupInfo: res.data.data.groupInfo || {}
-          })
-          groupData.setGroupMembers({
-            groupId: groupId,
-            members: res.data.data.members || {}
-          })
-        } catch {
-          // do nothing
-        }
+        const res = await groupInfoService({ groupId: groupId })
+        groupData.setGroupInfo({
+          groupId: groupId,
+          groupInfo: res.data.data.groupInfo || {}
+        })
+        groupData.setGroupMembers({
+          groupId: groupId,
+          members: res.data.data.members || {}
+        })
       }
     }
 
