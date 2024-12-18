@@ -49,6 +49,20 @@ const isSystemMsg = computed(() => {
   }
 })
 
+const myAccount = computed(() => {
+  return userData.user.account
+})
+
+const iAmAdmin = computed(() => {
+  const groupId = messageData.sessionList[props.sessionId]?.remoteId
+  const members = groupData.groupMembersList[groupId]
+  if (members) {
+    return members[myAccount.value]?.role > 0
+  } else {
+    return false
+  }
+})
+
 const getSysCreateGroupMsgTips = (content) => {
   const operator = content['operator']
   const members = content['members']
@@ -60,11 +74,15 @@ const getSysCreateGroupMsgTips = (content) => {
       `<span class="member-nickName" id="${item.account}" style="color: #409eff; cursor: pointer;">${item.nickName}</span>，`
   })
 
+  const modifyGroupNameTips = iAmAdmin.value
+    ? `<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
+    : ''
   return (
     `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>` +
     '创建了群聊，并邀请了' +
     str.slice(0, -1) +
-    `。<span class="update-group-name" style="color: #409eff; cursor: pointer;">修改群聊名称</span>`
+    '。' +
+    modifyGroupNameTips
   )
 }
 
