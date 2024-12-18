@@ -24,10 +24,9 @@ export const groupStore = defineStore('anyim-group', () => {
     const membersArray = Object.values(groupMembersList.value[groupId] || {})
     for (let index = 0; index < membersArray.length; index++) {
       const item = membersArray[index]
-      if (item.inStatus > 0) {
-        continue
+      if (item.inStatus === 0) {
+        data[item.account] = item
       }
-      data[item.account] = item
     }
     return data
   }

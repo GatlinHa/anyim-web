@@ -124,19 +124,7 @@ const sessionInfo = computed(() => {
 })
 
 const showMembers = computed(() => {
-  const members = groupData.groupMembersList[groupCardData.groupId]
-  if (!members) {
-    return {}
-  }
-
-  const data = {}
-  Object.values(members).forEach((item) => {
-    if (item.inStatus === 0) {
-      data[item.account] = item
-    }
-  })
-
-  return data
+  return groupData.getValidGroupMembers(groupCardData.groupId)
 })
 
 /**
