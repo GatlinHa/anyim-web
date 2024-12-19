@@ -6,7 +6,7 @@ import groupChatIcon from '@/assets/svg/groupchat.svg'
  * avatarThumb: 群组头像
  * size：尺寸，不传即显示默认值
  */
-const props = defineProps(['avatarThumb', 'size'])
+const props = defineProps(['avatarThumb', 'size', 'isValid'])
 
 const avatarSize = computed(() => {
   switch (props.size) {
@@ -35,6 +35,10 @@ const svgSize = computed(() => {
       return 24
   }
 })
+
+const isValid = computed(() => {
+  return props.isValid === undefined ? true : props.isValid
+})
 </script>
 
 <template>
@@ -49,7 +53,7 @@ const svgSize = computed(() => {
 <style lang="scss" scoped>
 .svg-avatar {
   border-radius: 50%;
-  background-color: #c0c4cc;
+  background-color: v-bind('isValid ? "rgb(121.3, 187.1, 255)" : "rgb(177.3, 179.4, 183.6)"');
   display: flex;
   justify-content: center;
   align-items: center;

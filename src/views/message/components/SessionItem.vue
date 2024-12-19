@@ -9,6 +9,7 @@ import { MsgType } from '@/proto/msg'
 import { messageStore, groupStore } from '@/stores'
 import { msgChatCloseSessionService } from '@/api/message'
 import router from '@/router'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps([
   'sessionId',
@@ -72,6 +73,12 @@ const showAvatarThumb = computed(() => {
     default:
       return ''
   }
+})
+
+const isNotInGroup = computed(() => {
+  return (
+    sessionInfo.value.sessionType === MsgType.GROUP_CHAT && sessionInfo.value.leaveFlag === true
+  )
 })
 
 const showTime = computed(() => {
@@ -265,6 +272,11 @@ const onShowUserCard = () => {
 }
 
 const onShowGroupCard = () => {
+  if (isNotInGroup.value) {
+    ElMessage.error('您已离开该群或群已被解散')
+    return
+  }
+
   emit('showGroupCard', { sessionId: props.sessionId, groupId: showId.value })
 }
 
@@ -345,6 +357,7 @@ defineExpose({
       <GroupAvatarIcon
         v-else-if="sessionInfo.sessionType === MsgType.GROUP_CHAT"
         :avatarThumb="showAvatarThumb"
+        :isValid="!isNotInGroup"
         style="cursor: pointer"
         @click="onShowGroupCard"
       ></GroupAvatarIcon>
