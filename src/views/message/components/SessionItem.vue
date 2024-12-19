@@ -368,6 +368,7 @@ defineExpose({
               v-if="sessionInfo.sessionType === MsgType.GROUP_CHAT"
               tagType="groupchat"
             ></SessionTag>
+            <SessionTag v-if="isNotInGroup" tagType="groupleave"></SessionTag>
             <span
               class="showName text-ellipsis"
               :title="sessionInfo.mark ? `${sessionInfo.mark}(${showName})` : showName"
