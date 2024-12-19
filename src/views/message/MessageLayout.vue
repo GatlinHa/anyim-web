@@ -475,7 +475,7 @@ const handleRead = () => {
 
 const handleSendMessage = (content) => {
   if (isNotInGroup.value) {
-    ElMessage.error('您已离开该群或群已被解散')
+    ElMessage.warning('您已离开该群或群已被解散')
     return
   }
   if (isMutedInGroup.value) {
