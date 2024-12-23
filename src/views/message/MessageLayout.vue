@@ -929,6 +929,7 @@ const onConfirmSelect = async (selected) => {
               v-if="selectedSession?.sessionType === MsgType.GROUP_CHAT"
               tagType="groupchat"
             ></SessionTag>
+            <SessionTag v-if="isNotInGroup" tagType="groupleave"></SessionTag>
             <span
               class="show-name text-ellipsis"
               :title="selectedSession.mark ? `${selectedSession.mark}(${showName})` : showName"
