@@ -1030,13 +1030,6 @@ const onConfirmSelect = async (selected) => {
             <div class="input-box bdr-t" :style="{ height: inputBoxHeight + 'px' }">
               <el-container class="input-box-container">
                 <el-header class="input-box-header">
-                  <DragLine
-                    direction="top"
-                    :min="inputBoxHeightMin"
-                    :max="inputBoxHeightMax"
-                    :origin-size="inputBoxHeight"
-                    @drag-update="onInputBoxDragUpdate"
-                  ></DragLine>
                   <div class="tool-set">
                     <div v-if="!isNotInGroup" class="left-tools">
                       <InputTool tips="表情">
@@ -1073,6 +1066,13 @@ const onConfirmSelect = async (selected) => {
                       </InputTool>
                     </div>
                   </div>
+                  <DragLine
+                    direction="top"
+                    :min="inputBoxHeightMin"
+                    :max="inputBoxHeightMax"
+                    :origin-size="inputBoxHeight"
+                    @drag-update="onInputBoxDragUpdate"
+                  ></DragLine>
                 </el-header>
                 <el-main class="input-box-main">
                   <div
@@ -1309,14 +1309,12 @@ const onConfirmSelect = async (selected) => {
           .input-box {
             width: 100%;
             display: flex;
-            position: relative;
 
             .input-box-header {
               width: 100%;
               height: auto;
               padding: 0;
-              display: flex;
-              flex-direction: column;
+              position: relative;
 
               .tool-set {
                 display: flex;
