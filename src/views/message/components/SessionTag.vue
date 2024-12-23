@@ -26,7 +26,7 @@ const width = computed(() => {
 
 <style lang="scss" scoped>
 .el-tag {
-  width: v-bind(width);
+  min-width: v-bind(width);
   height: 16px;
   border: 0;
   padding: 0;
