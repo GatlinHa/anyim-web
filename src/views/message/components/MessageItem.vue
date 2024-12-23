@@ -115,7 +115,7 @@ const getSysGroupDelMemberMsgTips = (content) => {
   })
   return (
     `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>` +
-    '移除了' +
+    '移出了' +
     str.slice(0, -1)
   )
 }

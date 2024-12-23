@@ -217,7 +217,7 @@ const cancelAdmin = (userInfo) => {
 
 const onDelete = (userInfo) => {
   ElMessageBox.confirm(
-    `是否要将 ${userInfo.nickName}(${userInfo.account}) 从本群移除？`,
+    `是否要将 ${userInfo.nickName}(${userInfo.account}) 从本群移出？`,
     '温馨提示',
     {
       type: 'warning',
@@ -237,9 +237,9 @@ const onDelete = (userInfo) => {
       })
         .then((res) => {
           if (res.data.code === 0) {
-            ElMessage.success('移除成功')
+            ElMessage.success('移出成功')
           } else {
-            ElMessage.error('移除失败')
+            ElMessage.error('移出失败')
           }
         })
         .finally(() => {

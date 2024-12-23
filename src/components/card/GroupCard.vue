@@ -170,7 +170,7 @@ const isShowAddButton = computed(() => {
 })
 
 /**
- * 如果是管理员，可以看到移除按钮
+ * 如果是管理员，可以看到移出按钮
  * @param memberInfo 成员信息
  */
 const isShowDelButton = computed(() => {
@@ -262,7 +262,7 @@ const delMember = () => {
 }
 
 const selectDialogTitle = computed(() => {
-  return changeMemberModel.value === 'addMember' ? '添加成员' : '移除成员'
+  return changeMemberModel.value === 'addMember' ? '添加成员' : '移出成员'
 })
 
 const doAdd = (userArray) => {
@@ -298,9 +298,9 @@ const doDelete = (userArray) => {
   })
     .then((res) => {
       if (res.data.code === 0) {
-        ElMessage.success('移除成功')
+        ElMessage.success('移出成功')
       } else {
-        ElMessage.error('移除失败')
+        ElMessage.error('移出失败')
       }
     })
     .finally(() => {
@@ -309,7 +309,7 @@ const doDelete = (userArray) => {
 }
 
 const onConfirmSelect = (selected) => {
-  isShowSelectDialog.value = false // 这里要先关闭，不然移除的时候会报错
+  isShowSelectDialog.value = false // 这里要先关闭，不然移出的时候会报错
   if (changeMemberModel.value === 'addMember') {
     doAdd(selected)
   } else if (changeMemberModel.value === 'delMember') {
@@ -746,7 +746,7 @@ const onClick = () => {
           </div>
           <div class="group-card-members-grid-item" v-if="isShowDelButton">
             <DeleteButton :size="40" @click="delMember"></DeleteButton>
-            <div class="text">移除成员</div>
+            <div class="text">移出成员</div>
           </div>
         </div>
       </div>

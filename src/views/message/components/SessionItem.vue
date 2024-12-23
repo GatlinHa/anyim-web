@@ -113,7 +113,7 @@ const getSysGroupDelMemberMsgTips = (content) => {
   members.forEach((item) => {
     str = str + item.nickName + '，'
   })
-  return operator.nickName + '移除了' + str.slice(0, -1)
+  return operator.nickName + '移出了' + str.slice(0, -1)
 }
 
 const getSysGroupChangeRoleMsgTips = (msgType, content) => {

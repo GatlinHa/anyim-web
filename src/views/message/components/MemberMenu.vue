@@ -86,7 +86,7 @@ const lable_setAdmin = computed(() => {
 })
 const lable_delete = ref({
   label: 'delete',
-  desc: '从本群移除',
+  desc: '从本群移出',
   icon: markRaw(DeleteIcon)
 })
 const lable_transferOwner = ref({
