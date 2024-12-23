@@ -4,7 +4,7 @@ import { msgChatQuerySessionService } from '@/api/message'
 import { groupInfoService } from '@/api/group'
 
 export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
-  return async (msg) => {
+  return (msg) => {
     const messageData = messageStore()
     const groupData = groupStore()
     const sessionId = msg.body.sessionId

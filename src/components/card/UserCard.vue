@@ -1,11 +1,22 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { Close, Male, Female, Check, Edit } from '@element-plus/icons-vue'
+import {
+  Close,
+  Male,
+  Female,
+  Check,
+  Edit,
+  ChatRound,
+  Microphone,
+  VideoCamera
+} from '@element-plus/icons-vue'
 import avatar from '@/assets/default_avatar.png'
 import { userStore, messageStore, userCardStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { MsgType } from '@/proto/msg'
 import { msgChatCreateSessionService } from '@/api/message'
+import router from '@/router'
+import { ElMessage } from 'element-plus'
 
 const userData = userStore()
 const messageData = messageStore()
@@ -104,6 +115,24 @@ const onChangePartition = async () => {
 
 const onCancelPartition = () => {
   partitioEditing.value = false
+}
+
+const goToSessionTab = () => {
+  onClose()
+  router.push({
+    path: '/message',
+    query: {
+      sessionId: sessionId.value
+    }
+  })
+}
+
+const onVoiceCall = () => {
+  ElMessage.warning('功能开发中')
+}
+
+const onVideoCall = () => {
+  ElMessage.warning('功能开发中')
 }
 </script>
 
@@ -237,6 +266,17 @@ const onCancelPartition = () => {
               ></el-button>
             </div>
           </div>
+        </div>
+        <div v-if="!isSelf" class="bottom">
+          <el-icon class="action-button" size="20" title="发送消息" @click="goToSessionTab">
+            <ChatRound />
+          </el-icon>
+          <el-icon class="action-button" size="20" title="语音通话" @click="onVoiceCall">
+            <Microphone />
+          </el-icon>
+          <el-icon class="action-button" size="20" title="视频通话" @click="onVideoCall">
+            <VideoCamera />
+          </el-icon>
         </div>
       </div>
     </el-dialog>
@@ -403,6 +443,28 @@ const onCancelPartition = () => {
 
       .el-button {
         margin: 0 2px 0 2px;
+      }
+    }
+  }
+
+  .bottom {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #f5f5f5;
+
+    .action-button {
+      padding: 8px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: transparent solid 1px;
+      cursor: pointer;
+
+      &:hover {
+        border: #409eff solid 1px;
+        color: #409eff;
       }
     }
   }
