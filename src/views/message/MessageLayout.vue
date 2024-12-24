@@ -638,7 +638,11 @@ const onUpdateMarkConfirm = (inputValue) => {
   isShowUpdateMarkDialog.value = false
 }
 
-const onShowGroupCard = async ({ groupId }) => {
+const onShowGroupCard = ({ groupId }) => {
+  if (isNotInGroup.value) {
+    ElMessage.warning('您已离开该群或群已被解散')
+    return
+  }
   const loadingInstance = ElLoading.service(el_loading_options)
   groupInfoService({ groupId: groupId })
     .then((res) => {
