@@ -200,22 +200,46 @@ const getSysGroupDrop = (content) => {
 const getSysGroupUpdateAnnouncement = (content) => {
   const operator = content['operator']
   const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
-  const announcementStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">群公告</span>`
-  return `${operatorStr}更改了${announcementStr}`
+  const title = `<div style="text-align: center;">${operatorStr}更改了群公告：</div>`
+  const announcement = content['announcement']
+  const announcementDivs = `
+  <div style="width: 100%; min-height: 100px; margin-top: 5px; padding: 5px 10px 5px 10px; border-radius: 10px; border: transparent solid 1px; background-color: #fff">
+    <div style="display: flex; justify-content: start; align-items: center; border-bottom: #f0f0f0 solid 1px;">
+      <svg
+        t="1734959290210"
+        class="svg-icon"
+        viewBox="0 0 1024 1024"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        p-id="4307"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        width="30"
+        height="30"
+        fill="#E6A23C"
+      >
+        <path d="M874.839 475.363h-152.11c-8.298 0-16.242 3.353-22.07 9.273a31.544 31.544 0 0 0-9.09 22.156v9.798c0 17.302 14.034 31.342 31.247 31.342h152.023c17.216 0 31.161-14.04 31.161-31.342v-9.798a31.543 31.543 0 0 0-9.09-22.156c-5.828-5.92-13.774-9.273-22.071-9.273zM522.15 206.37c-47.318 37.607-146.28 90.312-217.436 141.074h-0.086c-0.798 0.53-1.59 3.353-2.475 3.794-8.384 4.767-12.181 17.747-57.913 17.747h-89.16c-22.955 0-37.081 10.768-37.081 34.96v214.788c0 24.187 12.98 36.106 37.08 36.106h89.515c45.468 0.091 49.175 13.066 57.56 17.747 0.797 0.44 1.59 3.263 2.383 3.793h0.09c69.036 50.762 168.62 107.53 217.523 143.635 14.748 10.858 63.656 29.93 63.656-37.166V240.8c0-67.182-49.353-45.733-63.656-34.43z m140.371 148.135c8.122 14.212 24.101 17.833 35.753 7.944l124.918-105.317c11.742-9.802 14.565-29.312 6.535-43.61l-4.59-8.035c-8.035-14.212-24.102-17.747-35.758-7.945L664.462 302.86c-11.65 9.889-14.565 29.312-6.53 43.611l4.59 8.035zM698.19 661.2c-11.656-9.803-27.635-6.182-35.667 7.944l-4.59 8.03c-8.035 14.217-5.12 33.727 6.53 43.616L789.38 826.196c11.656 9.798 27.635 6.268 35.667-7.944l4.59-8.035c8.035-14.212 5.122-33.727-6.53-43.61L698.189 661.198z" p-id="4308">
+        </path>
+      </svg>
+      <span style="margin-left: 5px; font-weight: bold">群公告</span>
+    </div>
+    <span style="display: flex; justify-content: start; white-space: pre-wrap; word-wrap: break-word; word-break: break-all;">${announcement}</span>
+  </div>
+  `
+  return title + announcementDivs
 }
 
 const getSysGroupUpdateName = (content) => {
   const operator = content['operator']
   const groupName = content['groupName']
   const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
-  const groupNameStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">${groupName}</span>`
+  const groupNameStr = `<span class="show-group-card" style="color: #409eff; cursor: pointer;">${groupName}</span>`
   return `${operatorStr}更改了群名称：${groupNameStr}`
 }
 
 const getSysGroupUpdateAvatar = (content) => {
   const operator = content['operator']
   const operatorStr = `<span class="member-nickName" id="${operator.account}" style="color: #409eff; cursor: pointer;">${operator.nickName}</span>`
-  const avatarStr = `<span class="show-group-announcement" style="color: #409eff; cursor: pointer;">群头像</span>`
+  const avatarStr = `<span class="show-group-card" style="color: #409eff; cursor: pointer;">群头像</span>`
   return `${operatorStr}更改了${avatarStr}`
 }
 
@@ -223,37 +247,37 @@ const systemMsgContent = computed(() => {
   const content = jsonParseSafe(props.msg.content)
   switch (props.msg.msgType) {
     case MsgType.SYS_GROUP_CREATE:
-      return getSysCreateGroupMsgTips(content)
+      return `<div style="text-align: center;">${getSysCreateGroupMsgTips(content)}</div>`
     case MsgType.SYS_GROUP_ADD_MEMBER:
-      return getSysGroupAddMemberMsgTips(content)
+      return `<div style="text-align: center;">${getSysGroupAddMemberMsgTips(content)}</div>`
     case MsgType.SYS_GROUP_DEL_MEMBER:
-      return getSysGroupDelMemberMsgTips(content)
+      return `<div style="text-align: center;">${getSysGroupDelMemberMsgTips(content)}</div>`
     case MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT:
-      return getSysGroupUpdateAnnouncement(content)
+      return getSysGroupUpdateAnnouncement(content) //更新公告的系统消息需要特殊处理
     case MsgType.SYS_GROUP_UPDATE_NAME:
-      return getSysGroupUpdateName(content)
+      return `<div style="text-align: center;">${getSysGroupUpdateName(content)}</div>`
     case MsgType.SYS_GROUP_UPDATE_AVATAR:
-      return getSysGroupUpdateAvatar(content)
+      return `<div style="text-align: center;">${getSysGroupUpdateAvatar(content)}</div>`
     case MsgType.SYS_GROUP_SET_ADMIN:
     case MsgType.SYS_GROUP_CANCEL_ADMIN:
-      return getSysGroupChangeRoleMsgTips(props.msg.msgType, content)
+      return `<div style="text-align: center;">${getSysGroupChangeRoleMsgTips(props.msg.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_ALL_MUTED:
     case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:
-      return getSysGroupUpdateAllMuted(props.msg.msgType, content)
+      return `<div style="text-align: center;">${getSysGroupUpdateAllMuted(props.msg.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_JOIN_APPROVAL:
     case MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL:
-      return getSysGroupUpdateJoinApproval(props.msg.msgType, content)
+      return `<div style="text-align: center;">${getSysGroupUpdateJoinApproval(props.msg.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_HISTORY_BROWSE:
     case MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE:
-      return getSysGroupUpdateHistoryBrowse(props.msg.msgType, content)
+      return `<div style="text-align: center;">${getSysGroupUpdateHistoryBrowse(props.msg.msgType, content)}</div>`
     case MsgType.SYS_GROUP_OWNER_TRANSFER:
-      return getSysGroupOwnerTransfer(content)
+      return `<div style="text-align: center;">${getSysGroupOwnerTransfer(content)}</div>`
     case MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED:
-      return getSysGroupUpdateMemberMuted(content)
+      return `<div style="text-align: center;">${getSysGroupUpdateMemberMuted(content)}</div>`
     case MsgType.SYS_GROUP_LEAVE:
-      return getSysGroupLeave(content)
+      return `<div style="text-align: center;">${getSysGroupLeave(content)}</div>`
     case MsgType.SYS_GROUP_DROP:
-      return getSysGroupDrop(content)
+      return `<div style="text-align: center;">${getSysGroupDrop(content)}</div>`
     default:
       return ''
   }
@@ -356,7 +380,7 @@ const onClickSystemMsg = (e) => {
     }, 100)
   } else if (e.target.className === 'member-nickName') {
     emit('showUserCard', { sessionId: props.sessionId, account: e.target.id })
-  } else if (e.target.className === 'show-group-announcement') {
+  } else if (e.target.className === 'show-group-card') {
     emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId].remoteId })
   }
 }
@@ -379,12 +403,12 @@ const onClickSystemMsg = (e) => {
       >以下是新消息</el-divider
     >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
-    <span
+    <div
       v-if="isSystemMsg"
       class="system-message"
       v-html="systemMsgContent"
       @click="onClickSystemMsg"
-    ></span>
+    ></div>
     <div v-else class="message-container-wrapper">
       <el-container class="el-container-right" v-if="isSelf">
         <el-main class="el-main-right">
@@ -442,6 +466,7 @@ const onClickSystemMsg = (e) => {
 <style lang="scss" scoped>
 .message-item {
   width: 100%;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -506,7 +531,9 @@ const onClickSystemMsg = (e) => {
   .system-message {
     width: 60%;
     padding: 10px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     font-size: 14px;
     color: gray;
     user-select: text;
