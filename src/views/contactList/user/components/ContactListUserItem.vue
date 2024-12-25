@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import {
   ChatRound,
   Microphone,
@@ -26,6 +26,15 @@ const markEditRef = ref()
 
 const partitioEditing = ref(false)
 const newPartitionId = ref(props.session.partitionId)
+
+const lastMsg = computed(() => {
+  const msgRecords = messageData.msgRecordsList[props.session.sessionId]
+  if (!msgRecords?.length) {
+    return {}
+  }
+  const len = msgRecords.length
+  return msgRecords[len - 1]
+})
 
 const onShowCard = () => {
   emit('showUserCard', {
@@ -122,9 +131,9 @@ const onVideoCall = () => {
       ></ContactItem>
       <div class="diff-display">
         <div v-if="props.type === 'all'" class="all">
-          <div class="tips-block">{{ sessionShowTime(props.session.lastMsgTime) }}</div>
-          <div class="all-content text-ellipsis" :title="props.session.lastMsgContent">
-            {{ props.session.lastMsgContent }}
+          <div class="tips-block">{{ sessionShowTime(lastMsg.msgTime) }}</div>
+          <div class="all-content text-ellipsis" :title="lastMsg.content">
+            {{ lastMsg.content }}
           </div>
         </div>
         <div v-if="props.type === 'mark'" class="mark">

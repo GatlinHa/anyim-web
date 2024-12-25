@@ -14,7 +14,7 @@ export const onReceiveGroupChatMsg = (msgListDiv, capacity) => {
       msgChatQuerySessionService({
         sessionId: sessionId
       }).then((res) => {
-        messageData.addSession(res.data.data)
+        messageData.addSession(res.data.data.session)
       })
     }
 
@@ -30,11 +30,6 @@ export const onReceiveGroupChatMsg = (msgListDiv, capacity) => {
 
     messageData.updateSession({
       sessionId: sessionId,
-      lastMsgId: msg.body.msgId,
-      lastMsgType: msg.header.msgType,
-      lastMsgContent: msg.body.content,
-      lastMsgAccount: msg.body.fromId,
-      lastMsgTime: now,
       unreadCount: messageData.sessionList[sessionId].unreadCount + 1,
       ...readParams
     })

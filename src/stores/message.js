@@ -19,15 +19,18 @@ export const messageStore = defineStore('anyim-message', () => {
   }
 
   /**
+   * 会话列表
    * 格式：{sessionId_1: session_1, sessionId_2: session_2, ...}
    */
   const sessionList = ref({})
 
-  const setSessionList = (sessions) => {
-    sessionList.value = sessions
-  }
+  /**
+   * 会话消息
+   * 格式：{sessionId_1: msgRecord_1, sessionId_2: msgRecord_2, ...}
+   * 其中msgRecord_x是数组
+   */
+  const msgRecordsList = ref({})
 
-  // 加入新的会话（陌生人发消息，产生新的会话）， 或覆盖式更新
   const addSession = (session) => {
     sessionList.value[session.sessionId] = session
   }
@@ -62,11 +65,6 @@ export const messageStore = defineStore('anyim-message', () => {
     }
 
     const mySession = sessionList.value[obj.sessionId]
-    if ('lastMsgId' in obj) mySession.lastMsgId = obj.lastMsgId
-    if ('lastMsgType' in obj) mySession.lastMsgType = obj.lastMsgType
-    if ('lastMsgContent' in obj) mySession.lastMsgContent = obj.lastMsgContent
-    if ('lastMsgAccount' in obj) mySession.lastMsgAccount = obj.lastMsgAccount
-    if ('lastMsgTime' in obj) mySession.lastMsgTime = obj.lastMsgTime
     if ('unreadCount' in obj) mySession.unreadCount = obj.unreadCount
     if ('remoteRead' in obj) mySession.remoteRead = obj.remoteRead
     if ('readMsgId' in obj) mySession.readMsgId = obj.readMsgId
@@ -94,44 +92,14 @@ export const messageStore = defineStore('anyim-message', () => {
     }
   }
 
-  const totalUnReadCount = computed(() => {
-    return Object.values(sessionList.value).reduce(
-      (sum, item) => (item?.unreadCount ? sum + item.unreadCount : sum),
-      0
-    )
-  })
-
-  const el = document.getElementsByTagName('title')[0]
-  const title = import.meta.env.VITE_TITLE
-  let task = null
-  watch(
-    () => totalUnReadCount.value,
-    (newValue) => {
-      if (totalUnReadCount.value > 0) {
-        const newTitle = `您有(${newValue})条未读消息!`
-        clearInterval(task)
-        task = setInterval(() => {
-          el.innerText = el.innerText === title ? newTitle : title
-        }, 1000)
-      } else {
-        clearInterval(task)
-        el.innerText = title
-      }
-    }
-  )
-
-  /**
-   * 格式：{sessionId_1: msgRecord_1, sessionId_2: msgRecord_2, ...}
-   * 其中msgRecord_x是数组
-   */
-  const msgRecordsList = ref({})
-
   /**
    * 对话列表中加入新的消息数组，加入后要进行去重和排序
    * @param {*} sessionId 会话id
    * @param {*} msgRecords 新的消息数组
    */
   const addMsgRecords = (sessionId, msgRecords) => {
+    if (!msgRecords?.length) return
+
     if (!msgRecordsList.value[sessionId]) {
       // 去重
       let uniqueSet = new Set()
@@ -163,6 +131,32 @@ export const messageStore = defineStore('anyim-message', () => {
     }
   }
 
+  const totalUnReadCount = computed(() => {
+    return Object.values(sessionList.value).reduce(
+      (sum, item) => (item?.unreadCount ? sum + item.unreadCount : sum),
+      0
+    )
+  })
+
+  const el = document.getElementsByTagName('title')[0]
+  const title = import.meta.env.VITE_TITLE
+  let task = null
+  watch(
+    () => totalUnReadCount.value,
+    (newValue) => {
+      if (totalUnReadCount.value > 0) {
+        const newTitle = `您有(${newValue})条未读消息!`
+        clearInterval(task)
+        task = setInterval(() => {
+          el.innerText = el.innerText === title ? newTitle : title
+        }, 1000)
+      } else {
+        clearInterval(task)
+        el.innerText = title
+      }
+    }
+  )
+
   const clear = () => {
     selectedSessionId.value = ''
     sessionList.value = {}
@@ -186,7 +180,10 @@ export const messageStore = defineStore('anyim-message', () => {
   const loadSessionList = async () => {
     if (!Object.keys(sessionList.value).length) {
       const res = await msgChatSessionListService()
-      setSessionList(res.data.data)
+      Object.keys(res.data.data).forEach((item) => {
+        addSession(res.data.data[item].session)
+        addMsgRecords(item, res.data.data[item].msgList)
+      })
     }
   }
 
@@ -209,7 +206,6 @@ export const messageStore = defineStore('anyim-message', () => {
     selectedSessionId,
     setSelectedSessionId,
     sessionList,
-    setSessionList,
     addSession,
     deleteSession,
     updateSession,

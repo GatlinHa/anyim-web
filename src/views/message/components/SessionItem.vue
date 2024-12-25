@@ -30,6 +30,9 @@ const groupData = groupStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
 })
+const msgRecords = computed(() => {
+  return messageData.msgRecordsList[props.sessionId]
+})
 
 const top = ref(sessionInfo.value.top)
 const dnd = ref(sessionInfo.value.dnd)
@@ -76,13 +79,19 @@ const showAvatarThumb = computed(() => {
 })
 
 const isNotInGroup = computed(() => {
-  return (
-    sessionInfo.value.sessionType === MsgType.GROUP_CHAT && sessionInfo.value.leaveFlag === true
-  )
+  return sessionInfo.value.sessionType === MsgType.GROUP_CHAT && sessionInfo.value.leave
+})
+
+const lastMsg = computed(() => {
+  if (!msgRecords.value?.length) {
+    return {}
+  }
+  const len = msgRecords.value.length
+  return msgRecords.value[len - 1]
 })
 
 const showTime = computed(() => {
-  return sessionShowTime(sessionInfo.value.lastMsgTime)
+  return sessionShowTime(lastMsg.value.msgTime)
 })
 
 const getSysGroupCreateMsgTips = (content) => {
@@ -199,9 +208,7 @@ const getSysGroupUpdateAvatar = (content) => {
 
 const getGroupChatMsgTips = (content) => {
   const memberList = groupData.groupMembersList[showId.value]
-  const prefix = memberList
-    ? memberList[sessionInfo.value.lastMsgAccount].nickName
-    : sessionInfo.value.lastMsgAccount
+  const prefix = memberList ? memberList[lastMsg.value.fromId].nickName : lastMsg.value.fromId
   return prefix + '：' + content
 }
 
@@ -209,10 +216,10 @@ const showDetailContent = computed(() => {
   if (isShowDraft.value) {
     return sessionInfo.value.draft
   } else {
-    if (sessionInfo.value.lastMsgContent) {
+    if (lastMsg.value.content) {
       if (sessionInfo.value.sessionType === MsgType.GROUP_CHAT) {
-        const content = jsonParseSafe(sessionInfo.value.lastMsgContent)
-        switch (sessionInfo.value.lastMsgType) {
+        const content = jsonParseSafe(lastMsg.value.content)
+        switch (lastMsg.value.msgType) {
           case MsgType.SYS_GROUP_CREATE:
             return getSysGroupCreateMsgTips(content)
           case MsgType.SYS_GROUP_ADD_MEMBER:
@@ -227,16 +234,16 @@ const showDetailContent = computed(() => {
             return getSysGroupUpdateAvatar(content)
           case MsgType.SYS_GROUP_SET_ADMIN:
           case MsgType.SYS_GROUP_CANCEL_ADMIN:
-            return getSysGroupChangeRoleMsgTips(sessionInfo.value.lastMsgType, content)
+            return getSysGroupChangeRoleMsgTips(lastMsg.value.msgType, content)
           case MsgType.SYS_GROUP_SET_ALL_MUTED:
           case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:
-            return getSysGroupUpdateAllMuted(sessionInfo.value.lastMsgType, content)
+            return getSysGroupUpdateAllMuted(lastMsg.value.msgType, content)
           case MsgType.SYS_GROUP_SET_JOIN_APPROVAL:
           case MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL:
-            return getSysGroupUpdateJoinApproval(sessionInfo.value.lastMsgType, content)
+            return getSysGroupUpdateJoinApproval(lastMsg.value.msgType, content)
           case MsgType.SYS_GROUP_SET_HISTORY_BROWSE:
           case MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE:
-            return getSysGroupUpdateHistoryBrowse(sessionInfo.value.lastMsgType, content)
+            return getSysGroupUpdateHistoryBrowse(lastMsg.value.msgType, content)
           case MsgType.SYS_GROUP_OWNER_TRANSFER:
             return getSysGroupOwnerTransfer(content)
           case MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED:
@@ -246,12 +253,12 @@ const showDetailContent = computed(() => {
           case MsgType.SYS_GROUP_DROP:
             return getSysGroupDrop(content)
           case MsgType.GROUP_CHAT:
-            return getGroupChatMsgTips(sessionInfo.value.lastMsgContent)
+            return getGroupChatMsgTips(lastMsg.value.content)
           default:
             return ''
         }
       } else {
-        return sessionInfo.value.lastMsgContent
+        return lastMsg.value.content
       }
     } else {
       return ''

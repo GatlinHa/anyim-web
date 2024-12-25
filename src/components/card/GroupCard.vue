@@ -293,7 +293,6 @@ const doDelete = (userArray) => {
     operatorId: myAccount.value,
     operatorNickName: showMembers.value[myAccount.value].nickName,
     groupId: groupCardData.groupId,
-    leaveMsgId: sessionInfo.value.lastMsgId,
     members: members
   })
     .then((res) => {
@@ -466,7 +465,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
       remoteId: remoteId,
       sessionType: msgType
     }).then((res) => {
-      messageData.addSession(res.data.data)
+      messageData.addSession(res.data.data.session)
       groupCardData.setClosed()
       router.push({
         path: '/message',
@@ -560,8 +559,7 @@ const levelGroup = () => {
     .then(() => {
       const loadingInstance = ElLoading.service(el_loading_options)
       groupLeaveService({
-        groupId: groupCardData.groupId,
-        leaveMsgId: sessionInfo.value.lastMsgId
+        groupId: groupCardData.groupId
       })
         .then((res) => {
           if (res.data.code === 0) {
@@ -589,8 +587,7 @@ const dropGroup = () => {
     .then(() => {
       const loadingInstance = ElLoading.service(el_loading_options)
       groupDropService({
-        groupId: groupCardData.groupId,
-        leaveMsgId: sessionInfo.value.lastMsgId
+        groupId: groupCardData.groupId
       })
         .then((res) => {
           if (res.data.code === 0) {

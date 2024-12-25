@@ -17,7 +17,7 @@ export const onReceiveChatMsg = (msgListDiv, capacity) => {
         remoteId: msg.body.fromId,
         sessionType: MsgType.CHAT
       })
-      messageData.addSession(res.data.data)
+      messageData.addSession(res.data.data.session)
     }
 
     // 是不是发送端的消息同步
@@ -32,11 +32,6 @@ export const onReceiveChatMsg = (msgListDiv, capacity) => {
 
     messageData.updateSession({
       sessionId: sessionId,
-      lastMsgId: msg.body.msgId,
-      lastMsgType: msg.header.msgType,
-      lastMsgContent: msg.body.content,
-      lastMsgAccount: msg.body.fromId,
-      lastMsgTime: now,
       unreadCount: messageData.sessionList[sessionId].unreadCount + 1,
       ...readParams
     })

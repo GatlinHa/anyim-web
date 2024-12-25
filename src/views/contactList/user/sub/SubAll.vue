@@ -44,8 +44,18 @@ const allData = computed(() => {
     return data
   } else {
     return data.sort((a, b) => {
-      const bTime = new Date(b.lastMsgTime).getTime()
-      const aTIme = new Date(a.lastMsgTime).getTime()
+      const a_msgRecord = messageData.msgRecordsList[a.sessionId]
+      const a_msgRecord_len = a_msgRecord?.length
+      if (!a_msgRecord_len) return 1
+      const a_lastMsg = a_msgRecord[a_msgRecord_len - 1]
+
+      const b_msgRecord = messageData.msgRecordsList[b.sessionId]
+      const b_msgRecord_len = b_msgRecord?.length
+      if (!b_msgRecord_len) return -1
+      const b_lastMsg = b_msgRecord[b_msgRecord_len - 1]
+
+      const bTime = new Date(b_lastMsg.msgTime).getTime()
+      const aTIme = new Date(a_lastMsg.msgTime).getTime()
       return bTime - aTIme
     })
   }

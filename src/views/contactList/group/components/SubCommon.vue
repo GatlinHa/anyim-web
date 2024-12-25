@@ -233,7 +233,7 @@ const onConfirmSelect = async (selected) => {
   msgChatQuerySessionService({
     sessionId: res.data.data.groupInfo.groupId
   }).then((res) => {
-    messageData.addSession(res.data.data)
+    messageData.addSession(res.data.data.session)
   })
 }
 

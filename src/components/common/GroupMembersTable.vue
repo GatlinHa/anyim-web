@@ -35,7 +35,7 @@ const validMembers = computed(() => {
 })
 
 const isNotInGroup = computed(() => {
-  return messageData.sessionList[props.groupId]?.leaveFlag === true
+  return messageData.sessionList[props.groupId]?.leave
 })
 
 /**
@@ -232,7 +232,6 @@ const onDelete = (userInfo) => {
         operatorId: myAccount.value,
         operatorNickName: validMembers.value[myAccount.value].nickName,
         groupId: props.groupId,
-        leaveMsgId: messageData.sessionList[messageData.selectedSessionId].lastMsgId,
         members: members
       })
         .then((res) => {

@@ -12,7 +12,7 @@ export const onReceiveGroupSystemMsg = (msgListDiv, capacity) => {
 
     // 更新session
     msgChatQuerySessionService({ sessionId: sessionId }).then((res) => {
-      messageData.addSession(res.data.data)
+      messageData.addSession(res.data.data.session)
     })
 
     // 更新group信息

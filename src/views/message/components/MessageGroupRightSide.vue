@@ -51,7 +51,7 @@ const announcement = computed(() => {
 })
 
 const isNotInGroup = computed(() => {
-  return messageData.sessionList[props.sessionId]?.leaveFlag === true
+  return messageData.sessionList[props.sessionId]?.leave
 })
 
 const membersCount = computed(() => {

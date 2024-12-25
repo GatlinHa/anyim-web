@@ -112,6 +112,16 @@ const firstMsgId = computed(() => {
     return 0
   }
 })
+// msgRecordsList的最后一条消息ID
+const lastMsgId = computed(() => {
+  if (!noMsgRecords.value) {
+    const len = messageData.msgRecordsList[selectedSessionId.value].length
+    return messageData.msgRecordsList[selectedSessionId.value][len - 1].msgId
+  } else {
+    return 0
+  }
+})
+
 // 是否是没有更多消息了：从服务器拉取结束了，或者firstMsgId是BEGIN_MSG_ID
 const hasNoMoreMsg = computed(() => {
   return pullMsgDone.value || firstMsgId.value === BEGIN_MSG_ID
@@ -122,10 +132,7 @@ const allMembers = computed(() => {
 })
 
 const isNotInGroup = computed(() => {
-  return (
-    selectedSession.value.sessionType === MsgType.GROUP_CHAT &&
-    selectedSession.value.leaveFlag === true
-  )
+  return selectedSession.value.sessionType === MsgType.GROUP_CHAT && selectedSession.value.leave
 })
 
 const isMutedInGroup = computed(() => {
@@ -194,7 +201,7 @@ const locateSession = (sessionId) => {
 
 const msgRecords = computed(() => {
   const records = messageData.msgRecordsList[selectedSessionId.value]?.slice(startIndex.value)
-  if (!records) return null
+  if (!records) return []
 
   for (let index = 0; index < records.length; index++) {
     const element = records[index]
@@ -243,7 +250,7 @@ onMounted(async () => {
       msgChatQuerySessionService({ sessionId: routerSessionId })
         .then((res) => {
           if (res.data.data) {
-            messageData.addSession(res.data.data)
+            messageData.addSession(res.data.data.session)
             handleSelectedSession(routerSessionId)
           }
         })
@@ -273,7 +280,7 @@ const handleMsgListWheel = async () => {
   }
 }
 
-// 把sessionList转成数组，并按照lastMsgTime排序
+// 把sessionList转成数组，并按照msgTime排序
 const sessionListSorted = computed(() => {
   if (!Object.keys(messageData.sessionList)) {
     return []
@@ -293,8 +300,18 @@ const sessionListSorted = computed(() => {
           return 1
         } else {
           // 排序第三优先级：最后一条消息的时间
-          const bTime = new Date(b.lastMsgTime).getTime()
-          const aTIme = new Date(a.lastMsgTime).getTime()
+          const a_msgRecord = messageData.msgRecordsList[a.sessionId]
+          const a_msgRecord_len = a_msgRecord?.length
+          if (!a_msgRecord_len) return 1
+          const a_lastMsg = a_msgRecord[a_msgRecord_len - 1]
+
+          const b_msgRecord = messageData.msgRecordsList[b.sessionId]
+          const b_msgRecord_len = b_msgRecord?.length
+          if (!b_msgRecord_len) return -1
+          const b_lastMsg = b_msgRecord[b_msgRecord_len - 1]
+
+          const bTime = new Date(b_lastMsg.msgTime).getTime()
+          const aTIme = new Date(a_lastMsg.msgTime).getTime()
           if (bTime !== aTIme) {
             return bTime - aTIme
           }
@@ -354,11 +371,10 @@ const onInputBoxDragUpdate = ({ height }) => {
 }
 
 /**
- * 通过REST接口主动拉取消息
- * @param mode 0:拉取最近N条;1:按refMsgId向上拉取N条(上滑加载更多消息)
- * @param ref mode=1时要携带,标记更新的msgId位置
+ * 按refMsgId向上拉取N条(上滑加载更多消息)
+ * @param ref 标记更新的msgId位置
  */
-const pullMsg = async (mode = 0, ref = -1) => {
+const pullMsg = async (ref) => {
   // 下列三种情况不拉取数据
   if (
     hasNoMoreMsg.value ||
@@ -372,14 +388,14 @@ const pullMsg = async (mode = 0, ref = -1) => {
   const params = {
     sessionId: selectedSessionId.value,
     pageSize: pageSize,
-    mode: mode,
     refMsgId: ref
   }
 
-  // mode=0才需要显示"数据加载中..."
-  if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = true
-  // mode=1才需要显示"加载更多中..."
-  if (mode === 1) selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = true
+  // TODO 显示“加载中” 看看要怎么处理
+  // if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = true
+  // 显示"加载更多中..."
+  selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = true
+
   // 这里一定不要响应式的sessionId，否则快速点击切换session会导致数据都叠加到最后一次的selectedSessionId上面
   const sessionId = selectedSessionId.value
   try {
@@ -387,16 +403,6 @@ const pullMsg = async (mode = 0, ref = -1) => {
     const msgCount = res.data.data.count
     if (msgCount > 0) {
       messageData.addMsgRecords(sessionId, res.data.data.msgList)
-      if (mode === 0) {
-        messageData.updateSession({
-          sessionId: sessionId,
-          lastMsgId: res.data.data.lastMsgId,
-          lastMsgType: res.data.data.msgList[msgCount - 1].msgType,
-          lastMsgContent: res.data.data.msgList[msgCount - 1].content,
-          lastMsgAccount: res.data.data.msgList[msgCount - 1].fromId,
-          lastMsgTime: res.data.data.msgList[msgCount - 1].msgTime
-        })
-      }
     }
 
     if (msgCount < pageSize) {
@@ -406,8 +412,7 @@ const pullMsg = async (mode = 0, ref = -1) => {
       })
     }
   } finally {
-    if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = false
-    if (mode === 1) selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = false
+    selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = false
   }
 }
 
@@ -437,27 +442,14 @@ const handleSelectedSession = async (sessionId) => {
       }
     }
 
-    // 如果切换到的session在之前都没有pull过消息,则需要pull一次(mode=0),且lastMsgId有值才pull
-    if (!msgRecords.value && selectedSession.value.lastMsgId) {
-      if (isNotInGroup.value) {
-        await pullMsg(1, selectedSession.value.leaveMsgId + 1)
-      } else {
-        await pullMsg()
-      }
-
-      msgListReachBottom()
-    }
     lastReadMsgId.value = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
     handleRead()
   }
 }
 
 const handleRead = () => {
-  if (
-    selectedSessionId.value &&
-    selectedSession.value.readMsgId < selectedSession.value.lastMsgId
-  ) {
-    const content = selectedSession.value.lastMsgId.toString()
+  if (selectedSessionId.value && selectedSession.value.readMsgId < lastMsgId.value) {
+    const content = lastMsgId.value.toString()
     const msgType =
       selectedSession.value.sessionType === MsgType.CHAT
         ? MsgType.CHAT_READ
@@ -493,11 +485,6 @@ const handleSendMessage = (content) => {
       const now = new Date()
       messageData.updateSession({
         sessionId: selectedSessionId.value,
-        lastMsgId: msgId, // 最后一条消息（自己发的）
-        lastMsgType: selectedSession.value.sessionType,
-        lastMsgContent: content,
-        lastMsgAccount: myAccount.value,
-        lastMsgTime: now,
         readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到刚发的这条消息的msgId
         readTime: now,
         unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
@@ -524,7 +511,7 @@ const onLoadMore = async () => {
   const scrollHeight = msgListDiv.value.scrollHeight
   const scrollTop = msgListDiv.value.scrollTop
   if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
-    await pullMsg(1, msgRecords.value[0].msgId)
+    await pullMsg(msgRecords.value[0].msgId)
   }
   const len = messageData.msgRecordsList[selectedSessionId.value]?.length
   if (len > capacity.value) {
@@ -692,7 +679,7 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
       remoteId: remoteId,
       sessionType: msgType
     })
-    messageData.addSession(res.data.data)
+    messageData.addSession(res.data.data.session)
     handleSelectedSession(sessionId)
   }
 }
@@ -866,7 +853,7 @@ const onConfirmSelect = async (selected) => {
   msgChatQuerySessionService({
     sessionId: res.data.data.groupInfo.groupId
   }).then((res) => {
-    messageData.addSession(res.data.data)
+    messageData.addSession(res.data.data.session)
     handleSelectedSession(res.data.data.sessionId)
   })
 }
@@ -979,9 +966,7 @@ const onConfirmSelect = async (selected) => {
               <div v-if="selectedSessionCache[selectedSessionId]?.isLoading" class="show-loading">
                 数据加载中……
               </div>
-              <div v-else-if="!selectedSession.lastMsgId" class="no-more-message">
-                当前无更多消息
-              </div>
+              <div v-else-if="!lastMsgId" class="no-more-message">当前无更多消息</div>
               <div
                 v-else
                 class="message-main my-scrollbar"

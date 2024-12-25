@@ -78,7 +78,7 @@ const createSessionIfNotExist = async () => {
       remoteId: userCardData.userInfo.account,
       sessionType: MsgType.CHAT
     })
-    messageData.addSession(res.data.data)
+    messageData.addSession(res.data.data.session)
   }
 }
 
