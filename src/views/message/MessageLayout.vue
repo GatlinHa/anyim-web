@@ -618,7 +618,7 @@ const onUpdateMarkConfirm = (inputValue) => {
 }
 
 const onShowGroupCard = ({ groupId }) => {
-  if (isNotInGroup.value) {
+  if (messageData.sessionList[groupId].leave) {
     ElMessage.warning('您已离开该群或群已被解散')
     return
   }
