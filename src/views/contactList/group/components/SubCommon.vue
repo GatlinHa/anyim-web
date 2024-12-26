@@ -10,7 +10,6 @@ import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
 import { groupCreateService, groupSearchMemberService, groupInfoService } from '@/api/group'
-import { msgChatQuerySessionService } from '@/api/message'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import { MsgType } from '@/proto/msg'
 
@@ -218,22 +217,14 @@ const onConfirmSelect = async (selected) => {
 
   const members = selected.map((item) => ({ account: item.account, nickName: item.nickName }))
   members.push({ account: userData.user.account, nickName: userData.user.nickName })
-  const res = await groupCreateService({
+  const loadingInstance = ElLoading.service(el_loading_options)
+  groupCreateService({
     groupName: `${userData.user.nickName}、${selected[0].nickName}、${selected[1].nickName}等的群组`,
     groupType: 1, //普通群
     members: members
-  })
-  groupData.setGroupInfo({
-    groupId: res.data.data.groupInfo.groupId,
-    groupInfo: res.data.data.groupInfo
-  })
-  isShowSelectDialog.value = false
-
-  // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询
-  msgChatQuerySessionService({
-    sessionId: res.data.data.groupInfo.groupId
-  }).then((res) => {
-    messageData.addSession(res.data.data.session)
+  }).finally(() => {
+    isShowSelectDialog.value = false
+    loadingInstance.close()
   })
 }
 

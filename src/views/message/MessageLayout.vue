@@ -41,13 +41,7 @@ import {
 import { groupInfoService, groupCreateService } from '@/api/group'
 import { MsgType } from '@/proto/msg'
 import wsConnect from '@/js/websocket/wsConnect'
-import {
-  onReceiveChatMsg,
-  onReceiveChatReadMsg,
-  onReceiveGroupChatMsg,
-  onReceiveGroupChatReadMsg,
-  onReceiveGroupSystemMsg
-} from '@/js/event'
+import { onReceiveChatMsg, onReceiveGroupChatMsg, onReceiveGroupSystemMsg } from '@/js/event'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
@@ -236,9 +230,7 @@ onMounted(async () => {
   inputBoxHeight.value = settingData.inputBoxDrag[myAccount.value] || 300
 
   wsConnect.bindEvent(MsgType.CHAT, onReceiveChatMsg(msgListDiv, capacity)) //绑定接收Chat消息的事件
-  wsConnect.bindEvent(MsgType.CHAT_READ, onReceiveChatReadMsg()) //绑定接收Chat已读消息的事件
   wsConnect.bindEvent(MsgType.GROUP_CHAT, onReceiveGroupChatMsg(msgListDiv, capacity)) //绑定接收GroupChat消息的事件
-  wsConnect.bindEvent(MsgType.GROUP_CHAT_READ, onReceiveGroupChatReadMsg()) //绑定接收GroupChat已读消息的事件
   wsConnect.bindGroupSystemMsgEvent(onReceiveGroupSystemMsg(msgListDiv, capacity)) //绑定接收群系统消息事件
 
   // 这里要接收从其他页面跳转过来传递的sessionId参数
@@ -847,15 +839,31 @@ const onConfirmSelect = async (selected) => {
     groupId: res.data.data.groupInfo.groupId,
     groupInfo: res.data.data.groupInfo
   })
-  isShowSelectDialog.value = false
 
-  // 所有成员拿到chat_session在群主创建群组的时候统一新增了，所有这里只需要查询
-  msgChatQuerySessionService({
-    sessionId: res.data.data.groupInfo.groupId
-  }).then((res) => {
-    messageData.addSession(res.data.data.session)
-    handleSelectedSession(res.data.data.session.sessionId)
+  const sessionId = res.data.data.groupInfo.groupId
+  const loadingInstance = ElLoading.service(el_loading_options)
+  new Promise((resolve, reject) => {
+    let timeoutId = setTimeout(() => {
+      reject()
+    }, 3000)
+
+    watch(
+      () => messageData.sessionList[sessionId],
+      (newValue) => {
+        if (newValue) {
+          clearTimeout(timeoutId)
+          resolve()
+        }
+      }
+    )
   })
+    .then(() => {
+      handleSelectedSession(sessionId)
+    })
+    .finally(() => {
+      isShowSelectDialog.value = false
+      loadingInstance.close()
+    })
 }
 </script>
 

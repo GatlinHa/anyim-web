@@ -12,7 +12,14 @@ import {
   groupChatConstructor,
   groupChatReadConstructor
 } from './constructor'
-import { onReceiveStatusResMsg } from '@/js/event'
+import {
+  onReceiveStatusResMsg,
+  onReceiveChatMsg,
+  onReceiveChatReadMsg,
+  onReceiveGroupChatMsg,
+  onReceiveGroupChatReadMsg,
+  onReceiveGroupSystemMsg
+} from '@/js/event'
 
 class WsConnect {
   /**
@@ -100,11 +107,32 @@ class WsConnect {
       this.msgIdRefillCallback[deliveredMsg.body.tempMsgId](deliveredMsg.body.msgId)
       delete this.msgIdRefillCallback[deliveredMsg.body.tempMsgId]
     },
-    [MsgType.CHAT]: () => {},
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
     },
-    [MsgType.STATUS_RES]: onReceiveStatusResMsg()
+    [MsgType.STATUS_RES]: onReceiveStatusResMsg(),
+    [MsgType.CHAT]: onReceiveChatMsg(),
+    [MsgType.CHAT_READ]: onReceiveChatReadMsg(),
+    [MsgType.GROUP_CHAT]: onReceiveGroupChatMsg(),
+    [MsgType.GROUP_CHAT_READ]: onReceiveGroupChatReadMsg(),
+    [MsgType.SYS_GROUP_CREATE]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_ADD_MEMBER]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_DEL_MEMBER]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_SET_ADMIN]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_ADMIN]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_SET_ALL_MUTED]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_ALL_MUTED]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_SET_JOIN_APPROVAL]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_SET_HISTORY_BROWSE]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_OWNER_TRANSFER]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_LEAVE]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_DROP]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_NAME]: onReceiveGroupSystemMsg(),
+    [MsgType.SYS_GROUP_UPDATE_AVATAR]: onReceiveGroupSystemMsg()
   }
 
   /**
