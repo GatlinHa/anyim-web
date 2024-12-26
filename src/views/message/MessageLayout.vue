@@ -854,7 +854,7 @@ const onConfirmSelect = async (selected) => {
     sessionId: res.data.data.groupInfo.groupId
   }).then((res) => {
     messageData.addSession(res.data.data.session)
-    handleSelectedSession(res.data.data.groupInfo.groupId)
+    handleSelectedSession(res.data.data.session.sessionId)
   })
 }
 </script>
