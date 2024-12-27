@@ -91,7 +91,7 @@ const selectedSessionId = computed(() => {
 const pullMsgDone = computed(() => {
   return selectedSession.value.pullMsgDone || false
 })
-// 是否是msgRecordsList为空
+// msgRecordsList是否为空，注意和hasNoMoreMsg的区别，前者为空可以再拉取
 const noMsgRecords = computed(() => {
   return (
     !messageData.msgRecordsList[selectedSessionId.value] ||
@@ -363,10 +363,10 @@ const onInputBoxDragUpdate = ({ height }) => {
 }
 
 /**
- * 按refMsgId向上拉取N条(上滑加载更多消息)
+ * 从服务端拉取消息，endMsgId有值就表示最大拉到endMsgId-1的消息(滚轮上滚加载更多消息场景)
  * @param ref 标记更新的msgId位置
  */
-const pullMsg = async (ref) => {
+const pullMsg = async (endMsgId = null) => {
   // 下列三种情况不拉取数据
   if (
     hasNoMoreMsg.value ||
@@ -380,11 +380,10 @@ const pullMsg = async (ref) => {
   const params = {
     sessionId: selectedSessionId.value,
     pageSize: pageSize,
-    refMsgId: ref
+    endMsgId: endMsgId
   }
 
-  // TODO 显示“加载中” 看看要怎么处理
-  // if (mode === 0) selectedSessionCache.value[selectedSessionId.value].isLoading = true
+  if (!endMsgId) selectedSessionCache.value[selectedSessionId.value].isLoading = true
   // 显示"加载更多中..."
   selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = true
 
@@ -404,6 +403,7 @@ const pullMsg = async (ref) => {
       })
     }
   } finally {
+    selectedSessionCache.value[selectedSessionId.value].isLoading = false
     selectedSessionCache.value[selectedSessionId.value].isLoadMoreLoading = false
   }
 }
@@ -432,6 +432,11 @@ const handleSelectedSession = async (sessionId) => {
           members: res.data.data.members || {}
         })
       }
+    }
+
+    if (noMsgRecords.value) {
+      await pullMsg()
+      msgListReachBottom()
     }
 
     lastReadMsgId.value = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
@@ -520,7 +525,10 @@ const onLoadMore = async () => {
   })
 }
 
-// 消息列表拉到最底部
+/**
+ * 消息列表拉到最底部
+ * @param isSmooth 是否平滑的，默认是
+ */
 const msgListReachBottom = async (isSmooth = true) => {
   const behavior = isSmooth ? 'smooth' : 'instant'
   await nextTick() // 经测试，在未读消息的session页面刷新时，不能到达底部，需要再加一个nextTick

@@ -261,7 +261,7 @@ const showDetailContent = computed(() => {
         return lastMsg.value.content
       }
     } else {
-      return ''
+      return '...'
     }
   }
 })
