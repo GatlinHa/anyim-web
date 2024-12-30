@@ -25,11 +25,39 @@ export const messageStore = defineStore('anyim-message', () => {
   const sessionList = ref({})
 
   /**
-   * 会话消息
-   * 格式：{sessionId_1: msgRecord_1, sessionId_2: msgRecord_2, ...}
-   * 其中msgRecord_x是数组
+   * 会话消息，双层key-value结构，方便随机查找
+   * 格式：
+   * {
+   *   sessionId_1: {
+   *     msgId_1: {msgId: msgId_1, fromId: xxx,...},
+   *     msgId_2: {msgId: msgId_2, fromId: xxx,...},
+   *     ...
+   *   }
+   *   sessionId_2: {
+   *     msgId_a: {msgId: msgId_a, fromId: xxx,...},
+   *     msgId_b: {msgId: msgId_b, fromId: xxx,...},
+   *     ...
+   *   }
+   *   ...
+   * }
    */
   const msgRecordsList = ref({})
+
+  /**
+   * 会话消息ID排序后的数组，只存msgId,方便顺序查找
+   * 格式：
+   * {
+   *   sessionId_1: [msgId_1, msgId_2...],
+   *   sessionId_2: [msgId_a, msgId_b...]
+   *   ...
+   * }
+   */
+  const msgIdSortArray = ref({})
+
+  /**
+   * 用于消息唯一性校验，key是seq，value是msgId
+   */
+  const msgUniqueSeq = ref({})
 
   const addSession = (session) => {
     sessionList.value[session.sessionId] = session
@@ -93,42 +121,50 @@ export const messageStore = defineStore('anyim-message', () => {
   }
 
   /**
-   * 对话列表中加入新的消息数组，加入后要进行去重和排序
+   * 对话列表中加入新的消息数组
    * @param {*} sessionId 会话id
    * @param {*} msgRecords 新的消息数组
    */
   const addMsgRecords = (sessionId, msgRecords) => {
     if (!msgRecords?.length) return
 
-    if (!msgRecordsList.value[sessionId]) {
-      // 去重
-      let uniqueSet = new Set()
-      const uniqueRecords = msgRecords.filter((item) => {
-        if (!uniqueSet.has(item.msgId)) {
-          uniqueSet.add(item.msgId)
-          return true
-        } else {
-          return false
+    msgRecords.forEach((item) => {
+      if (!msgRecordsList.value[sessionId]) {
+        msgRecordsList.value[sessionId] = {}
+      }
+
+      // seq为undefined或者seq没有被缓存，才能add这条消息
+      if (item.seq === undefined || !(item.seq in msgUniqueSeq.value)) {
+        msgRecordsList.value[sessionId][item.msgId] = item
+        if (item.seq !== undefined) {
+          // seq不为空则添加至缓存
+          msgUniqueSeq.value[item.seq] = item.msgId
         }
-      })
-      // 排序
-      msgRecordsList.value[sessionId] = uniqueRecords.sort((a, b) => a.msgId - b.msgId)
-    } else {
-      // 合并
-      const combinedRecords = [...msgRecordsList.value[sessionId], ...msgRecords]
-      // 去重
-      let uniqueSet = new Set()
-      const uniqueRecords = combinedRecords.filter((item) => {
-        if (!uniqueSet.has(item.msgId)) {
-          uniqueSet.add(item.msgId)
-          return true
-        } else {
-          return false
-        }
-      })
-      // 排序
-      msgRecordsList.value[sessionId] = uniqueRecords.sort((a, b) => a.msgId - b.msgId)
+      }
+    })
+    // 更新排序
+    msgIdSortArray.value[sessionId] = Object.keys(msgRecordsList.value[sessionId]).sort(
+      (a, b) => a - b
+    )
+  }
+
+  /**
+   * 移除某个消息：消息已发出后，用正式消息替换temp消息场景
+   * @param {*} sessionId 会话id
+   * @param {*} msgId 消息id
+   */
+  const removeMsgRecord = (sessionId, msgId) => {
+    const msg = msgRecordsList.value[sessionId][msgId]
+    if (msg === undefined) return
+    if (msg.seq in msgUniqueSeq.value) delete msgUniqueSeq.value[msg.seq]
+    if (msgId in msgRecordsList.value[sessionId]) delete msgRecordsList.value[sessionId][msgId]
+  }
+
+  const getMsg = (sessionId, msgId) => {
+    if (!msgRecordsList.value[sessionId] || !msgRecordsList.value[sessionId][msgId]) {
+      return {}
     }
+    return msgRecordsList.value[sessionId][msgId]
   }
 
   const totalUnReadCount = computed(() => {
@@ -212,7 +248,10 @@ export const messageStore = defineStore('anyim-message', () => {
     loadSessionList,
 
     msgRecordsList,
+    msgIdSortArray,
     addMsgRecords,
+    removeMsgRecord,
+    getMsg,
 
     partitions,
     setPartitions,

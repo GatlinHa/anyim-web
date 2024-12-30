@@ -91,7 +91,7 @@ class WsConnect {
   }
 
   /**
-   * 消息发送时携带的是tempMsgId，服务端回复DELIVERED消息时返回了msgId，此时要回填msgId
+   * 消息发送时携带的是seq，没有msgId，服务端回复DELIVERED消息时返回了msgId，此时要回填msgId
    */
   msgIdRefillCallback = {}
 
@@ -104,8 +104,8 @@ class WsConnect {
       this.isConnect = true
     },
     [MsgType.DELIVERED]: (deliveredMsg) => {
-      this.msgIdRefillCallback[deliveredMsg.body.tempMsgId](deliveredMsg.body.msgId)
-      delete this.msgIdRefillCallback[deliveredMsg.body.tempMsgId]
+      this.msgIdRefillCallback[deliveredMsg.body.seq](deliveredMsg.body.msgId)
+      delete this.msgIdRefillCallback[deliveredMsg.body.seq]
     },
     [MsgType.HEART_BEAT]: () => {
       if (this.heartBeat.healthPoint > 0) this.heartBeat.healthPoint--
@@ -328,17 +328,20 @@ class WsConnect {
    * @param {*} remoteId 对方id或者群id
    * @param {*} msgType
    * @param {*} content
-   * @param {*} callback
+   * @param {*} seq
+   * @param {*} callbackBefore 发送前的处理，用于展示发送前状态
+   * @param {*} callbackAfter  发送后(接收MsgType.DELIVERED时)的处理，用于展示发送后状态
    */
-  sendMsg(sessionId, remoteId, msgType, content, callback) {
-    const tempMsgId = uuidv4()
-    const data = this.dataConstructor[msgType](sessionId, remoteId, content, tempMsgId)
-    this.msgIdRefillCallback[tempMsgId] = callback
+  sendMsg(sessionId, remoteId, msgType, content, seq, callbackBefore, callbackAfter) {
+    const sequence = seq || uuidv4()
+    const data = this.dataConstructor[msgType](sessionId, remoteId, content, sequence)
+    callbackBefore(sequence, data)
+    this.msgIdRefillCallback[sequence] = callbackAfter
     this.sendAgent(data)
   }
 
   /**
-   * 发送代理，封装了重发机制
+   * 发送代理，封装了重发机制(ws网络问题)
    */
   sendAgent(data) {
     if (this.isConnect) {

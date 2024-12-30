@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { WarningFilled } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { userStore, messageStore, groupStore, groupCardStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime, jsonParseSafe } from '@/js/utils/common'
@@ -7,7 +8,8 @@ import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 
 const props = defineProps([
   'sessionId',
-  'msg',
+  'msgId',
+  'extend',
   'obj',
   'readMsgId',
   'remoteRead',
@@ -15,33 +17,41 @@ const props = defineProps([
   'hasNoMoreMsg',
   'isLoadMoreLoading'
 ])
-const emit = defineEmits(['loadMore', 'showUserCard', 'showGroupCard'])
+const emit = defineEmits(['loadMore', 'showUserCard', 'showGroupCard', 'resendMsg'])
 
 const userData = userStore()
 const messageData = messageStore()
 const groupData = groupStore()
 const groupCardData = groupCardStore()
 
+const msg = computed(() => {
+  return messageData.getMsg(props.sessionId, props.msgId)
+})
+
+const msgStatus = computed(() => {
+  return msg.value.status || 'ok'
+})
+
 const isSystemMsg = computed(() => {
   if (
-    props.msg.msgType === MsgType.SYS_GROUP_CREATE ||
-    props.msg.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
-    props.msg.msgType === MsgType.SYS_GROUP_DEL_MEMBER ||
-    props.msg.msgType === MsgType.SYS_GROUP_SET_ADMIN ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_ADMIN ||
-    props.msg.msgType === MsgType.SYS_GROUP_SET_ALL_MUTED ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_ALL_MUTED ||
-    props.msg.msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL ||
-    props.msg.msgType === MsgType.SYS_GROUP_SET_HISTORY_BROWSE ||
-    props.msg.msgType === MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE ||
-    props.msg.msgType === MsgType.SYS_GROUP_OWNER_TRANSFER ||
-    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED ||
-    props.msg.msgType === MsgType.SYS_GROUP_LEAVE ||
-    props.msg.msgType === MsgType.SYS_GROUP_DROP ||
-    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT ||
-    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_NAME ||
-    props.msg.msgType === MsgType.SYS_GROUP_UPDATE_AVATAR
+    msg.value.msgType === MsgType.SYS_GROUP_CREATE ||
+    msg.value.msgType === MsgType.SYS_GROUP_ADD_MEMBER ||
+    msg.value.msgType === MsgType.SYS_GROUP_DEL_MEMBER ||
+    msg.value.msgType === MsgType.SYS_GROUP_SET_ADMIN ||
+    msg.value.msgType === MsgType.SYS_GROUP_CANCEL_ADMIN ||
+    msg.value.msgType === MsgType.SYS_GROUP_SET_ALL_MUTED ||
+    msg.value.msgType === MsgType.SYS_GROUP_CANCEL_ALL_MUTED ||
+    msg.value.msgType === MsgType.SYS_GROUP_SET_JOIN_APPROVAL ||
+    msg.value.msgType === MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL ||
+    msg.value.msgType === MsgType.SYS_GROUP_SET_HISTORY_BROWSE ||
+    msg.value.msgType === MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE ||
+    msg.value.msgType === MsgType.SYS_GROUP_OWNER_TRANSFER ||
+    msg.value.msgType === MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED ||
+    msg.value.msgType === MsgType.SYS_GROUP_LEAVE ||
+    msg.value.msgType === MsgType.SYS_GROUP_DROP ||
+    msg.value.msgType === MsgType.SYS_GROUP_UPDATE_ANNOUNCEMENT ||
+    msg.value.msgType === MsgType.SYS_GROUP_UPDATE_NAME ||
+    msg.value.msgType === MsgType.SYS_GROUP_UPDATE_AVATAR
   ) {
     return true
   } else {
@@ -244,8 +254,8 @@ const getSysGroupUpdateAvatar = (content) => {
 }
 
 const systemMsgContent = computed(() => {
-  const content = jsonParseSafe(props.msg.content)
-  switch (props.msg.msgType) {
+  const content = jsonParseSafe(msg.value.content)
+  switch (msg.value.msgType) {
     case MsgType.SYS_GROUP_CREATE:
       return `<div style="text-align: center;">${getSysCreateGroupMsgTips(content)}</div>`
     case MsgType.SYS_GROUP_ADD_MEMBER:
@@ -260,16 +270,16 @@ const systemMsgContent = computed(() => {
       return `<div style="text-align: center;">${getSysGroupUpdateAvatar(content)}</div>`
     case MsgType.SYS_GROUP_SET_ADMIN:
     case MsgType.SYS_GROUP_CANCEL_ADMIN:
-      return `<div style="text-align: center;">${getSysGroupChangeRoleMsgTips(props.msg.msgType, content)}</div>`
+      return `<div style="text-align: center;">${getSysGroupChangeRoleMsgTips(msg.value.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_ALL_MUTED:
     case MsgType.SYS_GROUP_CANCEL_ALL_MUTED:
-      return `<div style="text-align: center;">${getSysGroupUpdateAllMuted(props.msg.msgType, content)}</div>`
+      return `<div style="text-align: center;">${getSysGroupUpdateAllMuted(msg.value.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_JOIN_APPROVAL:
     case MsgType.SYS_GROUP_CANCEL_JOIN_APPROVAL:
-      return `<div style="text-align: center;">${getSysGroupUpdateJoinApproval(props.msg.msgType, content)}</div>`
+      return `<div style="text-align: center;">${getSysGroupUpdateJoinApproval(msg.value.msgType, content)}</div>`
     case MsgType.SYS_GROUP_SET_HISTORY_BROWSE:
     case MsgType.SYS_GROUP_CANCEL_HISTORY_BROWSE:
-      return `<div style="text-align: center;">${getSysGroupUpdateHistoryBrowse(props.msg.msgType, content)}</div>`
+      return `<div style="text-align: center;">${getSysGroupUpdateHistoryBrowse(msg.value.msgType, content)}</div>`
     case MsgType.SYS_GROUP_OWNER_TRANSFER:
       return `<div style="text-align: center;">${getSysGroupOwnerTransfer(content)}</div>`
     case MsgType.SYS_GROUP_UPDATE_MEMBER_MUTED:
@@ -284,11 +294,11 @@ const systemMsgContent = computed(() => {
 })
 
 const isChatMsgType = computed(() => {
-  return props.msg.msgType === MsgType.CHAT
+  return msg.value.msgType === MsgType.CHAT
 })
 
 const isGroupChatMsgType = computed(() => {
-  return props.msg.msgType === MsgType.GROUP_CHAT
+  return msg.value.msgType === MsgType.GROUP_CHAT
 })
 
 const loadMoreTips = computed(() => {
@@ -296,7 +306,7 @@ const loadMoreTips = computed(() => {
 })
 
 const isUnreadMsg = computed(() => {
-  if (!isSystemMsg.value && props.readMsgId < props.msg.msgId && !isSelf.value) {
+  if (!isSystemMsg.value && props.readMsgId < msg.value.msgId && !isSelf.value) {
     return true
   } else {
     return false
@@ -304,18 +314,18 @@ const isUnreadMsg = computed(() => {
 })
 
 const myMsgIsRead = computed(() => {
-  return isSelf.value && props.msg.msgId <= props.remoteRead
+  return isSelf.value && msg.value.msgId <= props.remoteRead
 })
 
 const isShowLoadMore = computed(() => {
-  if (props.msg.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
+  if (msg.value.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
     return true
   } else {
     return false
   }
 })
 const isShowNoMoreMsg = computed(() => {
-  if (props.msg.msgId === props.firstMsgId && props.hasNoMoreMsg) {
+  if (msg.value.msgId === props.firstMsgId && props.hasNoMoreMsg) {
     return true
   } else {
     return false
@@ -326,7 +336,7 @@ const loadMoreCursor = computed(() => {
 })
 
 const isSelf = computed(() => {
-  return userData.user.account === props.msg.fromId
+  return userData.user.account === msg.value.fromId
 })
 
 const account = computed(() => {
@@ -342,16 +352,16 @@ const avatarThumb = computed(() => {
 })
 
 const sysShowTime = computed(() => {
-  return messageSysShowTime(new Date(props.msg.msgTime))
+  return messageSysShowTime(new Date(msg.value.msgTime))
 })
 
 // 判断是否是连续的会话，与上个会话时间差小于5分钟
 const isContinuousSession = computed(() => {
-  if (!props.msg.preMsgTime) {
+  if (!props.extend.preMsgTime) {
     return false
   }
 
-  const diff = new Date(props.msg.msgTime).getTime() - new Date(props.msg.preMsgTime).getTime()
+  const diff = new Date(msg.value.msgTime).getTime() - new Date(props.extend.preMsgTime).getTime()
   if (diff < 5 * 60 * 1000) {
     return true
   } else {
@@ -360,7 +370,7 @@ const isContinuousSession = computed(() => {
 })
 
 const msgTime = computed(() => {
-  return messageBoxShowTime(props.msg.msgTime)
+  return messageBoxShowTime(msg.value.msgTime)
 })
 
 const onLoadMore = () => {
@@ -384,6 +394,10 @@ const onClickSystemMsg = (e) => {
     emit('showGroupCard', { groupId: messageData.sessionList[props.sessionId].remoteId })
   }
 }
+
+const onResendMsg = () => {
+  emit('resendMsg', msg.value)
+}
 </script>
 
 <template>
@@ -399,7 +413,7 @@ const onClickSystemMsg = (e) => {
         {{ loadMoreTips }}
       </div>
     </div>
-    <el-divider v-if="props.msg.isFirstNew" class="new-messages-tips" content-position="center"
+    <el-divider v-if="props.extend.isFirstNew" class="new-messages-tips" content-position="center"
       >以下是新消息</el-divider
     >
     <span v-if="!isContinuousSession" class="datetime">{{ sysShowTime }}</span>
@@ -419,10 +433,24 @@ const onClickSystemMsg = (e) => {
             </el-header>
             <el-main class="message-content">
               <div
-                v-if="isChatMsgType"
-                :class="{ remote_read: myMsgIsRead, remote_unread: !myMsgIsRead }"
-              ></div>
-              <div class="div-content">{{ props.msg.content }}</div>
+                v-if="msgStatus === 'pending'"
+                class="my-message-status my-message-status-pending"
+              >
+                <div class="loading-circular" v-loading="true"></div>
+              </div>
+              <div
+                v-else-if="msgStatus === 'failed'"
+                class="my-message-status my-message-status-failed"
+              >
+                <el-icon color="red" title="点击重发" @click="onResendMsg"
+                  ><WarningFilled
+                /></el-icon>
+              </div>
+              <div v-else-if="isChatMsgType" class="my-message-status">
+                <div v-if="myMsgIsRead" class="remote_read"></div>
+                <div v-else class="remote_unread"></div>
+              </div>
+              <div class="div-content">{{ msg.content }}</div>
             </el-main>
           </el-container>
         </el-main>
@@ -454,7 +482,7 @@ const onClickSystemMsg = (e) => {
               <span>{{ msgTime }}</span>
             </el-header>
             <el-main class="message-content">
-              <div class="div-content">{{ props.msg.content }}</div>
+              <div class="div-content">{{ msg.content }}</div>
             </el-main>
           </el-container>
         </el-main>
@@ -585,28 +613,44 @@ const onClickSystemMsg = (e) => {
               user-select: text;
             }
 
-            .remote_read {
+            .my-message-status {
               margin-right: 5px;
               display: flex;
               align-items: end;
+            }
 
-              &::before {
-                content: '●';
-                font-size: 10px;
-                color: #95d475;
+            .my-message-status-pending {
+              width: 16px;
+              position: relative;
+              .loading-circular {
+                bottom: 4px;
+                :deep(.circular) {
+                  width: 16px;
+                  height: 16px;
+                }
               }
             }
 
-            .remote_unread {
-              margin-right: 5px;
-              display: flex;
-              align-items: end;
-
-              &::before {
-                content: '●';
-                font-size: 10px;
-                color: #eebe77;
+            .my-message-status-failed {
+              .el-icon {
+                &:hover {
+                  cursor: pointer;
+                }
               }
+            }
+
+            .remote_read {
+              width: 10px;
+              height: 10px;
+              background-color: #95d475;
+              border-radius: 50%;
+            }
+
+            .remote_unread {
+              width: 10px;
+              height: 10px;
+              background-color: #eebe77;
+              border-radius: 50%;
             }
           }
         }

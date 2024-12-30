@@ -797,10 +797,8 @@ export const Body = ($root.Body = (() => {
    * @property {string|null} [toClient] Body toClient
    * @property {string|null} [groupId] Body groupId
    * @property {number|Long|null} [msgId] Body msgId
-   * @property {number|null} [seq] Body seq
-   * @property {number|null} [ack] Body ack
    * @property {string|null} [content] Body content
-   * @property {string|null} [tempMsgId] Body tempMsgId
+   * @property {string|null} [seq] Body seq
    * @property {string|null} [sessionId] Body sessionId
    */
 
@@ -808,34 +806,30 @@ export const Body = ($root.Body = (() => {
    * Constructs a new Body.
    * @exports Body
    * @classdesc 每种消息需要携带的字段规定：M必须，o非必须，-不带
-   * NO       filed      HELLO  HEART_BEAT  CHAT  GROUP_CHAT  CHAT_READ  GROUP_CHAT_READ  DELIVERED  CLOSE_BY_READ_IDLE  CLOSE_BY_ERROR_MAGIC
-   * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+-------------------+---------------------+
-   * | 1  | fromId       |   -  |    -      |  M  |     M     |     M    |        M       |    -     |       todo        |         todo        |
-   * | 2  | fromClient   |   -  |    -      |  M  |     M     |     M    |        M       |    -     |       todo        |         todo        |
-   * | 3  | toId         |   -  |    -      |  M  |     O     |     M    |        O       |    -     |       todo        |         todo        |
-   * | 4  | toClient     |   -  |    -      |  O  |     O     |     O    |        O       |    -     |       todo        |         todo        |
-   * | 5  | groupId      |   -  |    -      |  -  |     M     |     -    |        M       |    -     |       todo        |         todo        |
-   * | 6  | msgId        |   -  |    -      |  O  |     O     |     O    |        O       |    M     |       todo        |         todo        |
-   * | 7  | seq(todo)    |   -  |    -      |  -  |     -     |     -    |        -       |    -     |       todo        |         todo        |
-   * | 8  | ack(todo)    |   -  |    -      |  -  |     -     |     -    |        -       |    -     |       todo        |         todo        |
-   * | 9  | content      |   -  |    -      |  M  |     M     |     M    |        M       |    -     |       todo        |         todo        |
-   * | 10 | tempMsgId    |   -  |    -      |  O  |     O     |     O    |        O       |    M     |       todo        |         todo        |
-   * | 11 | sessionId    |   -  |    -      |  M  |     M     |     M    |        M       |    M     |       todo        |         todo        |
-   * +----+--------------+------+-----------+-----+-----------+----------+----------------+----------+-------------------+---------------------+
-   * NO       filed      STATUS_REQ   STATUS_RES   STATUS_SYNC  SYS_GROUP_XXX
-   * +----+--------------+------------+------------+-------------+------------+
-   * | 1  | fromId       |      M     |      M     |      M      |      -     |
-   * | 2  | fromClient   |      M     |      M     |      M      |      -     |
-   * | 3  | toId         |      -     |      -     |      -      |      -     |
-   * | 4  | toClient     |      -     |      -     |      -      |      -     |
-   * | 5  | groupId      |      -     |      -     |      -      |      M     |
-   * | 6  | msgId        |      -     |      -     |      -      |      M     |
-   * | 7  | seq(todo)    |      -     |      -     |      -      |      -     |
-   * | 8  | ack(todo)    |      -     |      -     |      -      |      -     |
-   * | 9  | content      |      M     |      M     |      M      |      M     |
-   * | 10 | tempMsgId    |      -     |      -     |      -      |      -     |
-   * | 11 | sessionId    |      -     |      -     |      -      |      M     |
-   * +----+--------------+------------+------------+-------------+------------+
+   * NO      filed      HELLO  HEART_BEAT  CHAT(up)  CHAT(down)  GROUP_CHAT(up)  GROUP_CHAT(down)  CHAT_READ  GROUP_CHAT_READ  DELIVERED  CLOSE_BY_READ_IDLE  CLOSE_BY_ERROR_MAGIC
+   * +---+--------------+------+-----------+---------|-----------+---------------+-----------------+----------+----------------+----------+-------------------+---------------------+
+   * | 1 | fromId       |   -  |    -      |    M    |     M     |       M       |        M        |     M    |        M       |    -     |       todo        |         todo        |
+   * | 2 | fromClient   |   -  |    -      |    M    |     M     |       M       |        M        |     M    |        M       |    -     |       todo        |         todo        |
+   * | 3 | toId         |   -  |    -      |    M    |     M     |       -       |        M        |     M    |        O       |    -     |       todo        |         todo        |
+   * | 4 | toClient     |   -  |    -      |    -    |     M     |       -       |        M        |     O    |        O       |    -     |       todo        |         todo        |
+   * | 5 | groupId      |   -  |    -      |    -    |     -     |       M       |        M        |     -    |        M       |    -     |       todo        |         todo        |
+   * | 6 | msgId        |   -  |    -      |    -    |     M     |       -       |        M        |     O    |        O       |    M     |       todo        |         todo        |
+   * | 7 | content      |   -  |    -      |    M    |     M     |       M       |        M        |     M    |        M       |    -     |       todo        |         todo        |
+   * | 8 | seq          |   -  |    -      |    M    |     M     |       M       |        M        |     O    |        O       |    M     |       todo        |         todo        |
+   * | 9 | sessionId    |   -  |    -      |    M    |     M     |       M       |        M        |     M    |        M       |    M     |       todo        |         todo        |
+   * +---+--------------+------+-----------+---------|-----------+---------------+-----------------+----------+----------------+----------+-------------------+---------------------+
+   * NO      filed      STATUS_REQ   STATUS_RES   STATUS_SYNC  SYS_GROUP_XXX
+   * +---+--------------+------------+------------+-------------+------------+
+   * | 1 | fromId       |      M     |      M     |      M      |      -     |
+   * | 2 | fromClient   |      M     |      M     |      M      |      -     |
+   * | 3 | toId         |      -     |      -     |      -      |      -     |
+   * | 4 | toClient     |      -     |      -     |      -      |      -     |
+   * | 5 | groupId      |      -     |      -     |      -      |      M     |
+   * | 6 | msgId        |      -     |      -     |      -      |      M     |
+   * | 7 | content      |      M     |      M     |      M      |      M     |
+   * | 8 | seq          |      -     |      -     |      -      |      -     |
+   * | 9 | sessionId    |      -     |      -     |      -      |      M     |
+   * +---+--------------+------------+------------+-------------+------------+
    * @implements IBody
    * @constructor
    * @param {IBody=} [properties] Properties to set
@@ -895,22 +889,6 @@ export const Body = ($root.Body = (() => {
   Body.prototype.msgId = null
 
   /**
-   * Body seq.
-   * @member {number|null|undefined} seq
-   * @memberof Body
-   * @instance
-   */
-  Body.prototype.seq = null
-
-  /**
-   * Body ack.
-   * @member {number|null|undefined} ack
-   * @memberof Body
-   * @instance
-   */
-  Body.prototype.ack = null
-
-  /**
    * Body content.
    * @member {string|null|undefined} content
    * @memberof Body
@@ -919,12 +897,12 @@ export const Body = ($root.Body = (() => {
   Body.prototype.content = null
 
   /**
-   * Body tempMsgId.
-   * @member {string|null|undefined} tempMsgId
+   * Body seq.
+   * @member {string|null|undefined} seq
    * @memberof Body
    * @instance
    */
-  Body.prototype.tempMsgId = null
+  Body.prototype.seq = null
 
   /**
    * Body sessionId.
@@ -974,26 +952,14 @@ export const Body = ($root.Body = (() => {
   })
 
   // Virtual OneOf for proto3 optional field
-  Object.defineProperty(Body.prototype, '_seq', {
-    get: $util.oneOfGetter(($oneOfFields = ['seq'])),
-    set: $util.oneOfSetter($oneOfFields)
-  })
-
-  // Virtual OneOf for proto3 optional field
-  Object.defineProperty(Body.prototype, '_ack', {
-    get: $util.oneOfGetter(($oneOfFields = ['ack'])),
-    set: $util.oneOfSetter($oneOfFields)
-  })
-
-  // Virtual OneOf for proto3 optional field
   Object.defineProperty(Body.prototype, '_content', {
     get: $util.oneOfGetter(($oneOfFields = ['content'])),
     set: $util.oneOfSetter($oneOfFields)
   })
 
   // Virtual OneOf for proto3 optional field
-  Object.defineProperty(Body.prototype, '_tempMsgId', {
-    get: $util.oneOfGetter(($oneOfFields = ['tempMsgId'])),
+  Object.defineProperty(Body.prototype, '_seq', {
+    get: $util.oneOfGetter(($oneOfFields = ['seq'])),
     set: $util.oneOfSetter($oneOfFields)
   })
 
@@ -1038,16 +1004,12 @@ export const Body = ($root.Body = (() => {
       writer.uint32(/* id 5, wireType 2 =*/ 42).string(message.groupId)
     if (message.msgId != null && Object.hasOwnProperty.call(message, 'msgId'))
       writer.uint32(/* id 6, wireType 0 =*/ 48).int64(message.msgId)
-    if (message.seq != null && Object.hasOwnProperty.call(message, 'seq'))
-      writer.uint32(/* id 7, wireType 0 =*/ 56).int32(message.seq)
-    if (message.ack != null && Object.hasOwnProperty.call(message, 'ack'))
-      writer.uint32(/* id 8, wireType 0 =*/ 64).int32(message.ack)
     if (message.content != null && Object.hasOwnProperty.call(message, 'content'))
-      writer.uint32(/* id 9, wireType 2 =*/ 74).string(message.content)
-    if (message.tempMsgId != null && Object.hasOwnProperty.call(message, 'tempMsgId'))
-      writer.uint32(/* id 10, wireType 2 =*/ 82).string(message.tempMsgId)
+      writer.uint32(/* id 7, wireType 2 =*/ 58).string(message.content)
+    if (message.seq != null && Object.hasOwnProperty.call(message, 'seq'))
+      writer.uint32(/* id 8, wireType 2 =*/ 66).string(message.seq)
     if (message.sessionId != null && Object.hasOwnProperty.call(message, 'sessionId'))
-      writer.uint32(/* id 11, wireType 2 =*/ 90).string(message.sessionId)
+      writer.uint32(/* id 9, wireType 2 =*/ 74).string(message.sessionId)
     return writer
   }
 
@@ -1107,22 +1069,14 @@ export const Body = ($root.Body = (() => {
           break
         }
         case 7: {
-          message.seq = reader.int32()
-          break
-        }
-        case 8: {
-          message.ack = reader.int32()
-          break
-        }
-        case 9: {
           message.content = reader.string()
           break
         }
-        case 10: {
-          message.tempMsgId = reader.string()
+        case 8: {
+          message.seq = reader.string()
           break
         }
-        case 11: {
+        case 9: {
           message.sessionId = reader.string()
           break
         }
@@ -1192,21 +1146,13 @@ export const Body = ($root.Body = (() => {
       )
         return 'msgId: integer|Long expected'
     }
-    if (message.seq != null && message.hasOwnProperty('seq')) {
-      properties._seq = 1
-      if (!$util.isInteger(message.seq)) return 'seq: integer expected'
-    }
-    if (message.ack != null && message.hasOwnProperty('ack')) {
-      properties._ack = 1
-      if (!$util.isInteger(message.ack)) return 'ack: integer expected'
-    }
     if (message.content != null && message.hasOwnProperty('content')) {
       properties._content = 1
       if (!$util.isString(message.content)) return 'content: string expected'
     }
-    if (message.tempMsgId != null && message.hasOwnProperty('tempMsgId')) {
-      properties._tempMsgId = 1
-      if (!$util.isString(message.tempMsgId)) return 'tempMsgId: string expected'
+    if (message.seq != null && message.hasOwnProperty('seq')) {
+      properties._seq = 1
+      if (!$util.isString(message.seq)) return 'seq: string expected'
     }
     if (message.sessionId != null && message.hasOwnProperty('sessionId')) {
       properties._sessionId = 1
@@ -1240,10 +1186,8 @@ export const Body = ($root.Body = (() => {
           object.msgId.low >>> 0,
           object.msgId.high >>> 0
         ).toNumber()
-    if (object.seq != null) message.seq = object.seq | 0
-    if (object.ack != null) message.ack = object.ack | 0
     if (object.content != null) message.content = String(object.content)
-    if (object.tempMsgId != null) message.tempMsgId = String(object.tempMsgId)
+    if (object.seq != null) message.seq = String(object.seq)
     if (object.sessionId != null) message.sessionId = String(object.sessionId)
     return message
   }
@@ -1292,21 +1236,13 @@ export const Body = ($root.Body = (() => {
               : message.msgId
       if (options.oneofs) object._msgId = 'msgId'
     }
-    if (message.seq != null && message.hasOwnProperty('seq')) {
-      object.seq = message.seq
-      if (options.oneofs) object._seq = 'seq'
-    }
-    if (message.ack != null && message.hasOwnProperty('ack')) {
-      object.ack = message.ack
-      if (options.oneofs) object._ack = 'ack'
-    }
     if (message.content != null && message.hasOwnProperty('content')) {
       object.content = message.content
       if (options.oneofs) object._content = 'content'
     }
-    if (message.tempMsgId != null && message.hasOwnProperty('tempMsgId')) {
-      object.tempMsgId = message.tempMsgId
-      if (options.oneofs) object._tempMsgId = 'tempMsgId'
+    if (message.seq != null && message.hasOwnProperty('seq')) {
+      object.seq = message.seq
+      if (options.oneofs) object._seq = 'seq'
     }
     if (message.sessionId != null && message.hasOwnProperty('sessionId')) {
       object.sessionId = message.sessionId

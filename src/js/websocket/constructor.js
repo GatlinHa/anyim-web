@@ -3,7 +3,7 @@ import { proto } from '@/const/msgConst'
 import { userStore } from '@/stores'
 import { v4 as uuidv4 } from 'uuid'
 
-export const chatConstructor = (sessionId, toId, content, tempMsgId) => {
+export const chatConstructor = (sessionId, toId, content, seq) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -18,7 +18,7 @@ export const chatConstructor = (sessionId, toId, content, tempMsgId) => {
     toId: toId,
     sessionId: sessionId,
     content: content,
-    tempMsgId: tempMsgId
+    seq: seq
   })
   const chatMsg = Msg.create({ header: header, body: body })
   const payload = Msg.encode(chatMsg).finish()
@@ -27,7 +27,7 @@ export const chatConstructor = (sessionId, toId, content, tempMsgId) => {
   return data
 }
 
-export const groupChatConstructor = (sessionId, groupId, content, tempMsgId) => {
+export const groupChatConstructor = (sessionId, groupId, content, seq) => {
   const header = Header.create({
     magic: proto.magic,
     version: proto.version,
@@ -42,7 +42,7 @@ export const groupChatConstructor = (sessionId, groupId, content, tempMsgId) => 
     sessionId: sessionId,
     groupId: groupId,
     content: content,
-    tempMsgId: tempMsgId
+    seq: seq
   })
   const msg = Msg.create({ header: header, body: body })
   const payload = Msg.encode(msg).finish()
@@ -94,7 +94,7 @@ export const chatReadConstructor = (sessionId, toId, content) => {
     toId: toId,
     sessionId: sessionId,
     content: content,
-    tempMsgId: uuidv4()
+    seq: uuidv4()
   })
   const chatMsg = Msg.create({ header: header, body: body })
   const payload = Msg.encode(chatMsg).finish()
@@ -118,7 +118,7 @@ export const groupChatReadConstructor = (sessionId, groupId, content) => {
     toId: groupId,
     sessionId: sessionId,
     content: content,
-    tempMsgId: uuidv4()
+    seq: uuidv4()
   })
   const chatMsg = Msg.create({ header: header, body: body })
   const payload = Msg.encode(chatMsg).finish()

@@ -30,8 +30,8 @@ const groupData = groupStore()
 const sessionInfo = computed(() => {
   return messageData.sessionList[props.sessionId]
 })
-const msgRecords = computed(() => {
-  return messageData.msgRecordsList[props.sessionId]
+const msgIds = computed(() => {
+  return messageData.msgIdSortArray[props.sessionId]
 })
 
 const top = ref(sessionInfo.value.top)
@@ -83,11 +83,11 @@ const isNotInGroup = computed(() => {
 })
 
 const lastMsg = computed(() => {
-  if (!msgRecords.value?.length) {
+  if (!msgIds.value?.length) {
     return {}
   }
-  const len = msgRecords.value.length
-  return msgRecords.value[len - 1]
+  const len = msgIds.value.length
+  return messageData.getMsg(props.sessionId, msgIds.value[len - 1])
 })
 
 const showTime = computed(() => {

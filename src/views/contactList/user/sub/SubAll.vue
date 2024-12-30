@@ -44,15 +44,15 @@ const allData = computed(() => {
     return data
   } else {
     return data.sort((a, b) => {
-      const a_msgRecord = messageData.msgRecordsList[a.sessionId]
-      const a_msgRecord_len = a_msgRecord?.length
-      if (!a_msgRecord_len) return 1
-      const a_lastMsg = a_msgRecord[a_msgRecord_len - 1]
+      const a_msgIds = messageData.msgIdSortArray[a.sessionId]
+      const a_msgIds_len = a_msgIds?.length
+      if (!a_msgIds_len) return 1
+      const a_lastMsg = messageData.getMsg(a.sessionId, a_msgIds[a_msgIds_len - 1])
 
-      const b_msgRecord = messageData.msgRecordsList[b.sessionId]
-      const b_msgRecord_len = b_msgRecord?.length
-      if (!b_msgRecord_len) return -1
-      const b_lastMsg = b_msgRecord[b_msgRecord_len - 1]
+      const b_msgIds = messageData.msgIdSortArray[b.sessionId]
+      const b_msgIds_len = b_msgIds?.length
+      if (!b_msgIds_len) return -1
+      const b_lastMsg = messageData.getMsg(b.sessionId, b_msgIds[b_msgIds_len - 1])
 
       const bTime = new Date(b_lastMsg.msgTime).getTime()
       const aTIme = new Date(a_lastMsg.msgTime).getTime()

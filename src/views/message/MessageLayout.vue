@@ -91,26 +91,28 @@ const selectedSessionId = computed(() => {
 const pullMsgDone = computed(() => {
   return selectedSession.value.pullMsgDone || false
 })
-// msgRecordsList是否为空，注意和hasNoMoreMsg的区别，前者为空可以再拉取
-const noMsgRecords = computed(() => {
-  return (
-    !messageData.msgRecordsList[selectedSessionId.value] ||
-    messageData.msgRecordsList[selectedSessionId.value].length === 0
-  )
+
+const msgIdSortArray = computed(() => {
+  return messageData.msgIdSortArray[selectedSessionId.value]
 })
-// msgRecordsList的第一条消息ID
+
+// 缓存的消息列表是否为空，注意和hasNoMoreMsg的区别，前者为空可以再拉取
+const noMsgRecords = computed(() => {
+  return msgIdSortArray.value.length === 0
+})
+// 当前session的第一条消息ID
 const firstMsgId = computed(() => {
   if (!noMsgRecords.value) {
-    return messageData.msgRecordsList[selectedSessionId.value][0].msgId
+    return msgIdSortArray.value[0]
   } else {
     return 0
   }
 })
-// msgRecordsList的最后一条消息ID
+// 当前session的最后一条消息ID
 const lastMsgId = computed(() => {
   if (!noMsgRecords.value) {
-    const len = messageData.msgRecordsList[selectedSessionId.value].length
-    return messageData.msgRecordsList[selectedSessionId.value][len - 1].msgId
+    const len = msgIdSortArray.value.length
+    return msgIdSortArray.value[len - 1]
   } else {
     return 0
   }
@@ -157,7 +159,7 @@ const capacity = ref(15) //TODO 现在是调试值
 const step = 15 //TODO 现在是调试值
 const startIndex = computed(() => {
   if (selectedSessionId.value) {
-    const len = messageData.msgRecordsList[selectedSessionId.value]?.length
+    const len = msgIdSortArray.value?.length
     return len > capacity.value ? len - capacity.value : 0
   } else {
     return 0
@@ -193,28 +195,32 @@ const locateSession = (sessionId) => {
   })
 }
 
-const msgRecords = computed(() => {
-  const records = messageData.msgRecordsList[selectedSessionId.value]?.slice(startIndex.value)
-  if (!records) return []
+const msgIdsShow = computed(() => {
+  const ids = msgIdSortArray.value?.slice(startIndex.value)
+  if (!ids) return []
+  return ids
+})
 
-  for (let index = 0; index < records.length; index++) {
-    const element = records[index]
-
+const msgExtend = computed(() => {
+  const data = []
+  for (let index = 0; index < msgIdsShow.value.length; index++) {
+    const msg = messageData.getMsg(selectedSessionId.value, msgIdsShow.value[index])
+    const ext = {}
     // 判断是否是打开session后的第一条未读消息
-    if (index > 0 && records[index - 1].msgId == lastReadMsgId.value) {
-      element['isFirstNew'] = true
+    if (index > 0 && msg.msgId == lastReadMsgId.value) {
+      ext['isFirstNew'] = true
     } else {
-      element['isFirstNew'] = false
+      ext['isFirstNew'] = false
     }
-
     // 上一条消息的时间，相邻的时间只出一条tips
     if (index > 0) {
-      element['preMsgTime'] = records[index - 1].msgTime
+      ext['preMsgTime'] = msg.msgTime
     } else {
-      element['preMsgTime'] = null
+      ext['preMsgTime'] = null
     }
+    data.push(ext)
   }
-  return records
+  return data
 })
 
 const selectedSession = computed(() => {
@@ -292,15 +298,15 @@ const sessionListSorted = computed(() => {
           return 1
         } else {
           // 排序第三优先级：最后一条消息的时间
-          const a_msgRecord = messageData.msgRecordsList[a.sessionId]
-          const a_msgRecord_len = a_msgRecord?.length
-          if (!a_msgRecord_len) return 1
-          const a_lastMsg = a_msgRecord[a_msgRecord_len - 1]
+          const a_msgIds = messageData.msgIdSortArray[a.sessionId]
+          const a_msgIds_len = a_msgIds?.length
+          if (!a_msgIds_len) return 1
+          const a_lastMsg = messageData.getMsg(a.sessionId, a_msgIds[a_msgIds_len - 1])
 
-          const b_msgRecord = messageData.msgRecordsList[b.sessionId]
-          const b_msgRecord_len = b_msgRecord?.length
-          if (!b_msgRecord_len) return -1
-          const b_lastMsg = b_msgRecord[b_msgRecord_len - 1]
+          const b_msgIds = messageData.msgIdSortArray[b.sessionId]
+          const b_msgIds_len = b_msgIds?.length
+          if (!b_msgIds_len) return -1
+          const b_lastMsg = messageData.getMsg(b.sessionId, b_msgIds[b_msgIds_len - 1])
 
           const bTime = new Date(b_lastMsg.msgTime).getTime()
           const aTIme = new Date(a_lastMsg.msgTime).getTime()
@@ -332,12 +338,13 @@ const showId = computed(() => {
   return selectedSession.value.remoteId
 })
 
-const getMsgSenderObj = (item) => {
+const getMsgSenderObj = (msgId) => {
+  const msg = messageData.getMsg(selectedSessionId.value, msgId)
   if (selectedSession.value.sessionType === MsgType.GROUP_CHAT) {
     // 如果此时memberList还没有加载完成，先return account给MessageItem子组件
-    return allMembers.value ? allMembers.value[item.fromId] : { account: item.fromId }
+    return allMembers.value ? allMembers.value[msg.fromId] : { account: msg.fromId }
   } else {
-    if (myAccount.value === item.fromId) {
+    if (myAccount.value === msg.fromId) {
       return userData.user
     } else {
       return selectedSession.value.objectInfo
@@ -451,7 +458,7 @@ const handleRead = () => {
       selectedSession.value.sessionType === MsgType.CHAT
         ? MsgType.CHAT_READ
         : MsgType.GROUP_CHAT_READ
-    wsConnect.sendMsg(selectedSessionId.value, showId.value, msgType, content + '', () => {})
+    wsConnect.sendMsg(selectedSessionId.value, showId.value, msgType, content + '', '', () => {})
     // 更新本地缓存的已读位置
     messageData.updateSession({
       sessionId: selectedSessionId.value,
@@ -462,7 +469,7 @@ const handleRead = () => {
   }
 }
 
-const handleSendMessage = (content) => {
+const handleSendMessage = (content, resendSeq = '') => {
   if (isNotInGroup.value) {
     ElMessage.warning('您已离开该群或群已被解散')
     return
@@ -472,45 +479,91 @@ const handleSendMessage = (content) => {
     return
   }
 
-  // TODO 这里还要考虑失败情况：1）消息发不出去；2）消息发出去了，服务器不发“已发送”
+  const msg = {
+    sessionId: selectedSessionId.value,
+    fromId: myAccount.value,
+    msgType: selectedSession.value.sessionType,
+    content: content,
+    status: 'pending',
+    msgTime: new Date()
+  }
+
+  const resendInterval = 2000 //2秒
+  const callbackBefore = (seq, data) => {
+    // 当2s内status如果还是pending中，则重发3次。如果最后还是pending，则把status置为failed
+    setTimeout(() => {
+      if (msg.status === 'pending') {
+        wsConnect.sendAgent(data)
+        setTimeout(() => {
+          if (msg.status === 'pending') {
+            wsConnect.sendAgent(data)
+            setTimeout(() => {
+              if (msg.status === 'pending') {
+                wsConnect.sendAgent(data)
+                setTimeout(() => {
+                  if (msg.status === 'pending') {
+                    messageData.removeMsgRecord(selectedSessionId.value, msg.msgId)
+                    // 这里需要在nextTick执行add操作，否则computed没有触发更新
+                    nextTick(() => {
+                      msg.status = 'failed'
+                      messageData.addMsgRecords(selectedSessionId.value, [msg])
+                      ElMessage.error('消息发送失败')
+                    })
+                  }
+                }, resendInterval)
+              }
+            }, resendInterval)
+          }
+        }, resendInterval)
+      }
+    }, resendInterval)
+
+    messageData.updateSession({
+      sessionId: selectedSessionId.value,
+      unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
+      draft: '' //草稿意味着要清空
+    })
+    msg.seq = seq
+    msg.msgId = seq //服务器没有回复DELIVERED消息之前，都用seq暂代msgId
+    messageData.removeMsgRecord(selectedSessionId.value, msg.msgId)
+    messageData.addMsgRecords(selectedSessionId.value, [msg])
+    msgListReachBottom(false) // 发送消息之后,msgList要触底
+  }
+
+  const callbackAfter = (msgId) => {
+    messageData.updateSession({
+      sessionId: selectedSessionId.value,
+      readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到刚发的这条消息的msgId
+      readTime: new Date()
+    })
+    messageData.removeMsgRecord(selectedSessionId.value, msg.msgId) //移除seq为key的msg
+    msg.msgId = msgId
+    msg.status = 'ok'
+    messageData.addMsgRecords(selectedSessionId.value, [msg]) //添加服务端返回msgId为key的msg
+  }
+
   wsConnect.sendMsg(
     selectedSessionId.value,
     showId.value,
     selectedSession.value.sessionType,
     content,
-    (msgId) => {
-      const now = new Date()
-      messageData.updateSession({
-        sessionId: selectedSessionId.value,
-        readMsgId: msgId, // 最后一条消息是自己发的，因此已读更新到刚发的这条消息的msgId
-        readTime: now,
-        unreadCount: 0, // 最后一条消息是自己发的，因此未读是0
-        draft: '' //草稿意味着要清空
-      })
-
-      messageData.addMsgRecords(selectedSessionId.value, [
-        {
-          sessionId: selectedSessionId.value,
-          msgId: msgId,
-          fromId: myAccount.value,
-          msgType: selectedSession.value.sessionType,
-          content: content,
-          msgTime: now
-        }
-      ])
-
-      msgListReachBottom(false) // 发送消息之后,msgList要触底
-    }
+    resendSeq,
+    callbackBefore,
+    callbackAfter
   )
+}
+
+const handleResendMessage = ({ content, seq }) => {
+  handleSendMessage(content, seq)
 }
 
 const onLoadMore = async () => {
   const scrollHeight = msgListDiv.value.scrollHeight
   const scrollTop = msgListDiv.value.scrollTop
-  if (messageData.msgRecordsList[selectedSessionId.value]?.length <= capacity.value) {
-    await pullMsg(msgRecords.value[0].msgId)
+  if (msgIdSortArray.value?.length <= capacity.value) {
+    await pullMsg(msgIdsShow.value[0])
   }
-  const len = messageData.msgRecordsList[selectedSessionId.value]?.length
+  const len = msgIdSortArray.value?.length
   if (len > capacity.value) {
     if (len - capacity.value > step) {
       capacity.value += step
@@ -685,10 +738,10 @@ const onOpenSession = async ({ msgType, objectInfo }) => {
 }
 
 /**
- * 监视msgRecords的数据变化,给出新消息的tips提示
+ * 监视msgIdsShow的数据变化,给出新消息的tips提示
  */
 watch(
-  () => msgRecords.value,
+  () => msgIdsShow.value,
   (newValue) => {
     if (!newValue || selectedSession.value.unreadCount === 0) return
     nextTick(() => {
@@ -990,10 +1043,11 @@ const onConfirmSelect = async (selected) => {
                 @wheel="handleMsgListWheel"
               >
                 <MessageItem
-                  v-for="(item, index) in msgRecords"
-                  :key="index"
+                  v-for="item in msgIdsShow"
+                  :key="item"
                   :sessionId="selectedSessionId"
-                  :msg="item"
+                  :msgId="item"
+                  :extend="msgExtend"
                   :obj="getMsgSenderObj(item)"
                   :readMsgId="selectedSession.readMsgId"
                   :remoteRead="selectedSession.remoteRead"
@@ -1003,6 +1057,7 @@ const onConfirmSelect = async (selected) => {
                   @loadMore="onLoadMore"
                   @showUserCard="onShowUserCard"
                   @showGroupCard="onShowGroupCard"
+                  @resendMsg="handleResendMessage"
                 ></MessageItem>
               </div>
               <el-button

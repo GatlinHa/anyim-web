@@ -199,3 +199,5 @@ export const jsonParseSafe = (str) => {
     return ''
   }
 }
+
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))

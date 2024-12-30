@@ -28,12 +28,11 @@ const partitioEditing = ref(false)
 const newPartitionId = ref(props.session.partitionId)
 
 const lastMsg = computed(() => {
-  const msgRecords = messageData.msgRecordsList[props.session.sessionId]
-  if (!msgRecords?.length) {
+  const msgIds = messageData.msgIdSortArray[props.session.sessionId]
+  if (!msgIds?.length) {
     return {}
   }
-  const len = msgRecords.length
-  return msgRecords[len - 1]
+  return messageData.getMsg(props.session.sessionId, msgIds[msgIds.length - 1])
 })
 
 const onShowCard = () => {
