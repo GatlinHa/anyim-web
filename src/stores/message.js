@@ -143,9 +143,9 @@ export const messageStore = defineStore('anyim-message', () => {
       }
     })
     // 更新排序
-    msgIdSortArray.value[sessionId] = Object.keys(msgRecordsList.value[sessionId]).sort(
-      (a, b) => a - b
-    )
+    msgIdSortArray.value[sessionId] = Object.keys(msgRecordsList.value[sessionId])
+      .map((key) => parseInt(key)) // Object.keys得到的是string数组
+      .sort((a, b) => a - b)
   }
 
   /**
