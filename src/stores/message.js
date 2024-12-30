@@ -181,7 +181,7 @@ export const messageStore = defineStore('anyim-message', () => {
     () => totalUnReadCount.value,
     (newValue) => {
       if (totalUnReadCount.value > 0) {
-        const newTitle = `您有(${newValue})条未读消息!`
+        const newTitle = `您有(${newValue > 99 ? '99+' : newValue})条未读消息!`
         clearInterval(task)
         task = setInterval(() => {
           el.innerText = el.innerText === title ? newTitle : title

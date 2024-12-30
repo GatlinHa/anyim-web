@@ -397,7 +397,7 @@ defineExpose({
         <div class="body">
           <div class="content">
             <span v-if="isShowUnreadCount" class="unread-count"
-              >[{{ sessionInfo.unreadCount }}条]</span
+              >[{{ sessionInfo.unreadCount > 99 ? '99+' : sessionInfo.unreadCount }}条]</span
             >
             <span v-if="isShowDraft" class="draft">[草稿]</span>
             <span class="detail text-ellipsis"> {{ showDetailContent }}</span>
