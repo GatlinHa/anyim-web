@@ -98,7 +98,7 @@ const msgIdSortArray = computed(() => {
 
 // 缓存的消息列表是否为空，注意和hasNoMoreMsg的区别，前者为空可以再拉取
 const noMsgRecords = computed(() => {
-  return msgIdSortArray.value.length === 0
+  return msgIdSortArray.value?.length === 0
 })
 // 当前session的第一条消息ID
 const firstMsgId = computed(() => {
@@ -111,8 +111,8 @@ const firstMsgId = computed(() => {
 // 当前session的最后一条消息ID
 const lastMsgId = computed(() => {
   if (!noMsgRecords.value) {
-    const len = msgIdSortArray.value.length
-    return msgIdSortArray.value[len - 1]
+    const len = msgIdSortArray.value?.length
+    return len ? msgIdSortArray.value[len - 1] : 0
   } else {
     return 0
   }

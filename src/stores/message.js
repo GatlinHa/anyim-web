@@ -133,10 +133,10 @@ export const messageStore = defineStore('anyim-message', () => {
         msgRecordsList.value[sessionId] = {}
       }
 
-      // seq为undefined或者seq没有被缓存，才能add这条消息
-      if (item.seq === undefined || !(item.seq in msgUniqueSeq.value)) {
+      // seq没有或者seq没有被缓存，才能add这条消息
+      if (!item.seq || !(item.seq in msgUniqueSeq.value)) {
         msgRecordsList.value[sessionId][item.msgId] = item
-        if (item.seq !== undefined) {
+        if (item.seq) {
           // seq不为空则添加至缓存
           msgUniqueSeq.value[item.seq] = item.msgId
         }
@@ -155,7 +155,7 @@ export const messageStore = defineStore('anyim-message', () => {
    */
   const removeMsgRecord = (sessionId, msgId) => {
     const msg = msgRecordsList.value[sessionId][msgId]
-    if (msg === undefined) return
+    if (!msg) return
     if (msg.seq in msgUniqueSeq.value) delete msgUniqueSeq.value[msg.seq]
     if (msgId in msgRecordsList.value[sessionId]) delete msgRecordsList.value[sessionId][msgId]
   }
