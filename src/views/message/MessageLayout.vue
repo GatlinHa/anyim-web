@@ -202,7 +202,7 @@ const msgIdsShow = computed(() => {
 })
 
 const msgExtend = computed(() => {
-  const data = []
+  const data = {}
   for (let index = 0; index < msgIdsShow.value.length; index++) {
     const msg = messageData.getMsg(selectedSessionId.value, msgIdsShow.value[index])
     const ext = {}
@@ -214,11 +214,12 @@ const msgExtend = computed(() => {
     }
     // 上一条消息的时间，相邻的时间只出一条tips
     if (index > 0) {
-      ext['preMsgTime'] = msg.msgTime
+      const preMsg = messageData.getMsg(selectedSessionId.value, msgIdsShow.value[index - 1])
+      ext['preMsgTime'] = preMsg.msgTime
     } else {
       ext['preMsgTime'] = null
     }
-    data.push(ext)
+    data[msgIdsShow.value[index]] = ext
   }
   return data
 })
@@ -1046,7 +1047,7 @@ const onConfirmSelect = async (selected) => {
                   :key="item"
                   :sessionId="selectedSessionId"
                   :msgId="item"
-                  :extend="msgExtend"
+                  :extend="msgExtend[item]"
                   :obj="getMsgSenderObj(item)"
                   :readMsgId="selectedSession.readMsgId"
                   :remoteRead="selectedSession.remoteRead"
