@@ -168,7 +168,7 @@ const startIndex = computed(() => {
 
 const initSession = (sessionId) => {
   capacity.value = 15 //会话的默认显示消息记录数
-  msgListReachBottom(false) //会话默认滚到最底部
+  msgListReachBottom('instant') //会话默认滚到最底部
   isShowReturnBottom.value = false //会话默认不弹出“返回底部”的按钮
   // 如果selectedSessionCache有这个sessionId就不重置
   if (!selectedSessionCache.value[sessionId]) {
@@ -527,7 +527,7 @@ const handleSendMessage = (content, resendSeq = '') => {
     msg.msgId = seq //服务器没有回复DELIVERED消息之前，都用seq暂代msgId
     messageData.removeMsgRecord(selectedSessionId.value, msg.msgId)
     messageData.addMsgRecords(selectedSessionId.value, [msg])
-    msgListReachBottom(false) // 发送消息之后,msgList要触底
+    msgListReachBottom('instant') // 发送消息之后,msgList要触底
   }
 
   const callbackAfter = (msgId) => {
@@ -580,10 +580,9 @@ const onLoadMore = async () => {
 
 /**
  * 消息列表拉到最底部
- * @param isSmooth 是否平滑的，默认是
+ * @param behavior smooth 平滑的, instant 立即
  */
-const msgListReachBottom = async (isSmooth = true) => {
-  const behavior = isSmooth ? 'smooth' : 'instant'
+const msgListReachBottom = async (behavior = 'smooth') => {
   await nextTick() // 经测试，在未读消息的session页面刷新时，不能到达底部，需要再加一个nextTick
   nextTick(() => {
     msgListDiv.value?.scrollTo({
