@@ -318,14 +318,16 @@ const myMsgIsRead = computed(() => {
 })
 
 const isShowLoadMore = computed(() => {
-  if (msg.value.msgId === props.firstMsgId && !props.hasNoMoreMsg) {
+  // 这里用弱等于“==”，左边是数字，右边是string
+  if (msg.value.msgId == props.firstMsgId && !props.hasNoMoreMsg) {
     return true
   } else {
     return false
   }
 })
 const isShowNoMoreMsg = computed(() => {
-  if (msg.value.msgId === props.firstMsgId && props.hasNoMoreMsg) {
+  // 这里用弱等于“==”，左边是数字，右边是string
+  if (msg.value.msgId == props.firstMsgId && props.hasNoMoreMsg) {
     return true
   } else {
     return false
