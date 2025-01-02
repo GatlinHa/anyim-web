@@ -611,7 +611,7 @@ const onClickMsgContainer = () => {
   handleRead()
 }
 
-const onShowUserCard = async ({ sessionId, account }) => {
+const onShowUserCard = ({ sessionId, account }) => {
   const loadingInstance = ElLoading.service(el_loading_options)
   if (myAccount.value === account) {
     userData
@@ -984,7 +984,7 @@ const onConfirmSelect = async (selected) => {
 
       <el-container v-else class="container">
         <el-header class="header bdr-b">
-          <div class="show-name-id">
+          <div class="show-name-id" @click="onMoreSetting">
             <SessionTag
               v-if="selectedSession?.sessionType === MsgType.GROUP_CHAT"
               tagType="groupchat"
@@ -1254,6 +1254,7 @@ const onConfirmSelect = async (selected) => {
           justify-content: center;
           align-items: center;
           user-select: text;
+          cursor: pointer;
 
           .show-name {
             max-width: 300px;
