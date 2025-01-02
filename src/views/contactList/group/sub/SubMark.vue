@@ -1,5 +1,9 @@
-<script setup></script>
+<script setup>
+import SubCommon from '../components/SubCommon.vue'
+</script>
 
-<template>备注</template>
+<template>
+  <SubCommon :tab="'mark'"></SubCommon>
+</template>
 
 <style lang="scss" scoped></style>

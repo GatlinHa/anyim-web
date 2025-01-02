@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
+import { Search, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
 import SelectDialog from '@/components/common/SelectDialog.vue'
@@ -24,6 +24,10 @@ const searchKey = ref('')
 const searchData = ref([])
 const isShowSelectDialog = ref(false)
 const initDone = ref(false) //避免还未数据加载完时就显示无数据
+
+const markEditing = ref({})
+const newMark = ref({})
+const markEditRef = ref({})
 
 onMounted(async () => {
   await messageData.loadSessionList()
@@ -63,6 +67,17 @@ const initData = computed(() => {
         }
       })
       return data
+    case 'mark':
+      values
+        .filter((item) => {
+          if (messageData.sessionList[item.groupId].mark) {
+            return true
+          }
+        })
+        .forEach((item) => {
+          data[item.groupId] = item
+        })
+      return data
   }
 })
 
@@ -74,10 +89,14 @@ const showData = computed(() => {
   const data = []
   const searchDataGroupIds = new Set(searchData.value?.map((item) => item.groupId))
   Object.values(initData.value).forEach((item) => {
-    // 1.放群名称和群ID的匹配结果
+    // 1.放群名称和群ID，或群备注的匹配结果
     if (
       item.groupName.toLowerCase().includes(searchKey.value.toLowerCase()) ||
-      item.groupId === searchKey.value
+      item.groupId === searchKey.value ||
+      (props.tab === 'mark' &&
+        messageData.sessionList[item.groupId].mark
+          .toLowerCase()
+          .includes(searchKey.value.toLowerCase()))
     ) {
       item['sortMark'] = '1' // 让群名称和群ID的匹配结果放在前面, 因为群成员的匹配结果会滞后出现,如果不排序在出现的时候页面数据刷新变化很大
       data.push(item)
@@ -90,6 +109,15 @@ const showData = computed(() => {
   return data.sort((a, b) => {
     return a.sortMark - b.sortMark
   })
+})
+
+const searchPlaceholder = computed(() => {
+  switch (props.tab) {
+    default:
+      return '搜索：群名称/群ID/成员群昵称/成员账号'
+    case 'mark':
+      return '搜索：群名称/群备注/群ID/成员群昵称/成员账号'
+  }
 })
 
 // 需要给符合条件的groupId保存下查询结果高亮的提示
@@ -236,6 +264,38 @@ const onShowGroupCard = async (groupInfo) => {
     members: res.data.data.members
   })
 }
+
+const onClickEditMark = (groupId) => {
+  newMark.value[groupId] = messageData.sessionList[groupId].mark || ''
+  markEditing.value[groupId] = true
+  nextTick(() => {
+    markEditRef.value[groupId].focus()
+  })
+}
+
+const saveMark = (groupId) => {
+  if (newMark.value[groupId] !== messageData.sessionList[groupId].mark) {
+    const sessionId = groupId
+    messageData.updateSession({
+      sessionId: sessionId,
+      mark: newMark.value[groupId]
+    })
+  }
+  markEditing.value[groupId] = false
+}
+
+const deleteMark = (groupId) => {
+  if (!messageData.sessionList[groupId].mark) {
+    return
+  } else {
+    newMark.value[groupId] = ''
+    saveMark(groupId)
+  }
+}
+
+const cancelMark = (groupId) => {
+  markEditing.value[groupId] = false
+}
 </script>
 
 <template>
@@ -245,7 +305,7 @@ const onShowGroupCard = async (groupInfo) => {
       <div class="search-and-add">
         <el-input
           v-model.trim="searchKey"
-          placeholder="搜索：群名称/群ID/成员群昵称/成员账号"
+          :placeholder="searchPlaceholder"
           :prefix-icon="Search"
           :clearable="true"
           @input="onSearch"
@@ -262,12 +322,72 @@ const onShowGroupCard = async (groupInfo) => {
           :keyWords="searchKey"
           @showGroupCard="onShowGroupCard(item)"
         >
-          <template #showMore_1>
-            <div
-              style="cursor: pointer; color: #409eff; width: 100px; text-align: center"
-              @click="onShowGroupCard(item)"
-            >
-              查看详情
+          <template v-if="props.tab === 'mark'" #showMore_1>
+            <div class="mark" style="margin-left: 10px">
+              <div class="tips-block">备注</div>
+              <div v-if="!markEditing[item.groupId]" class="mark-content-wrapper">
+                <div
+                  class="mark-content text-ellipsis"
+                  :title="messageData.sessionList[item.groupId].mark"
+                  @click="onClickEditMark(item.groupId)"
+                >
+                  {{ messageData.sessionList[item.groupId].mark }}
+                </div>
+                <div style="display: flex; flex-direction: row">
+                  <el-button
+                    type="primary"
+                    :icon="Edit"
+                    size="small"
+                    title="编辑备注"
+                    circle
+                    @click="onClickEditMark(item.groupId)"
+                  ></el-button>
+                  <el-button
+                    type="danger"
+                    :icon="Delete"
+                    size="small"
+                    title="删除备注"
+                    circle
+                    @click="deleteMark(item.groupId)"
+                    style="margin-left: 5px"
+                  ></el-button>
+                </div>
+              </div>
+              <div v-else class="mark-edit-wrapper">
+                <el-input
+                  :ref="
+                    (el) => {
+                      markEditRef[item.groupId] = el
+                    }
+                  "
+                  class="mark-edit"
+                  v-model.trim="newMark[item.groupId]"
+                  maxlength="10"
+                  show-word-limit
+                  size="small"
+                  clearable
+                  @keyup.enter="saveMark(item.groupId)"
+                ></el-input>
+                <div style="display: flex; flex-direction: row">
+                  <el-button
+                    type="success"
+                    :icon="Check"
+                    size="small"
+                    title="确认"
+                    circle
+                    @click="saveMark(item.groupId)"
+                  ></el-button>
+                  <el-button
+                    type="info"
+                    :icon="Close"
+                    size="small"
+                    title="取消"
+                    circle
+                    @click="cancelMark(item.groupId)"
+                    style="margin-left: 5px"
+                  ></el-button>
+                </div>
+              </div>
             </div>
           </template>
           <template #showMore_2>
@@ -275,7 +395,7 @@ const onShowGroupCard = async (groupInfo) => {
               class="text-ellipsis"
               :title="searchResultTips.title[item.groupId]"
               v-html="searchResultTips.html[item.groupId]"
-              style="width: 200px"
+              style="width: 200px; margin-left: 10px"
             ></div>
           </template>
         </ContactListGroupItem>
@@ -312,12 +432,51 @@ const onShowGroupCard = async (groupInfo) => {
   align-items: center;
 
   .el-input {
-    width: 300px;
+    width: 350px;
     height: 30px;
     margin-right: 10px;
 
     :deep(.el-input__wrapper) {
       border-radius: 25px;
+    }
+  }
+}
+
+.mark {
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  .tips-block {
+    justify-content: start;
+    border-radius: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    background: rgb(221.7, 222.6, 224.4);
+    flex-shrink: 0;
+  }
+
+  .mark-content-wrapper {
+    width: 220px;
+    display: flex;
+    justify-content: space-between;
+
+    .mark-content {
+      margin-left: 5px;
+      display: flex;
+      align-items: center;
+      color: #409eff;
+      cursor: pointer;
+    }
+  }
+
+  .mark-edit-wrapper {
+    width: 220px;
+    display: flex;
+    justify-content: space-between;
+    .mark-edit {
+      width: 140px;
+      margin-left: 5px;
     }
   }
 }
