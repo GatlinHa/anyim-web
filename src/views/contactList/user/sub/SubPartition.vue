@@ -12,12 +12,12 @@ import {
   msgDeletePartitionService,
   msgUpdatePartitionService
 } from '@/api/message'
-import { PARTITION_TYPE } from '@/const/userConst'
+import { PARTITION_TYPE } from '@/const/commonConst'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { messageStore, userStore, userCardStore } from '@/stores'
 import { ElLoading } from 'element-plus'
 import { el_loading_options } from '@/const/commonConst'
-import SelectDialog from '@/components/common/SelectDialog.vue'
+import SelectUserDialog from '@/components/common/SelectUserDialog.vue'
 import { combineId, highLightedText } from '@/js/utils/common'
 import { MsgType } from '@/proto/msg'
 
@@ -45,7 +45,16 @@ onMounted(async () => {
 })
 
 const partitions = computed(() => {
-  return messageData.partitions
+  if (Object.keys(messageData.partitions).length === 0) {
+    return {}
+  }
+  const data = {}
+  Object.values(messageData.partitions).forEach((item) => {
+    if (item.partitionType === PARTITION_TYPE.USER) {
+      data[item.partitionId] = item
+    }
+  })
+  return data
 })
 
 const totalCount = computed(() => {
@@ -107,7 +116,7 @@ const onAddPartitionConfirm = (inputValue) => {
   }).then((res) => {
     if (res.data.code === 0) {
       const resData = res.data.data
-      partitions.value[resData.partitionId] = resData
+      messageData.addPartition(resData)
       ElMessage.success('新建分组成功')
     }
   })
@@ -122,7 +131,10 @@ const onRenamePartitionConfirm = (inputValue) => {
       newPartitionName: inputValue
     }).then((res) => {
       if (res.data.code === 0) {
-        partitions.value[showOprMenuPartitionId.value]['partitionName'] = inputValue
+        messageData.addPartition({
+          ...partitions.value[showOprMenuPartitionId.value],
+          partitionName: inputValue
+        })
         ElMessage.success('修改成功')
       }
     })
@@ -141,7 +153,7 @@ const onSelectOprMenu = (label) => {
       break
     case 'delete':
       ElMessageBox.confirm(
-        `确认要【${partitions.value[showOprMenuPartitionId.value].partitionName}】及组内联系人吗？`,
+        `确认要删除【${partitions.value[showOprMenuPartitionId.value].partitionName}】分组吗？`,
         '温馨提示',
         {
           type: 'warning',
@@ -151,7 +163,6 @@ const onSelectOprMenu = (label) => {
       ).then(() => {
         msgDeletePartitionService({ partitionId: showOprMenuPartitionId.value }).then((res) => {
           if (res.data.code === 0) {
-            delete partitions.value[showOprMenuPartitionId.value]
             if (
               !Object.keys(partitions.value).includes(parseInt(selectedIndex.value)) &&
               Object.keys(partitions.value).length > 0
@@ -160,6 +171,7 @@ const onSelectOprMenu = (label) => {
             } else if (Object.keys(partitions.value).length === 0) {
               selectedIndex.value = ''
             }
+            messageData.removePartition(showOprMenuPartitionId.value)
             ElMessage.success('删除成功')
           }
         })
@@ -318,7 +330,7 @@ const onShowUserCardFromSelectDialog = (account) => {
     @close="isShowRenamePartitionDialog = false"
     @confirm="onRenamePartitionConfirm"
   ></EditDialog>
-  <SelectDialog
+  <SelectUserDialog
     v-model="isShowSelectDialog"
     :options="hasNoParitionSessions"
     @showUserCard="onShowUserCardFromSelectDialog"
@@ -342,7 +354,7 @@ const onShowUserCardFromSelectDialog = (account) => {
         <div style="font-size: 16px; font-weight: bold; white-space: nowrap">添加联系人</div>
       </div>
     </template>
-  </SelectDialog>
+  </SelectUserDialog>
 </template>
 
 <style lang="scss" scoped>

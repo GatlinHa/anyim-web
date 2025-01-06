@@ -12,7 +12,7 @@ import EditAvatar from '@/components/common/EditAvatar.vue'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
-import SelectDialog from '../common/SelectDialog.vue'
+import SelectUserDialog from '../common/SelectUserDialog.vue'
 import SingleSelectDialog from '../common/SingleSelectDialog.vue'
 import {
   groupAddMembersService,
@@ -394,12 +394,6 @@ const updateGroupName = () => {
 
 const updateGroupMark = () => {
   const trimValue = newGroupMark.value.trim()
-  if (!trimValue) {
-    newGroupMark.value = sessionInfo.value.mark
-    groupMarkInputRef.value.blur()
-    return
-  }
-
   const loadingInstance = ElLoading.service(el_loading_options)
   messageData
     .updateSession({
@@ -977,7 +971,7 @@ const onClick = () => {
       ></GroupMembersTable>
     </div>
   </el-drawer>
-  <SelectDialog
+  <SelectUserDialog
     v-model="isShowSelectDialog"
     :options="selectDialogOptions"
     :disabledOptions="selectDialogDisabledOptions"
@@ -990,7 +984,7 @@ const onClick = () => {
         {{ selectDialogTitle }}
       </div>
     </template>
-  </SelectDialog>
+  </SelectUserDialog>
   <SingleSelectDialog
     v-model="isShowSingleSelectDialog"
     :options="validMembersSorted"

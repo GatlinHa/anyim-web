@@ -8,7 +8,7 @@ import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
  * groupInfo: 群组详情
  * keyWords：搜索关键字，用于高亮显示检索的关键字
  * size：尺寸，不传即显示默认值
- * disableClickAvatar：是否允许点击头像，默认false
+ * disableClickAvatar：是否禁用点击头像，默认false
  */
 const props = defineProps(['groupInfo', 'keyWords', 'size', 'disableClickAvatar'])
 const emit = defineEmits(['showGroupCard', 'openSession'])
@@ -18,7 +18,7 @@ const itemHeight = computed(() => {
     case 'large':
       return 64
     case 'small':
-      return 32
+      return 40
     case 'default':
     default:
       return 48
@@ -60,10 +60,13 @@ const onOpenSession = () => {
         class="text-ellipsis"
         :title="props.groupInfo.groupName"
         v-html="showName"
-        style="font-size: 14px"
+        style="height: 20px; font-size: 14px; display: flex; align-items: center"
       >
       </span>
-      <span class="group-id" style="color: gray; font-size: 12px">
+      <span
+        class="group-id"
+        style="height: 20px; color: gray; font-size: 12px; display: flex; align-items: center"
+      >
         <div :title="props.groupInfo.groupId" v-html="showId"></div>
       </span>
     </div>

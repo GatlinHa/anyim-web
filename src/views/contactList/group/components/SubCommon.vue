@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import { Search, Edit, Delete, Check, Close } from '@element-plus/icons-vue'
 import AddButton from '@/components/common/AddButton.vue'
 import HashNoData from '@/components/common/HasNoData.vue'
-import SelectDialog from '@/components/common/SelectDialog.vue'
+import SelectUserDialog from '@/components/common/SelectUserDialog.vue'
 import { groupStore, userStore, messageStore, userCardStore, groupCardStore } from '@/stores'
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
@@ -13,7 +13,7 @@ import { groupCreateService, groupSearchMemberService, groupInfoService } from '
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import { MsgType } from '@/proto/msg'
 
-const props = defineProps(['tab'])
+const props = defineProps(['tab', 'params'])
 
 const groupData = groupStore()
 const userData = userStore()
@@ -68,15 +68,18 @@ const initData = computed(() => {
       })
       return data
     case 'mark':
-      values
-        .filter((item) => {
-          if (messageData.sessionList[item.groupId].mark) {
-            return true
-          }
-        })
-        .forEach((item) => {
+      values.forEach((item) => {
+        if (messageData.sessionList[item.groupId]?.mark) {
           data[item.groupId] = item
-        })
+        }
+      })
+      return data
+    case 'partition':
+      values.forEach((item) => {
+        if (messageData.sessionList[item.groupId]?.partitionId === props.params.partitionId) {
+          data[item.groupId] = item
+        }
+      })
       return data
   }
 })
@@ -403,7 +406,7 @@ const cancelMark = (groupId) => {
       <HashNoData v-else-if="showData.length === 0 && initDone" :size="100"></HashNoData>
     </el-main>
   </el-container>
-  <SelectDialog
+  <SelectUserDialog
     v-model="isShowSelectDialog"
     :options="selectDialogOptions"
     :searchModel="'server'"
@@ -413,7 +416,7 @@ const cancelMark = (groupId) => {
     <template #title>
       <div style="font-size: 16px; font-weight: bold; white-space: nowrap">创建群组</div>
     </template>
-  </SelectDialog>
+  </SelectUserDialog>
 </template>
 
 <style lang="scss" scoped>

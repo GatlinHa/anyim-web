@@ -167,7 +167,7 @@ const onRemoveSelectedItem = (index) => {
           <el-button type="info" size="small" @click="onClearSelected" plain>清空</el-button>
         </div>
         <div v-if="selected.length > 0" class="my-scrollbar" style="flex: 1; overflow-y: scroll">
-          <div class="selected-item" v-for="(item, index) in selected" :key="item.key">
+          <div class="selected-item" v-for="(item, index) in selected" :key="index">
             <ContactItem
               :contactInfo="optionsAll[item]"
               :size="'small'"

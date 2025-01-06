@@ -23,7 +23,7 @@ import InputTool from '@/views/message/components/InputTool.vue'
 import InputEditor from '@/views/message/components/InputEditor.vue'
 import MessageItem from '@/views/message/components/MessageItem.vue'
 import SessionTag from '@/views/message/components/SessionTag.vue'
-import SelectDialog from '@/components/common/SelectDialog.vue'
+import SelectUserDialog from '@/components/common/SelectUserDialog.vue'
 import {
   userStore,
   settingStore,
@@ -1178,7 +1178,7 @@ const onConfirmSelect = async (selected) => {
     @close="isShowUpdateMarkDialog = false"
     @confirm="onUpdateMarkConfirm"
   ></EditDialog>
-  <SelectDialog
+  <SelectUserDialog
     v-model="isShowSelectDialog"
     :options="selectDialogOptions"
     :defaultSelected="defaultSelectedOptionIds"
@@ -1189,7 +1189,7 @@ const onConfirmSelect = async (selected) => {
     <template #title>
       <div style="font-size: 16px; font-weight: bold; white-space: nowrap">创建群组</div>
     </template>
-  </SelectDialog>
+  </SelectUserDialog>
 </template>
 
 <style lang="scss" scoped>

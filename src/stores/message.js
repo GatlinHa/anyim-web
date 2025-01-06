@@ -191,10 +191,6 @@ export const messageStore = defineStore('anyim-message', () => {
    */
   const partitions = ref({})
 
-  const setPartitions = (obj) => {
-    partitions.value = obj
-  }
-
   /**
    * 加载会话列表
    * @returns
@@ -216,12 +212,18 @@ export const messageStore = defineStore('anyim-message', () => {
   const loadPartitions = async () => {
     if (Object.keys(partitions.value).length === 0) {
       const res = await msgQueryPartitionService()
-      const data = {}
       res.data.data.forEach((item) => {
-        data[item.partitionId] = item
+        partitions.value[item.partitionId] = item
       })
-      setPartitions(data)
     }
+  }
+
+  const addPartition = (obj) => {
+    partitions.value[obj.partitionId] = obj
+  }
+
+  const removePartition = (partitionId) => {
+    delete partitions.value[partitionId]
   }
 
   return {
@@ -240,8 +242,9 @@ export const messageStore = defineStore('anyim-message', () => {
     getMsg,
 
     partitions,
-    setPartitions,
     loadPartitions,
+    addPartition,
+    removePartition,
 
     clear
   }

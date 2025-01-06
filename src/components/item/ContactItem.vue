@@ -17,7 +17,7 @@ const contactItemHeight = computed(() => {
     case 'large':
       return 64
     case 'small':
-      return 32
+      return 40
     case 'default':
     default:
       return 48
