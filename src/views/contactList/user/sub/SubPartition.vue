@@ -161,6 +161,17 @@ const onSelectOprMenu = (label) => {
           cancelButtonText: '取消'
         }
       ).then(() => {
+        Object.values(messageData.sessionList).forEach((item) => {
+          if (
+            item.sessionType === MsgType.CHAT &&
+            item.partitionId.toString() === selectedIndex.value
+          ) {
+            messageData.updateSession({
+              sessionId: item.sessionId,
+              partitionId: 0
+            })
+          }
+        })
         msgDeletePartitionService({ partitionId: showOprMenuPartitionId.value }).then((res) => {
           if (res.data.code === 0) {
             if (
@@ -349,7 +360,7 @@ const onShowUserCardFromSelectDialog = (account) => {
             background: #ebedf0;
           "
         >
-          {{ partitions[addSessionPartitionId].partitionName }}
+          {{ partitions[addSessionPartitionId]?.partitionName }}
         </div>
         <div style="font-size: 16px; font-weight: bold; white-space: nowrap">添加联系人</div>
       </div>
