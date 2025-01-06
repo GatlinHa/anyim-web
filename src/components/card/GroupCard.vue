@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
-import { Search, ArrowLeft, ArrowRight, Edit } from '@element-plus/icons-vue'
-import { el_loading_options } from '@/const/commonConst'
+import { Search, ArrowLeft, ArrowRight, Edit, Check } from '@element-plus/icons-vue'
+import { el_loading_options, PARTITION_TYPE } from '@/const/commonConst'
 import GroupItem from '@/components/item/GroupItem.vue'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import GroupAvatarIcon from '@/components/common/GroupAvatarIcon.vue'
@@ -48,6 +48,7 @@ const isAllMuted = ref()
 const isJoinGroupApproval = ref()
 const isHistoryBrowse = ref(false)
 const settingOption = ref('chatSetting')
+const newPartitionId = ref()
 
 // 打开GroupCard时，重置数据
 watch(
@@ -62,6 +63,8 @@ watch(
       isHistoryBrowse.value = groupInfo.value.historyBrowse
       isTop.value = sessionInfo.value.top
       isDnd.value = sessionInfo.value.dnd
+      newPartitionId.value =
+        sessionInfo.value.partitionId === 0 ? undefined : sessionInfo.value.partitionId
     } else {
       groupCardData.setShowModel('')
       groupCardData.setChangeMemberModel('')
@@ -76,6 +79,8 @@ watch(
       case 'editAvatarAndName':
         newGroupName.value = groupInfo.value.groupName
         newGroupMark.value = sessionInfo.value.mark
+        newPartitionId.value =
+          sessionInfo.value.partitionId === 0 ? undefined : sessionInfo.value.partitionId
         break
       case 'editAnnouncement':
         newAnnouncement.value = groupInfo.value.announcement
@@ -121,6 +126,16 @@ const groupInfo = computed(() => {
 const sessionInfo = computed(() => {
   const sessionId = groupCardData.groupId
   return messageData.sessionList[sessionId] || {}
+})
+
+const partitions = computed(() => {
+  const data = {}
+  Object.values(messageData.partitions).forEach((item) => {
+    if (item.partitionType === PARTITION_TYPE.GROUP) {
+      data[item.partitionId] = item
+    }
+  })
+  return data
 })
 
 const showMembers = computed(() => {
@@ -647,6 +662,15 @@ const onConfirmSingleSelect = (selected) => {
 const onClick = () => {
   document.dispatchEvent(new Event('click'))
 }
+
+const onChangePartition = () => {
+  if (newPartitionId.value !== sessionInfo.value.partitionId) {
+    messageData.updateSession({
+      sessionId: sessionInfo.value.sessionId,
+      partitionId: newPartitionId.value
+    })
+  }
+}
 </script>
 
 <template>
@@ -911,12 +935,11 @@ const onClick = () => {
           background-color: #f5f5f5;
           display: flex;
           flex-direction: column;
+          justify-content: space-around;
         "
       >
-        <div v-if="iAmAdmin" style="display: flex">
-          <span style="width: 80px; font-size: 14px; display: flex; align-items: center">
-            群组名称
-          </span>
+        <div v-if="iAmAdmin" style="width: 100%; display: flex; justify-content: space-between">
+          <span style="font-size: 14px; display: flex; align-items: center"> 群组名称 </span>
           <el-input
             ref="groupNameInputRef"
             v-model="newGroupName"
@@ -924,12 +947,11 @@ const onClick = () => {
             maxlength="50"
             show-word-limit
             @change="updateGroupName"
+            style="width: 240px"
           />
         </div>
-        <div style="display: flex; margin-top: 10px">
-          <span style="width: 80px; font-size: 14px; display: flex; align-items: center">
-            群组备注
-          </span>
+        <div style="width: 100%; margin-top: 10px; display: flex; justify-content: space-between">
+          <span style="font-size: 14px; display: flex; align-items: center"> 群组备注 </span>
           <el-input
             ref="groupMarkInputRef"
             v-model="newGroupMark"
@@ -937,7 +959,31 @@ const onClick = () => {
             maxlength="10"
             show-word-limit
             @change="updateGroupMark"
+            style="width: 240px"
           />
+        </div>
+        <div style="width: 100%; margin-top: 10px; display: flex; justify-content: space-between">
+          <span style="font-size: 14px; display: flex; align-items: center"> 群组分组 </span>
+          <div
+            style="width: 240px; display: flex; align-items: center; justify-content: space-between"
+          >
+            <el-select v-model="newPartitionId" placeholder="请选择分组" style="width: 200px">
+              <el-option
+                v-for="item in Object.values(partitions)"
+                :key="item.partitionId"
+                :label="item.partitionName"
+                :value="item.partitionId"
+              />
+            </el-select>
+            <el-button
+              type="success"
+              :icon="Check"
+              size="small"
+              title="确认"
+              circle
+              @click="onChangePartition()"
+            ></el-button>
+          </div>
         </div>
       </div>
     </div>
