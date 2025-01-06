@@ -8,7 +8,7 @@ import { groupStore, userStore, messageStore, userCardStore, groupCardStore } fr
 import { combineId } from '@/js/utils/common'
 import { userQueryService } from '@/api/user'
 import { ElLoading, ElMessage } from 'element-plus'
-import { el_loading_options } from '@/const/commonConst'
+import { el_loading_options, PARTITION_TYPE } from '@/const/commonConst'
 import { groupCreateService, groupSearchMemberService, groupInfoService } from '@/api/group'
 import ContactListGroupItem from '@/views/contactList/group/components/ContactListGroupItem.vue'
 import { MsgType } from '@/proto/msg'
@@ -28,6 +28,9 @@ const initDone = ref(false) //避免还未数据加载完时就显示无数据
 const markEditing = ref({})
 const newMark = ref({})
 const markEditRef = ref({})
+
+const partitioEditing = ref({})
+const newPartitionId = ref({})
 
 onMounted(async () => {
   await messageData.loadSessionList()
@@ -82,6 +85,16 @@ const initData = computed(() => {
       })
       return data
   }
+})
+
+const partitions = computed(() => {
+  const data = {}
+  Object.values(messageData.partitions).forEach((item) => {
+    if (item.partitionType === PARTITION_TYPE.GROUP) {
+      data[item.partitionId] = item
+    }
+  })
+  return data
 })
 
 const showData = computed(() => {
@@ -299,6 +312,34 @@ const deleteMark = (groupId) => {
 const cancelMark = (groupId) => {
   markEditing.value[groupId] = false
 }
+
+const onClickEditPartition = (groupId) => {
+  partitioEditing.value[groupId] = true
+  newPartitionId.value[groupId] = messageData.sessionList[groupId]?.partitionId
+}
+
+const onClearPartition = (groupId) => {
+  messageData.updateSession({
+    sessionId: groupId,
+    partitionId: 0 //和后端约定0表示不分组
+  })
+  newPartitionId.value[groupId] = 0
+}
+
+const onChangePartition = (groupId) => {
+  if (newPartitionId.value[groupId] !== messageData.sessionList[groupId]?.partitionId) {
+    messageData.updateSession({
+      sessionId: groupId,
+      partitionId: newPartitionId.value[groupId]
+    })
+  }
+  partitioEditing.value[groupId] = false
+}
+
+const onCancelPartition = (groupId) => {
+  partitioEditing.value[groupId] = false
+  newPartitionId.value[groupId] = messageData.sessionList[groupId]?.partitionId
+}
 </script>
 
 <template>
@@ -325,8 +366,8 @@ const cancelMark = (groupId) => {
           :keyWords="searchKey"
           @showGroupCard="onShowGroupCard(item)"
         >
-          <template v-if="props.tab === 'mark'" #showMore_1>
-            <div class="mark" style="margin-left: 10px">
+          <template #showMore_1>
+            <div v-if="props.tab === 'mark'" class="mark" style="margin-left: 10px">
               <div class="tips-block">备注</div>
               <div v-if="!markEditing[item.groupId]" class="mark-content-wrapper">
                 <div
@@ -387,6 +428,76 @@ const cancelMark = (groupId) => {
                     title="取消"
                     circle
                     @click="cancelMark(item.groupId)"
+                    style="margin-left: 5px"
+                  ></el-button>
+                </div>
+              </div>
+            </div>
+            <div v-if="props.tab === 'partition'" class="partition" style="margin-left: 10px">
+              <div class="tips-block">分组</div>
+              <div v-if="!partitioEditing[item.groupId]" class="partition-content-wrapper">
+                <div
+                  class="partition-content text-ellipsis"
+                  :title="
+                    partitions[messageData.sessionList[item.groupId]?.partitionId]?.partitionName
+                  "
+                  @click="onClickEditPartition(item.groupId)"
+                >
+                  {{
+                    partitions[messageData.sessionList[item.groupId]?.partitionId]?.partitionName
+                  }}
+                </div>
+                <div style="display: flex; flex-direction: row">
+                  <el-button
+                    type="primary"
+                    :icon="Edit"
+                    size="small"
+                    title="调整分组"
+                    circle
+                    @click="onClickEditPartition(item.groupId)"
+                  ></el-button>
+                  <el-button
+                    type="danger"
+                    :icon="Delete"
+                    size="small"
+                    title="从该分组中移除"
+                    circle
+                    @click="onClearPartition(item.groupId)"
+                    style="margin-left: 5px"
+                  ></el-button>
+                </div>
+              </div>
+              <div v-else class="partition-edit-wrapper">
+                <el-select
+                  class="partition-edit"
+                  v-model="newPartitionId[item.groupId]"
+                  placeholder="请选择分组"
+                  size="small"
+                  style="margin-left: 5px"
+                >
+                  <el-option
+                    v-for="item in Object.values(partitions)"
+                    :key="item.partitionId"
+                    :label="item.partitionName"
+                    :value="item.partitionId"
+                  />
+                </el-select>
+                <div style="display: flex; flex-direction: row">
+                  <el-button
+                    type="success"
+                    :icon="Check"
+                    size="small"
+                    title="确认"
+                    circle
+                    @click="onChangePartition(item.groupId)"
+                  ></el-button>
+                  <el-button
+                    type="info"
+                    :icon="Close"
+                    size="small"
+                    title="取消"
+                    circle
+                    @click="onCancelPartition(item.groupId)"
                     style="margin-left: 5px"
                   ></el-button>
                 </div>
@@ -478,6 +589,45 @@ const cancelMark = (groupId) => {
     display: flex;
     justify-content: space-between;
     .mark-edit {
+      width: 140px;
+      margin-left: 5px;
+    }
+  }
+}
+
+.partition {
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  .tips-block {
+    justify-content: start;
+    border-radius: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    background: rgb(221.7, 222.6, 224.4);
+    flex-shrink: 0;
+  }
+
+  .partition-content-wrapper {
+    width: 220px;
+    display: flex;
+    justify-content: space-between;
+
+    .partition-content {
+      margin-left: 5px;
+      display: flex;
+      align-items: center;
+      color: #409eff;
+      cursor: pointer;
+    }
+  }
+
+  .partition-edit-wrapper {
+    width: 220px;
+    display: flex;
+    justify-content: space-between;
+    .partition-edit {
       width: 140px;
       margin-left: 5px;
     }
