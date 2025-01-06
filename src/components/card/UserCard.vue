@@ -449,7 +449,7 @@ const onVideoCall = () => {
 
   .bottom {
     width: 100%;
-    height: 50px;
+    height: 60px;
     display: flex;
     justify-content: space-around;
     align-items: center;
