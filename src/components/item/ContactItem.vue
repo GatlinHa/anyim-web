@@ -63,7 +63,7 @@ const onOpenSession = () => {
         <span class="account" :title="props.contactInfo.account" v-html="showId"></span>
       </div>
       <div class="info">
-        <span class="organization" :title="props.contactInfo.organization || '-'"
+        <span class="organization text-ellipsis" :title="props.contactInfo.organization || '-'"
           >部门: {{ props.contactInfo.organization || '-' }}</span
         >
       </div>

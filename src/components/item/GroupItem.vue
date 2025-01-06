@@ -60,13 +60,10 @@ const onOpenSession = () => {
         class="text-ellipsis"
         :title="props.groupInfo.groupName"
         v-html="showName"
-        style="height: 20px; font-size: 14px; display: flex; align-items: center"
+        style="height: 20px; font-size: 14px"
       >
       </span>
-      <span
-        class="group-id"
-        style="height: 20px; color: gray; font-size: 12px; display: flex; align-items: center"
-      >
+      <span class="group-id" style="flex: 1; color: gray; font-size: 12px">
         <div :title="props.groupInfo.groupId" v-html="showId"></div>
       </span>
     </div>
