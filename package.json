@@ -46,5 +46,10 @@
     "*.{js,ts,vue}": [
       "eslint --fix"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "quill": "2.0.2"
+    }
   }
 }
