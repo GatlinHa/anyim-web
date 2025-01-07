@@ -1,7 +1,7 @@
 <script setup>
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { messageStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 
@@ -33,6 +33,24 @@ onMounted(() => {
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
   getQuill().setText(props.draft)
   getQuill().setSelection(getQuill().getLength(), 0, 'user')
+  getQuill().on('composition-start', () => {
+    // 当用户使用拼音输入法开始输入汉字时，这个事件就会被触发
+    getQuill().root.dataset.placeholder = ''
+  })
+  getQuill().on('composition-end', () => {
+    // 当用户使用拼音输入法输入完成后，把值恢复成原来的值
+    getQuill().root.dataset.placeholder = getQuill().options.placeholder
+  })
+})
+
+onUnmounted(() => {
+  if (editorRef.value) {
+    document.querySelector('.ql-editor').classList.remove('my-scrollbar')
+    getQuill().setText('')
+    getQuill().off('composition-start')
+    getQuill().off('composition-end')
+    getQuill().destroy()
+  }
 })
 
 // 监控session发生了切换
