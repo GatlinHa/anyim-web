@@ -60,7 +60,7 @@ const options = {
     keyboard: {
       bindings: {
         enter: {
-          key: 13,
+          key: 'Enter',
           handler: handleEnter
         }
       }

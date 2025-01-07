@@ -49,7 +49,7 @@
   },
   "pnpm": {
     "overrides": {
-      "quill": "2.0.2"
+      "quill": "^2.0.2"
     }
   }
 }

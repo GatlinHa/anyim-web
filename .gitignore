@@ -31,3 +31,4 @@ coverage
 note.md
 *.bak
 *.xlsx
+pnpm-lock.yaml
