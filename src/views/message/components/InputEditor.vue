@@ -15,19 +15,6 @@ const getQuill = () => {
   return editorRef.value?.getQuill()
 }
 
-const handleEnter = () => {
-  const content = getQuill().getText().trim()
-  if (!content) {
-    ElMessage.warning('请勿发送空内容')
-    getQuill().setText('')
-  } else if (content.length > 3000) {
-    ElMessage.warning('发送内容请不要超过3000个字')
-  } else {
-    emit('sendMessage', content)
-    getQuill().setText('')
-  }
-}
-
 onMounted(() => {
   // 给组件增加滚动条样式
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
@@ -71,6 +58,28 @@ watch(
   { deep: true }
 )
 
+const handleEnter = () => {
+  const content = getQuill().getText().trim()
+  if (!content) {
+    ElMessage.warning('请勿发送空内容')
+    getQuill().setText('')
+  } else if (content.length > 3000) {
+    ElMessage.warning('发送内容请不要超过3000个字')
+  } else {
+    emit('sendMessage', content)
+    getQuill().setText('')
+  }
+}
+
+const textMatcherHandler = (node, delta) => {
+  delta.ops = delta.ops.map((op) => {
+    return {
+      insert: op.insert
+    }
+  })
+  return delta
+}
+
 const options = {
   debug: false,
   modules: {
@@ -82,6 +91,9 @@ const options = {
           handler: handleEnter
         }
       }
+    },
+    clipboard: {
+      matchers: [[Node.ELEMENT_NODE, textMatcherHandler]]
     }
   },
   placeholder: 'Enter发送 / Shift+Enter换行',

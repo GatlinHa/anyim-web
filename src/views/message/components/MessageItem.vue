@@ -613,6 +613,7 @@ const onResendMsg = () => {
               border-radius: 10px;
               border-top-right-radius: 0;
               user-select: text;
+              white-space: pre-wrap;
             }
 
             .my-message-status {
@@ -697,6 +698,7 @@ const onResendMsg = () => {
               border-radius: 10px;
               border-top-left-radius: 0;
               user-select: text;
+              white-space: pre-wrap;
             }
           }
         }
