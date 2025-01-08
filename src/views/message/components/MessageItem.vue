@@ -539,6 +539,7 @@ const onResendMsg = () => {
 
   .new-messages-tips {
     width: 40%;
+    user-select: text;
     :deep(.el-divider__text) {
       background-color: #f5f5f5;
       font-size: 14px;

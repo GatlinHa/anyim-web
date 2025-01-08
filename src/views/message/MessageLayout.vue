@@ -60,7 +60,6 @@ const userCardData = userCardStore()
 const groupCardData = groupCardStore()
 const groupData = groupStore()
 const sessionListRef = ref()
-const lastReadMsgId = ref()
 
 const asideWidth = ref(0)
 const asideWidthMin = 200
@@ -201,23 +200,24 @@ const msgIdsShow = computed(() => {
   return ids
 })
 
+let lastReadMsgId = 0
 const msgExtend = computed(() => {
   const data = {}
   for (let index = 0; index < msgIdsShow.value.length; index++) {
-    const msg = messageData.getMsg(selectedSessionId.value, msgIdsShow.value[index])
     const ext = {}
-    // 判断是否是打开session后的第一条未读消息
-    if (index > 0 && msg.msgId == lastReadMsgId.value) {
-      ext['isFirstNew'] = true
-    } else {
-      ext['isFirstNew'] = false
-    }
-    // 上一条消息的时间，相邻的时间只出一条tips
     if (index > 0) {
       const preMsg = messageData.getMsg(selectedSessionId.value, msgIdsShow.value[index - 1])
+      // 上一条消息的时间，相邻的时间只出一条tips
       ext['preMsgTime'] = preMsg.msgTime
+      // 判断是否是打开session后的第一条未读消息
+      if (preMsg.msgId === lastReadMsgId) {
+        ext['isFirstNew'] = true
+      } else {
+        ext['isFirstNew'] = false
+      }
     } else {
       ext['preMsgTime'] = null
+      ext['isFirstNew'] = false
     }
     data[msgIdsShow.value[index]] = ext
   }
@@ -447,7 +447,7 @@ const handleSelectedSession = async (sessionId) => {
       msgListReachBottom()
     }
 
-    lastReadMsgId.value = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
+    lastReadMsgId = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
     handleRead()
   }
 }
