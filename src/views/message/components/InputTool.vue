@@ -1,22 +1,12 @@
 <script setup>
-import { ref } from 'vue'
-
-defineProps(['tips'])
-const tooltipVisible = ref(false)
-const showTooltip = () => {
-  tooltipVisible.value = true
-}
-const hideTooltip = () => {
-  tooltipVisible.value = false
-}
+const props = defineProps(['tips'])
 </script>
 
 <template>
-  <div class="tool-icon-wrapper" @mouseenter="showTooltip" @mouseleave="hideTooltip">
+  <div class="tool-icon-wrapper" :title="props.tips">
     <el-icon class="tool-icon" :size="20">
       <slot name="iconSlot"></slot>
     </el-icon>
-    <span v-if="tooltipVisible" class="tooltip">{{ tips }}</span>
   </div>
 </template>
 
@@ -29,17 +19,10 @@ const hideTooltip = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 
   &:hover {
     background-color: #c6e2ff;
-  }
-
-  .tooltip {
-    position: absolute;
-    top: 36px;
-    font-size: 12px;
-    z-index: 1;
-    white-space: nowrap;
   }
 }
 </style>
