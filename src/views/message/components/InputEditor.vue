@@ -1,5 +1,5 @@
 <script setup>
-import { QuillEditor } from '@vueup/vue-quill'
+import { QuillEditor, Delta, Quill } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { messageStore } from '@/stores'
@@ -71,14 +71,24 @@ const handleEnter = () => {
   }
 }
 
-const textMatcherHandler = (node, delta) => {
-  delta.ops = delta.ops.map((op) => {
-    return {
-      insert: op.insert
-    }
-  })
-  return delta
+/**
+ * 处理粘贴格式问题
+ */
+const Clipboard = Quill.import('modules/clipboard')
+class PlainClipboard extends Clipboard {
+  onPaste(range, { text }) {
+    const delta = new Delta().retain(range.index).delete(range.length).insert(text)
+    this.quill.updateContents(delta, Quill.sources.USER)
+    this.quill.setSelection(delta.length() - range.length, Quill.sources.SILENT)
+    this.quill.scrollSelectionIntoView()
+  }
 }
+Quill.register(
+  {
+    'modules/clipboard': PlainClipboard
+  },
+  true
+)
 
 const options = {
   debug: false,
@@ -91,9 +101,6 @@ const options = {
           handler: handleEnter
         }
       }
-    },
-    clipboard: {
-      matchers: [[Node.ELEMENT_NODE, textMatcherHandler]]
     }
   },
   placeholder: 'Enter发送 / Shift+Enter换行',
