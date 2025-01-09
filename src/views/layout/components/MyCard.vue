@@ -1,8 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Close, Male, Female } from '@element-plus/icons-vue'
 import { userStore } from '@/stores'
 import avatar from '@/assets/default_avatar.png'
+import { ElLoading } from 'element-plus'
+import { el_loading_options } from '@/const/commonConst'
+
+const props = defineProps(['isShow'])
+const emit = defineEmits(['close'])
 
 const userData = userStore()
 
@@ -13,27 +18,41 @@ const truncatedSignature = computed(() => {
 })
 
 const dialogVisible = ref(false)
+const elementRef = ref()
 
-// 组件对外暴露打开方法
-const open = () => {
-  dialogVisible.value = true
+const clickListener = (e) => {
+  if (!dialogVisible.value) return
+  if (!elementRef.value?.contains(e.target)) {
+    close()
+  }
 }
+
 const close = () => {
   dialogVisible.value = false
+  document.removeEventListener('click', clickListener)
+  emit('close')
 }
-const isOpen = () => {
-  return dialogVisible.value
-}
-defineExpose({
-  open,
-  close,
-  isOpen
-})
+
+watch(
+  () => props.isShow,
+  (newValue) => {
+    dialogVisible.value = newValue
+    if (dialogVisible.value) {
+      const loadingInstance = ElLoading.service(el_loading_options)
+      userData.updateUser().finally(() => {
+        loadingInstance.close()
+      })
+      setTimeout(() => {
+        document.addEventListener('click', clickListener)
+      }, 0)
+    }
+  }
+)
 </script>
 
 <template>
   <transition name="fade">
-    <div class="card-dialog" v-show="dialogVisible">
+    <div class="card-dialog" v-show="dialogVisible" ref="elementRef">
       <el-icon class="close-button" @click="dialogVisible = false"><Close /></el-icon>
       <div class="main">
         <el-avatar class="avatar" :src="userData.user.avatarThumb || avatar" />

@@ -13,8 +13,6 @@ import MyCard from '@/views/layout/components/MyCard.vue'
 import NaviMenu from '@/views/layout/components/NaviMenu.vue'
 import { userLogoutService } from '@/api/user'
 import wsConnect from '@/js/websocket/wsConnect'
-import { ElLoading } from 'element-plus'
-import { el_loading_options } from '@/const/commonConst'
 import { ElMessageBox } from 'element-plus'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import {
@@ -27,12 +25,12 @@ import UserCard from '@/components/card/UserCard.vue'
 import GroupCard from '@/components/card/GroupCard.vue'
 import { MsgType } from '@/proto/msg'
 
-const myCardDialog = ref()
 const myAvatar = ref()
 const userData = userStore()
 const messageData = messageStore()
 const searchData = searchStore()
 const groupData = groupStore()
+const isShowMyCard = ref(false)
 
 const userStatusDesc = computed(() => {
   switch (userData.user.status) {
@@ -73,11 +71,9 @@ onMounted(() => {
       wsConnect.statusReq(toSyncStatusAccounts.value)
     }, STATUS_REQ_INTERVAL)
   }, 500)
-  document.addEventListener('click', clickListener)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', clickListener)
   clearInterval(statusReqTask)
   statusSyncTimer && clearTimeout(statusSyncTimer)
   autoLogoutTimer && clearTimeout(autoLogoutTimer)
@@ -156,29 +152,6 @@ const autoLogout = () => {
   }, LOGOUT_AFTER_DURATION)
 }
 
-const clickListener = (e) => {
-  if (!myCardDialog.value.isOpen()) return
-
-  // 鼠标点击不在头像或卡片范围内，则关闭卡片
-  if (!myCardDialog.value?.$el.contains(e.target) && !myAvatar.value?.$el.contains(e.target)) {
-    myCardDialog.value.close()
-  }
-}
-
-const openMyCardDialog = () => {
-  if (!myCardDialog.value.isOpen()) {
-    const loadingInstance = ElLoading.service(el_loading_options)
-    userData
-      .updateUser()
-      .then(() => {
-        myCardDialog.value.open()
-      })
-      .finally(() => {
-        loadingInstance.close()
-      })
-  }
-}
-
 const onExit = async () => {
   ElMessageBox.confirm('确认要退出吗？', '温馨提示', {
     type: 'warning',
@@ -209,7 +182,7 @@ const onExit = async () => {
           :showName="userData.user.nickName"
           :showId="userData.user.account"
           :showAvatarThumb="userData.user.avatarThumb"
-          @click="openMyCardDialog"
+          @click="isShowMyCard = true"
         >
         </UserAvatarIcon>
         <div class="user-status">
@@ -254,7 +227,7 @@ const onExit = async () => {
     <el-main style="padding: 0">
       <router-view></router-view>
     </el-main>
-    <MyCard ref="myCardDialog"></MyCard>
+    <MyCard :isShow="isShowMyCard" @close="isShowMyCard = false"></MyCard>
     <UserCard></UserCard>
     <GroupCard></GroupCard>
   </el-container>
