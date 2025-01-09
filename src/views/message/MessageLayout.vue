@@ -11,7 +11,6 @@ import {
   Picture,
   FolderAdd,
   CreditCard,
-  PictureRounded,
   ArrowDownBold,
   ArrowUp
 } from '@element-plus/icons-vue'
@@ -52,6 +51,8 @@ import { BEGIN_MSG_ID } from '@/const/msgConst'
 import EditDialog from '@/components/common/EditDialog.vue'
 import AddOprMenu from './components/AddOprMenu.vue'
 import MessageGroupRightSide from './components/MessageGroupRightSide.vue'
+import EmojiBox from './components/EmojiBox.vue'
+import EmojiIcon from '@/assets/svg/emoji.svg'
 
 const userData = userStore()
 const settingData = settingStore()
@@ -76,6 +77,8 @@ const newMsgTips = ref({
   unreadCount: 0,
   firstElement: null
 })
+
+const isShowEmojiBox = ref(false)
 
 const myAccount = computed(() => {
   return userData.user.account
@@ -1093,9 +1096,9 @@ const onConfirmSelect = async (selected) => {
                 <el-header class="input-box-header">
                   <div class="tool-set">
                     <div v-if="!isNotInGroup" class="left-tools">
-                      <InputTool tips="表情">
+                      <InputTool tips="表情" @click="isShowEmojiBox = true">
                         <template #iconSlot>
-                          <PictureRounded />
+                          <EmojiIcon />
                         </template>
                       </InputTool>
                       <InputTool tips="图片">
@@ -1134,6 +1137,7 @@ const onConfirmSelect = async (selected) => {
                     :origin-size="inputBoxHeight"
                     @drag-update="onInputBoxDragUpdate"
                   ></DragLine>
+                  <EmojiBox :isShow="isShowEmojiBox" @close="isShowEmojiBox = false"></EmojiBox>
                 </el-header>
                 <el-main class="input-box-main">
                   <div

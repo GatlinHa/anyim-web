@@ -1,0 +1,87 @@
+<script setup>
+import { ref, watch } from 'vue'
+import { emojis } from '@/js/utils/emojis'
+
+const props = defineProps(['isShow'])
+const emit = defineEmits(['close'])
+
+const isShowDialog = ref(false)
+const elementRef = ref()
+const tabOption = ref('system')
+
+const clickListener = (e) => {
+  if (!isShowDialog.value) return
+  if (!elementRef.value?.contains(e.target)) {
+    close()
+  }
+}
+
+const close = () => {
+  isShowDialog.value = false
+  document.removeEventListener('click', clickListener)
+  emit('close')
+}
+
+watch(
+  () => props.isShow,
+  (newValue) => {
+    isShowDialog.value = newValue
+    if (isShowDialog.value) {
+      tabOption.value = 'system'
+      setTimeout(() => {
+        document.addEventListener('click', clickListener)
+      }, 0)
+    }
+  }
+)
+</script>
+
+<template>
+  <div class="emoji" v-show="isShowDialog" ref="elementRef" @click.self="close">
+    <el-tabs v-model="tabOption">
+      <el-tab-pane class="emoji-container my-scrollbar" label="系统表情" name="system">
+        <div v-for="(item, key) in emojis" :key="key" class="emoji-item" v-html="item"></div>
+      </el-tab-pane>
+      <el-tab-pane class="emoji-container my-scrollbar" label="自定义表情" name="custom">
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.emoji {
+  width: 465px;
+  height: 240px;
+  padding: 0 5px 0 5px;
+  position: absolute;
+  left: 5px;
+  bottom: 45px;
+  border-radius: 10px;
+  border: #f0f0f0 solid 1px;
+  background-color: #fff;
+
+  .emoji-container {
+    width: auto;
+    height: 190px;
+    padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+
+    .emoji-item {
+      padding: 5px;
+      display: flex;
+      cursor: pointer;
+      transition: all 0.3s;
+
+      &:hover {
+        transform: scale(1.5);
+      }
+    }
+  }
+
+  :deep(.el-tabs__header) {
+    margin-bottom: 0;
+  }
+}
+</style>
