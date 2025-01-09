@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { emojis } from '@/js/utils/emojis'
 
 const props = defineProps(['isShow'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'sendEmoji'])
 
 const isShowDialog = ref(false)
 const elementRef = ref()
@@ -34,15 +34,25 @@ watch(
     }
   }
 )
+
+const onSelectEmoji = (key) => {
+  emit('sendEmoji', key)
+}
 </script>
 
 <template>
   <div class="emoji" v-show="isShowDialog" ref="elementRef" @click.self="close">
     <el-tabs v-model="tabOption">
       <el-tab-pane class="emoji-container my-scrollbar" label="系统表情" name="system">
-        <div v-for="(item, key) in emojis" :key="key" class="emoji-item" v-html="item"></div>
+        <div
+          v-for="(item, key) in emojis"
+          :key="key"
+          class="emoji-item"
+          v-html="item"
+          @click="onSelectEmoji(key)"
+        ></div>
       </el-tab-pane>
-      <el-tab-pane class="emoji-container my-scrollbar" label="自定义表情" name="custom">
+      <el-tab-pane class="emoji-container my-scrollbar" label="我的收藏" name="custom">
       </el-tab-pane>
     </el-tabs>
   </div>

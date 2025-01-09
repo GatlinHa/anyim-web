@@ -4,6 +4,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { messageStore } from '@/stores'
 import { ElMessage } from 'element-plus'
+import { emojis } from '@/js/utils/emojis'
 
 const props = defineProps(['sessionId', 'draft'])
 const emit = defineEmits(['sendMessage'])
@@ -59,7 +60,22 @@ watch(
 )
 
 const handleEnter = () => {
-  const content = getQuill().getText().trim()
+  const delta = getQuill().getContents()
+  let content = ''
+  delta.ops.forEach((op) => {
+    const insert = op.insert
+    // 文本
+    if (insert && typeof insert === 'string') {
+      content = content + insert
+    } else if (insert && insert.image) {
+      const alt = op.attributes?.alt
+      // 表情
+      if (alt && alt.startsWith('[') && alt.endsWith(']')) {
+        content = content + alt
+      }
+    }
+  })
+
   if (!content) {
     ElMessage.warning('请勿发送空内容')
     getQuill().setText('')
@@ -106,6 +122,29 @@ const options = {
   placeholder: 'Enter发送 / Shift+Enter换行',
   theme: 'snow'
 }
+
+const getQuillSelectionIndex = () => {
+  const quill = getQuill()
+  if (!quill) return 0
+
+  return (quill.getSelection() || {}).index || 0
+}
+
+const addEmoji = (key) => {
+  const quill = getQuill()
+  let index = getQuillSelectionIndex()
+  if (index == 1 && quill.getLength() == 1 && quill.getText(0, 1) == '\n') {
+    quill.deleteText(0, 1)
+    index = 0
+  }
+
+  quill.clipboard.dangerouslyPasteHTML(index, emojis[key])
+  quill.setSelection(index + 1, 0, 'user')
+}
+
+defineExpose({
+  addEmoji
+})
 </script>
 
 <template>

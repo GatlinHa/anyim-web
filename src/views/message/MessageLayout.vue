@@ -929,6 +929,11 @@ const onConfirmSelect = async (selected) => {
       loadingInstance.close()
     })
 }
+
+const inputEditorRef = ref()
+const onSendEmoji = (key) => {
+  inputEditorRef.value.addEmoji(key)
+}
 </script>
 
 <template>
@@ -1137,7 +1142,11 @@ const onConfirmSelect = async (selected) => {
                     :origin-size="inputBoxHeight"
                     @drag-update="onInputBoxDragUpdate"
                   ></DragLine>
-                  <EmojiBox :isShow="isShowEmojiBox" @close="isShowEmojiBox = false"></EmojiBox>
+                  <EmojiBox
+                    :isShow="isShowEmojiBox"
+                    @close="isShowEmojiBox = false"
+                    @sendEmoji="onSendEmoji"
+                  ></EmojiBox>
                 </el-header>
                 <el-main class="input-box-main">
                   <div
@@ -1156,6 +1165,7 @@ const onConfirmSelect = async (selected) => {
                   </div>
                   <InputEditor
                     v-else
+                    ref="inputEditorRef"
                     :sessionId="selectedSessionId"
                     :draft="selectedSession.draft || ''"
                     @sendMessage="handleSendMessage"
