@@ -178,11 +178,10 @@ export const emojiTrans = (content) => {
     return content
   }
 
-  for (let i = 0; i < matches.length; i++) {
-    const match = matches[i]
-    const emoji = emojis[match]
-    content = content.replace(match, emoji)
-  }
+  new Set(matches).forEach((item) => {
+    const emoji = emojis[item]
+    content = content.replaceAll(item, emoji)
+  })
 
   return content
 }
