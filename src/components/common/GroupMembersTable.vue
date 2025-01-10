@@ -437,22 +437,6 @@ const onSelectMenu = (item) => {
           </div>
         </template>
       </el-table-column>
-      <el-table-column width="30">
-        <template #default="scope">
-          <el-button
-            class="el-button-muted"
-            :class="{
-              'muted-active': isMuted(scope.row.mutedMode),
-              'muted-not-active': !isMuted(scope.row.mutedMode)
-            }"
-            :icon="Mute"
-            size="small"
-            circle
-            :title="mutedButtonTitle(scope.row.mutedMode)"
-            @click="setMuted(scope.row.account, isMuted(scope.row.mutedMode) ? 'cancle' : 'set')"
-          />
-        </template>
-      </el-table-column>
       <el-table-column width="45">
         <template #default="scope">
           <div
@@ -479,6 +463,22 @@ const onSelectMenu = (item) => {
           </div>
         </template>
       </el-table-column>
+      <el-table-column width="30">
+        <template #default="scope">
+          <el-button
+            class="el-button-muted"
+            :class="{
+              'muted-active': isMuted(scope.row.mutedMode),
+              'muted-not-active': !isMuted(scope.row.mutedMode)
+            }"
+            :icon="Mute"
+            size="small"
+            circle
+            :title="mutedButtonTitle(scope.row.mutedMode)"
+            @click="setMuted(scope.row.account, isMuted(scope.row.mutedMode) ? 'cancle' : 'set')"
+          />
+        </template>
+      </el-table-column>
     </el-table>
   </MemberMenu>
 </template>
@@ -490,7 +490,7 @@ const onSelectMenu = (item) => {
   }
 
   :deep(.el-table__cell) {
-    padding: 2px 0 2px 0;
+    padding: 2px;
     z-index: auto; // 解决右键菜单被el-table透视的问题
   }
 
