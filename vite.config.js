@@ -22,5 +22,13 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '') //  /api 替换为空字符串
       }
     }
+  },
+  // 屏蔽告警：The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
   }
 })
