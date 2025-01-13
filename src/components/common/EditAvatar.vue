@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { userStore } from '@/stores'
 import { Plus, Upload, RefreshLeft, RefreshRight, Refresh } from '@element-plus/icons-vue'
-import { userUploadAvatarService } from '@/api/user'
+import { mtsUploadService } from '@/api/mts'
 import { ElMessage } from 'element-plus'
 import 'vue-cropper/dist/index.css'
 import { VueCropper } from 'vue-cropper'
@@ -69,7 +69,7 @@ const onUpload = async () => {
 
     isLoading.value = true
     try {
-      const res = await userUploadAvatarService({ file: file })
+      const res = await mtsUploadService({ file: file })
       emit('update:newAvatar', {
         avatar: res.data.data.originUrl,
         avatarThumb: res.data.data.thumbUrl

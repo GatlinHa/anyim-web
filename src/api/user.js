@@ -38,10 +38,6 @@ export const userModifyPassword = (obj) => {
   return request.post('/user/modifyPwd', getReqBody(obj))
 }
 
-export const userUploadAvatarService = (obj) => {
-  return request.postForm('/user/upload', getReqBody(obj))
-}
-
 export const userQueryService = (obj) => {
   return request.post('/user/query', getReqBody(obj))
 }
