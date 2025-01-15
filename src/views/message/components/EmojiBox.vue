@@ -31,6 +31,9 @@ watch(
       setTimeout(() => {
         document.addEventListener('click', clickListener)
       }, 0)
+    } else {
+      // 父组件通过props.isShow关闭时也要注销掉listener
+      document.removeEventListener('click', clickListener)
     }
   }
 )

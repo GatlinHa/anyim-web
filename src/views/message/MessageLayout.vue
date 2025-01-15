@@ -483,6 +483,8 @@ const handleSendMessage = (content, resendSeq = '') => {
     return
   }
 
+  isShowEmojiBox.value = false
+
   const msg = {
     sessionId: selectedSessionId.value,
     fromId: myAccount.value,
