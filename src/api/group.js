@@ -1,58 +1,57 @@
 import request from '@/js/utils/request'
-import { getReqBody } from '@/api/common'
 
 export const groupCreateService = (obj) => {
-  return request.post('/groupmng/createGroup', getReqBody(obj))
+  return request.post('/groupmng/createGroup', obj)
 }
 
 export const groupInfoListService = () => {
-  return request.post('/groupmng/queryGroupList', getReqBody())
+  return request.get('/groupmng/queryGroupList')
 }
 
 export const groupSearchMemberService = (obj) => {
-  return request.post('/groupmng/searchGroupMember', getReqBody(obj))
+  return request.get('/groupmng/searchGroupMember', { params: obj })
 }
 
 export const groupInfoService = (obj) => {
-  return request.post('/groupmng/queryGroupInfo', getReqBody(obj))
+  return request.get('/groupmng/queryGroupInfo', { params: obj })
 }
 
 export const groupAddMembersService = (obj) => {
-  return request.post('/groupmng/addMembers', getReqBody(obj))
+  return request.post('/groupmng/addMembers', obj)
 }
 
 export const groupDelMembersService = (obj) => {
-  return request.post('/groupmng/delMembers', getReqBody(obj))
+  return request.post('/groupmng/delMembers', obj)
 }
 
 export const groupUpdateInfoService = (obj) => {
-  return request.post('/groupmng/updateGroupInfo', getReqBody(obj))
+  return request.post('/groupmng/updateGroupInfo', obj)
 }
 
 export const groupChangeRoleService = (obj) => {
-  return request.post('/groupmng/changeRole', getReqBody(obj))
+  return request.post('/groupmng/changeRole', obj)
 }
 
 export const groupUpdateNickNameInGroupService = (obj) => {
-  return request.post('/groupmng/updateNickNameInGroup', getReqBody(obj))
+  return request.post('/groupmng/updateNickNameInGroup', obj)
 }
 
 export const groupLeaveService = (obj) => {
-  return request.post('/groupmng/leaveGroup', getReqBody(obj))
+  return request.post('/groupmng/leaveGroup', obj)
 }
 
 export const groupDropService = (obj) => {
-  return request.post('/groupmng/dropGroup', getReqBody(obj))
+  return request.post('/groupmng/dropGroup', obj)
 }
 
 export const groupOwnerTransferService = (obj) => {
-  return request.post('/groupmng/ownerTransfer', getReqBody(obj))
+  return request.post('/groupmng/ownerTransfer', obj)
 }
 
 export const groupUpdateMuteService = (obj) => {
-  return request.post('/groupmng/updateMute', getReqBody(obj))
+  return request.post('/groupmng/updateMute', obj)
 }
 
 export const groupSearchGroupInfoService = (obj) => {
-  return request.post('/groupmng/searchGroupInfo', getReqBody(obj))
+  return request.get('/groupmng/searchGroupInfo', { params: obj })
 }

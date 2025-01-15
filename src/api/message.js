@@ -1,42 +1,41 @@
 import request from '@/js/utils/request'
-import { getReqBody } from '@/api/common'
 
 export const msgChatSessionListService = () => {
-  return request.post('/chat/sessionList', getReqBody())
+  return request.get('/chat/sessionList')
 }
 
 export const msgUpdateSessionService = (obj) => {
-  return request.post('/chat/updateSession', getReqBody(obj))
+  return request.post('/chat/updateSession', obj)
 }
 
 export const msgChatPullMsgService = (obj) => {
-  return request.post('/chat/pullMsg', getReqBody(obj))
+  return request.get('/chat/pullMsg', { params: obj })
 }
 
 export const msgChatCreateSessionService = (obj) => {
-  return request.post('/chat/createSession', getReqBody(obj))
+  return request.post('/chat/createSession', obj)
 }
 
 export const msgChatQuerySessionService = (obj) => {
-  return request.post('/chat/querySession', getReqBody(obj))
+  return request.get('/chat/querySession', { params: obj })
 }
 
 export const msgChatCloseSessionService = (obj) => {
-  return request.post('/chat/closeSession', getReqBody(obj))
+  return request.post('/chat/closeSession', obj)
 }
 
 export const msgCreatePartitionService = (obj) => {
-  return request.post('/chat/createPartition', getReqBody(obj))
+  return request.post('/chat/createPartition', obj)
 }
 
 export const msgQueryPartitionService = () => {
-  return request.post('/chat/queryPartition', getReqBody())
+  return request.get('/chat/queryPartition')
 }
 
 export const msgUpdatePartitionService = (obj) => {
-  return request.post('/chat/updatePartition', getReqBody(obj))
+  return request.post('/chat/updatePartition', obj)
 }
 
 export const msgDeletePartitionService = (obj) => {
-  return request.post('/chat/delPartition', getReqBody(obj))
+  return request.post('/chat/delPartition', obj)
 }

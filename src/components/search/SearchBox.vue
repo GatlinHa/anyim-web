@@ -66,7 +66,7 @@ const onQuery = () => {
     let result = {}
     switch (searchTab.value) {
       case 'contact':
-        response = await userQueryByNickService({ nickNameKeyWords: key })
+        response = await userQueryByNickService({ keyWords: key })
         response.data.data?.forEach((element) => {
           result[element.account] = element
         })

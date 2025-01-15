@@ -4,6 +4,7 @@ import router from '@/router'
 import { generateSign } from './common'
 import { v4 as uuidv4 } from 'uuid'
 import { ElMessage } from 'element-plus'
+import { CLIENT_TYPE, CLIENT_NAME, CLIENT_VERSION } from '@/const/userConst'
 
 const baseURL = '/api' //配合vite.config.js中的代理配置解决跨域问题
 const noTokenReqList = ['/user/login', '/user/register', '/user/validateAccount']
@@ -36,6 +37,10 @@ instance.interceptors.request.use(
       config.headers.sign = sign
       config.headers.accessToken = token
     }
+    config.headers.clientType = CLIENT_TYPE
+    config.headers.clientName = CLIENT_NAME
+    config.headers.clientVersion = CLIENT_VERSION
+
     return config
   },
   (err) => Promise.reject(err)
