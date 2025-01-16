@@ -41,25 +41,7 @@ onUnmounted(() => {
   }
 })
 
-// 监控session发生了切换
-watch(
-  () => props.sessionId,
-  (newValue, oldValue) => {
-    let content = getQuill().getText().trim()
-    // 草稿若没发生变动，则不触发存储
-    if (oldValue && content !== messageData.sessionList[oldValue].draft) {
-      messageData.updateSession({
-        sessionId: oldValue,
-        draft: content
-      })
-    }
-    getQuill().setText(messageData.sessionList[newValue].draft || '')
-    getQuill().setSelection(getQuill().getLength(), 0, 'user')
-  },
-  { deep: true }
-)
-
-const handleEnter = () => {
+const getContent = () => {
   const delta = getQuill().getContents()
   let content = ''
   delta.ops.forEach((op) => {
@@ -75,7 +57,29 @@ const handleEnter = () => {
       }
     }
   })
+  return content.trim()
+}
 
+// 监控session发生了切换
+watch(
+  () => props.sessionId,
+  (newValue, oldValue) => {
+    let content = getContent()
+    // 草稿若没发生变动，则不触发存储
+    if (oldValue && content !== messageData.sessionList[oldValue].draft) {
+      messageData.updateSession({
+        sessionId: oldValue,
+        draft: content
+      })
+    }
+    getQuill().setText(messageData.sessionList[newValue].draft || '')
+    getQuill().setSelection(getQuill().getLength(), 0, 'user')
+  },
+  { deep: true }
+)
+
+const handleEnter = () => {
+  const content = getContent()
   if (!content) {
     ElMessage.warning('请勿发送空内容')
     getQuill().setText('')
