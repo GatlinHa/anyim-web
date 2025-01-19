@@ -2,13 +2,18 @@
 import { QuillEditor, Delta, Quill } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { messageStore } from '@/stores'
-import { ElMessage } from 'element-plus'
-import { emojis } from '@/js/utils/emojis'
+import { v4 as uuidv4 } from 'uuid'
+import { messageStore, imageStore } from '@/stores'
+import { ElMessage, ElLoading } from 'element-plus'
+import { emojis, emojiTrans } from '@/js/utils/emojis'
+import { base64ToFile } from '@/js/utils/common'
+import { mtsUploadService } from '@/api/mts'
+import { el_loading_options } from '@/const/commonConst'
 
 const props = defineProps(['sessionId', 'draft'])
 const emit = defineEmits(['sendMessage'])
 const messageData = messageStore()
+const imageData = imageStore()
 
 const editorRef = ref()
 
@@ -16,11 +21,11 @@ const getQuill = () => {
   return editorRef.value?.getQuill()
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 给组件增加滚动条样式
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
-  getQuill().setText(props.draft)
-  getQuill().setSelection(getQuill().getLength(), 0, 'user')
+  await imageData.getImageFromContent(props.draft)
+  formatContent(props.draft)
   getQuill().on('composition-start', () => {
     // 当用户使用拼音输入法开始输入汉字时，这个事件就会被触发
     getQuill().root.dataset.placeholder = ''
@@ -41,30 +46,43 @@ onUnmounted(() => {
   }
 })
 
-const getContent = () => {
+const getContent = async () => {
   const delta = getQuill().getContents()
   let content = ''
-  delta.ops.forEach((op) => {
+  for (let index = 0; index < delta.ops.length; index++) {
+    const op = delta.ops[index]
     const insert = op.insert
-    // 文本
     if (insert && typeof insert === 'string') {
+      // 文本
       content = content + insert
     } else if (insert && insert.image) {
       const alt = op.attributes?.alt
-      // 表情
       if (alt && alt.startsWith('[') && alt.endsWith(']')) {
+        // 表情
         content = content + alt
+      } else if (alt && alt.startsWith('{') && alt.endsWith('}')) {
+        // 图片
+        content = content + alt
+      } else if (insert.image.startsWith('data:') && insert.image.includes('base64')) {
+        // base64编码的图片
+        const file = base64ToFile(insert.image, uuidv4()) // base64转file
+        el_loading_options.text = '图片上传中...' //上传中加一个loading效果
+        const loadingInstance = ElLoading.service(el_loading_options)
+        const res = await mtsUploadService({ file: file }) //上传图片至服务端
+        loadingInstance.close()
+        imageData.setImage(res.data.data) // 缓存image数据
+        content = content + `{${res.data.data.objectId}}`
       }
     }
-  })
+  }
   return content.trim()
 }
 
 // 监控session发生了切换
 watch(
   () => props.sessionId,
-  (newValue, oldValue) => {
-    let content = getContent()
+  async (newValue, oldValue) => {
+    let content = await getContent()
     // 草稿若没发生变动，则不触发存储
     if (oldValue && content !== messageData.sessionList[oldValue].draft) {
       messageData.updateSession({
@@ -72,14 +90,22 @@ watch(
         draft: content
       })
     }
-    getQuill().setText(messageData.sessionList[newValue].draft || '')
-    getQuill().setSelection(getQuill().getLength(), 0, 'user')
+    formatContent(messageData.sessionList[newValue].draft || '')
   },
   { deep: true }
 )
 
-const handleEnter = () => {
-  const content = getContent()
+const formatContent = (content) => {
+  let html = emojiTrans(content)
+  html = imageData.imageTrans(html)
+  html = html.replace(/\n/g, '<br>')
+  getQuill().setText('')
+  getQuill().clipboard.dangerouslyPasteHTML(0, html)
+  getQuill().setSelection(getQuill().getLength(), 0, 'user')
+}
+
+const handleEnter = async () => {
+  const content = await getContent()
   if (!content) {
     ElMessage.warning('请勿发送空内容')
     getQuill().setText('')

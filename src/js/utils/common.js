@@ -201,3 +201,31 @@ export const jsonParseSafe = (str) => {
 }
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export const base64ToFile = (base64Data, fileName) => {
+  let arr = base64Data.split(',') // 将 Base64 数据拆分成数据部分和前缀部分
+  let bstr = atob(arr[1])
+  let n = bstr.length
+  let u8arr = new Uint8Array(n)
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  const mimeType = base64Data.match(/data:(.*?);/)[1]
+  switch (mimeType) {
+    case 'image/png':
+      fileName = fileName + '.png'
+      break
+    case 'image/jpeg':
+      fileName = fileName + '.jpg'
+      break
+    case 'image/gif':
+      fileName = fileName + '.gif'
+      break
+    case 'application/pdf':
+      fileName = fileName + '.pdf'
+      break
+    default:
+      fileName = fileName + '.dat'
+  }
+  return new File([u8arr], fileName, { type: mimeType })
+}

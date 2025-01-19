@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { WarningFilled } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
-import { userStore, messageStore, groupStore, groupCardStore } from '@/stores'
+import { userStore, messageStore, groupStore, groupCardStore, imageStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime, jsonParseSafe } from '@/js/utils/common'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
 import { emojiTrans } from '@/js/utils/emojis'
@@ -24,6 +24,7 @@ const userData = userStore()
 const messageData = messageStore()
 const groupData = groupStore()
 const groupCardData = groupCardStore()
+const imageData = imageStore()
 
 const msg = computed(() => {
   return messageData.getMsg(props.sessionId, props.msgId)
@@ -401,6 +402,12 @@ const onClickSystemMsg = (e) => {
 const onResendMsg = () => {
   emit('resendMsg', msg.value)
 }
+
+const formatContent = (content) => {
+  let html = emojiTrans(content)
+  html = imageData.imageTrans(html)
+  return html
+}
 </script>
 
 <template>
@@ -453,7 +460,7 @@ const onResendMsg = () => {
                 <div v-if="myMsgIsRead" class="remote_read"></div>
                 <div v-else class="remote_unread"></div>
               </div>
-              <div class="div-content" v-html="emojiTrans(msg.content)"></div>
+              <div class="div-content" v-html="formatContent(msg.content)"></div>
             </el-main>
           </el-container>
         </el-main>
@@ -485,7 +492,7 @@ const onResendMsg = () => {
               <span>{{ msgTime }}</span>
             </el-header>
             <el-main class="message-content">
-              <div class="div-content" v-html="emojiTrans(msg.content)"></div>
+              <div class="div-content" v-html="formatContent(msg.content)"></div>
             </el-main>
           </el-container>
         </el-main>

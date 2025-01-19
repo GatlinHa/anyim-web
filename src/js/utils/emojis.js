@@ -180,7 +180,7 @@ export const emojiTrans = (content) => {
 
   new Set(matches).forEach((item) => {
     const emoji = emojis[item]
-    content = content.replaceAll(item, emoji)
+    content = emoji ? content.replaceAll(item, emoji) : content
   })
 
   return content

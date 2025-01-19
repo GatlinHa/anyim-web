@@ -8,7 +8,6 @@ import {
   CirclePlus,
   LocationInformation,
   Clock,
-  Picture,
   FolderAdd,
   CreditCard,
   ArrowDownBold,
@@ -1108,22 +1107,17 @@ const onSendEmoji = (key) => {
                           <EmojiIcon />
                         </template>
                       </InputTool>
-                      <InputTool tips="图片">
-                        <template #iconSlot>
-                          <Picture />
-                        </template>
-                      </InputTool>
-                      <InputTool tips="文件">
+                      <InputTool tips="文件" @click="ElMessage.warning('功能开发中')">
                         <template #iconSlot>
                           <FolderAdd />
                         </template>
                       </InputTool>
-                      <InputTool tips="代码">
+                      <InputTool tips="代码" @click="ElMessage.warning('功能开发中')">
                         <template #iconSlot>
                           <CreditCard />
                         </template>
                       </InputTool>
-                      <InputTool tips="位置">
+                      <InputTool tips="位置" @click="ElMessage.warning('功能开发中')">
                         <template #iconSlot>
                           <LocationInformation />
                         </template>
