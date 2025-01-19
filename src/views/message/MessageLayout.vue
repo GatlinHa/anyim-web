@@ -588,14 +588,13 @@ const onLoadMore = async () => {
  * @param behavior smooth 平滑的, instant 立即
  */
 const msgListReachBottom = async (behavior = 'smooth') => {
-  await nextTick() // 经测试，在未读消息的session页面刷新时，不能到达底部，需要再加一个nextTick
-  nextTick(() => {
+  setTimeout(() => {
     msgListDiv.value?.scrollTo({
       top: msgListDiv.value.scrollHeight,
       behavior: behavior
     })
     newMsgTips.value.isShowBottomTips = false
-  })
+  }, 0)
 }
 
 const onReturnBottom = () => {
