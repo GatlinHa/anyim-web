@@ -1,11 +1,12 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, h, createApp } from 'vue'
+import { ElImage } from 'element-plus'
 import { WarningFilled } from '@element-plus/icons-vue'
 import { MsgType } from '@/proto/msg'
 import { userStore, messageStore, groupStore, groupCardStore, imageStore } from '@/stores'
 import { messageSysShowTime, messageBoxShowTime, jsonParseSafe } from '@/js/utils/common'
 import UserAvatarIcon from '@/components/common/UserAvatarIcon.vue'
-import { emojiTrans } from '@/js/utils/emojis'
+import { emojis } from '@/js/utils/emojis'
 
 const props = defineProps([
   'sessionId',
@@ -25,6 +26,67 @@ const messageData = messageStore()
 const groupData = groupStore()
 const groupCardData = groupCardStore()
 const imageData = imageStore()
+
+onMounted(() => {
+  const msgContent = document.querySelector(`#div-content-${msg.value.msgId}`)
+  if (msgContent) {
+    const vnode = renderComponent(msg.value.content)
+    const app = createApp({
+      render: () => vnode
+    })
+    app.mount(msgContent)
+  }
+})
+
+const renderComponent = (content) => {
+  if (!content) return h('div', [])
+  let contentArray = []
+  //匹配内容中的图片
+  content.split(/(\{.*?\})/).forEach((item) => {
+    //匹配内容中的表情
+    item.split(/(\[.*?\])/).forEach((item) => {
+      if (item) {
+        contentArray.push(item)
+      }
+    })
+  })
+
+  const elements = contentArray.map((item) => {
+    if (item.startsWith('{') && item.endsWith('}')) {
+      const imgId = item.slice(1, -1)
+      const url = imageData.image[imgId]?.originUrl
+      if (url) {
+        const srcList = imageData.imageInSession[props.sessionId].map(
+          (item) => imageData.image[item].originUrl
+        )
+        return h(ElImage, {
+          src: url,
+          alt: `{${imgId}}`,
+          fit: 'cover',
+          previewSrcList: srcList
+        })
+      } else {
+        return h('span', item)
+      }
+    } else if (item.startsWith('[') && item.endsWith(']')) {
+      const emojiId = `[${item.slice(1, -1)}]`
+      const url = emojis[emojiId]
+      if (url) {
+        return h('img', {
+          class: 'emoji',
+          src: url,
+          alt: emojiId,
+          title: item.slice(1, -1)
+        })
+      } else {
+        return h('span', item)
+      }
+    } else {
+      return h('span', item)
+    }
+  })
+  return elements
+}
 
 const msg = computed(() => {
   return messageData.getMsg(props.sessionId, props.msgId)
@@ -402,12 +464,6 @@ const onClickSystemMsg = (e) => {
 const onResendMsg = () => {
   emit('resendMsg', msg.value)
 }
-
-const formatContent = (content) => {
-  let html = emojiTrans(content)
-  html = imageData.imageTrans(html)
-  return html
-}
 </script>
 
 <template>
@@ -460,7 +516,7 @@ const formatContent = (content) => {
                 <div v-if="myMsgIsRead" class="remote_read"></div>
                 <div v-else class="remote_unread"></div>
               </div>
-              <div class="div-content" v-html="formatContent(msg.content)"></div>
+              <div class="div-content" :id="`div-content-${msg.msgId}`"></div>
             </el-main>
           </el-container>
         </el-main>
@@ -492,7 +548,7 @@ const formatContent = (content) => {
               <span>{{ msgTime }}</span>
             </el-header>
             <el-main class="message-content">
-              <div class="div-content" v-html="formatContent(msg.content)"></div>
+              <div class="div-content"></div>
             </el-main>
           </el-container>
         </el-main>

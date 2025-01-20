@@ -5,7 +5,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { messageStore, imageStore } from '@/stores'
 import { ElMessage, ElLoading } from 'element-plus'
-import { emojis, emojiTrans } from '@/js/utils/emojis'
+import { emojiTrans, getEmojiHtml } from '@/js/utils/emojis'
 import { base64ToFile } from '@/js/utils/common'
 import { mtsUploadService } from '@/api/mts'
 import { el_loading_options } from '@/const/commonConst'
@@ -70,7 +70,7 @@ const getContent = async () => {
         const loadingInstance = ElLoading.service(el_loading_options)
         const res = await mtsUploadService({ file: file }) //上传图片至服务端
         loadingInstance.close()
-        imageData.setImage(res.data.data) // 缓存image数据
+        imageData.setImage(props.sessionId, res.data.data) // 缓存image数据
         content = content + `{${res.data.data.objectId}}`
       }
     }
@@ -168,7 +168,7 @@ const addEmoji = (key) => {
     index = 0
   }
 
-  quill.clipboard.dangerouslyPasteHTML(index, emojis[key])
+  quill.clipboard.dangerouslyPasteHTML(index, getEmojiHtml(key))
   quill.setSelection(index + 1, 0, 'user')
 }
 

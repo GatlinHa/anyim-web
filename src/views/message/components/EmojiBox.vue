@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { emojis } from '@/js/utils/emojis'
+import { emojis, getEmojiHtml } from '@/js/utils/emojis'
 
 const props = defineProps(['isShow'])
 const emit = defineEmits(['close', 'sendEmoji'])
@@ -44,14 +44,14 @@ const onSelectEmoji = (key) => {
 </script>
 
 <template>
-  <div class="emoji" v-show="isShowDialog" ref="elementRef" @click.self="close">
+  <div class="emoji-box" v-show="isShowDialog" ref="elementRef" @click.self="close">
     <el-tabs v-model="tabOption">
       <el-tab-pane class="emoji-container my-scrollbar" label="系统表情" name="system">
         <div
-          v-for="(item, key) in emojis"
+          v-for="key in Object.keys(emojis)"
           :key="key"
           class="emoji-item"
-          v-html="item"
+          v-html="getEmojiHtml(key)"
           @click="onSelectEmoji(key)"
         ></div>
       </el-tab-pane>
@@ -62,8 +62,8 @@ const onSelectEmoji = (key) => {
 </template>
 
 <style lang="scss" scoped>
-.emoji {
-  width: 465px;
+.emoji-box {
+  width: 472px;
   height: 240px;
   padding: 0 5px 0 5px;
   position: absolute;

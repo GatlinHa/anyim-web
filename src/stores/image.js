@@ -14,8 +14,17 @@ export const imageStore = defineStore('anyim-image', () => {
    */
   const image = ref({})
 
-  const setImage = (obj) => {
+  /**
+   * 在同一个session中的image（id）集合
+   */
+  const imageInSession = ref({})
+
+  const setImage = (sessionId, obj) => {
     image.value[obj.objectId] = obj
+    if (!imageInSession.value[sessionId]) {
+      imageInSession.value[sessionId] = []
+    }
+    imageInSession.value[sessionId].push(obj.objectId)
   }
 
   const imageTrans = (content, maxWidth = 400, maxHeight = 300) => {
@@ -29,9 +38,10 @@ export const imageStore = defineStore('anyim-image', () => {
       let endIndex = item.indexOf('}')
       const objectId = item.slice(startIndex + 1, endIndex)
       const thumbUrl = image.value[objectId]?.thumbUrl
+      const originUrl = image.value[objectId]?.originUrl
       if (thumbUrl) {
         const imageHtml =
-          `<img class="image" alt="{${objectId}}" src="${thumbUrl}" ` +
+          `<img class="image" alt="{${objectId}}" src="${thumbUrl}" data-origin-url="${originUrl}" ` +
           `style="max-width: ${maxWidth}px; max-height: ${maxHeight}px; width: auto; height: auto;cursor: pointer;">`
         content = content.replaceAll(item, imageHtml)
       }
@@ -63,6 +73,7 @@ export const imageStore = defineStore('anyim-image', () => {
 
   return {
     image,
+    imageInSession,
     setImage,
     imageTrans,
     getImageFromContent

@@ -157,7 +157,7 @@ export const messageStore = defineStore('anyim-message', () => {
     if (imageIds.size > 0) {
       mtsImageService({ objectIds: [...imageIds].join(',') }).then((res) => {
         res.data.data.forEach((item) => {
-          imageStore().setImage(item) // 缓存image数据
+          imageStore().setImage(sessionId, item) // 缓存image数据
         })
       })
     }
