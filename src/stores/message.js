@@ -6,9 +6,6 @@ import {
   msgQueryPartitionService
 } from '@/api/message'
 import { ElMessage } from 'element-plus'
-import { MsgType } from '@/proto/msg'
-import { mtsImageService } from '@/api/mts'
-import { imageStore } from './image'
 
 // 消息功能相关需要缓存的数据，不持久化存储
 export const messageStore = defineStore('anyim-message', () => {
@@ -125,42 +122,16 @@ export const messageStore = defineStore('anyim-message', () => {
    */
   const addMsgRecords = (sessionId, msgRecords) => {
     if (!msgRecords?.length) return
-
-    const imageIds = new Set()
     msgRecords.forEach((item) => {
       if (!msgRecordsList.value[sessionId]) {
         msgRecordsList.value[sessionId] = {}
       }
       msgRecordsList.value[sessionId][item.msgId] = item
-
-      // 如果消息内容中含有图片，则查询图片的url
-      if (item.msgType === MsgType.CHAT || item.msgType === MsgType.GROUP_CHAT) {
-        const pattern = /\{[a-f0-9]+\}/g
-        const matches = item.content.match(pattern)
-        if (matches && matches.length > 0) {
-          matches.forEach((item) => {
-            let startIndex = item.indexOf('{')
-            let endIndex = item.indexOf('}')
-            const objectId = item.slice(startIndex + 1, endIndex)
-            if (!imageStore().image[objectId]) {
-              imageIds.add(objectId)
-            }
-          })
-        }
-      }
     })
     // 更新排序
     msgIdSortArray.value[sessionId] = Object.keys(msgRecordsList.value[sessionId]).sort(
       (a, b) => a - b
     )
-
-    if (imageIds.size > 0) {
-      mtsImageService({ objectIds: [...imageIds].join(',') }).then((res) => {
-        res.data.data.forEach((item) => {
-          imageStore().setImage(sessionId, item) // 缓存image数据
-        })
-      })
-    }
   }
 
   /**
