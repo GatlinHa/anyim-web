@@ -50,7 +50,7 @@ export const imageStore = defineStore('anyim-image', () => {
     return content
   }
 
-  const getImageFromContent = async (content) => {
+  const loadImageInfoFromContent = async (sessionId, content) => {
     const imageIds = new Set()
     const matches = content.match(pattern)
     if (matches && matches.length > 0) {
@@ -66,7 +66,7 @@ export const imageStore = defineStore('anyim-image', () => {
     if (imageIds.size > 0) {
       const res = await mtsImageService({ objectIds: [...imageIds].join(',') })
       res.data.data.forEach((item) => {
-        imageStore().setImage(item) // 缓存image数据
+        imageStore().setImage(sessionId, item) // 缓存image数据
       })
     }
   }
@@ -76,6 +76,6 @@ export const imageStore = defineStore('anyim-image', () => {
     imageInSession,
     setImage,
     imageTrans,
-    getImageFromContent
+    loadImageInfoFromContent
   }
 })

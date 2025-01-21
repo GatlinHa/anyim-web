@@ -24,7 +24,7 @@ const getQuill = () => {
 onMounted(async () => {
   // 给组件增加滚动条样式
   document.querySelector('.ql-editor').classList.add('my-scrollbar')
-  await imageData.getImageFromContent(props.draft)
+  await imageData.loadImageInfoFromContent(props.sessionId, props.draft)
   formatContent(props.draft)
   getQuill().on('composition-start', () => {
     // 当用户使用拼音输入法开始输入汉字时，这个事件就会被触发

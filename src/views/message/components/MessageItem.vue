@@ -27,10 +27,10 @@ const groupData = groupStore()
 const groupCardData = groupCardStore()
 const imageData = imageStore()
 
-onMounted(() => {
+onMounted(async () => {
   const msgContent = document.querySelector(`#div-content-${msg.value.msgId}`)
   if (msgContent) {
-    const vnode = renderComponent(msg.value.content)
+    const vnode = await renderComponent(msg.value.content)
     const app = createApp({
       render: () => vnode
     })
@@ -38,7 +38,8 @@ onMounted(() => {
   }
 })
 
-const renderComponent = (content) => {
+const renderComponent = async (content) => {
+  await imageData.loadImageInfoFromContent(props.sessionId, content)
   if (!content) return h('div', [])
   let contentArray = []
   //匹配内容中的图片
@@ -56,14 +57,15 @@ const renderComponent = (content) => {
       const imgId = item.slice(1, -1)
       const url = imageData.image[imgId]?.originUrl
       if (url) {
-        const srcList = imageData.imageInSession[props.sessionId].map(
-          (item) => imageData.image[item].originUrl
-        )
+        const imgIdList = imageData.imageInSession[props.sessionId].sort((a, b) => a - b)
+        const srcList = imgIdList.map((item) => imageData.image[item].originUrl)
         return h(ElImage, {
           src: url,
           alt: `{${imgId}}`,
           fit: 'cover',
-          previewSrcList: srcList
+          previewSrcList: srcList,
+          initialIndex: imgIdList.indexOf(imgId),
+          infinite: false
         })
       } else {
         return h('span', item)
@@ -548,7 +550,7 @@ const onResendMsg = () => {
               <span>{{ msgTime }}</span>
             </el-header>
             <el-main class="message-content">
-              <div class="div-content"></div>
+              <div class="div-content" :id="`div-content-${msg.msgId}`"></div>
             </el-main>
           </el-container>
         </el-main>
