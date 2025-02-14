@@ -97,13 +97,13 @@ const msgIdSortArray = computed(() => {
   return messageData.msgIdSortArray[selectedSessionId.value]
 })
 
-// 缓存的消息列表是否为空，注意和hasNoMoreMsg的区别，前者为空可以再拉取
-const noMsgRecords = computed(() => {
-  return msgIdSortArray.value?.length === 0
+// 缓存的消息列表是否为空，注意和hasNoMoreMsg的区别
+const noMsg = computed(() => {
+  return msgIdSortArray.value?.length === 0 || true // 如果msgIdSortArray是undefined则取true
 })
 // 当前session的第一条消息ID
 const firstMsgId = computed(() => {
-  if (!noMsgRecords.value) {
+  if (!noMsg.value) {
     return msgIdSortArray.value[0]
   } else {
     return 0
@@ -111,7 +111,7 @@ const firstMsgId = computed(() => {
 })
 // 当前session的最后一条消息ID
 const lastMsgId = computed(() => {
-  if (!noMsgRecords.value) {
+  if (!noMsg.value) {
     const len = msgIdSortArray.value?.length
     return len ? msgIdSortArray.value[len - 1] : 0
   } else {
@@ -442,11 +442,6 @@ const handleSelectedSession = async (sessionId) => {
           members: res.data.data.members || {}
         })
       }
-    }
-
-    if (noMsgRecords.value) {
-      await pullMsg()
-      msgListReachBottom()
     }
 
     lastReadMsgId = selectedSession.value.readMsgId //保存这个readMsgId,要留给MessageItem用
