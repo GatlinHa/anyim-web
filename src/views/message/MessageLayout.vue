@@ -99,7 +99,7 @@ const msgIdSortArray = computed(() => {
 
 // 缓存的消息列表是否为空，注意和hasNoMoreMsg的区别
 const noMsg = computed(() => {
-  return msgIdSortArray.value?.length === 0 || true // 如果msgIdSortArray是undefined则取true
+  return msgIdSortArray.value?.length === 0
 })
 // 当前session的第一条消息ID
 const firstMsgId = computed(() => {
