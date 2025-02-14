@@ -5,7 +5,7 @@ import { refreshToken } from '@/api/user'
 
 // 用户模块
 export const userStore = defineStore(
-  'anyim-user',
+  'anylink-user',
   () => {
     const at = ref({
       token: '',

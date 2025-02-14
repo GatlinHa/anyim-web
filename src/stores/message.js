@@ -8,7 +8,7 @@ import {
 import { ElMessage } from 'element-plus'
 
 // 消息功能相关需要缓存的数据，不持久化存储
-export const messageStore = defineStore('anyim-message', () => {
+export const messageStore = defineStore('anylink-message', () => {
   /**
    * message页面当前被选中的sessionId
    */
