@@ -169,7 +169,7 @@ const startIndex = computed(() => {
 
 const initSession = (sessionId) => {
   capacity.value = 15 //会话的默认显示消息记录数
-  msgListReachBottom('instant') //会话默认滚到最底部
+  msgListReachBottom() //会话默认滚到最底部
   isShowReturnBottom.value = false //会话默认不弹出“返回底部”的按钮
   // 如果selectedSessionCache有这个sessionId就不重置
   if (!selectedSessionCache.value[sessionId]) {
@@ -365,7 +365,7 @@ const onAsideDragUpdate = ({ width }) => {
 
 const onInputBoxDragUpdate = ({ height }) => {
   inputBoxHeight.value = height
-  msgListReachBottom()
+  msgListReachBottom('smooth')
   settingData.setInputBoxDrag({
     ...settingData.inputBoxDrag,
     [myAccount.value]: height
@@ -527,7 +527,6 @@ const handleSendMessage = (content, resendSeq = '') => {
     msg.msgId = seq //服务器没有回复DELIVERED消息之前，都用seq暂代msgId
     messageData.removeMsgRecord(selectedSessionId.value, msg.msgId)
     messageData.addMsgRecords(selectedSessionId.value, [msg])
-    msgListReachBottom('instant') // 发送消息之后,msgList要触底
   }
 
   const callbackAfter = (msgId) => {
@@ -578,11 +577,18 @@ const onLoadMore = async () => {
   })
 }
 
+// MessageItem最后一个msg渲染结束后的动作
+const renderFinished = () => {
+  setTimeout(() => {
+    msgListReachBottom()
+  }, 50)
+}
+
 /**
  * 消息列表拉到最底部
- * @param behavior smooth 平滑的, instant 立即
+ * @param behavior smooth 平滑的, instant 立即（默认）
  */
-const msgListReachBottom = async (behavior = 'smooth') => {
+const msgListReachBottom = (behavior = 'instant') => {
   setTimeout(() => {
     msgListDiv.value?.scrollTo({
       top: msgListDiv.value.scrollHeight,
@@ -593,7 +599,7 @@ const msgListReachBottom = async (behavior = 'smooth') => {
 }
 
 const onReturnBottom = () => {
-  msgListReachBottom()
+  msgListReachBottom('smooth')
 }
 
 const onReachFirstUnReadMsg = () => {
@@ -1055,12 +1061,14 @@ const onSendEmoji = (key) => {
                   :readMsgId="selectedSession.readMsgId"
                   :remoteRead="selectedSession.remoteRead"
                   :firstMsgId="firstMsgId"
+                  :lastMsgId="lastMsgId"
                   :hasNoMoreMsg="hasNoMoreMsg"
                   :isLoadMoreLoading="selectedSessionCache[selectedSessionId]?.isLoadMoreLoading"
                   @loadMore="onLoadMore"
                   @showUserCard="onShowUserCard"
                   @showGroupCard="onShowGroupCard"
                   @resendMsg="handleResendMessage"
+                  @renderFinished="renderFinished"
                 ></MessageItem>
               </div>
               <el-button

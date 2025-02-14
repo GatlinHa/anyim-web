@@ -16,10 +16,17 @@ const props = defineProps([
   'readMsgId',
   'remoteRead',
   'firstMsgId',
+  'lastMsgId',
   'hasNoMoreMsg',
   'isLoadMoreLoading'
 ])
-const emit = defineEmits(['loadMore', 'showUserCard', 'showGroupCard', 'resendMsg'])
+const emit = defineEmits([
+  'loadMore',
+  'showUserCard',
+  'showGroupCard',
+  'resendMsg',
+  'renderFinished'
+])
 
 const userData = userStore()
 const messageData = messageStore()
@@ -35,6 +42,10 @@ onMounted(async () => {
       render: () => vnode
     })
     app.mount(msgContent)
+  }
+
+  if (props.lastMsgId === props.msgId) {
+    emit('renderFinished')
   }
 })
 
