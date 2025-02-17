@@ -104,88 +104,106 @@ watch(isRegister, () => {
 </script>
 
 <template>
-  <el-row class="login-page">
-    <el-col :span="12" class="bg"></el-col>
-    <el-col :span="6" :offset="3" class="form">
-      <el-form
-        :model="formModel"
-        :rules="rules"
-        ref="form"
-        size="large"
-        autocomplete="off"
-        v-if="isRegister"
+  <div>
+    <el-row class="login-page">
+      <el-col :span="12" class="bg"></el-col>
+      <el-col :span="6" :offset="3" class="form">
+        <el-form
+          :model="formModel"
+          :rules="rules"
+          ref="form"
+          size="large"
+          autocomplete="off"
+          v-if="isRegister"
+        >
+          <el-form-item>
+            <h1>注册</h1>
+          </el-form-item>
+          <el-form-item prop="username">
+            <el-input
+              v-model="formModel.username"
+              :prefix-icon="User"
+              placeholder="请输入账号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
+              v-model="formModel.password"
+              :prefix-icon="Lock"
+              type="password"
+              placeholder="请输入密码"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="repassword">
+            <el-input
+              v-model="formModel.repassword"
+              :prefix-icon="Lock"
+              type="password"
+              placeholder="请输入再次密码"
+            ></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="register" class="button" type="primary" auto-insert-space>
+              注册
+            </el-button>
+          </el-form-item>
+          <el-form-item class="flex">
+            <el-link type="info" :underline="false" @click="isRegister = false"> ← 登录 </el-link>
+          </el-form-item>
+        </el-form>
+        <el-form
+          :model="formModel"
+          :rules="rules"
+          ref="form"
+          size="large"
+          autocomplete="off"
+          v-else
+        >
+          <el-form-item>
+            <h1>登录</h1>
+          </el-form-item>
+          <el-form-item prop="username">
+            <el-input
+              v-model="formModel.username"
+              :prefix-icon="User"
+              placeholder="请输入账号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
+              v-model="formModel.password"
+              name="password"
+              :prefix-icon="Lock"
+              type="password"
+              placeholder="请输入密码"
+              @keyup.enter="login"
+            ></el-input>
+          </el-form-item>
+          <el-form-item class="flex">
+            <div class="flex">
+              <el-checkbox v-model="isRemenberMe">记住我</el-checkbox>
+              <el-link type="primary" :underline="false">忘记密码？</el-link>
+            </div>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="login" class="button" type="primary" auto-insert-space
+              >登录</el-button
+            >
+          </el-form-item>
+          <el-form-item class="flex">
+            <el-link type="info" :underline="false" @click="isRegister = true"> 注册 → </el-link>
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+    <div class="footer">
+      <span class="item">©2024 - 2025 Open-AnyLink 版权所有</span>
+      <a class="item" href="https://beian.miit.gov.cn/" target="_blank">陕ICP备2025059454号-1</a>
+      <a class="item" href="https://github.com/GatlinHa/open-anylink/" target="_blank"
+        >Github源码</a
       >
-        <el-form-item>
-          <h1>注册</h1>
-        </el-form-item>
-        <el-form-item prop="username">
-          <el-input
-            v-model="formModel.username"
-            :prefix-icon="User"
-            placeholder="请输入账号"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="formModel.password"
-            :prefix-icon="Lock"
-            type="password"
-            placeholder="请输入密码"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="repassword">
-          <el-input
-            v-model="formModel.repassword"
-            :prefix-icon="Lock"
-            type="password"
-            placeholder="请输入再次密码"
-          ></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="register" class="button" type="primary" auto-insert-space>
-            注册
-          </el-button>
-        </el-form-item>
-        <el-form-item class="flex">
-          <el-link type="info" :underline="false" @click="isRegister = false"> ← 登录 </el-link>
-        </el-form-item>
-      </el-form>
-      <el-form :model="formModel" :rules="rules" ref="form" size="large" autocomplete="off" v-else>
-        <el-form-item>
-          <h1>登录</h1>
-        </el-form-item>
-        <el-form-item prop="username">
-          <el-input
-            v-model="formModel.username"
-            :prefix-icon="User"
-            placeholder="请输入账号"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="formModel.password"
-            name="password"
-            :prefix-icon="Lock"
-            type="password"
-            placeholder="请输入密码"
-            @keyup.enter="login"
-          ></el-input>
-        </el-form-item>
-        <el-form-item class="flex">
-          <div class="flex">
-            <el-checkbox v-model="isRemenberMe">记住我</el-checkbox>
-            <el-link type="primary" :underline="false">忘记密码？</el-link>
-          </div>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="login" class="button" type="primary" auto-insert-space>登录</el-button>
-        </el-form-item>
-        <el-form-item class="flex">
-          <el-link type="info" :underline="false" @click="isRegister = true"> 注册 → </el-link>
-        </el-form-item>
-      </el-form>
-    </el-col>
-  </el-row>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -215,6 +233,16 @@ watch(isRegister, () => {
       display: flex;
       justify-content: space-between;
     }
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+  .item {
+    margin-left: 5px;
+    margin-right: 5px;
   }
 }
 </style>
