@@ -21,9 +21,7 @@ export default defineConfig({
         changeOrigin: true, // 修改源
         rewrite: (path) => path.replace(/^\/api/, '') //  /api 替换为空字符串
       }
-    },
-    host: '0.0.0.0',
-    port: 8080
+    }
   },
   // 屏蔽告警：The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
   css: {
